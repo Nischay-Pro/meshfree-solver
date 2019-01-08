@@ -17,4 +17,25 @@ def calculateTheta():
     theta = math.radians(float(configData["core"]["aoa"]))
     return theta
 
+def calculateNormals(left, right, mx, my):
+    lx = left[0]
+    ly = left[1]
 
+    rx = right[0]
+    ry = right[1]
+
+    nx1 = my - ly
+    nx2 = ry - my
+
+    ny1 = mx - lx
+    ny2 = rx - mx
+
+    nx = 0.5*(nx1 + nx2)
+    ny = 0.5*(ny1 + ny2)
+
+    det = math.sqrt(nx*nx + ny*ny)
+
+    nx = -nx/det
+    ny = ny/det
+
+    return (nx,ny)

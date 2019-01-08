@@ -3,7 +3,7 @@ import core
 
 def main():
 
-    globaldata = []
+    globaldata = ["start"]
     wallpts, interiorpts, outerpts = 0,0,0
     wallptsidx, interiorptsidx, outerptsidx = [],[],[]
 
@@ -14,26 +14,39 @@ def main():
 
     defprimal = core.getInitialPrimitive()
 
-    print(defprimal)
-    exit()
-
     for _, itm in enumerate(splitdata):
         itmdata = itm.split(" ")
         itmdata.pop(-1)
-        temp = Point(itmdata[0], itmdata[1], itmdata[2], itmdata[3], itmdata[4], itmdata[5], itmdata[6], itmdata[19], itmdata[20:], 0, 0, None, None, defprimal, None, None, None, None, None, None, None, None, None, None, None)
+        temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[6]), int(itmdata[19]), itmdata[20:], 0, 1, None, None, defprimal, None, None, None, None, None, None, None, None, None, None, None)
         globaldata.append(temp)
         if int(itmdata[5]) == 0:
             wallpts += 1
-            wallptsidx.append(itmdata[0])
+            wallptsidx.append(int(itmdata[0]))
         elif int(itmdata[5]) == 1:
             interiorpts += 1
-            interiorptsidx.append(itmdata[0])
+            interiorptsidx.append(int(itmdata[0]))
         elif int(itmdata[5]) == 2:
             outerpts += 1
-            outerptsidx.append(itmdata[0])
+            outerptsidx.append(int(itmdata[0]))
 
     
+    for idx in wallptsidx:
+        currpt = globaldata[idx].getxy()
+        leftpt = globaldata[idx].left
+        leftpt = globaldata[leftpt].getxy()
+        rightpt = globaldata[idx].right
+        rightpt = globaldata[rightpt].getxy()
+        normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
+        globaldata[idx].setNormals(normals)
 
+    for idx in outerptsidx:
+        currpt = globaldata[idx].getxy()
+        leftpt = globaldata[idx].left
+        leftpt = globaldata[leftpt].getxy()
+        rightpt = globaldata[idx].right
+        rightpt = globaldata[rightpt].getxy()
+        normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
+        globaldata[idx].setNormals(normals)
 
 if __name__ == "__main__":
     main()

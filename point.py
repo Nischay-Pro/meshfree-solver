@@ -28,3 +28,11 @@ class Point:
         self.ypos_conn = ypos_conn
         self.yneg_conn = yneg_conn
         self.delta = delta
+    
+
+    def setNormals(self, n):
+        self.nx = n[0]
+        self.ny = n[1]
+
+    def getxy(self):
+        return (self.x, self.y)
