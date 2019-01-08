@@ -1,5 +1,6 @@
 from point import Point
 import core
+import config
 
 def main():
 
@@ -17,7 +18,7 @@ def main():
     for _, itm in enumerate(splitdata):
         itmdata = itm.split(" ")
         itmdata.pop(-1)
-        temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[6]), int(itmdata[19]), map(int,itmdata[20:]), 0, 1, None, None, defprimal, None, None, None, None, None, None, None, None, None, None, None)
+        temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[6]), int(itmdata[19]), list(map(int,itmdata[20:])), 0, 1, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None)
         globaldata.append(temp)
         if int(itmdata[5]) == 0:
             wallpts += 1
@@ -53,10 +54,8 @@ def main():
         connectivity = core.calculateConnectivity(globaldata, idx)
         globaldata[idx].setConnectivity(connectivity)
 
-    print(globaldata[20].xpos_conn)
-    print(globaldata[20].xneg_conn)
-    print(globaldata[20].ypos_conn)
-    print(globaldata[20].yneg_conn)
+    for i in range(1, int(config.getConfig()["core"]["max_iters"]) + 1):
+        core.fpi_solver(i, globaldata)
 
 if __name__ == "__main__":
     main()

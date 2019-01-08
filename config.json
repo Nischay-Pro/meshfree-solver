@@ -1,8 +1,8 @@
 {
     "core":{
         "cfl": 0.4,
-        "max_iters": 10000,
-        "mach": 0,
+        "max_iters": 1,
+        "mach": 0.8,
         "aoa": 0,
         "power": 0,
         "limiter_flag": 1,
