@@ -36,3 +36,16 @@ class Point:
 
     def getxy(self):
         return (self.x, self.y)
+
+    def setConnectivity(self, conn):
+        self.xpos_conn = conn[0]
+        self.xpos_nbhs = len(conn[0])
+
+        self.xneg_conn = conn[1]
+        self.xneg_nbhs = len(conn[1])
+
+        self.ypos_conn = conn[2]
+        self.ypos_nbhs = len(conn[2])
+
+        self.yneg_conn = conn[3]
+        self.yneg_nbhs = len(conn[3])

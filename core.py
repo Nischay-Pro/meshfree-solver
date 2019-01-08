@@ -39,3 +39,48 @@ def calculateNormals(left, right, mx, my):
     ny = ny/det
 
     return (nx,ny)
+
+def calculateConnectivity(globaldata, idx):
+    ptInterest = globaldata[idx]
+    currx = ptInterest.x
+    curry = ptInterest.y
+    nx = ptInterest.nx
+    ny = ptInterest.ny
+
+    flag = ptInterest.flag_1
+
+    xpos_conn,xneg_conn,ypos_conn,yneg_conn = [],[],[],[]
+
+    tx = ny
+    ty = -nx
+
+    for itm in ptInterest.conn:
+        itmx = globaldata[itm].x
+        itmy = globaldata[itm].y
+
+        delx = itmx - currx
+        dely = itmy - curry
+
+        dels = delx*tx + dely*ty
+        deln = delx*nx + dely*ny
+
+        if dels <= 0:
+            xpos_conn.append(itm)
+        
+        if dels >= 0:
+            xneg_conn.append(itm)
+
+        if flag == 1:
+            if deln <= 0:
+                ypos_conn.append(itm)
+            
+            if deln >= 0:
+                yneg_conn.append(itm)
+
+        elif flag == 0:
+            yneg_conn.append(itm)
+        
+        elif flag == 2:
+            ypos_conn.append(itm)
+        
+    return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
