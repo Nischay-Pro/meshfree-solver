@@ -1,6 +1,8 @@
 import math
 
-def flux_quad_GxI(G, nx, ny, u1, u2, rho, pr):
+def flux_quad_GxI(nx, ny, u1, u2, rho, pr):
+    G = []
+
     tx = ny
     ty = -nx
     ut = u1*tx + u2*ty
@@ -14,15 +16,15 @@ def flux_quad_GxI(G, nx, ny, u1, u2, rho, pr):
     A2neg = 0.5*(1 - math.erf(S2))
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
-    G[1] = rho*A2neg*(ut*A1neg - B1)  
+    G.append(rho*A2neg*(ut*A1neg - B1))
 
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1neg - ut*B1
-    G[2] = rho*A2neg*temp2
+    G.append(rho*A2neg*temp2)
 
     temp1 = ut*A1neg - B1
     temp2 = un*A2neg - B2
-    G[3] = rho*temp1*temp2
+    G.append(rho*temp1*temp2)
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1neg
@@ -33,9 +35,12 @@ def flux_quad_GxI(G, nx, ny, u1, u2, rho, pr):
     temp1 = ut*A1neg - B1
     temp4 = 0.5*rho*un*B2*temp1
         
-    G[4] = rho*A2neg*(temp2 - temp3) - temp4
+    G.append(rho*A2neg*(temp2 - temp3) - temp4)
+    return G
 
-def flux_quad_GxII(G, nx, ny, u1, u2, rho, pr):
+def flux_quad_GxII(nx, ny, u1, u2, rho, pr):
+    G = []
+
     tx = ny
     ty = -nx
 
@@ -53,15 +58,15 @@ def flux_quad_GxII(G, nx, ny, u1, u2, rho, pr):
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
 
-    G[1] = rho*A2neg*(ut*A1pos + B1)  
+    G.append(rho*A2neg*(ut*A1pos + B1))
 
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1pos + ut*B1
-    G[2] = rho*A2neg*temp2
+    G.append(rho*A2neg*temp2)
 
     temp1 = ut*A1pos + B1
     temp2 = un*A2neg - B2
-    G[3] = rho*temp1*temp2
+    G.append(rho*temp1*temp2)
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1pos
@@ -72,9 +77,14 @@ def flux_quad_GxII(G, nx, ny, u1, u2, rho, pr):
     temp1 = ut*A1pos + B1
     temp4 = 0.5*rho*un*B2*temp1
 
-    G[4] = rho*A2neg*(temp2 + temp3) - temp4
+    G.append(rho*A2neg*(temp2 + temp3) - temp4)
 
-def flux_quad_GxIII(G, nx, ny, u1, u2, rho, pr):
+    return G
+
+def flux_quad_GxIII(nx, ny, u1, u2, rho, pr):
+
+    G = []
+
     tx = ny
     ty = -nx
 
@@ -93,15 +103,15 @@ def flux_quad_GxIII(G, nx, ny, u1, u2, rho, pr):
     u_sqr = ut*ut + un*un
 
 
-    G[1] = rho*A2pos*(ut*A1pos + B1)  
+    G.append(rho*A2pos*(ut*A1pos + B1))
 
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1pos + ut*B1
-    G[2] = rho*A2pos*temp2
+    G.append(rho*A2pos*temp2)
 
     temp1 = ut*A1pos + B1
     temp2 = un*A2pos + B2
-    G[3] = rho*temp1*temp2
+    G.append(rho*temp1*temp2)
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1pos
@@ -112,9 +122,14 @@ def flux_quad_GxIII(G, nx, ny, u1, u2, rho, pr):
     temp1 = ut*A1pos + B1
     temp4 = 0.5*rho*un*B2*temp1
 
-    G[4] = rho*A2pos*(temp2 + temp3) + temp4
+    G.append(rho*A2pos*(temp2 + temp3) + temp4)
 
-def flux_quad_GxIV(G, nx, ny, u1, u2, rho, pr):
+    return G
+
+def flux_quad_GxIV(nx, ny, u1, u2, rho, pr):
+
+    G = []
+
     tx = ny
     ty = -nx
 
@@ -132,16 +147,15 @@ def flux_quad_GxIV(G, nx, ny, u1, u2, rho, pr):
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
 
-
-    G[1] = rho*A2pos*(ut*A1neg - B1)  
+    G.append(rho*A2pos*(ut*A1neg - B1))
         
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1neg - ut*B1
-    G[2] = rho*A2pos*temp2
+    G.append(rho*A2pos*temp2)
 
     temp1 = ut*A1neg - B1
     temp2 = un*A2pos + B2
-    G[3] = rho*temp1*temp2
+    G.append(rho*temp1*temp2)
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1neg
@@ -152,4 +166,6 @@ def flux_quad_GxIV(G, nx, ny, u1, u2, rho, pr):
     temp1 = ut*A1neg - B1
     temp4 = 0.5*rho*un*B2*temp1
 
-    G[4] = rho*A2pos*(temp2 - temp3) + temp4
+    G.append(rho*A2pos*(temp2 - temp3) + temp4)
+
+    return G

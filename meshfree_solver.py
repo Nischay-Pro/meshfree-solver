@@ -5,6 +5,9 @@ import config
 def main():
 
     globaldata = ["start"]
+
+    configData = config.getConfig()
+
     wallpts, interiorpts, outerpts = 0,0,0
     wallptsidx, interiorptsidx, outerptsidx, table = [],[],[],[]
 
@@ -13,7 +16,7 @@ def main():
     splitdata = data1.split("\n")
     splitdata = splitdata[:-1]
 
-    defprimal = core.getInitialPrimitive()
+    defprimal = core.getInitialPrimitive(configData)
 
     for _, itm in enumerate(splitdata):
         itmdata = itm.split(" ")
@@ -55,7 +58,7 @@ def main():
         globaldata[idx].setConnectivity(connectivity)
 
     for i in range(1, int(config.getConfig()["core"]["max_iters"]) + 1):
-        core.fpi_solver(i, globaldata)
+        core.fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx)
 
 if __name__ == "__main__":
     main()

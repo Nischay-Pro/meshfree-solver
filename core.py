@@ -1,20 +1,20 @@
 import config
 import math
 import operator
+import flux_residual
+import state_update
 
-def getInitialPrimitive():
-    configData = config.getConfig()
+def getInitialPrimitive(configData):
     rho_inf = float(configData["core"]["rho_inf"])
     mach = float(configData["core"]["mach"])
-    machcos = mach * math.cos(calculateTheta())
-    machsin = mach * math.sin(calculateTheta())
+    machcos = mach * math.cos(calculateTheta(configData))
+    machsin = mach * math.sin(calculateTheta(configData))
     pr_inf = float(configData["core"]["pr_inf"])
     primal = [rho_inf, machcos, machsin, pr_inf]
     return primal
 
     
-def calculateTheta():
-    configData = config.getConfig()
+def calculateTheta(configData):
     theta = math.radians(float(configData["core"]["aoa"]))
     return theta
 
@@ -86,11 +86,14 @@ def calculateConnectivity(globaldata, idx):
         
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 
-def fpi_solver(iter, globaldata):
-    globaldata = q_var_derivatives(globaldata)
+def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices):
+    globaldata = q_var_derivatives(globaldata, configData)
+    globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+    globaldata = state_update.func_delta(globaldata, configData)
+    globaldata = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter)
 
-def q_var_derivatives(globaldata):
-    power = int(config.getConfig()["core"]["power"])
+def q_var_derivatives(globaldata, configData):
+    power = int(configData["core"]["power"])
     for idx,itm in enumerate(globaldata):
         if idx > 0:
             rho = itm.prim[0]
@@ -175,3 +178,27 @@ def q_var_derivatives(globaldata):
             globaldata[idx].dq = tempdq
     
     return globaldata
+
+def qtilde_to_primitive(qtilde, configData):
+
+    gamma = configData["core"]["gamma"]
+
+    q1 = qtilde[0]
+    q2 = qtilde[1]
+    q3 = qtilde[2]
+    q4 = qtilde[3]
+
+    beta = -q4*0.5
+
+    temp = 0.5/beta
+
+    u1 = q2*temp
+    u2 = q3*temp
+
+    temp1 = q1 + beta*(u1*u1 + u2*u2)
+    temp2 = temp1 - (math.log(beta)/(gamma-1))
+
+    rho = math.exp(temp2)
+    pr = rho*temp
+
+    return (u1,u2,rho,pr)
