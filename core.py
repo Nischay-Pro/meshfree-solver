@@ -3,6 +3,7 @@ import math
 import operator
 import flux_residual
 import state_update
+import objective_function
 
 def getInitialPrimitive(configData):
     rho_inf = float(configData["core"]["rho_inf"])
@@ -91,6 +92,7 @@ def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interior
     globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
     globaldata = state_update.func_delta(globaldata, configData)
     globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
+    objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     return res_old
 
 def q_var_derivatives(globaldata, configData):

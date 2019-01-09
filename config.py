@@ -1,9 +1,6 @@
 import json
 import redis
 import uuid
-import jsonpickle
-import marshal
-import pickle
 
 def getConfig():
     with open("config.json","r") as f:
@@ -47,19 +44,3 @@ def save_obj(obj, name):
 def load_obj(name):
     with open(name + '.json', 'r') as f:
         return json.load(f)
-
-def save_obj_marshal(obj, name):
-    with open(name + '.marshal', 'wb') as f:
-        marshal.dump(obj, f)
-
-def load_obj_marshal(name):
-    with open(name + '.marshal', 'rb') as f:
-        return marshal.load(f)
-
-def save_obj_cpickle(obj, name):
-    with open(name + '.pkl', 'wb') as f:
-        pickle.dump(obj, f,protocol=pickle.HIGHEST_PROTOCOL)
-
-def load_obj_cpickle(name):
-    with open(name + '.pkl', 'rb') as f:
-        return pickle.load(f)

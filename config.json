@@ -12,7 +12,8 @@
         "shapes": 1,
         "rho_inf": 1,
         "pr_inf": 0.71428571428,
-        "gamma": 1.4
+        "gamma": 1.4,
+        "clcd_flag": false
     },
     "global":{
         "redis": {
