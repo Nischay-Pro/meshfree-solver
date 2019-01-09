@@ -86,11 +86,12 @@ def calculateConnectivity(globaldata, idx):
         
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 
-def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices):
+def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
     globaldata = q_var_derivatives(globaldata, configData)
     globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
     globaldata = state_update.func_delta(globaldata, configData)
-    globaldata = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter)
+    globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
+    return res_old
 
 def q_var_derivatives(globaldata, configData):
     power = int(configData["core"]["power"])
@@ -176,11 +177,12 @@ def q_var_derivatives(globaldata, configData):
             tempdq.append(tempsumy)
 
             globaldata[idx].dq = tempdq
-    
+
+
     return globaldata
 
 def qtilde_to_primitive(qtilde, configData):
-
+    
     gamma = configData["core"]["gamma"]
 
     q1 = qtilde[0]
@@ -197,8 +199,8 @@ def qtilde_to_primitive(qtilde, configData):
 
     temp1 = q1 + beta*(u1*u1 + u2*u2)
     temp2 = temp1 - (math.log(beta)/(gamma-1))
-
     rho = math.exp(temp2)
     pr = rho*temp
+
 
     return (u1,u2,rho,pr)

@@ -36,7 +36,7 @@ def func_delta(globaldata, configData):
 
     return globaldata
 
-def state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter):
+def state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old):
     max_res = 0	
     sum_res_sqr = 0
     for itm in wallindices:
@@ -44,16 +44,15 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         ny = globaldata[itm].ny
         U = primitive_to_conserved(globaldata, itm, nx, ny)
         temp = U[0]
-
-        U = np.array(U) - globaldata[itm].delta * np.array(globaldata[itm].flux_res)
-        U[0] = 0
-
+        U = np.array(U) - (globaldata[itm].delta * np.array(globaldata[itm].flux_res))
+        U[2] = 0
         U2_rot = U[1]
         U3_rot = U[2]
         U[1] = U2_rot*ny + U3_rot*nx
         U[2] = U3_rot*ny - U2_rot*nx
 
         res_sqr = (U[0] - temp)*(U[0] - temp)
+
 
         if res_sqr > max_res:
             max_res = res_sqr
@@ -63,21 +62,27 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
 
         U = U.tolist()
 
-        globaldata[itm].prim[0] = U[0]
+        tempU = []
+        tempU.append(U[0])
         temp = 1 / U[0]
-        globaldata[itm].prim[1] = U[1]*temp
-        globaldata[itm].prim[2] = U[2]*temp
-        globaldata[itm].prim[3] = 0.4*U[3] - (0.2*temp)*(U[1]*U[1] + U[2]*U[2])
+        tempU.append(U[1]*temp)
+        tempU.append(U[2]*temp)
+        tempU.append(0.4*U[3] - (0.2*temp)*(U[1]*U[1] + U[2]*U[2]))
+
+        globaldata[itm].prim = tempU
 
     for itm in outerindices:
         nx = globaldata[itm].nx
         ny = globaldata[itm].ny
 
-        Ubar = conserved_vector_Ubar(globaldata, itm, nx, ny, configData)
+        U = conserved_vector_Ubar(globaldata, itm, nx, ny, configData)
 
         temp = U[0]
 
         U = np.array(U) - globaldata[itm].delta * np.array(globaldata[itm].flux_res)
+
+        if itm == 9951:
+            print(U)
 
         U2_rot = U[1]
         U3_rot = U[2]
@@ -87,11 +92,15 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
 
         U = U.tolist()
 
-        globaldata[itm].prim[0] = U[0]
+        tempU = []
+        tempU.append(U[0])
         temp = 1 / U[0]
-        globaldata[itm].prim[1] = U[1]*temp
-        globaldata[itm].prim[2] = U[2]*temp
-        globaldata[itm].prim[3] = 0.4*U[3] - (0.2*temp)*(U[1]*U[1] + U[2]*U[2])
+        tempU.append(U[1]*temp)
+        tempU.append(U[2]*temp)
+        tempU.append(0.4*U[3] - (0.2*temp)*(U[1]*U[1] + U[2]*U[2]))
+        
+
+        globaldata[itm].prim = tempU
 
     for itm in interiorindices:
         nx = globaldata[itm].nx
@@ -100,7 +109,6 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         temp = U[0]
 
         U = np.array(U) - globaldata[itm].delta * np.array(globaldata[itm].flux_res)
-
         U2_rot = U[1]
         U3_rot = U[2]
         U[1] = U2_rot*ny + U3_rot*nx
@@ -116,11 +124,13 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
 
         U = U.tolist()
 
-        globaldata[itm].prim[0] = U[0]
+        tempU = []
+        tempU.append(U[0])
         temp = 1 / U[0]
-        globaldata[itm].prim[1] = U[1]*temp
-        globaldata[itm].prim[2] = U[2]*temp
-        globaldata[itm].prim[3] = 0.4*U[3] - (0.2*temp)*(U[1]*U[1] + U[2]*U[2])
+        tempU.append(U[1]*temp)
+        tempU.append(U[2]*temp)
+        tempU.append(0.4*U[3] - (0.2*temp)*(U[1]*U[1] + U[2]*U[2]))
+        globaldata[itm].prim = tempU
 
     res_new = math.sqrt(sum_res_sqr)/ len(globaldata)
 
@@ -130,8 +140,9 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
     else:
         residue = math.log10(res_new/res_old)
     
-    print(residue)
-    return globaldata
+    print(iter, residue)
+
+    return globaldata, res_old
 
 def primitive_to_conserved(globaldata, itm, nx, ny):
 
@@ -157,8 +168,9 @@ def conserved_vector_Ubar(globaldata, itm, nx, ny, configData):
     Ubar = []
 
     theta = core.calculateTheta(configData)
+
     u1_inf = Mach*math.cos(theta)
-    u2_inf = Mach*math.cos(theta)
+    u2_inf = Mach*math.sin(theta)
 
     tx = ny
     ty = -nx

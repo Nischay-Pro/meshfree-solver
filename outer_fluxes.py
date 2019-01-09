@@ -50,7 +50,7 @@ def outer_dGx_pos(globaldata, idx, configData):
 
         qtilde_i = np.array(globaldata[idx].q) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
         qtilde_k = np.array(globaldata[itm].q) - 0.5*(delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
-        
+
         if limiter_flag == 1:
             phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData))
             phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData))

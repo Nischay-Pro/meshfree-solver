@@ -17,7 +17,7 @@ def cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, co
 		GTemp = GTemp.tolist()
 
 		globaldata[itm].flux_res = GTemp
-
+		
 	for itm in outerindices:
 		Gxp = outer_fluxes.outer_dGx_pos(globaldata, itm, configData)
 		Gxn = outer_fluxes.outer_dGx_neg(globaldata, itm, configData)
