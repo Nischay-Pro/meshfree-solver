@@ -81,9 +81,6 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
 
         U = np.array(U) - globaldata[itm].delta * np.array(globaldata[itm].flux_res)
 
-        if itm == 9951:
-            print(U)
-
         U2_rot = U[1]
         U3_rot = U[2]
 
@@ -139,8 +136,12 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         residue = 0
     else:
         residue = math.log10(res_new/res_old)
+
+    with open('residue', 'a') as the_file:
+        the_file.write("%i %f" % (iter, residue))
     
-    print(iter, residue)
+    print("Iteration Number: ", iter)
+    print("Residue: ", residue)
 
     return globaldata, res_old
 
