@@ -17,19 +17,19 @@ def interior_dGx_pos(globaldata, idx, configData):
     sum_delx_delf = np.array([0,0,0,0])
     sum_dely_delf = np.array([0,0,0,0])
 
-    x_i = globaldata[idx].x
-    y_i = globaldata[idx].y
+    x_i = globaldata[idx].getx()
+    y_i = globaldata[idx].gety()
 
-    nx = globaldata[idx].nx
-    ny = globaldata[idx].ny
+    nx = globaldata[idx].getnx()
+    ny = globaldata[idx].getny()
 
     tx = ny
     ty = -nx
 
-    for itm in globaldata[idx].xpos_conn:
+    for itm in globaldata[idx].get_xpos_conn():
 
-        x_k = globaldata[itm].x
-        y_k = globaldata[itm].y
+        x_k = globaldata[itm].getx()
+        y_k = globaldata[itm].gety()
 
         delx = x_k - x_i
         dely = y_k - y_i
@@ -48,14 +48,14 @@ def interior_dGx_pos(globaldata, idx, configData):
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = np.array(globaldata[idx].q) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
-        qtilde_k = np.array(globaldata[itm].q) - 0.5*(delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
+        qtilde_i = np.array(globaldata[idx].getq()) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+        qtilde_k = np.array(globaldata[itm].getq()) - 0.5*(delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
         
         if limiter_flag == 1:
             phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData))
             phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData))
-            qtilde_i = np.array(globaldata[idx].q) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
-            qtilde_k = np.array(globaldata[itm].q) - 0.5 * phi_k * (delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
+            qtilde_i = np.array(globaldata[idx].getq()) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+            qtilde_k = np.array(globaldata[itm].getq()) - 0.5 * phi_k * (delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
 
         if limiter_flag == 2:
             maxi = limiters.max_q_values(globaldata, idx)
@@ -103,19 +103,19 @@ def interior_dGx_neg(globaldata, idx, configData):
     sum_delx_delf = np.array([0,0,0,0])
     sum_dely_delf = np.array([0,0,0,0])
 
-    x_i = globaldata[idx].x
-    y_i = globaldata[idx].y
+    x_i = globaldata[idx].getx()
+    y_i = globaldata[idx].gety()
 
-    nx = globaldata[idx].nx
-    ny = globaldata[idx].ny
+    nx = globaldata[idx].getnx()
+    ny = globaldata[idx].getny()
 
     tx = ny
     ty = -nx
 
-    for itm in globaldata[idx].xpos_conn:
+    for itm in globaldata[idx].get_xpos_conn():
 
-        x_k = globaldata[itm].x
-        y_k = globaldata[itm].y
+        x_k = globaldata[itm].getx()
+        y_k = globaldata[itm].gety()
 
         delx = x_k - x_i
         dely = y_k - y_i
@@ -134,14 +134,14 @@ def interior_dGx_neg(globaldata, idx, configData):
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = np.array(globaldata[idx].q) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
-        qtilde_k = np.array(globaldata[itm].q) - 0.5*(delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
+        qtilde_i = np.array(globaldata[idx].getq()) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+        qtilde_k = np.array(globaldata[itm].getq()) - 0.5*(delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
         
         if limiter_flag == 1:
             phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData))
             phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData))
-            qtilde_i = np.array(globaldata[idx].q) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
-            qtilde_k = np.array(globaldata[itm].q) - 0.5 * phi_k * (delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
+            qtilde_i = np.array(globaldata[idx].getq()) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+            qtilde_k = np.array(globaldata[itm].getq()) - 0.5 * phi_k * (delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
 
         if limiter_flag == 2:
             maxi = limiters.max_q_values(globaldata, idx)
@@ -189,19 +189,19 @@ def interior_dGy_pos(globaldata, idx, configData):
     sum_delx_delf = np.array([0,0,0,0])
     sum_dely_delf = np.array([0,0,0,0])
 
-    x_i = globaldata[idx].x
-    y_i = globaldata[idx].y
+    x_i = globaldata[idx].getx()
+    y_i = globaldata[idx].gety()
 
-    nx = globaldata[idx].nx
-    ny = globaldata[idx].ny
+    nx = globaldata[idx].getnx()
+    ny = globaldata[idx].getny()
 
     tx = ny
     ty = -nx
 
-    for itm in globaldata[idx].xpos_conn:
+    for itm in globaldata[idx].get_xpos_conn():
 
-        x_k = globaldata[itm].x
-        y_k = globaldata[itm].y
+        x_k = globaldata[itm].getx()
+        y_k = globaldata[itm].gety()
 
         delx = x_k - x_i
         dely = y_k - y_i
@@ -220,14 +220,14 @@ def interior_dGy_pos(globaldata, idx, configData):
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = np.array(globaldata[idx].q) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
-        qtilde_k = np.array(globaldata[itm].q) - 0.5*(delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
+        qtilde_i = np.array(globaldata[idx].getq()) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+        qtilde_k = np.array(globaldata[itm].getq()) - 0.5*(delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
         
         if limiter_flag == 1:
             phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData))
             phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData))
-            qtilde_i = np.array(globaldata[idx].q) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
-            qtilde_k = np.array(globaldata[itm].q) - 0.5 * phi_k * (delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
+            qtilde_i = np.array(globaldata[idx].getq()) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+            qtilde_k = np.array(globaldata[itm].getq()) - 0.5 * phi_k * (delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
 
         if limiter_flag == 2:
             maxi = limiters.max_q_values(globaldata, idx)
@@ -275,19 +275,19 @@ def interior_dGy_neg(globaldata, idx, configData):
     sum_delx_delf = np.array([0,0,0,0])
     sum_dely_delf = np.array([0,0,0,0])
 
-    x_i = globaldata[idx].x
-    y_i = globaldata[idx].y
+    x_i = globaldata[idx].getx()
+    y_i = globaldata[idx].gety()
 
-    nx = globaldata[idx].nx
-    ny = globaldata[idx].ny
+    nx = globaldata[idx].getnx()
+    ny = globaldata[idx].getny()
 
     tx = ny
     ty = -nx
 
-    for itm in globaldata[idx].xpos_conn:
+    for itm in globaldata[idx].get_xpos_conn():
 
-        x_k = globaldata[itm].x
-        y_k = globaldata[itm].y
+        x_k = globaldata[itm].getx()
+        y_k = globaldata[itm].gety()
 
         delx = x_k - x_i
         dely = y_k - y_i
@@ -306,14 +306,14 @@ def interior_dGy_neg(globaldata, idx, configData):
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = np.array(globaldata[idx].q) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
-        qtilde_k = np.array(globaldata[itm].q) - 0.5*(delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
+        qtilde_i = np.array(globaldata[idx].getq()) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+        qtilde_k = np.array(globaldata[itm].getq()) - 0.5*(delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
         
         if limiter_flag == 1:
             phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData))
             phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData))
-            qtilde_i = np.array(globaldata[idx].q) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
-            qtilde_k = np.array(globaldata[itm].q) - 0.5 * phi_k * (delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
+            qtilde_i = np.array(globaldata[idx].getq()) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+            qtilde_k = np.array(globaldata[itm].getq()) - 0.5 * phi_k * (delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
 
         if limiter_flag == 2:
             maxi = limiters.max_q_values(globaldata, idx)

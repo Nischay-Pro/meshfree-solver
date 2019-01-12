@@ -29,8 +29,8 @@ def compute_cl_cd_cm(globaldata, configData, wallindices):
             ly = globaldata[left].y
             rx = globaldata[right].x
             ry = globaldata[right].y
-            mx = globaldata[itm].x
-            my = globaldata[itm].y
+            mx = globaldata[itm].getx()
+            my = globaldata[itm].gety()
 
             ds1 = (mx - lx)**2 + (my - ly)**2
             ds1 = math.sqrt(ds1)

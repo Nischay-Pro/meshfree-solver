@@ -1,9 +1,11 @@
 import config
 import math
 import operator
-import flux_residual
+cimport flux_residual
 import state_update
 import objective_function
+import numpy as np
+cimport numpy as np
 
 def getInitialPrimitive(configData):
     rho_inf = float(configData["core"]["rho_inf"])
@@ -44,19 +46,19 @@ def calculateNormals(left, right, mx, my):
 
 def calculateConnectivity(globaldata, idx):
     ptInterest = globaldata[idx]
-    currx = ptInterest.x
-    curry = ptInterest.y
-    nx = ptInterest.nx
-    ny = ptInterest.ny
+    currx = ptInterest.getx()
+    curry = ptInterest.gety()
+    nx = ptInterest.getnx()
+    ny = ptInterest.getny()
 
-    flag = ptInterest.flag_1
+    flag = ptInterest.get_flag_1()
 
-    xpos_conn,xneg_conn,ypos_conn,yneg_conn = [],[],[],[]
+    xpos_conn,xneg_conn,ypos_conn,yneg_conn = np.array([], dtype=np.long), np.array([], dtype=np.long), np.array([], dtype=np.long), np.array([], dtype=np.long)
 
     tx = ny
     ty = -nx
 
-    for itm in ptInterest.conn:
+    for itm in ptInterest.get_conn():
         itmx = globaldata[itm].getx()
         itmy = globaldata[itm].gety()
 
@@ -67,23 +69,23 @@ def calculateConnectivity(globaldata, idx):
         deln = delx*nx + dely*ny
 
         if dels <= 0:
-            xpos_conn.append(itm)
+            xpos_conn = np.append(xpos_conn, [itm])
         
         if dels >= 0:
-            xneg_conn.append(itm)
+            xneg_conn = np.append(xneg_conn, [itm])
 
         if flag == 1:
             if deln <= 0:
-                ypos_conn.append(itm)
+                ypos_conn = np.append(ypos_conn, [itm])
             
             if deln >= 0:
-                yneg_conn.append(itm)
+                yneg_conn = np.append(yneg_conn, [itm])
 
         elif flag == 0:
-            yneg_conn.append(itm)
+            yneg_conn = np.append(yneg_conn, [itm])
         
         elif flag == 2:
-            ypos_conn.append(itm)
+            ypos_conn = np.append(ypos_conn, [itm])
         
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 
@@ -92,36 +94,37 @@ def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interior
     globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
     globaldata = state_update.func_delta(globaldata, configData)
     globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
-    objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
+    # objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     return res_old
 
 def q_var_derivatives(globaldata, configData):
     power = int(configData["core"]["power"])
     for idx,itm in enumerate(globaldata):
         if idx > 0:
-            rho = itm.prim[0]
-            u1 = itm.prim[1]
-            u2 = itm.prim[2]
-            pr = itm.prim[3]
+            tempitm = itm.getprim()
+            rho = tempitm[0]
+            u1 = tempitm[1]
+            u2 = tempitm[2]
+            pr = tempitm[3]
 
             beta = 0.5 * (rho / pr)
 
-            tempq = []
+            tempq = np.array([])
 
-            tempq.append(math.log(rho) + (math.log(beta) * 2.5) - (beta * ((u1*u1) + (u2 * u2))))
+            tempq = np.append(tempq, [math.log(rho) + (math.log(beta) * 2.5) - (beta * ((u1*u1) + (u2 * u2)))])
             two_times_beta = 2 * beta
 
-            tempq.append(two_times_beta * u1)
-            tempq.append(two_times_beta * u2)
-            tempq.append(-two_times_beta)
+            tempq = np.append(tempq, [two_times_beta * u1])
+            tempq = np.append(tempq, [two_times_beta * u2])
+            tempq = np.append(tempq, [-two_times_beta])
 
-            globaldata[idx].getq() = tempq
+            globaldata[idx].setq(tempq)
 
     for idx,itm in enumerate(globaldata):
         if idx > 0:
             
-            x_i = itm.x
-            y_i = itm.y
+            x_i = itm.getx()
+            y_i = itm.gety()
 
             sum_delx_sqr = 0
             sum_dely_sqr = 0
@@ -130,11 +133,11 @@ def q_var_derivatives(globaldata, configData):
             sum_delx_delq = [0,0,0,0]
             sum_dely_delq = [0,0,0,0]
 
-            for conn in itm.conn:
+            for conn in itm.get_conn():
                 
 
-                x_k = globaldata[conn].x
-                y_k = globaldata[conn].y
+                x_k = globaldata[conn].getx()
+                y_k = globaldata[conn].gety()
 
                 delx = x_k - x_i
                 dely = y_k - y_i
@@ -148,15 +151,15 @@ def q_var_derivatives(globaldata, configData):
 
                 sum_delx_dely = sum_delx_dely + (delx * dely * weights)
 
-                sum_delx_delq[0] = sum_delx_delq[0] + (weights * delx * (globaldata[conn].q[0] - globaldata[idx].getq()[0]))
-                sum_delx_delq[1] = sum_delx_delq[1] + (weights * delx * (globaldata[conn].q[1] - globaldata[idx].getq()[1]))
-                sum_delx_delq[2] = sum_delx_delq[2] + (weights * delx * (globaldata[conn].q[2] - globaldata[idx].getq()[2]))
-                sum_delx_delq[3] = sum_delx_delq[3] + (weights * delx * (globaldata[conn].q[3] - globaldata[idx].getq()[3]))
+                sum_delx_delq[0] = sum_delx_delq[0] + (weights * delx * (globaldata[conn].getq()[0] - globaldata[idx].getq()[0]))
+                sum_delx_delq[1] = sum_delx_delq[1] + (weights * delx * (globaldata[conn].getq()[1] - globaldata[idx].getq()[1]))
+                sum_delx_delq[2] = sum_delx_delq[2] + (weights * delx * (globaldata[conn].getq()[2] - globaldata[idx].getq()[2]))
+                sum_delx_delq[3] = sum_delx_delq[3] + (weights * delx * (globaldata[conn].getq()[3] - globaldata[idx].getq()[3]))
 
-                sum_dely_delq[0] = sum_dely_delq[0] + (weights * dely * (globaldata[conn].q[0] - globaldata[idx].getq()[0]))
-                sum_dely_delq[1] = sum_dely_delq[1] + (weights * dely * (globaldata[conn].q[1] - globaldata[idx].getq()[1]))
-                sum_dely_delq[2] = sum_dely_delq[2] + (weights * dely * (globaldata[conn].q[2] - globaldata[idx].getq()[2]))
-                sum_dely_delq[3] = sum_dely_delq[3] + (weights * dely * (globaldata[conn].q[3] - globaldata[idx].getq()[3]))
+                sum_dely_delq[0] = sum_dely_delq[0] + (weights * dely * (globaldata[conn].getq()[0] - globaldata[idx].getq()[0]))
+                sum_dely_delq[1] = sum_dely_delq[1] + (weights * dely * (globaldata[conn].getq()[1] - globaldata[idx].getq()[1]))
+                sum_dely_delq[2] = sum_dely_delq[2] + (weights * dely * (globaldata[conn].getq()[2] - globaldata[idx].getq()[2]))
+                sum_dely_delq[3] = sum_dely_delq[3] + (weights * dely * (globaldata[conn].getq()[3] - globaldata[idx].getq()[3]))
 
             det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
             one_by_det = 1 / det
@@ -178,31 +181,7 @@ def q_var_derivatives(globaldata, configData):
             tempdq.append(tempsumx)
             tempdq.append(tempsumy)
 
-            globaldata[idx].dq = tempdq
+            globaldata[idx].setdq(np.array(tempdq))
 
 
     return globaldata
-
-def qtilde_to_primitive(qtilde, configData):
-    
-    gamma = configData["core"]["gamma"]
-
-    q1 = qtilde[0]
-    q2 = qtilde[1]
-    q3 = qtilde[2]
-    q4 = qtilde[3]
-
-    beta = -q4*0.5
-
-    temp = 0.5/beta
-
-    u1 = q2*temp
-    u2 = q3*temp
-
-    temp1 = q1 + beta*(u1*u1 + u2*u2)
-    temp2 = temp1 - (math.log(beta)/(gamma-1))
-    rho = math.exp(temp2)
-    pr = rho*temp
-
-
-    return (u1,u2,rho,pr)

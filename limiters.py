@@ -5,7 +5,7 @@ def venkat_limiter(qtilde, globaldata, idx, configData):
     phi = []
     del_pos, del_neg = 0,0
     for i in range(4):
-        q = globaldata[idx].q[i]
+        q = globaldata[idx].getq()[i]
         del_neg = qtilde[i] - q
         if abs(del_neg) <= 1e-5:
             phi.append(1)
@@ -40,26 +40,26 @@ def venkat_limiter(qtilde, globaldata, idx, configData):
 
 
 def maximum(globaldata, idx, i):
-    maxval = globaldata[idx].q[i]
+    maxval = globaldata[idx].getq()[i]
     for itm in globaldata[idx].conn:
-        if maxval < globaldata[itm].q[i]:
-            maxval = globaldata[itm].q[i]
+        if maxval < globaldata[itm].getq()[i]:
+            maxval = globaldata[itm].getq()[i]
     return maxval
 
 
 def minimum(globaldata, idx, i):
-    minval = globaldata[idx].q[i]
+    minval = globaldata[idx].getq()[i]
     for itm in globaldata[idx].conn:
-        if minval > globaldata[itm].q[i]:
-            minval = globaldata[itm].q[i]
+        if minval > globaldata[itm].getq()[i]:
+            minval = globaldata[itm].getq()[i]
     return minval
 
 def smallest_dist(globaldata, idx):
     min_dist = 10000
 
     for itm in globaldata[idx].conn:
-        dx = globaldata[idx].x - globaldata[itm].x
-        dy = globaldata[idx].y - globaldata[itm].y
+        dx = globaldata[idx].getx() - globaldata[itm].getx()
+        dy = globaldata[idx].gety() - globaldata[itm].gety()
         ds = math.sqrt(dx * dx + dy * dy)
         
         if ds < min_dist:
@@ -68,10 +68,10 @@ def smallest_dist(globaldata, idx):
     return min_dist
 
 def max_q_values(globaldata, idx):
-    maxq = globaldata[idx].q
+    maxq = globaldata[idx].getq()
 
     for itm in globaldata[idx].conn:
-        currq = globaldata[itm].q
+        currq = globaldata[itm].getq()
         for i in range(4):
             if maxq[i] < currq[i]:
                 maxq[i] = currq[i]
@@ -79,10 +79,10 @@ def max_q_values(globaldata, idx):
     return maxq
 
 def min_q_values(globaldata, idx):
-    minq = globaldata[idx].q
+    minq = globaldata[idx].getq()
 
     for itm in globaldata[idx].conn:
-        currq = globaldata[itm].q
+        currq = globaldata[itm].getq()
         for i in range(4):
             if minq[i] > currq[i]:
                 minq[i] = currq[i]

@@ -1,12 +1,12 @@
-from point import Point
+import point
 import core
 import config
+import numpy as np
 
 def main():
+    configData = config.getConfig()
 
     globaldata = ["start"]
-
-    configData = config.getConfig()
 
     wallpts, interiorpts, outerpts = 0,0,0
     wallptsidx, interiorptsidx, outerptsidx, table = [],[],[],[]
@@ -16,12 +16,16 @@ def main():
     splitdata = data1.split("\n")
     splitdata = splitdata[:-1]
 
+    # sizeoffile = len(open("preprocessorfile_normal.txt").readlines())
+
+    # globaldata = []
+
     defprimal = core.getInitialPrimitive(configData)
 
-    for _, itm in enumerate(splitdata):
+    for i, itm in enumerate(splitdata):
         itmdata = itm.split(" ")
         itmdata.pop(-1)
-        temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[6]), int(itmdata[14]), list(map(int,itmdata[15:])), 0, 1, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None)
+        temp = point.Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[6]), int(itmdata[14]), np.array(list(map(int,itmdata[15:])),dtype=np.long), 0, 1, np.array(defprimal,dtype=np.float64), np.zeros((4),dtype=np.float64), np.zeros((4),dtype=np.float64), np.zeros((2,4), dtype=np.float64), 0, 0, 0, 0, 0, np.zeros((25), dtype=np.int), np.zeros((25), dtype=np.int), np.zeros((25), dtype=np.int), np.zeros((25), dtype=np.int), 0)
         globaldata.append(temp)
         if int(itmdata[5]) == 0:
             wallpts += 1
@@ -37,18 +41,18 @@ def main():
     
     for idx in wallptsidx:
         currpt = globaldata[idx].getxy()
-        leftpt = globaldata[idx].left
+        leftpt = globaldata[idx].getleft()
         leftpt = globaldata[leftpt].getxy()
-        rightpt = globaldata[idx].right
+        rightpt = globaldata[idx].getright()
         rightpt = globaldata[rightpt].getxy()
         normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
         globaldata[idx].setNormals(normals)
 
     for idx in outerptsidx:
         currpt = globaldata[idx].getxy()
-        leftpt = globaldata[idx].left
+        leftpt = globaldata[idx].getleft()
         leftpt = globaldata[leftpt].getxy()
-        rightpt = globaldata[idx].right
+        rightpt = globaldata[idx].getright()
         rightpt = globaldata[rightpt].getxy()
         normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
         globaldata[idx].setNormals(normals)
@@ -58,7 +62,7 @@ def main():
         globaldata[idx].setConnectivity(connectivity)
 
     res_old = 0
-
+    
     for i in range(1, int(config.getConfig()["core"]["max_iters"]) + 1):
         res_old = core.fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx, res_old)
 

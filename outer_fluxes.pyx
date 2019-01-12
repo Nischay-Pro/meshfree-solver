@@ -1,30 +1,44 @@
+# cython: profile=True
+# cython: binding=True
+# cython: linetrace=True
+# distutils: define_macros=CYTHON_TRACE_NOGIL=1
 import math
 import numpy as np
-import limiters
-import split_fluxes
-import quadrant_fluxes
-import core
+cimport limiters
+cimport split_fluxes
+cimport quadrant_fluxes
+cimport misc
+cimport numpy as np
 
-def outer_dGx_pos(globaldata, idx, configData):
+cdef np.ndarray outer_dGx_pos(list globaldata, int idx, dict configData):
 
-    power = configData["core"]["power"]
-    limiter_flag = configData["core"]["limiter_flag"]
+    cdef int power = configData["core"]["power"]
+    cdef int limiter_flag = configData["core"]["limiter_flag"]
 
-    sum_delx_sqr = 0
-    sum_dely_sqr = 0
-    sum_delx_dely = 0
+    cdef double sum_delx_sqr = 0
+    cdef double sum_dely_sqr = 0
+    cdef double sum_delx_dely = 0
 
-    sum_delx_delf = np.array([0,0,0,0])
-    sum_dely_delf = np.array([0,0,0,0])
+    cdef np.ndarray sum_delx_delf = np.array([0,0,0,0])
+    cdef np.ndarray sum_dely_delf = np.array([0,0,0,0])
 
-    x_i = globaldata[idx].getx()
-    y_i = globaldata[idx].gety()
+    cdef double x_i = globaldata[idx].getx()
+    cdef double y_i = globaldata[idx].gety()
 
-    nx = globaldata[idx].getnx()
-    ny = globaldata[idx].getny()
+    cdef double nx = globaldata[idx].getnx()
+    cdef double ny = globaldata[idx].getny()
 
-    tx = ny
-    ty = -nx
+    cdef double tx = ny
+    cdef double ty = -nx
+
+    cdef long itm
+
+    cdef double delx, dely
+    cdef double x_k, y_k, det, one_by_det
+    cdef double dels, deln, dist, weights
+
+    cdef np.ndarray qtilde_i, qtilde_k
+    cdef np.ndarray phi_i, phi_k, maxi, mini, result, G_i, G_k
 
     for itm in globaldata[idx].get_xpos_conn():
 
@@ -48,13 +62,13 @@ def outer_dGx_pos(globaldata, idx, configData):
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = np.array(globaldata[idx].getq()) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+        qtilde_i = np.array(globaldata[idx].getq()) - 0.5*(delx*np.array(globaldata[idx].getdq()[0]) + dely*np.array(globaldata[idx].getdq()[1]))
         qtilde_k = np.array(globaldata[itm].getq()) - 0.5*(delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
 
         if limiter_flag == 1:
             phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData))
             phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData))
-            qtilde_i = np.array(globaldata[idx].getq()) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+            qtilde_i = np.array(globaldata[idx].getq()) - 0.5 * phi_i * (delx*np.array(globaldata[idx].getdq()[0]) + dely*np.array(globaldata[idx].getdq()[1]))
             qtilde_k = np.array(globaldata[itm].getq()) - 0.5 * phi_k * (delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
 
         if limiter_flag == 2:
@@ -74,10 +88,10 @@ def outer_dGx_pos(globaldata, idx, configData):
                 if qtilde_k[i] < mini[i]:
                     qtilde_k[i] = mini[i]
 
-        result = core.qtilde_to_primitive(qtilde_i, configData)
+        result = misc.qtilde_to_primitive(qtilde_i, configData)
         G_i = quadrant_fluxes.flux_quad_GxIII(nx, ny, result[0], result[1], result[2], result[3])
 
-        result = core.qtilde_to_primitive(qtilde_k, configData)
+        result = misc.qtilde_to_primitive(qtilde_k, configData)
         G_k = quadrant_fluxes.flux_quad_GxIII(nx, ny, result[0], result[1], result[2], result[3])
 
         sum_delx_delf = sum_delx_delf + (np.array(G_k) - np.array(G_i)) * dels_weights
@@ -89,29 +103,37 @@ def outer_dGx_pos(globaldata, idx, configData):
 
     G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
 
-    return G.tolist()
+    return G
 
-def outer_dGx_neg(globaldata, idx, configData):
+cdef np.ndarray outer_dGx_neg(list globaldata, int idx, dict configData):
 
-    power = configData["core"]["power"]
-    limiter_flag = configData["core"]["limiter_flag"]
+    cdef int power = configData["core"]["power"]
+    cdef int limiter_flag = configData["core"]["limiter_flag"]
 
-    sum_delx_sqr = 0
-    sum_dely_sqr = 0
-    sum_delx_dely = 0
+    cdef double sum_delx_sqr = 0
+    cdef double sum_dely_sqr = 0
+    cdef double sum_delx_dely = 0
 
-    sum_delx_delf = np.array([0,0,0,0])
-    sum_dely_delf = np.array([0,0,0,0])
+    cdef np.ndarray sum_delx_delf = np.array([0,0,0,0])
+    cdef np.ndarray sum_dely_delf = np.array([0,0,0,0])
 
-    x_i = globaldata[idx].getx()
-    y_i = globaldata[idx].gety()
+    cdef double x_i = globaldata[idx].getx()
+    cdef double y_i = globaldata[idx].gety()
 
-    nx = globaldata[idx].getnx()
-    ny = globaldata[idx].getny()
+    cdef double nx = globaldata[idx].getnx()
+    cdef double ny = globaldata[idx].getny()
 
-    tx = ny
-    ty = -nx
+    cdef double tx = ny
+    cdef double ty = -nx
 
+    cdef long itm
+
+    cdef double delx, dely
+    cdef double x_k, y_k, det, one_by_det
+    cdef double dels, deln, dist, weights
+
+    cdef np.ndarray qtilde_i, qtilde_k
+    cdef np.ndarray phi_i, phi_k, maxi, mini, result, G_i, G_k
     for itm in globaldata[idx].get_xpos_conn():
 
         x_k = globaldata[itm].getx()
@@ -134,13 +156,13 @@ def outer_dGx_neg(globaldata, idx, configData):
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = np.array(globaldata[idx].getq()) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+        qtilde_i = np.array(globaldata[idx].getq()) - 0.5*(delx*np.array(globaldata[idx].getdq()[0]) + dely*np.array(globaldata[idx].getdq()[1]))
         qtilde_k = np.array(globaldata[itm].getq()) - 0.5*(delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
         
         if limiter_flag == 1:
             phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData))
             phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData))
-            qtilde_i = np.array(globaldata[idx].getq()) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+            qtilde_i = np.array(globaldata[idx].getq()) - 0.5 * phi_i * (delx*np.array(globaldata[idx].getdq()[0]) + dely*np.array(globaldata[idx].getdq()[1]))
             qtilde_k = np.array(globaldata[itm].getq()) - 0.5 * phi_k * (delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
            
         if limiter_flag == 2:
@@ -160,10 +182,10 @@ def outer_dGx_neg(globaldata, idx, configData):
                 if qtilde_k[i] < mini[i]:
                     qtilde_k[i] = mini[i]
 
-        result = core.qtilde_to_primitive(qtilde_i, configData)
+        result = misc.qtilde_to_primitive(qtilde_i, configData)
         G_i = quadrant_fluxes.flux_quad_GxIV(nx, ny, result[0], result[1], result[2], result[3])
         
-        result = core.qtilde_to_primitive(qtilde_k, configData)
+        result = misc.qtilde_to_primitive(qtilde_k, configData)
         G_k = quadrant_fluxes.flux_quad_GxIV(nx, ny, result[0], result[1], result[2], result[3])
 
         sum_delx_delf = sum_delx_delf + (np.array(G_k) - np.array(G_i)) * dels_weights
@@ -175,28 +197,37 @@ def outer_dGx_neg(globaldata, idx, configData):
 
     G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
 
-    return G.tolist()
+    return G
 
-def outer_dGy_pos(globaldata, idx, configData):
+cdef np.ndarray outer_dGy_pos(list globaldata, int idx, dict configData):
 
-    power = configData["core"]["power"]
-    limiter_flag = configData["core"]["limiter_flag"]
+    cdef int power = configData["core"]["power"]
+    cdef int limiter_flag = configData["core"]["limiter_flag"]
 
-    sum_delx_sqr = 0
-    sum_dely_sqr = 0
-    sum_delx_dely = 0
+    cdef double sum_delx_sqr = 0
+    cdef double sum_dely_sqr = 0
+    cdef double sum_delx_dely = 0
 
-    sum_delx_delf = np.array([0,0,0,0])
-    sum_dely_delf = np.array([0,0,0,0])
+    cdef np.ndarray sum_delx_delf = np.array([0,0,0,0])
+    cdef np.ndarray sum_dely_delf = np.array([0,0,0,0])
 
-    x_i = globaldata[idx].getx()
-    y_i = globaldata[idx].gety()
+    cdef double x_i = globaldata[idx].getx()
+    cdef double y_i = globaldata[idx].gety()
 
-    nx = globaldata[idx].getnx()
-    ny = globaldata[idx].getny()
+    cdef double nx = globaldata[idx].getnx()
+    cdef double ny = globaldata[idx].getny()
 
-    tx = ny
-    ty = -nx
+    cdef double tx = ny
+    cdef double ty = -nx
+
+    cdef long itm
+
+    cdef double delx, dely
+    cdef double x_k, y_k, det, one_by_det
+    cdef double dels, deln, dist, weights
+
+    cdef np.ndarray qtilde_i, qtilde_k
+    cdef np.ndarray phi_i, phi_k, maxi, mini, result, G_i, G_k
 
     for itm in globaldata[idx].get_xpos_conn():
 
@@ -220,13 +251,13 @@ def outer_dGy_pos(globaldata, idx, configData):
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = np.array(globaldata[idx].getq()) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+        qtilde_i = np.array(globaldata[idx].getq()) - 0.5*(delx*np.array(globaldata[idx].getdq()[0]) + dely*np.array(globaldata[idx].getdq()[1]))
         qtilde_k = np.array(globaldata[itm].getq()) - 0.5*(delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
         
         if limiter_flag == 1:
             phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData))
             phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData))
-            qtilde_i = np.array(globaldata[idx].getq()) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
+            qtilde_i = np.array(globaldata[idx].getq()) - 0.5 * phi_i * (delx*np.array(globaldata[idx].getdq()[0]) + dely*np.array(globaldata[idx].getdq()[1]))
             qtilde_k = np.array(globaldata[itm].getq()) - 0.5 * phi_k * (delx*np.array(globaldata[itm].getdq()[0]) + dely*np.array(globaldata[itm].getdq()[1]))
     
         if limiter_flag == 2:
@@ -246,10 +277,10 @@ def outer_dGy_pos(globaldata, idx, configData):
                 if qtilde_k[i] < mini[i]:
                     qtilde_k[i] = mini[i]
 
-        result = core.qtilde_to_primitive(qtilde_i, configData)
+        result = misc.qtilde_to_primitive(qtilde_i, configData)
         G_i = split_fluxes.flux_Gyp(nx, ny, result[0], result[1], result[2], result[3])
         
-        result = core.qtilde_to_primitive(qtilde_k, configData)
+        result = misc.qtilde_to_primitive(qtilde_k, configData)
         G_k = split_fluxes.flux_Gyp(nx, ny, result[0], result[1], result[2], result[3])
 
         sum_delx_delf = sum_delx_delf + (np.array(G_k) - np.array(G_i)) * dels_weights
@@ -261,4 +292,4 @@ def outer_dGy_pos(globaldata, idx, configData):
 
     G = (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
 
-    return G.tolist()
+    return G

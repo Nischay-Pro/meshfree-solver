@@ -1,7 +1,7 @@
 {
     "core":{
         "cfl": 0.4,
-        "max_iters": 10,
+        "max_iters": 1,
         "mach": 1.2,
         "aoa": 0,
         "power": 0,

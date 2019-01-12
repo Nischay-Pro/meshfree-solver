@@ -8,17 +8,17 @@ def func_delta(globaldata, configData):
     for idx, _ in enumerate(globaldata):
         if idx > 0:
             min_delt = 1
-            for itm in globaldata[idx].conn:
-                rho = globaldata[itm].prim[0]
-                u1 = globaldata[itm].prim[1]
-                u2 = globaldata[itm].prim[2]
-                pr = globaldata[itm].prim[3]
+            for itm in globaldata[idx].get_conn():
+                rho = globaldata[itm].getprim()[0]
+                u1 = globaldata[itm].getprim()[1]
+                u2 = globaldata[itm].getprim()[2]
+                pr = globaldata[itm].getprim()[3]
                 
-                x_i = globaldata[idx].x
-                y_i = globaldata[idx].y
+                x_i = globaldata[idx].getx()
+                y_i = globaldata[idx].gety()
 
-                x_k = globaldata[itm].x
-                y_k = globaldata[itm].y
+                x_k = globaldata[itm].getx()
+                y_k = globaldata[itm].gety()
 
                 dist = (x_k - x_i)*(x_k - x_i) + (y_k - y_i)*(y_k - y_i)
                 dist = math.sqrt(dist)
@@ -32,7 +32,7 @@ def func_delta(globaldata, configData):
                 if min_delt > delta_t:
                     min_delt = delta_t
 
-            globaldata[idx].delta = min_delt
+            globaldata[idx].setDelta(min_delt)
 
     return globaldata
 
@@ -40,11 +40,11 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
     max_res = 0	
     sum_res_sqr = 0
     for itm in wallindices:
-        nx = globaldata[itm].nx
-        ny = globaldata[itm].ny
+        nx = globaldata[itm].getnx()
+        ny = globaldata[itm].getny()
         U = primitive_to_conserved(globaldata, itm, nx, ny)
         temp = U[0]
-        U = np.array(U) - (globaldata[itm].delta * np.array(globaldata[itm].flux_res))
+        U = np.array(U) - (globaldata[itm].getDelta() * np.array(globaldata[itm].get_flux_res()))
         U[2] = 0
         U2_rot = U[1]
         U3_rot = U[2]
@@ -69,17 +69,17 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         tempU.append(U[2]*temp)
         tempU.append(0.4*U[3] - (0.2*temp)*(U[1]*U[1] + U[2]*U[2]))
 
-        globaldata[itm].prim = tempU
+        globaldata[itm].setprim(np.array(tempU))
 
     for itm in outerindices:
-        nx = globaldata[itm].nx
-        ny = globaldata[itm].ny
+        nx = globaldata[itm].getnx()
+        ny = globaldata[itm].getny()
 
         U = conserved_vector_Ubar(globaldata, itm, nx, ny, configData)
 
         temp = U[0]
 
-        U = np.array(U) - globaldata[itm].delta * np.array(globaldata[itm].flux_res)
+        U = np.array(U) - globaldata[itm].getDelta() * np.array(globaldata[itm].get_flux_res())
 
         U2_rot = U[1]
         U3_rot = U[2]
@@ -97,15 +97,15 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         tempU.append(0.4*U[3] - (0.2*temp)*(U[1]*U[1] + U[2]*U[2]))
         
 
-        globaldata[itm].prim = tempU
+        globaldata[itm].setprim(np.array(tempU))
 
     for itm in interiorindices:
-        nx = globaldata[itm].nx
-        ny = globaldata[itm].ny
+        nx = globaldata[itm].getnx()
+        ny = globaldata[itm].getny()
         U = primitive_to_conserved(globaldata, itm, nx, ny)
         temp = U[0]
 
-        U = np.array(U) - globaldata[itm].delta * np.array(globaldata[itm].flux_res)
+        U = np.array(U) - globaldata[itm].getDelta() * np.array(globaldata[itm].get_flux_res())
         U2_rot = U[1]
         U3_rot = U[2]
         U[1] = U2_rot*ny + U3_rot*nx
@@ -127,7 +127,7 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         tempU.append(U[1]*temp)
         tempU.append(U[2]*temp)
         tempU.append(0.4*U[3] - (0.2*temp)*(U[1]*U[1] + U[2]*U[2]))
-        globaldata[itm].prim = tempU
+        globaldata[itm].setprim(np.array(tempU))
 
     res_new = math.sqrt(sum_res_sqr)/ len(globaldata)
 
@@ -149,14 +149,14 @@ def primitive_to_conserved(globaldata, itm, nx, ny):
 
     U = []
 
-    rho = globaldata[itm].prim[0]
+    rho = globaldata[itm].getprim()[0]
     U.append(rho) 
-    temp1 = rho*globaldata[itm].prim[1]
-    temp2 = rho*globaldata[itm].prim[2]
+    temp1 = rho*globaldata[itm].getprim()[1]
+    temp2 = rho*globaldata[itm].getprim()[2]
 
     U.append(temp1*ny - temp2*nx)
     U.append(temp1*nx + temp2*ny)
-    U.append(2.5*globaldata[itm].prim[3] + 0.5*(temp1*temp1 + temp2*temp2)/rho)
+    U.append(2.5*globaldata[itm].getprim()[3] + 0.5*(temp1*temp1 + temp2*temp2)/rho)
 
     return U
 
@@ -187,10 +187,10 @@ def conserved_vector_Ubar(globaldata, itm, nx, ny, configData):
     B2_inf = math.exp(-S2*S2)/(2*math.sqrt(math.pi*beta))
     A2n_inf = 0.5*(1-math.erf(S2))
 
-    rho = globaldata[itm].prim[0]
-    u1 = globaldata[itm].prim[1]
-    u2 = globaldata[itm].prim[2]
-    pr = globaldata[itm].prim[3]
+    rho = globaldata[itm].getprim()[0]
+    u1 = globaldata[itm].getprim()[1]
+    u2 = globaldata[itm].getprim()[2]
+    pr = globaldata[itm].getprim()[3]
 
     u1_rot = u1*tx + u2*ty
     u2_rot = u1*nx + u2*ny
