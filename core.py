@@ -175,7 +175,6 @@ def q_var_derivatives(globaldata, configData):
 
             sum_delx_delq1 = sum_delx_delq * sum_dely_sqr
             sum_dely_delq1 = sum_dely_delq * sum_delx_dely
-<<<<<<< HEAD
 
             tempsumx = one_by_det * (sum_delx_delq1 - sum_dely_delq1)
 
@@ -186,18 +185,6 @@ def q_var_derivatives(globaldata, configData):
 
             tempsumy = one_by_det * (sum_dely_delq2 - sum_delx_delq2)
 
-=======
-
-            tempsumx = one_by_det * (sum_delx_delq1 - sum_dely_delq1)
-
-
-            sum_dely_delq2 = sum_dely_delq * sum_delx_sqr
-
-            sum_delx_delq2 = sum_delx_delq * sum_delx_dely
-
-            tempsumy = one_by_det * (sum_dely_delq2 - sum_delx_delq2)
-
->>>>>>> 5d6fff18521a234554cdd8f4d3ef16e0c202b852
             tempdq = np.array([tempsumx, tempsumy], dtype=np.float64)
 
             globaldata[idx].dq = tempdq
