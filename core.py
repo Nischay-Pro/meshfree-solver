@@ -5,15 +5,7 @@ import flux_residual
 import state_update
 import objective_function
 import numpy as np
-import torch
-from gpustruct import GPUStruct
-from jinja2 import Template
-
-import pycuda.autoinit
-import pycuda.driver as drv
-from pycuda import driver, compiler, gpuarray, tools
-from pycuda.compiler import SourceModule
-
+from timeit import default_timer as timer
 
 def getInitialPrimitive(configData):
     rho_inf = float(configData["core"]["rho_inf"])
@@ -113,20 +105,12 @@ def calculateConnectivity(globaldata, idx):
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 
 def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
-    if torch.cuda.is_available():
-        globaldata = q_var_derivatives(globaldata, configData)
-        globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
-        globaldata = state_update.func_delta(globaldata, configData)
-        globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
-        objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
-        return res_old, globaldata
-    else:
-        globaldata = q_var_derivatives(globaldata, configData)
-        globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
-        globaldata = state_update.func_delta(globaldata, configData)
-        globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
-        objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
-        return res_old, globaldata
+    globaldata = q_var_derivatives(globaldata, configData)
+    globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+    globaldata = state_update.func_delta(globaldata, configData)
+    globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
+    objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
+    return res_old, globaldata
 
 def q_var_derivatives(globaldata, configData):
     power = int(configData["core"]["power"])
@@ -149,7 +133,6 @@ def q_var_derivatives(globaldata, configData):
             tempq[3] = -two_times_beta
 
             globaldata[idx].q = tempq
-
     for idx,itm in enumerate(globaldata):
         if idx > 0:
             
@@ -208,68 +191,6 @@ def q_var_derivatives(globaldata, configData):
 
 
     return globaldata
-
-def q_var_derivatives_cuda(globaldata, config):
-    tpl = Template("""
-            struct Point{
-                int localID;
-                double x;
-                double y;
-                int left;
-                int right;
-                int flag_1;
-                int flag_2;
-                int* nbhs;
-                int* conn;
-                float nx;
-                float ny;
-                float* prim;
-                float* flux_res;
-                float* q;
-                float* dq;
-                float* entropy;
-                int xpos_nbhs;
-                int xneg_nbhs;
-                int ypos_nbhs;
-                int yneg_nbhs;
-                int* xpos_conn;
-                int* xneg_conn;
-                int* ypos_conn;
-                int* yneg_conn;
-                float delta;
-            };
-
-            __global__ void q_var_derivatives()
-            {
-        
-                int i = (blockIdx.x)* blockDim.x + threadIdx.x;
-                int j = (blockIdx.y)* blockDim.y + threadIdx.y;
-
-                int width = {{ POINT_WIDTH }};
-
-                double r = {{ DELTA }};
-
-                double u1 = u_old[i + (width * j)];
-                double ul = u_old[(i-1) + (width * j)];
-                double ur = u_old[(i+1) + (width * j)];
-                double utop = u_old[i + (width * (j+1))];
-                double ubottom = u_old[i + (width * (j-1))];
-                double test = 0;
-
-                if (i > 0 && i < {{ POINT_SIZE_X }} - 1 && j > 0 && j < {{ POINT_SIZE_Y }} - 1){
-                    test = u1 + (r * (ul + ur + utop + ubottom - (4 * u1)));
-                    u_new[i + width * j] = test;
-                }
-            
-
-            }""")
-
-    rendered_tpl = tpl.render(POINT_SIZE_X=1, POINT_SIZE_Y=2, POINT_WIDTH=3, DELTA=4)
-    mod = SourceModule(rendered_tpl)
-
-
-
-    heatCalculate = mod.get_function("heatCalculate")
 
 def qtilde_to_primitive(qtilde, configData):
     
