@@ -126,10 +126,11 @@ def flux_Gyn(nx, ny, u1, u2, rho, pr):
     
     temp1 = pr_by_rho + un*un
     temp2 = temp1*A2neg - un*B2
-    Gyn.append(rho*temp2)
 
     temp1 = ut*un*A2neg - ut*B2
     Gyn.append(rho*temp1)
+
+    Gyn.append(rho*temp2)
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*un*temp1*A2neg 

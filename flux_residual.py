@@ -14,8 +14,6 @@ def cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, co
 		GTemp = np.array(Gxp) + np.array(Gxn) + np.array(Gyn)
 		GTemp = GTemp * 2
 
-		GTemp = GTemp.tolist()
-
 		globaldata[itm].flux_res = GTemp
 		
 	for itm in outerindices:
@@ -25,8 +23,6 @@ def cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, co
 
 		GTemp = np.array(Gxp) + np.array(Gxn) + np.array(Gyp)
 		GTemp = GTemp * 2
-
-		GTemp = GTemp.tolist()
 
 		globaldata[itm].flux_res = GTemp
 
@@ -38,8 +34,6 @@ def cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, co
 
 		GTemp = np.array(Gxp) + np.array(Gxn) + np.array(Gyp) + np.array(Gyn)
 		GTemp = GTemp * 2
-
-		GTemp = GTemp.tolist()
 
 		globaldata[itm].flux_res = GTemp
 

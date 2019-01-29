@@ -45,11 +45,14 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         U = primitive_to_conserved(globaldata, itm, nx, ny)
         temp = U[0]
         U = np.array(U) - (globaldata[itm].delta * np.array(globaldata[itm].flux_res))
+
         U[2] = 0
+
         U2_rot = U[1]
         U3_rot = U[2]
         U[1] = U2_rot*ny + U3_rot*nx
         U[2] = U3_rot*ny - U2_rot*nx
+
 
         res_sqr = (U[0] - temp)*(U[0] - temp)
 
@@ -60,16 +63,22 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
 
         sum_res_sqr = sum_res_sqr + res_sqr
 
-        U = U.tolist()
-
-        tempU = []
-        tempU.append(U[0])
+        tempU = np.zeros(4, dtype=np.float64)
+        tempU[0] = U[0]
         temp = 1 / U[0]
-        tempU.append(U[1]*temp)
-        tempU.append(U[2]*temp)
-        tempU.append(0.4*U[3] - (0.2*temp)*(U[1]*U[1] + U[2]*U[2]))
+        tempU[1] = U[1]*temp
+        tempU[2] = U[2]*temp
+
+        tempU[3] = (0.4*U[3]) - ((0.2*temp)*(U[1]*U[1] + U[2]*U[2]))
 
         globaldata[itm].prim = tempU
+
+        if itm == 100:
+            print(tempU[0])
+            print(tempU[1])
+            print(tempU[2])
+            print(tempU[3])
+
 
     for itm in outerindices:
         nx = globaldata[itm].nx
@@ -87,14 +96,12 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         U[1] = U2_rot*ny + U3_rot*nx
         U[2] = U3_rot*ny - U2_rot*nx
 
-        U = U.tolist()
-
-        tempU = []
-        tempU.append(U[0])
+        tempU = np.zeros(4, dtype=np.float64)
+        tempU[0] = U[0]
         temp = 1 / U[0]
-        tempU.append(U[1]*temp)
-        tempU.append(U[2]*temp)
-        tempU.append(0.4*U[3] - (0.2*temp)*(U[1]*U[1] + U[2]*U[2]))
+        tempU[1] = U[1]*temp
+        tempU[2] = U[2]*temp
+        tempU[3] = (0.4*U[3]) - (0.2*temp)*(U[1]*U[1] + U[2]*U[2])
         
 
         globaldata[itm].prim = tempU
@@ -111,37 +118,37 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         U[1] = U2_rot*ny + U3_rot*nx
         U[2] = U3_rot*ny - U2_rot*nx
 
-        res_sqr = (U[0] - temp)*(U[0] - temp)
+        # res_sqr = (U[0] - temp)*(U[0] - temp)
 
-        if res_sqr > max_res:
-            max_res = res_sqr
-            max_res_point = itm
+        # if res_sqr > max_res:
+        #     max_res = res_sqr
+        #     max_res_point = itm
 
-        sum_res_sqr = sum_res_sqr + res_sqr
+        # sum_res_sqr = sum_res_sqr + res_sqr
 
-        U = U.tolist()
-
-        tempU = []
-        tempU.append(U[0])
+        tempU = np.zeros(4, dtype=np.float64)
+        tempU[0] = U[0]
         temp = 1 / U[0]
-        tempU.append(U[1]*temp)
-        tempU.append(U[2]*temp)
-        tempU.append(0.4*U[3] - (0.2*temp)*(U[1]*U[1] + U[2]*U[2]))
+        tempU[1] = U[1]*temp
+        tempU[2] = U[2]*temp
+        tempU[3] = (0.4*U[3]) - (0.2*temp)*(U[1]*U[1] + U[2]*U[2])
         globaldata[itm].prim = tempU
 
-    res_new = math.sqrt(sum_res_sqr)/ len(globaldata)
+    res_old = 0
+    
+    # res_new = math.sqrt(sum_res_sqr)/ len(globaldata)
 
-    if iter <= 2:
-        res_old = res_new
-        residue = 0
-    else:
-        residue = math.log10(res_new/res_old)
+    # if iter <= 2:
+    #     res_old = res_new
+    #     residue = 0
+    # else:
+    #     residue = math.log10(res_new/res_old)
 
-    with open('residue', 'a') as the_file:
-        the_file.write("%i %f" % (iter, residue))
+    # with open('residue', 'a') as the_file:
+    #     the_file.write("%i %f" % (iter, residue))
     
     print("Iteration Number: ", iter)
-    print("Residue: ", residue)
+    # print("Residue: ", residue)
 
     return globaldata, res_old
 
