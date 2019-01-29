@@ -1,9 +1,9 @@
 {
     "core":{
-        "cfl": 0.4,
+        "cfl": 0.8,
         "max_iters": 10,
-        "mach": 1.2,
-        "aoa": 0,
+        "mach": 0.63,
+        "aoa": 2,
         "power": 0,
         "limiter_flag": 1,
         "vl_const": 150,

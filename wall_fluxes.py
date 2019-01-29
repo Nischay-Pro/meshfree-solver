@@ -50,9 +50,10 @@ def wall_dGx_pos(globaldata, idx, configData):
 
         qtilde_i = np.array(globaldata[idx].q) - 0.5*(delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
         qtilde_k = np.array(globaldata[itm].q) - 0.5*(delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
+        
         if limiter_flag == 1:
-            phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData))
-            phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData))
+            phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData), dtype=np.float64)
+            phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData), dtype=np.float64)
             qtilde_i = np.array(globaldata[idx].q) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
             qtilde_k = np.array(globaldata[itm].q) - 0.5 * phi_k * (delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
 
@@ -73,22 +74,21 @@ def wall_dGx_pos(globaldata, idx, configData):
                 if qtilde_k[i] < mini[i]:
                     qtilde_k[i] = mini[i]
 
-
         result = core.qtilde_to_primitive(qtilde_i, configData)
         G_i = quadrant_fluxes.flux_quad_GxII(nx, ny, result[0], result[1], result[2], result[3])
 
         result = core.qtilde_to_primitive(qtilde_k, configData)
         G_k = quadrant_fluxes.flux_quad_GxII(nx, ny, result[0], result[1], result[2], result[3])
 
-        sum_delx_delf = sum_delx_delf + (np.array(G_k) - np.array(G_i)) * dels_weights
-        sum_dely_delf = sum_dely_delf + (np.array(G_k) - np.array(G_i)) * deln_weights
+        sum_delx_delf = sum_delx_delf + (np.array(G_k, dtype=np.float64) - np.array(G_i, dtype=np.float64)) * dels_weights
+        sum_dely_delf = sum_dely_delf + (np.array(G_k, dtype=np.float64) - np.array(G_i, dtype=np.float64)) * deln_weights
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
 
     G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
 
-    return G.tolist()
+    return G
 
 def wall_dGx_neg(globaldata, idx, configData):
 
@@ -111,7 +111,7 @@ def wall_dGx_neg(globaldata, idx, configData):
     tx = ny
     ty = -nx
 
-    for itm in globaldata[idx].xpos_conn:
+    for itm in globaldata[idx].xneg_conn:
 
         x_k = globaldata[itm].x
         y_k = globaldata[itm].y
@@ -137,8 +137,8 @@ def wall_dGx_neg(globaldata, idx, configData):
         qtilde_k = np.array(globaldata[itm].q) - 0.5*(delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
         
         if limiter_flag == 1:
-            phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData))
-            phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData))
+            phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData), dtype=np.float64)
+            phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData), dtype=np.float64)
             qtilde_i = np.array(globaldata[idx].q) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
             qtilde_k = np.array(globaldata[itm].q) - 0.5 * phi_k * (delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
             
@@ -165,8 +165,8 @@ def wall_dGx_neg(globaldata, idx, configData):
         result = core.qtilde_to_primitive(qtilde_k, configData)
         G_k = quadrant_fluxes.flux_quad_GxI(nx, ny, result[0], result[1], result[2], result[3])
 
-        sum_delx_delf = sum_delx_delf + (np.array(G_k) - np.array(G_i)) * dels_weights
-        sum_dely_delf = sum_dely_delf + (np.array(G_k) - np.array(G_i)) * deln_weights
+        sum_delx_delf = sum_delx_delf + (np.array(G_k, dtype=np.float64) - np.array(G_i, dtype=np.float64)) * dels_weights
+        sum_dely_delf = sum_dely_delf + (np.array(G_k, dtype=np.float64) - np.array(G_i, dtype=np.float64)) * deln_weights
 
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
@@ -174,7 +174,7 @@ def wall_dGx_neg(globaldata, idx, configData):
 
     G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
 
-    return G.tolist()
+    return G
 
 def wall_dGy_neg(globaldata, idx, configData):
 
@@ -197,7 +197,7 @@ def wall_dGy_neg(globaldata, idx, configData):
     tx = ny
     ty = -nx
 
-    for itm in globaldata[idx].xpos_conn:
+    for itm in globaldata[idx].yneg_conn:
 
         x_k = globaldata[itm].x
         y_k = globaldata[itm].y
@@ -223,8 +223,8 @@ def wall_dGy_neg(globaldata, idx, configData):
         qtilde_k = np.array(globaldata[itm].q) - 0.5*(delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
         
         if limiter_flag == 1:
-            phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData))
-            phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData))
+            phi_i = np.array(limiters.venkat_limiter(qtilde_i, globaldata, idx, configData), dtype=np.float64)
+            phi_k = np.array(limiters.venkat_limiter(qtilde_k, globaldata, itm, configData), dtype=np.float64)
             qtilde_i = np.array(globaldata[idx].q) - 0.5 * phi_i * (delx*np.array(globaldata[idx].dq[0]) + dely*np.array(globaldata[idx].dq[1]))
             qtilde_k = np.array(globaldata[itm].q) - 0.5 * phi_k * (delx*np.array(globaldata[itm].dq[0]) + dely*np.array(globaldata[itm].dq[1]))
             
@@ -251,13 +251,12 @@ def wall_dGy_neg(globaldata, idx, configData):
         result = core.qtilde_to_primitive(qtilde_k, configData)
         G_k = split_fluxes.flux_Gyn(nx, ny, result[0], result[1], result[2], result[3])
 
-        sum_delx_delf = sum_delx_delf + (np.array(G_k) - np.array(G_i)) * dels_weights
-        sum_dely_delf = sum_dely_delf + (np.array(G_k) - np.array(G_i)) * deln_weights
-
+        sum_delx_delf = sum_delx_delf + (np.array(G_k, dtype=np.float64) - np.array(G_i, dtype=np.float64)) * dels_weights
+        sum_dely_delf = sum_dely_delf + (np.array(G_k, dtype=np.float64) - np.array(G_i, dtype=np.float64)) * deln_weights
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
 
     G = (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
 
-    return G.tolist()
+    return G
