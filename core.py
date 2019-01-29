@@ -105,29 +105,12 @@ def calculateConnectivity(globaldata, idx):
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 
 def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
-<<<<<<< HEAD
     globaldata = q_var_derivatives(globaldata, configData)
     globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
     globaldata = state_update.func_delta(globaldata, configData)
     globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     return res_old, globaldata
-=======
-    if torch.cuda.is_available():
-        globaldata = q_var_derivatives(globaldata, configData)
-        globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
-        globaldata = state_update.func_delta(globaldata, configData)
-        globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
-        objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
-        return res_old, globaldata
-    else:
-        globaldata = q_var_derivatives(globaldata, configData)
-        globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
-        globaldata = state_update.func_delta(globaldata, configData)
-        globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
-        objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
-        return res_old, globaldata
->>>>>>> 5d6fff18521a234554cdd8f4d3ef16e0c202b852
 
 def q_var_derivatives(globaldata, configData):
     power = int(configData["core"]["power"])
