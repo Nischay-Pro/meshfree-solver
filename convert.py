@@ -1,4 +1,5 @@
 import numpy as np
+import point
 
 def convert_globaldata_to_gpu_globaldata(globaldata):
     point_dtype = np.dtype([('localID', np.int32),
@@ -21,10 +22,10 @@ def convert_globaldata_to_gpu_globaldata(globaldata):
                             ('xneg_nbhs', np.int32),
                             ('ypos_nbhs', np.int32),
                             ('yneg_nbhs', np.int32),
-                            ('xpos_conn', np.float64, (20,)),
-                            ('xneg_conn', np.float64, (20,)),
-                            ('ypos_conn', np.float64, (20,)),
-                            ('yneg_conn', np.float64, (20,)),
+                            ('xpos_conn', np.int32, (20,)),
+                            ('xneg_conn', np.int32, (20,)),
+                            ('ypos_conn', np.int32, (20,)),
+                            ('yneg_conn', np.int32, (20,)),
                             ('delta', np.float64)], align=True)
     temp = np.zeros(len(globaldata), dtype=point_dtype)
     for idx in range(len(globaldata)):
@@ -71,3 +72,16 @@ def convert_globaldata_to_gpu_globaldata(globaldata):
             temp[idx]['delta'] = globaldata[idx].delta
     
     return temp    
+
+def convert_gpu_globaldata_to_globaldata(globaldata):
+    globaldata_cpu = np.zeros(len(globaldata), dtype=object)
+    for idx in range(len(globaldata)):
+        itm = globaldata[idx]
+        conn = itm['conn'][:itm['nbhs']]
+        xpos_conn = itm['xpos_conn'][:itm['xpos_nbhs']]
+        xneg_conn = itm['xneg_conn'][:itm['xneg_nbhs']]
+        ypos_conn = itm['ypos_conn'][:itm['ypos_nbhs']]
+        yneg_conn = itm['yneg_conn'][:itm['yneg_nbhs']]
+        temp = point.Point(itm['localID'], itm['x'], itm['y'], itm['left'], itm['right'], itm['flag_1'], itm['flag_2'], itm['nbhs'], conn, itm['nx'], itm['ny'], itm['prim'], itm['flux_res'], itm['q'], itm['dq'], itm['entropy'], itm['xpos_nbhs'], itm['xneg_nbhs'], itm['ypos_nbhs'], itm['yneg_nbhs'], xpos_conn, xneg_conn, ypos_conn, yneg_conn, itm['delta'])
+        globaldata_cpu[idx] = temp
+    return globaldata_cpu

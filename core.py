@@ -111,6 +111,11 @@ def calculateConnectivity(globaldata, idx):
 def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
     if not cuda.is_available():
         globaldata = q_var_derivatives(globaldata, configData)
+        with open('test_cpu', 'w+') as the_file:
+            for idx in range(len(globaldata)):
+                if idx > 0:
+                    itm = globaldata[idx]
+                    the_file.write(str(itm.q) + "\n")
         globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
         globaldata = state_update.func_delta(globaldata, configData)
         globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
@@ -134,6 +139,19 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         cuda.synchronize()
         q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData['core']['power'])
         cuda.synchronize()
+        temp = globaldata_gpu.copy_to_host()
+    globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
+    with open('test_gpu', 'w+') as the_file:
+        for idx in range(len(globaldata)):
+            if idx > 0:
+                itm = globaldata[idx]
+                the_file.write(str(itm.q) + "\n")
+    globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+    globaldata = state_update.func_delta(globaldata, configData)
+    globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
+    objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
+    return res_old, globaldata
+        
     
 
 def q_var_derivatives(globaldata, configData):
@@ -203,7 +221,6 @@ def q_var_derivatives(globaldata, configData):
 
             tempsumx = one_by_det * (sum_delx_delq1 - sum_dely_delq1)
 
-
             sum_dely_delq2 = sum_dely_delq * sum_delx_sqr
 
             sum_delx_delq2 = sum_delx_delq * sum_delx_dely
@@ -265,6 +282,7 @@ def q_var_derivatives_cuda_kernel(globaldata, power):
 
         sum_delx_delq = cuda.local.array((4), dtype=numba.float64)
         sum_dely_delq = cuda.local.array((4), dtype=numba.float64)
+
         sum_delx_delq[0] = 0
         sum_delx_delq[1] = 0
         sum_delx_delq[2] = 0
@@ -295,35 +313,77 @@ def q_var_derivatives_cuda_kernel(globaldata, power):
 
             temp = cuda.local.array((4), dtype=numba.float64)
 
+            temp[0] = 0
+            temp[1] = 0
+            temp[2] = 0
+            temp[3] = 0
+
             subtract(globaldata[conn]['q'], globaldata[idx]['q'], temp)
             multiply((weights * delx), temp, temp)
             add(sum_delx_delq, temp, sum_delx_delq)
+
+            temp[0] = 0
+            temp[1] = 0
+            temp[2] = 0
+            temp[3] = 0
 
             subtract(globaldata[conn]['q'], globaldata[idx]['q'], temp)
             multiply((weights * dely), temp, temp)
             add(sum_dely_delq, temp, sum_dely_delq)
 
         det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
+
         one_by_det = 1 / det
 
         sum_delx_delq1 = cuda.local.array((4), dtype=numba.float64)
         sum_dely_delq1 = cuda.local.array((4), dtype=numba.float64)
+
+        sum_delx_delq1[0] = 0
+        sum_delx_delq1[1] = 0
+        sum_delx_delq1[2] = 0
+        sum_delx_delq1[3] = 0
+
+        sum_dely_delq1[0] = 0
+        sum_dely_delq1[1] = 0
+        sum_dely_delq1[2] = 0
+        sum_dely_delq1[3] = 0
         
-        sum_delx_delq1 = multiply(sum_dely_sqr, sum_delx_delq, sum_delx_delq1)
-        sum_dely_delq1 = multiply(sum_delx_dely, sum_dely_delq, sum_dely_delq)
+        multiply(sum_dely_sqr, sum_delx_delq, sum_delx_delq1)
+        multiply(sum_delx_dely, sum_dely_delq, sum_dely_delq1)
 
         subtract(sum_delx_delq1, sum_dely_delq1, sum_delx_delq1)
         multiply(one_by_det, sum_delx_delq1, sum_delx_delq1)
 
-        tempsumx = sum_delx_delq1
+        tempsumx = cuda.local.array((4), dtype=numba.float64)
 
-        sum_delx_delq1 = multiply(sum_delx_sqr, sum_dely_delq, sum_delx_delq1)
-        sum_dely_delq1 = multiply(sum_delx_dely, sum_delx_delq, sum_dely_delq)
 
-        subtract(sum_dely_delq1, sum_delx_delq1, sum_dely_delq1)
+        tempsumx[0] = sum_delx_delq1[0]
+        tempsumx[1] = sum_delx_delq1[1]
+        tempsumx[2] = sum_delx_delq1[2]
+        tempsumx[3] = sum_delx_delq1[3]
+
+        sum_delx_delq1[0] = 0
+        sum_delx_delq1[1] = 0
+        sum_delx_delq1[2] = 0
+        sum_delx_delq1[3] = 0
+
+        sum_dely_delq1[0] = 0
+        sum_dely_delq1[1] = 0
+        sum_dely_delq1[2] = 0
+        sum_dely_delq1[3] = 0
+
+        multiply(sum_delx_sqr, sum_dely_delq, sum_delx_delq1)
+        multiply(sum_delx_dely, sum_delx_delq, sum_dely_delq1)
+
+        subtract(sum_delx_delq1, sum_dely_delq1, sum_dely_delq1)
         multiply(one_by_det, sum_dely_delq1, sum_dely_delq1)
 
-        tempsumy = sum_dely_delq1
+        tempsumy = cuda.local.array((4), dtype=numba.float64)
+
+        tempsumy[0] = sum_dely_delq1[0]
+        tempsumy[1] = sum_dely_delq1[1]
+        tempsumy[2] = sum_dely_delq1[2]
+        tempsumy[3] = sum_dely_delq1[3]
     
         globaldata[idx]['dq'][0][0] = tempsumx[0]
         globaldata[idx]['dq'][0][1] = tempsumx[1]
