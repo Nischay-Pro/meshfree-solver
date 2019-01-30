@@ -111,11 +111,11 @@ def calculateConnectivity(globaldata, idx):
 def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
     if not cuda.is_available():
         globaldata = q_var_derivatives(globaldata, configData)
-        with open('test_cpu', 'w+') as the_file:
-            for idx in range(len(globaldata)):
-                if idx > 0:
-                    itm = globaldata[idx]
-                    the_file.write(str(itm.q) + "\n")
+        # with open('test_cpu', 'w+') as the_file:
+        #     for idx in range(len(globaldata)):
+        #         if idx > 0:
+        #             itm = globaldata[idx]
+        #             the_file.write(str(itm.q) + "\n")
         globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
         globaldata = state_update.func_delta(globaldata, configData)
         globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
@@ -141,11 +141,11 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         cuda.synchronize()
         temp = globaldata_gpu.copy_to_host()
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
-    with open('test_gpu', 'w+') as the_file:
-        for idx in range(len(globaldata)):
-            if idx > 0:
-                itm = globaldata[idx]
-                the_file.write(str(itm.q) + "\n")
+    # with open('test_gpu', 'w+') as the_file:
+    #     for idx in range(len(globaldata)):
+    #         if idx > 0:
+    #             itm = globaldata[idx]
+    #             the_file.write(str(itm.q) + "\n")
     globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
     globaldata = state_update.func_delta(globaldata, configData)
     globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
