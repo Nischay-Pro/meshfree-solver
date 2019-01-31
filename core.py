@@ -10,6 +10,7 @@ import numba
 from numba import cuda
 import convert
 from numba import vectorize, float64
+from cuda_func import add, subtract, multiply
 
 def getInitialPrimitive(configData):
     rho_inf = float(configData["core"]["rho_inf"])
@@ -139,6 +140,8 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         cuda.synchronize()
         q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData['core']['power'])
         cuda.synchronize()
+        flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData['core']['power'], configData['core']['vl_const'], configData['core']['gamma'])
+        cuda.synchronize()
         temp = globaldata_gpu.copy_to_host()
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
     # with open('test_gpu', 'w+') as the_file:
@@ -146,7 +149,6 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
     #         if idx > 0:
     #             itm = globaldata[idx]
     #             the_file.write(str(itm.q) + "\n")
-    globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
     globaldata = state_update.func_delta(globaldata, configData)
     globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
@@ -395,27 +397,6 @@ def q_var_derivatives_cuda_kernel(globaldata, power):
         globaldata[idx]['dq'][1][2] = tempsumy[2]
         globaldata[idx]['dq'][1][3] = tempsumy[3]
 
-@cuda.jit('float64[:](float64[:], float64[:], float64[:])', device=True, inline=True)
-def subtract(x, y, store):
-    for i in range(len(x)):
-        store[i] = x[i] - y[i]
-    return store
-
-@cuda.jit('float64[:](float64, float64[:], float64[:])', device=True, inline=True)
-def multiply(x, y, store):
-    for i in range(len(y)):
-        store[i] = x * y[i]
-    return store
-
-@cuda.jit('float64[:](float64[:], float64[:], float64[:])', device=True, inline=True)
-def add(x, y, store):
-    for i in range(len(x)):
-        store[i] = x[i] + y[i]
-    return store
-
-# @vectorize(['float64(float64, float64)'], target='cuda')
-# def cu_usub(x, y):
-#     return subtract(x, y)
 
 def qtilde_to_primitive(qtilde, configData):
     
