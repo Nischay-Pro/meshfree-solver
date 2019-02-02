@@ -3,6 +3,7 @@ import math
 import operator
 import flux_residual
 import state_update
+import state_update_cuda
 import objective_function
 import numpy as np
 from timeit import default_timer as timer
@@ -40,6 +41,11 @@ def getInitialPrimitive2(configData):
 def calculateTheta(configData):
     theta = math.radians(float(configData["core"]["aoa"]))
     return theta
+
+@cuda.jit(device=True)
+def calculateThetaCuda(aoa, value):
+    pi = 3.14159265358979323846
+    value[0] = (pi/180) * aoa
 
 def calculateNormals(left, right, mx, my):
     lx = left[0]
@@ -114,12 +120,12 @@ def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interior
         globaldata = q_var_derivatives(globaldata, configData)
         globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
         globaldata = state_update.func_delta(globaldata, configData)
+        globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
         with open('test_cpu', 'w+') as the_file:
             for idx in range(len(globaldata)):
                 if idx > 0:
                     itm = globaldata[idx]
-                    the_file.write("%.13f \n" % (itm.delta))
-        globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
+                    the_file.write("%.13f \n" % (itm.prim[0]))
         objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
         return res_old, globaldata
     else:
@@ -149,17 +155,20 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         cuda.synchronize()
         print("stop flux")
         print("start func delta")
-        state_update.func_delta_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData["core"]["cfl"])
+        state_update_cuda.func_delta_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData["core"]["cfl"])
         cuda.synchronize()
         print("stop func delta")
+        print("start state update")
+        state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](globaldata_gpu, configData["core"]["mach"], configData["core"]["gamma"], configData["core"]["pr_inf"], configData["core"]["rho_inf"], configData["core"]["aoa"])
+        cuda.synchronize()
+        print("stop state update")
         temp = globaldata_gpu.copy_to_host()
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
     with open('test_gpu', 'w+') as the_file:
         for idx in range(len(globaldata)):
             if idx > 0:
                 itm = globaldata[idx]
-                the_file.write("%.13f \n" % (itm.delta))
-    globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
+                the_file.write("%.13f \n" % (itm.prim[0]))
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     return res_old, globaldata
         
