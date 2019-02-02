@@ -117,16 +117,17 @@ def calculateConnectivity(globaldata, idx):
 
 def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
     if not cuda.is_available():
-        globaldata = q_var_derivatives(globaldata, configData)
-        globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
-        globaldata = state_update.func_delta(globaldata, configData)
-        globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
-        with open('test_cpu', 'w+') as the_file:
-            for idx in range(len(globaldata)):
-                if idx > 0:
-                    itm = globaldata[idx]
-                    the_file.write("%.13f \n" % (itm.prim[0]))
-        objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
+        for i in range(1, iter):
+            globaldata = q_var_derivatives(globaldata, configData)
+            globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+            globaldata = state_update.func_delta(globaldata, configData)
+            globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
+            with open('test_cpu', 'w+') as the_file:
+                for idx in range(len(globaldata)):
+                    if idx > 0:
+                        itm = globaldata[idx]
+                        the_file.write("%.13f \n" % (itm.prim[0]))
+            objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
         return res_old, globaldata
     else:
         return fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
@@ -142,26 +143,27 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         blockspergrid_x = math.ceil(len(globaldata) / threadsperblock[0])
         blockspergrid_y = math.ceil(1)
         blockspergrid = (blockspergrid_x, blockspergrid_y)
-        print("start q")
-        q_var_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu)
-        cuda.synchronize()
-        print("stop q")
-        print('start dq')
-        q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData['core']['power'])
-        cuda.synchronize()
-        print("stop dq")
-        print("start flux")
-        flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData['core']['power'], configData['core']['vl_const'], configData['core']['gamma'])
-        cuda.synchronize()
-        print("stop flux")
-        print("start func delta")
-        state_update_cuda.func_delta_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData["core"]["cfl"])
-        cuda.synchronize()
-        print("stop func delta")
-        print("start state update")
-        state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](globaldata_gpu, configData["core"]["mach"], configData["core"]["gamma"], configData["core"]["pr_inf"], configData["core"]["rho_inf"], configData["core"]["aoa"])
-        cuda.synchronize()
-        print("stop state update")
+        for i in range(1, iter):
+            print("start q")
+            q_var_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu)
+            cuda.synchronize()
+            print("stop q")
+            print('start dq')
+            q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData['core']['power'])
+            cuda.synchronize()
+            print("stop dq")
+            print("start flux")
+            flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData['core']['power'], configData['core']['vl_const'], configData['core']['gamma'])
+            cuda.synchronize()
+            print("stop flux")
+            print("start func delta")
+            state_update_cuda.func_delta_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData["core"]["cfl"])
+            cuda.synchronize()
+            print("stop func delta")
+            print("start state update")
+            state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](globaldata_gpu, configData["core"]["mach"], configData["core"]["gamma"], configData["core"]["pr_inf"], configData["core"]["rho_inf"], configData["core"]["aoa"])
+            cuda.synchronize()
+            print("stop state update")
         temp = globaldata_gpu.copy_to_host()
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
     with open('test_gpu', 'w+') as the_file:

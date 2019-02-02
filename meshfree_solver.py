@@ -58,8 +58,7 @@ def main():
 
     res_old = 0
 
-    for i in range(1, int(config.getConfig()["core"]["max_iters"]) + 1):
-        res_old, globaldata = core.fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx, res_old)
+    core.fpi_solver(config.getConfig()["core"]["max_iters"] + 1, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx, res_old)
 
     for idx, itm in enumerate(globaldata):
         if idx > 0:
