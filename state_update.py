@@ -73,13 +73,6 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
 
         globaldata[itm].prim = tempU
 
-        if itm == 100:
-            print(tempU[0])
-            print(tempU[1])
-            print(tempU[2])
-            print(tempU[3])
-
-
     for itm in outerindices:
         nx = globaldata[itm].nx
         ny = globaldata[itm].ny

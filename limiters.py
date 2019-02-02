@@ -19,7 +19,7 @@ def venkat_limiter(qtilde, globaldata, idx, configData):
 
             ds = smallest_dist(globaldata,idx)
             epsi = VL_CONST * ds
-            epsi = pow(epsi,3)
+            epsi = math.pow(epsi,3)
 
             num = (del_pos*del_pos) + (epsi*epsi)
             num = num*del_neg + 2.0*del_neg*del_neg*del_pos
@@ -34,7 +34,6 @@ def venkat_limiter(qtilde, globaldata, idx, configData):
                 phi.append(temp)
             else:
                 phi.append(1)
-    
     return phi
 
 

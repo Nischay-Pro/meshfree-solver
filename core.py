@@ -112,43 +112,51 @@ def calculateConnectivity(globaldata, idx):
 def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
     if not cuda.is_available():
         globaldata = q_var_derivatives(globaldata, configData)
-        # with open('test_cpu', 'w+') as the_file:
-        #     for idx in range(len(globaldata)):
-        #         if idx > 0:
-        #             itm = globaldata[idx]
-        #             the_file.write(str(itm.q) + "\n")
+        # print(globaldata[100].q[0])
+        # print(globaldata[100].dq[0][0])
         globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+        with open('test_cpu', 'w+') as the_file:
+            for idx in range(len(globaldata)):
+                if idx > 0:
+                    itm = globaldata[idx]
+                    the_file.write("%.13f \n" % (itm.flux_res[0]))
         globaldata = state_update.func_delta(globaldata, configData)
         globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
         objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
         return res_old, globaldata
     else:
-        fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
-        return res_old, globaldata
+        return fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
 
 
 def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
     stream = cuda.stream()
     globaldata_gpu = convert.convert_globaldata_to_gpu_globaldata(globaldata)
+    print("start")
     with stream.auto_synchronize():
         globaldata_gpu = cuda.to_device(globaldata_gpu, stream)
         threadsperblock = (128, 1)
         blockspergrid_x = math.ceil(len(globaldata) / threadsperblock[0])
         blockspergrid_y = math.ceil(1)
         blockspergrid = (blockspergrid_x, blockspergrid_y)
+        print("start q")
         q_var_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu)
         cuda.synchronize()
+        print("stop q")
+        print('start dq')
         q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData['core']['power'])
         cuda.synchronize()
+        print("stop dq")
+        print("start flux")
         flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData['core']['power'], configData['core']['vl_const'], configData['core']['gamma'])
         cuda.synchronize()
+        print("stop flux")
         temp = globaldata_gpu.copy_to_host()
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
-    # with open('test_gpu', 'w+') as the_file:
-    #     for idx in range(len(globaldata)):
-    #         if idx > 0:
-    #             itm = globaldata[idx]
-    #             the_file.write(str(itm.q) + "\n")
+    with open('test_gpu', 'w+') as the_file:
+        for idx in range(len(globaldata)):
+            if idx > 0:
+                itm = globaldata[idx]
+                the_file.write("%.13f \n" % (itm.flux_res[0]))
     globaldata = state_update.func_delta(globaldata, configData)
     globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)

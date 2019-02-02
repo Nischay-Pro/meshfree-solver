@@ -4,25 +4,35 @@ import split_fluxes_cuda
 import quadrant_fluxes_cuda
 import numba
 from numba import cuda
-from cuda_func import add, zeros, multiply, qtilde_to_primitive_cuda, subtract
+from cuda_func import add, zeros, multiply, qtilde_to_primitive_cuda, subtract, multiply_element_wise
 
 @cuda.jit(device=True)
 def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
+
     sum_delx_sqr = 0
     sum_dely_sqr = 0
     sum_delx_dely = 0
 
-    sum_delx_delf = numba.local.array((4), numba.float64)
-    sum_dely_delf = numba.local.array((4), numba.float64)
+    sum_delx_delf = cuda.local.array((4), numba.float64)
+    sum_dely_delf = cuda.local.array((4), numba.float64)
 
-    qtilde_i = numba.local.array((4), numba.float64)
-    qtilde_k = numba.local.array((4), numba.float64)
+    qtilde_i = cuda.local.array((4), numba.float64)
+    qtilde_k = cuda.local.array((4), numba.float64)
 
-    phi_i = numba.local.array((4), numba.float64)
-    phi_k = numba.local.array((4), numba.float64)
+    phi_i = cuda.local.array((4), numba.float64)
+    phi_k = cuda.local.array((4), numba.float64)
 
-    temp1 = numba.local.array((4), numba.float64)
-    temp2 = numba.local.array((4), numba.float64)
+    temp1 = cuda.local.array((4), numba.float64)
+    temp2 = cuda.local.array((4), numba.float64)
+
+    result = cuda.local.array((4), numba.float64)
+    G_i = cuda.local.array((4), numba.float64)
+    G_k = cuda.local.array((4), numba.float64)
+
+    ## Venkat
+    max_q = cuda.local.array((1), numba.float64)
+    min_q = cuda.local.array((1), numba.float64)
+    ds = cuda.local.array((1), numba.float64)
 
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
@@ -36,7 +46,7 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
     tx = ny
     ty = -nx
 
-    for itm in globaldata[idx]['xpos_conn']:
+    for itm in globaldata[idx]['xpos_conn'][:globaldata[idx]['xpos_nbhs']]:
 
         x_k = globaldata[itm]['x']
         y_k = globaldata[itm]['y']
@@ -47,7 +57,7 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = math.sqrt(dels*dels + deln*deln)
+        dist = (dels*dels + deln*deln) ** 0.5
         weights = dist**power
 
         dels_weights = dels*weights
@@ -84,8 +94,17 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
         zeros(phi_i, phi_i)
         zeros(phi_k, phi_k)
 
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i)
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, idx, vl_const, phi_k)
+        zeros(max_q, max_q)
+        zeros(min_q, min_q)
+        zeros(ds, ds)
+
+        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i, max_q, min_q, ds)
+
+        zeros(max_q, max_q)
+        zeros(min_q, min_q)
+        zeros(ds, ds)
+
+        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k, max_q, min_q, ds)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
@@ -96,7 +115,7 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
         multiply(0.5, phi_i, phi_i)
 
         add(temp1, temp2, temp1)
-        multiply(temp1, phi_i, temp1)
+        multiply_element_wise(temp1, phi_i, temp1)
 
         subtract(globaldata[idx]['q'], temp1, qtilde_i)
 
@@ -109,22 +128,17 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
         multiply(0.5, phi_k, phi_k)
 
         add(temp1, temp2, temp1)
-        multiply(temp1, phi_k, temp1)
+        multiply_element_wise(temp1, phi_k, temp1)
 
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
-        result = numba.local.array((4), dtype=numba.float64)
         zeros(result, result)
 
         qtilde_to_primitive_cuda(qtilde_i, gamma, result)
 
-        G_i = cuda.local.array((4), dtype=numba.float64)
-
         split_fluxes_cuda.flux_Gxp(nx, ny, result[0], result[1], result[2], result[3], G_i)
 
         qtilde_to_primitive_cuda(qtilde_k, gamma, result)
-
-        G_k = cuda.local.array((4), dtype=numba.float64)
 
         split_fluxes_cuda.flux_Gxp(nx, ny, result[0], result[1], result[2], result[3], G_k)
 
@@ -136,7 +150,7 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
         zeros(temp2, temp2)
         subtract(G_k, G_i, temp2)
         multiply(deln_weights, temp2, temp2)
-        add(sum_dely_delf, temp1, sum_dely_delf)
+        add(sum_dely_delf, temp2, sum_dely_delf)
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
@@ -153,21 +167,31 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
 
 @cuda.jit(device=True)
 def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
+
     sum_delx_sqr = 0
     sum_dely_sqr = 0
     sum_delx_dely = 0
 
-    sum_delx_delf = numba.local.array((4), numba.float64)
-    sum_dely_delf = numba.local.array((4), numba.float64)
+    sum_delx_delf = cuda.local.array((4), numba.float64)
+    sum_dely_delf = cuda.local.array((4), numba.float64)
 
-    qtilde_i = numba.local.array((4), numba.float64)
-    qtilde_k = numba.local.array((4), numba.float64)
+    qtilde_i = cuda.local.array((4), numba.float64)
+    qtilde_k = cuda.local.array((4), numba.float64)
 
-    phi_i = numba.local.array((4), numba.float64)
-    phi_k = numba.local.array((4), numba.float64)
+    phi_i = cuda.local.array((4), numba.float64)
+    phi_k = cuda.local.array((4), numba.float64)
 
-    temp1 = numba.local.array((4), numba.float64)
-    temp2 = numba.local.array((4), numba.float64)
+    temp1 = cuda.local.array((4), numba.float64)
+    temp2 = cuda.local.array((4), numba.float64)
+
+    result = cuda.local.array((4), numba.float64)
+    G_i = cuda.local.array((4), numba.float64)
+    G_k = cuda.local.array((4), numba.float64)
+
+    ## Venkat
+    max_q = cuda.local.array((1), numba.float64)
+    min_q = cuda.local.array((1), numba.float64)
+    ds = cuda.local.array((1), numba.float64)
 
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
@@ -181,7 +205,7 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
     tx = ny
     ty = -nx
 
-    for itm in globaldata[idx]['xneg_conn']:
+    for itm in globaldata[idx]['xneg_conn'][:globaldata[idx]['xneg_nbhs']]:
 
         x_k = globaldata[itm]['x']
         y_k = globaldata[itm]['y']
@@ -192,7 +216,7 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = math.sqrt(dels*dels + deln*deln)
+        dist = (dels*dels + deln*deln) ** 0.5
         weights = dist**power
 
         dels_weights = dels*weights
@@ -229,8 +253,17 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
         zeros(phi_i, phi_i)
         zeros(phi_k, phi_k)
 
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i)
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, idx, vl_const, phi_k)
+        zeros(max_q, max_q)
+        zeros(min_q, min_q)
+        zeros(ds, ds)
+
+        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i, max_q, min_q, ds)
+
+        zeros(max_q, max_q)
+        zeros(min_q, min_q)
+        zeros(ds, ds)
+
+        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k, max_q, min_q, ds)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
@@ -241,7 +274,7 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
         multiply(0.5, phi_i, phi_i)
 
         add(temp1, temp2, temp1)
-        multiply(temp1, phi_i, temp1)
+        multiply_element_wise(temp1, phi_i, temp1)
 
         subtract(globaldata[idx]['q'], temp1, qtilde_i)
 
@@ -254,22 +287,17 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
         multiply(0.5, phi_k, phi_k)
 
         add(temp1, temp2, temp1)
-        multiply(temp1, phi_k, temp1)
+        multiply_element_wise(temp1, phi_k, temp1)
 
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
-        result = numba.local.array((4), dtype=numba.float64)
         zeros(result, result)
 
         qtilde_to_primitive_cuda(qtilde_i, gamma, result)
 
-        G_i = cuda.local.array((4), dtype=numba.float64)
-
         split_fluxes_cuda.flux_Gxn(nx, ny, result[0], result[1], result[2], result[3], G_i)
 
         qtilde_to_primitive_cuda(qtilde_k, gamma, result)
-
-        G_k = cuda.local.array((4), dtype=numba.float64)
 
         split_fluxes_cuda.flux_Gxn(nx, ny, result[0], result[1], result[2], result[3], G_k)
 
@@ -281,7 +309,7 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
         zeros(temp2, temp2)
         subtract(G_k, G_i, temp2)
         multiply(deln_weights, temp2, temp2)
-        add(sum_dely_delf, temp1, sum_dely_delf)
+        add(sum_dely_delf, temp2, sum_dely_delf)
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
@@ -298,21 +326,31 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
 
 @cuda.jit(device=True)
 def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
+ 
     sum_delx_sqr = 0
     sum_dely_sqr = 0
     sum_delx_dely = 0
 
-    sum_delx_delf = numba.local.array((4), numba.float64)
-    sum_dely_delf = numba.local.array((4), numba.float64)
+    sum_delx_delf = cuda.local.array((4), numba.float64)
+    sum_dely_delf = cuda.local.array((4), numba.float64)
 
-    qtilde_i = numba.local.array((4), numba.float64)
-    qtilde_k = numba.local.array((4), numba.float64)
+    qtilde_i = cuda.local.array((4), numba.float64)
+    qtilde_k = cuda.local.array((4), numba.float64)
 
-    phi_i = numba.local.array((4), numba.float64)
-    phi_k = numba.local.array((4), numba.float64)
+    phi_i = cuda.local.array((4), numba.float64)
+    phi_k = cuda.local.array((4), numba.float64)
 
-    temp1 = numba.local.array((4), numba.float64)
-    temp2 = numba.local.array((4), numba.float64)
+    temp1 = cuda.local.array((4), numba.float64)
+    temp2 = cuda.local.array((4), numba.float64)
+
+    result = cuda.local.array((4), numba.float64)
+    G_i = cuda.local.array((4), numba.float64)
+    G_k = cuda.local.array((4), numba.float64)
+
+    ## Venkat
+    max_q = cuda.local.array((1), numba.float64)
+    min_q = cuda.local.array((1), numba.float64)
+    ds = cuda.local.array((1), numba.float64)
 
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
@@ -326,7 +364,7 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
     tx = ny
     ty = -nx
 
-    for itm in globaldata[idx]['ypos_conn']:
+    for itm in globaldata[idx]['ypos_conn'][:globaldata[idx]['ypos_nbhs']]:
 
         x_k = globaldata[itm]['x']
         y_k = globaldata[itm]['y']
@@ -337,7 +375,7 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = math.sqrt(dels*dels + deln*deln)
+        dist = (dels*dels + deln*deln) ** 0.5
         weights = dist**power
 
         dels_weights = dels*weights
@@ -374,8 +412,17 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
         zeros(phi_i, phi_i)
         zeros(phi_k, phi_k)
 
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i)
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, idx, vl_const, phi_k)
+        zeros(max_q, max_q)
+        zeros(min_q, min_q)
+        zeros(ds, ds)
+
+        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i, max_q, min_q, ds)
+
+        zeros(max_q, max_q)
+        zeros(min_q, min_q)
+        zeros(ds, ds)
+
+        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k, max_q, min_q, ds)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
@@ -386,7 +433,7 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
         multiply(0.5, phi_i, phi_i)
 
         add(temp1, temp2, temp1)
-        multiply(temp1, phi_i, temp1)
+        multiply_element_wise(temp1, phi_i, temp1)
 
         subtract(globaldata[idx]['q'], temp1, qtilde_i)
 
@@ -399,22 +446,17 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
         multiply(0.5, phi_k, phi_k)
 
         add(temp1, temp2, temp1)
-        multiply(temp1, phi_k, temp1)
+        multiply_element_wise(temp1, phi_k, temp1)
 
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
-        result = numba.local.array((4), dtype=numba.float64)
         zeros(result, result)
 
         qtilde_to_primitive_cuda(qtilde_i, gamma, result)
 
-        G_i = cuda.local.array((4), dtype=numba.float64)
-
         split_fluxes_cuda.flux_Gyp(nx, ny, result[0], result[1], result[2], result[3], G_i)
 
         qtilde_to_primitive_cuda(qtilde_k, gamma, result)
-
-        G_k = cuda.local.array((4), dtype=numba.float64)
 
         split_fluxes_cuda.flux_Gyp(nx, ny, result[0], result[1], result[2], result[3], G_k)
 
@@ -426,7 +468,7 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
         zeros(temp2, temp2)
         subtract(G_k, G_i, temp2)
         multiply(deln_weights, temp2, temp2)
-        add(sum_dely_delf, temp1, sum_dely_delf)
+        add(sum_dely_delf, temp2, sum_dely_delf)
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
@@ -434,30 +476,40 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
     zeros(store, store)
     zeros(temp1, temp1)
 
-    multiply(sum_dely_sqr, sum_delx_delf, sum_delx_delf)
-    multiply(sum_delx_dely, sum_dely_delf, sum_dely_delf)
+    multiply(sum_delx_dely, sum_delx_delf, sum_delx_delf)
+    multiply(sum_delx_sqr, sum_dely_delf, sum_dely_delf)
 
-    subtract(sum_delx_delf, sum_dely_delf, temp1)
+    subtract(sum_dely_delf, sum_delx_delf, temp1)
 
     multiply(one_by_det, temp1, store)
 
 @cuda.jit(device=True)
 def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store):
+
     sum_delx_sqr = 0
     sum_dely_sqr = 0
     sum_delx_dely = 0
 
-    sum_delx_delf = numba.local.array((4), numba.float64)
-    sum_dely_delf = numba.local.array((4), numba.float64)
+    sum_delx_delf = cuda.local.array((4), numba.float64)
+    sum_dely_delf = cuda.local.array((4), numba.float64)
 
-    qtilde_i = numba.local.array((4), numba.float64)
-    qtilde_k = numba.local.array((4), numba.float64)
+    qtilde_i = cuda.local.array((4), numba.float64)
+    qtilde_k = cuda.local.array((4), numba.float64)
 
-    phi_i = numba.local.array((4), numba.float64)
-    phi_k = numba.local.array((4), numba.float64)
+    phi_i = cuda.local.array((4), numba.float64)
+    phi_k = cuda.local.array((4), numba.float64)
 
-    temp1 = numba.local.array((4), numba.float64)
-    temp2 = numba.local.array((4), numba.float64)
+    temp1 = cuda.local.array((4), numba.float64)
+    temp2 = cuda.local.array((4), numba.float64)
+
+    result = cuda.local.array((4), numba.float64)
+    G_i = cuda.local.array((4), numba.float64)
+    G_k = cuda.local.array((4), numba.float64)
+
+    ## Venkat
+    max_q = cuda.local.array((1), numba.float64)
+    min_q = cuda.local.array((1), numba.float64)
+    ds = cuda.local.array((1), numba.float64)
 
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
@@ -471,7 +523,7 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store):
     tx = ny
     ty = -nx
 
-    for itm in globaldata[idx]['yneg_conn']:
+    for itm in globaldata[idx]['yneg_conn'][:globaldata[idx]['yneg_nbhs']]:
 
         x_k = globaldata[itm]['x']
         y_k = globaldata[itm]['y']
@@ -482,7 +534,7 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store):
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = math.sqrt(dels*dels + deln*deln)
+        dist = (dels*dels + deln*deln) ** 0.5
         weights = dist**power
 
         dels_weights = dels*weights
@@ -519,8 +571,17 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store):
         zeros(phi_i, phi_i)
         zeros(phi_k, phi_k)
 
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i)
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, idx, vl_const, phi_k)
+        zeros(max_q, max_q)
+        zeros(min_q, min_q)
+        zeros(ds, ds)
+
+        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i, max_q, min_q, ds)
+
+        zeros(max_q, max_q)
+        zeros(min_q, min_q)
+        zeros(ds, ds)
+
+        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k, max_q, min_q, ds)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
@@ -531,7 +592,7 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store):
         multiply(0.5, phi_i, phi_i)
 
         add(temp1, temp2, temp1)
-        multiply(temp1, phi_i, temp1)
+        multiply_element_wise(temp1, phi_i, temp1)
 
         subtract(globaldata[idx]['q'], temp1, qtilde_i)
 
@@ -544,22 +605,17 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store):
         multiply(0.5, phi_k, phi_k)
 
         add(temp1, temp2, temp1)
-        multiply(temp1, phi_k, temp1)
+        multiply_element_wise(temp1, phi_k, temp1)
 
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
-        result = numba.local.array((4), dtype=numba.float64)
         zeros(result, result)
 
         qtilde_to_primitive_cuda(qtilde_i, gamma, result)
 
-        G_i = cuda.local.array((4), dtype=numba.float64)
-
         split_fluxes_cuda.flux_Gyn(nx, ny, result[0], result[1], result[2], result[3], G_i)
 
         qtilde_to_primitive_cuda(qtilde_k, gamma, result)
-
-        G_k = cuda.local.array((4), dtype=numba.float64)
 
         split_fluxes_cuda.flux_Gyn(nx, ny, result[0], result[1], result[2], result[3], G_k)
 
@@ -571,7 +627,7 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store):
         zeros(temp2, temp2)
         subtract(G_k, G_i, temp2)
         multiply(deln_weights, temp2, temp2)
-        add(sum_dely_delf, temp1, sum_dely_delf)
+        add(sum_dely_delf, temp2, sum_dely_delf)
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
@@ -579,9 +635,9 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store):
     zeros(store, store)
     zeros(temp1, temp1)
 
-    multiply(sum_dely_sqr, sum_delx_delf, sum_delx_delf)
-    multiply(sum_delx_dely, sum_dely_delf, sum_dely_delf)
+    multiply(sum_delx_dely, sum_delx_delf, sum_delx_delf)
+    multiply(sum_delx_sqr, sum_dely_delf, sum_dely_delf)
 
-    subtract(sum_delx_delf, sum_dely_delf, temp1)
+    subtract(sum_dely_delf, sum_delx_delf, temp1)
 
     multiply(one_by_det, temp1, store)
