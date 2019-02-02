@@ -2,6 +2,8 @@ import config
 import math
 import numpy as np
 import core
+import numba
+from numba import cuda
 
 def func_delta(globaldata, configData):
     cfl = configData["core"]["cfl"]
@@ -35,6 +37,39 @@ def func_delta(globaldata, configData):
             globaldata[idx].delta = min_delt
 
     return globaldata
+
+@cuda.jit()
+def func_delta_cuda_kernel(globaldata, cfl):
+    tx = cuda.threadIdx.x
+    bx = cuda.blockIdx.x
+    bw = cuda.blockDim.x
+    idx =  bx * bw + tx
+    if idx > 0 and idx < len(globaldata):
+        min_delt = 1
+        x_i = globaldata[idx]['x']
+        y_i = globaldata[idx]['y']
+        for itm in globaldata[idx]['conn'][:globaldata[idx]['nbhs']]:
+            rho = globaldata[itm]['prim'][0]
+            u1 = globaldata[itm]['prim'][1]
+            u2 = globaldata[itm]['prim'][2]
+            pr = globaldata[itm]['prim'][3]
+
+            x_k = globaldata[itm]['x']
+            y_k = globaldata[itm]['y']
+
+            dist = (x_k - x_i)*(x_k - x_i) + (y_k - y_i)*(y_k - y_i)
+            dist = math.sqrt(dist)
+
+            mod_u = math.sqrt(u1*u1 + u2*u2)
+
+            delta_t = dist/(mod_u + 3*math.sqrt(pr/rho))
+
+            delta_t = cfl*delta_t
+
+            if min_delt > delta_t:
+                min_delt = delta_t
+
+        globaldata[idx]['delta'] = min_delt
 
 def state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old):
     max_res = 0	
