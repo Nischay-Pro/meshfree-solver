@@ -6,8 +6,8 @@ mutable struct Point
     right::Int
     flag_1::Int
     flag_2::Int
-    nbhs
-    conn
+    nbhs::Int
+    conn::Array{Int,1}
     nx::Float64
     ny::Float64
     # Size 4 (Pressure, vx, vy, density) x numberpts
@@ -18,15 +18,16 @@ mutable struct Point
     # Size 2(x,y) 4(Pressure, vx, vy, density) numberpts
     dq
     entropy
-    xpos_nbhs
-    xneg_nbhs
-    ypos_nbhs
-    yneg_nbhs
+    xpos_nbhs::Int
+    xneg_nbhs::Int
+    ypos_nbhs::Int
+    yneg_nbhs::Int
     xpos_conn
     xneg_conn
     ypos_conn
     yneg_conn
     delta
+    short_distance
 end
 
 # point = Point(locaslID, x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, flux_res, q, dq, entropy, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta)
@@ -42,11 +43,15 @@ end
 
 function setConnectivity(self::Point, conn)
     self.xpos_conn = conn[1]
-    self.xpos_nbhs = size(conn[1])
+    self.xpos_nbhs = length(conn[1])
     self.xneg_conn = conn[2]
-    self.xneg_nbhs = size(conn[2])
+    self.xneg_nbhs = length(conn[2])
     self.ypos_conn = conn[3]
-    self.ypos_nbhs = size(conn[3])
+    self.ypos_nbhs = length(conn[3])
     self.yneg_conn = conn[4]
-    self.yneg_nbhs = size(conn[4])
+    self.yneg_nbhs = length(conn[4])
 end
+
+# function setSmallestPointDistance(self::Point, distance)
+#     self.short_distance = distance
+# end

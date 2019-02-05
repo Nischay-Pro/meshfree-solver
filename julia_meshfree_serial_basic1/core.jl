@@ -25,6 +25,7 @@ function getInitialPrimitive2(configData)
         #     print(idx)
         # end
     end
+    close(dataman)
     # print(length(finaldata))
     return finaldata
 end
@@ -67,17 +68,6 @@ function calculateConnectivity(globaldata, idx)
     tx = ny
     ty = -nx
 
-    # if idx == 1
-    #     println("\n\n ")
-    #     println(ptInterest)
-    #     println(currx)
-    #     println(curry)
-    #     println(nx)
-    #     println(ny)
-    #     println(flag)
-    #     println(tx)
-    #     println(ty)
-    # end
     for itm in ptInterest.conn
         itmx = globaldata[itm].x
         itmy = globaldata[itm].y
@@ -87,7 +77,6 @@ function calculateConnectivity(globaldata, idx)
 
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
-
         if dels <= 0
             push!(xpos_conn, itm)
         end
