@@ -31,7 +31,7 @@ def getInitialPrimitive2(configData):
     return finaldata
 
 
-    
+
 def calculateTheta(configData):
     theta = math.radians(float(configData["core"]["aoa"]))
     return theta
@@ -85,31 +85,37 @@ def calculateConnectivity(globaldata, idx):
 
         if dels <= 0:
             xpos_conn.append(itm)
-        
+
         if dels >= 0:
             xneg_conn.append(itm)
 
         if flag == 2:
             if deln <= 0:
                 ypos_conn.append(itm)
-            
+
             if deln >= 0:
                 yneg_conn.append(itm)
 
         elif flag == 1:
             yneg_conn.append(itm)
-        
+
         elif flag == 3:
             ypos_conn.append(itm)
-        
+
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 
 def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
+
     globaldata = q_var_derivatives(globaldata, configData)
+
     globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+
     globaldata = state_update.func_delta(globaldata, configData)
+
     globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
+
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
+
     return res_old, globaldata
 
 def q_var_derivatives(globaldata, configData):
@@ -135,7 +141,7 @@ def q_var_derivatives(globaldata, configData):
             globaldata[idx].q = tempq
     for idx,itm in enumerate(globaldata):
         if idx > 0:
-            
+
             x_i = itm.x
             y_i = itm.y
 
@@ -147,7 +153,7 @@ def q_var_derivatives(globaldata, configData):
             sum_dely_delq = np.zeros(4, dtype=np.float64)
 
             for conn in itm.conn:
-                
+
 
                 x_k = globaldata[conn].x
                 y_k = globaldata[conn].y
@@ -224,7 +230,7 @@ def q_var_derivatives_cuda(globaldata, config):
 
             __global__ void q_var_derivatives()
             {
-        
+
                 int i = (blockIdx.x)* blockDim.x + threadIdx.x;
                 int j = (blockIdx.y)* blockDim.y + threadIdx.y;
 
@@ -243,7 +249,7 @@ def q_var_derivatives_cuda(globaldata, config):
                     test = u1 + (r * (ul + ur + utop + ubottom - (4 * u1)));
                     u_new[i + width * j] = test;
                 }
-            
+
 
             }""")
 
@@ -255,7 +261,7 @@ def q_var_derivatives_cuda(globaldata, config):
     heatCalculate = mod.get_function("heatCalculate")
 
 def qtilde_to_primitive(qtilde, configData):
-    
+
     gamma = configData["core"]["gamma"]
 
     q1 = qtilde[0]

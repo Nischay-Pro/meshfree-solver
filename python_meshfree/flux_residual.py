@@ -12,10 +12,10 @@ def cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, co
 		Gyn = wall_fluxes.wall_dGy_neg(globaldata, itm, configData)
 
 		GTemp = np.array(Gxp) + np.array(Gxn) + np.array(Gyn)
-		GTemp = GTemp * 2
+		# GTemp = GTemp * 2
 
 		globaldata[itm].flux_res = GTemp
-		
+
 	for itm in outerindices:
 		Gxp = outer_fluxes.outer_dGx_pos(globaldata, itm, configData)
 		Gxn = outer_fluxes.outer_dGx_neg(globaldata, itm, configData)
@@ -33,7 +33,7 @@ def cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, co
 		Gyn = interior_fluxes.interior_dGy_neg(globaldata, itm, configData)
 
 		GTemp = np.array(Gxp) + np.array(Gxn) + np.array(Gyp) + np.array(Gyn)
-		GTemp = GTemp * 2
+		# GTemp = GTemp * 2
 
 		globaldata[itm].flux_res = GTemp
 

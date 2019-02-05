@@ -33,7 +33,7 @@ def main():
             outerptsidx.append(int(itmdata[0]))
         table.append(int(itmdata[0]))
 
-    
+
     # for idx in wallptsidx:
     #     currpt = globaldata[idx].getxy()
     #     leftpt = globaldata[idx].left
@@ -61,6 +61,7 @@ def main():
     for i in range(1, int(config.getConfig()["core"]["max_iters"]) + 1):
         res_old, globaldata = core.fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx, res_old)
 
+    # print(globaldata[1].prim)
     for idx, itm in enumerate(globaldata):
         if idx > 0:
             primtowrite = globaldata[idx].prim
@@ -71,4 +72,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    

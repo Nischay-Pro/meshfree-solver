@@ -6,9 +6,6 @@ function cal_flux_residual(globaldata, wallindices, outerindices, interiorindice
 
 		GTemp = Gxp + Gxn + Gyn
 		GTemp = GTemp * 2
-		# if itm == 76
-		# 	println(" GTemps are ", Gxp, " ", Gxn, " ", Gyn)
-		# end
 		globaldata[itm].flux_res = GTemp
 	end
 	for itm in outerindices
@@ -17,8 +14,6 @@ function cal_flux_residual(globaldata, wallindices, outerindices, interiorindice
 		Gyp = outer_dGy_pos(globaldata, itm, configData)
 
 		GTemp = Gxp + Gxn + Gyp
-		GTemp = GTemp * 2
-
 		globaldata[itm].flux_res = GTemp
 	end
 	for itm in interiorindices
@@ -28,13 +23,7 @@ function cal_flux_residual(globaldata, wallindices, outerindices, interiorindice
 		Gyn = interior_dGy_neg(globaldata, itm, configData)
 
 		GTemp = Gxp + Gxn + Gyp + Gyn
-		GTemp = GTemp * 2
 		globaldata[itm].flux_res = GTemp
-		# if itm == 1
-		# 	print("========")
-		# 	print(globaldata[1].flux_res)
-		# 	print("========")
-		# end
 	end
 	return globaldata
 end

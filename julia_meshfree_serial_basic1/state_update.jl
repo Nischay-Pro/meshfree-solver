@@ -87,8 +87,8 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
         # end
     end
     # print(wallindices)
-    print(globaldata[1].prim[1])
-    print("\n 444a")
+    # print(globaldata[1].prim[1])
+    # print("\n 444a")
 
     for itm in outerindices
         nx = globaldata[itm].nx
@@ -117,8 +117,8 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
     end
 
     # print(outerindices)
-    print(globaldata[1].prim[1])
-    print("\n 444b")
+    # print(globaldata[1].prim[1])
+    # print("\n 444b")
 
     for itm in interiorindices
         nx = globaldata[itm].nx
@@ -157,8 +157,8 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
 
     end
 
-    print(globaldata[1].prim[1])
-    print("\n 444c")
+    # print(globaldata[1].prim[1])
+    # print("\n 444c")
 
     res_old = 0
 
@@ -173,7 +173,7 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
     # with open('residue', 'a') as the_file
     #     the_file.write("%i %f" % (iter, residue))
 
-    # print("Iteration Number ", iter)
+    print("Iteration Number ", iter)
     # # print("Residue ", residue)
 
     return globaldata, res_old
