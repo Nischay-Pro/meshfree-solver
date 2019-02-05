@@ -16,7 +16,7 @@ function main()
 
     for (idx, itm) in enumerate(splitdata)
         itmdata = split(itm, " ")
-        temp = Point(parse.(Int,itmdata[1]), parse.(Float64,itmdata[2]), parse.(Float64, itmdata[3]), 1, 1, parse.(Int,itmdata[6]), parse.(Int,itmdata[7]), parse.(Int,itmdata[8]), parse.(Int64,itmdata[9:end]), parse.(Float64, itmdata[4]), parse.(Float64, itmdata[5]), defprimal[idx], nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing)
+        temp = Point(parse.(Int,itmdata[1]), parse.(Float64,itmdata[2]), parse.(Float64, itmdata[3]), 1, 1, parse.(Int,itmdata[6]), parse.(Int,itmdata[7]), parse.(Int,itmdata[8]), parse.(Int64,itmdata[9:end]), parse.(Float64, itmdata[4]), parse.(Float64, itmdata[5]), defprimal[idx], nothing, zeros(Float64, 4), nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing)
         # print(convert(String, temp))
         # print(globaldata)
         # print("123\n")

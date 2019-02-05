@@ -21,8 +21,6 @@ function interior_dGx_pos(globaldata, idx, configData)
     ty = -nx
 
     for itm in globaldata[idx].xpos_conn
-
-
         x_k = globaldata[itm].x
         y_k = globaldata[itm].y
 

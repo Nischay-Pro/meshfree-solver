@@ -74,7 +74,7 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
         temp = 1 / U[1]
         globaldata[itm].prim[2] = U[2]*temp
         globaldata[itm].prim[3] = U[3]*temp
-        globaldata[itm].prim[4] = @. (0.4 *U[4]) - ((0.2 * temp)*(U[2] * U[2] + U[3] * U[3]))
+        globaldata[itm].prim[4] = (0.4 *U[4]) - ((0.2 * temp)*(U[2] * U[2] + U[3] * U[3]))
 
         # if itm == 100
         #     print(tempU[1])
@@ -106,7 +106,7 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
         temp = 1 / U[1]
         globaldata[itm].prim[2] = U[2]*temp
         globaldata[itm].prim[3] = U[3]*temp
-        globaldata[itm].prim[4] = @. (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
+        globaldata[itm].prim[4] = (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
     end
 
     # print(outerindices)
@@ -144,7 +144,7 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
         temp = 1 / U[1]
         globaldata[itm].prim[2] = U[2]*temp
         globaldata[itm].prim[3] = U[3]*temp
-        globaldata[itm].prim[4] = @.(0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
+        globaldata[itm].prim[4] = (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
     end
 
     # print(globaldata[1].prim[1])

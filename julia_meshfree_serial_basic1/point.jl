@@ -14,7 +14,7 @@ mutable struct Point
     prim::Array{Float64,1}
     flux_res
     # Size 4 (Pressure, vx, vy, density) x numberpts
-    q
+    q::Array{Float64,1}
     # Size 2(x,y) 4(Pressure, vx, vy, density) numberpts
     dq
     entropy

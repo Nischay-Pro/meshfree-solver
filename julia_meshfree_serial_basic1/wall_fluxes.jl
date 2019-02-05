@@ -40,35 +40,8 @@ function wall_dGx_pos(globaldata, idx, configData)
         sum_dely_sqr = sum_dely_sqr + deln*deln_weights
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        # if idx == 77
-        #     println("^^^^^^^^^^Sequence^^^^^^^^^^^")
-        #     println("x_k ", x_k)
-        #     println("y_k ", y_k)
-        #     println("delx ", delx)
-        #     println("dely ", dely)
-        #     println("dist ", dist)
-        #     println("weights ", weights)
-        #     println("dels_weights ",dels_weights)
-        #     println("deln_weights ", deln_weights)
-        #     println("sum_delx_sqr  ", sum_delx_sqr )
-        #     println("sum_dely_sqr  ", sum_dely_sqr )
-        #     println("sum_delx_dely ", sum_delx_dely)
-        # end
-
-        qtilde_i = globaldata[idx].q - 0.5*(delx .* globaldata[idx].dq[1] + dely .* globaldata[idx].dq[2])
-        qtilde_k = globaldata[itm].q - 0.5*(delx .* globaldata[itm].dq[1] + dely .* globaldata[itm].dq[2])
-
-        # if idx == 76
-        #     println(delx)
-        #     println(dely)
-        #     println(globaldata[idx].q)
-        #     println(globaldata[idx].dq[1])
-        #     println(globaldata[idx].dq[2])
-        #     println(- 0.5*(delx .* globaldata[idx].dq[1]))
-        #     println(dely .* globaldata[idx].dq[2])
-        #     println("qtile_i ", qtilde_i)
-        #     println("qtile_k ", qtilde_k)
-        # end
+        qtilde_i = globaldata[idx].q - 0.5*(delx * globaldata[idx].dq[1] + dely * globaldata[idx].dq[2])
+        qtilde_k = globaldata[itm].q - 0.5*(delx * globaldata[itm].dq[1] + dely * globaldata[itm].dq[2])
 
         if limiter_flag == 1
             phi_i = venkat_limiter(qtilde_i, globaldata, idx, configData)
@@ -114,12 +87,6 @@ function wall_dGx_pos(globaldata, idx, configData)
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
     G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
-    # if idx == 77
-    #     # println(" The sum_del are ",sum_delx_sqr, " ", sum_dely_sqr, " ", sum_delx_dely)
-    #     # println(" The det is ",det)
-    #     # println(" The onebydet is ", one_by_det)
-    #     println(" G is ", G)
-    # end
     return G
 end
 

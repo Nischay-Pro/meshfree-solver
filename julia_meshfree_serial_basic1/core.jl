@@ -113,7 +113,7 @@ end
 function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 111\n")
-    globaldata = q_var_derivatives(globaldata, configData)
+    q_var_derivatives(globaldata, configData)
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 222\n")
     globaldata = cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
@@ -135,98 +135,65 @@ function q_var_derivatives(globaldata, configData)
     power = Int(configData["core"]["power"])
 
     for (idx, itm) in enumerate(globaldata)
-        if idx > 0
-            rho = 1
-            tempq = zeros(Float64, 4)
-            rho = itm.prim[1]
-            u1 = itm.prim[2]
-            u2 = itm.prim[3]
-            pr = itm.prim[4]
-
-            # print(rho)
-            # print("\n")
-
-            beta = 0.5 * (itm.prim[1] / itm.prim[4])
-            try
-                a = log(rho)
-                b = log(beta)
-            catch
-                println(rho)
-                println(beta)
-                println(idx)
-            end
-
-            tempq[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
-            two_times_beta = 2 * beta
-
-            tempq[2] = (two_times_beta * u1)
-            tempq[3] = (two_times_beta * u2)
-            tempq[4] = -two_times_beta
-
-            globaldata[idx].q = tempq
+        rho = itm.prim[1]
+        u1 = itm.prim[2]
+        u2 = itm.prim[3]
+        pr = itm.prim[4]
+        # print(rho)
+        # print("\n")
+        beta = 0.5 * (itm.prim[1] / itm.prim[4])
+        try
+            a = log(rho)
+            b = log(beta)
+        catch
+            println(rho)
+            println(beta)
+            println(idx)
         end
+        globaldata[idx].q[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
+        two_times_beta = 2 * beta
+        globaldata[idx].q[2] = (two_times_beta * u1)
+        globaldata[idx].q[3] = (two_times_beta * u2)
+        globaldata[idx].q[4] = -two_times_beta
+
     end
 
     for (idx,itm) in enumerate(globaldata)
-        if idx > 0
-
-            x_i = itm.x
-            y_i = itm.y
-
-            sum_delx_sqr = 0
-            sum_dely_sqr = 0
-            sum_delx_dely = 0
-
-            sum_delx_delq = zeros(Float64, 4)
-            sum_dely_delq = zeros(Float64, 4)
-
-            for conn in itm.conn
-                # print(conn)
-                # print(" 123 \n")
-                # print(itm.conn)
-                x_k = globaldata[conn].x
-                # print(x_k)
-                # print("   \n\n")
-                y_k = globaldata[conn].y
-
-                delx = x_k - x_i
-                dely = y_k - y_i
-
-                dist = hypot(delx, dely)
-                weights = dist ^ power
-
-                sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
-                sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
-
-                sum_delx_dely = sum_delx_dely + ((delx * dely) * weights)
-
-                sum_delx_delq = sum_delx_delq + (weights * delx * (globaldata[conn].q - globaldata[idx].q))
-
-                sum_dely_delq = sum_dely_delq + (weights * dely * (globaldata[conn].q - globaldata[idx].q))
-            end
-
-            det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
-            one_by_det = 1 / det
-
-            tempdq = zeros(Float64, 2)
-
-            sum_delx_delq1 = sum_delx_delq * sum_dely_sqr
-            sum_dely_delq1 = sum_dely_delq * sum_delx_dely
-
-            tempsumx = one_by_det * (sum_delx_delq1 - sum_dely_delq1)
-
-            sum_dely_delq2 = sum_dely_delq * sum_delx_sqr
-
-            sum_delx_delq2 = sum_delx_delq * sum_delx_dely
-
-            tempsumy = one_by_det * (sum_dely_delq2 - sum_delx_delq2)
-
-            tempdq = [tempsumx, tempsumy]
-
-            globaldata[idx].dq = tempdq
+        x_i = itm.x
+        y_i = itm.y
+        sum_delx_sqr = 0
+        sum_dely_sqr = 0
+        sum_delx_dely = 0
+        sum_delx_delq = zeros(Float64, 4)
+        sum_dely_delq = zeros(Float64, 4)
+        for conn in itm.conn
+            # print(conn)
+            # print(" 123 \n")
+            # print(itm.conn)
+            x_k = globaldata[conn].x
+            # print(x_k)
+            # print("   \n\n")
+            y_k = globaldata[conn].y
+            delx = x_k - x_i
+            dely = y_k - y_i
+            dist = hypot(delx, dely)
+            weights = dist ^ power
+            sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
+            sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
+            sum_delx_dely = sum_delx_dely + ((delx * dely) * weights)
+            sum_delx_delq = sum_delx_delq + (weights * delx * (globaldata[conn].q - globaldata[idx].q))
+            sum_dely_delq = sum_dely_delq + (weights * dely * (globaldata[conn].q - globaldata[idx].q))
         end
+        det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
+        one_by_det = 1 / det
+        sum_delx_delq1 = sum_delx_delq * sum_dely_sqr
+        sum_dely_delq1 = sum_dely_delq * sum_delx_dely
+        tempsumx = one_by_det * (sum_delx_delq1 - sum_dely_delq1)
+        sum_dely_delq2 = sum_dely_delq * sum_delx_sqr
+        sum_delx_delq2 = sum_delx_delq * sum_delx_dely
+        tempsumy = one_by_det * (sum_dely_delq2 - sum_delx_delq2)
+        globaldata[idx].dq = [tempsumx, tempsumy]
     end
-    return globaldata
 end
 
 # function q_var_derivatives_cuda(globaldata, config)
