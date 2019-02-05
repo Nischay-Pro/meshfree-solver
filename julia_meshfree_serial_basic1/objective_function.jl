@@ -35,11 +35,8 @@ function compute_cl_cd_cm(globaldata, configData, wallindices)
             mx = globaldata[itm].x
             my = globaldata[itm].y
 
-            ds1 = (mx - lx) ^ 2 + (my - ly) ^ 2
-            ds1 = sqrt(ds1)
-
-            ds2 = (rx - mx) ^ 2 + (ry - my) ^ 2
-            ds2 = sqrt(ds2)
+            ds1 = hypot(mx - lx, my - ly)
+            ds2 = hypot(rx - mx, ry - my)
 
             ds = 0.5*(ds1 + ds2)
 

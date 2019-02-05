@@ -1,7 +1,10 @@
 function venkat_limiter(qtilde, globaldata, idx, configData)
     VL_CONST = configData["core"]["vl_const"]
+    ds = smallest_dist(globaldata,idx)
+    epsi = VL_CONST * ds
+    epsi = epsi ^ 3
     phi = []
-    del_pos, del_neg = 0,0
+    del_pos, del_neg = zero(Float64), zero(Float64)
     for i in 1:4
         q = globaldata[idx].q[i]
         del_neg = qtilde[i] - q
@@ -15,14 +18,10 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
                 min_q = minimum(globaldata, idx, i)
                 del_pos = min_q - q
             end
-            ds = smallest_dist(globaldata,idx)
-            epsi = VL_CONST * ds
-            epsi = epsi ^ 3
-
             num = (del_pos*del_pos) + (epsi*epsi)
-            num = num*del_neg + 2.0*del_neg*del_neg*del_pos
+            num = num*del_neg + 2 *del_neg*del_neg*del_pos
 
-            den = del_pos*del_pos + 2.0*del_neg*del_neg
+            den = del_pos*del_pos + 2 *del_neg*del_neg
             den = den + del_neg*del_pos + epsi*epsi
             den = den*del_neg
 
@@ -63,12 +62,10 @@ function minimum(globaldata, idx, i)
 end
 
 function smallest_dist(globaldata, idx)
-    min_dist = 10000
+    min_dist = 1000.0
+    ds = zero(Float64)
     for itm in globaldata[idx].conn
-        dx = globaldata[idx].x - globaldata[itm].x
-        dy = globaldata[idx].y - globaldata[itm].y
-        ds = sqrt(dx * dx + dy * dy)
-
+        ds = hypot(globaldata[idx].x - globaldata[itm].x, globaldata[idx].y - globaldata[itm].y)
         if ds < min_dist
             min_dist = ds
         end

@@ -45,7 +45,7 @@ function calculateNormals(left, right, mx, my)
     nx = 0.5*(nx1 + nx2)
     ny = 0.5*(ny1 + ny2)
 
-    det = sqrt(nx*nx + ny*ny)
+    det = hypot(nx, ny)
 
     nx = -nx/det
     ny = ny/det
@@ -192,7 +192,7 @@ function q_var_derivatives(globaldata, configData)
                 delx = x_k - x_i
                 dely = y_k - y_i
 
-                dist = sqrt(delx*delx + dely*dely)
+                dist = hypot(delx, dely)
                 weights = dist ^ power
 
                 sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)

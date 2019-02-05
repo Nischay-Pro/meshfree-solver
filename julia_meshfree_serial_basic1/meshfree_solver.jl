@@ -20,7 +20,7 @@ function main()
         # print(convert(String, temp))
         # print(globaldata)
         # print("123\n")
-        globaldata  = [globaldata; temp]
+        globaldata  = push!(globaldata, temp)
         # print(globaldata[1])
         if convert(Int, parse.(Float64, itmdata[6])) == 1
             wallpts += 1

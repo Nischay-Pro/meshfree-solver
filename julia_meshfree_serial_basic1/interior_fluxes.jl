@@ -32,7 +32,7 @@ function interior_dGx_pos(globaldata, idx, configData)
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = sqrt(dels*dels + deln*deln)
+        dist = hypot(dels, deln)
         weights = dist^power
 
         dels_weights = dels*weights
@@ -125,7 +125,7 @@ function interior_dGx_neg(globaldata, idx, configData)
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = sqrt(dels*dels + deln*deln)
+        dist = hypot(dels, deln)
         weights = dist^power
 
         dels_weights = dels*weights
@@ -213,7 +213,7 @@ function interior_dGy_pos(globaldata, idx, configData)
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = sqrt(dels*dels + deln*deln)
+        dist = hypot(dels, deln)
         weights = dist^power
 
         dels_weights = dels*weights
@@ -299,7 +299,7 @@ function interior_dGy_neg(globaldata, idx, configData)
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = sqrt(dels*dels + deln*deln)
+        dist = hypot(dels, deln)
         weights = dist^power
 
         dels_weights = dels*weights

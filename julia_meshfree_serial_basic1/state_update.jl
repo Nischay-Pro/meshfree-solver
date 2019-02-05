@@ -21,7 +21,7 @@ function func_delta(globaldata, configData)
                 dist = (x_k - x_i)*(x_k - x_i) + (y_k - y_i)*(y_k - y_i)
                 dist = sqrt(dist)
 
-                mod_u = sqrt(u1*u1 + u2*u2)
+                mod_u = hypot(u1,u2)
 
                 delta_t = dist/(mod_u + 3*sqrt(pr/rho))
 
@@ -40,6 +40,8 @@ end
 function state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
     max_res = 0
     sum_res_sqr = 0
+    U = zeros(Float64, 4)
+    # print(typeof(globaldata[1].prim[1]))
     for itm in wallindices
         nx = globaldata[itm].nx
         ny = globaldata[itm].ny
@@ -67,18 +69,13 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
             max_res = res_sqr
             max_res_point = itm
         end
-
         sum_res_sqr = sum_res_sqr + res_sqr
-
-        tempU = zeros(Float64, 4)
-        tempU[1] = U[1]
+        globaldata[itm].prim[1] = U[1]
         temp = 1 / U[1]
-        tempU[2] = U[2]*temp
-        tempU[3] = U[3]*temp
+        globaldata[itm].prim[2] = U[2]*temp
+        globaldata[itm].prim[3] = U[3]*temp
+        globaldata[itm].prim[4] = @. (0.4 *U[4]) - ((0.2 * temp)*(U[2] * U[2] + U[3] * U[3]))
 
-        tempU[4] = (0.4 *U[4]) - ((0.2 * temp)*(U[2] * U[2] + U[3] * U[3]))
-
-        globaldata[itm].prim = tempU
         # if itm == 100
         #     print(tempU[1])
         #     print(tempU[2])
@@ -105,15 +102,11 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
         U[2] = U2_rot*ny + U3_rot*nx
         U[3] = U3_rot*ny - U2_rot*nx
 
-        tempU = zeros(Float64, 4)
-        tempU[1] = U[1]
+        globaldata[itm].prim[1] = U[1]
         temp = 1 / U[1]
-        tempU[2] = U[2]*temp
-        tempU[3] = U[3]*temp
-        tempU[4] = (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
-
-        globaldata[itm].prim = tempU
-
+        globaldata[itm].prim[2] = U[2]*temp
+        globaldata[itm].prim[3] = U[3]*temp
+        globaldata[itm].prim[4] = @. (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
     end
 
     # print(outerindices)
@@ -147,14 +140,11 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
 
         # sum_res_sqr = sum_res_sqr + res_sqr
 
-        tempU = zeros(Float64, 4)
-        tempU[1] = U[1]
+        globaldata[itm].prim[1] = U[1]
         temp = 1 / U[1]
-        tempU[2] = U[2]*temp
-        tempU[3] = U[3]*temp
-        tempU[4] = (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
-        globaldata[itm].prim = tempU
-
+        globaldata[itm].prim[2] = U[2]*temp
+        globaldata[itm].prim[3] = U[3]*temp
+        globaldata[itm].prim[4] = @.(0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
     end
 
     # print(globaldata[1].prim[1])
@@ -173,7 +163,7 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
     # with open('residue', 'a') as the_file
     #     the_file.write("%i %f" % (iter, residue))
 
-    print("Iteration Number ", iter)
+    println("Iteration Number ", iter)
     # # print("Residue ", residue)
 
     return globaldata, res_old

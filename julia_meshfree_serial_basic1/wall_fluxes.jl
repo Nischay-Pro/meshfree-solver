@@ -30,7 +30,7 @@ function wall_dGx_pos(globaldata, idx, configData)
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = sqrt(dels*dels + deln*deln)
+        dist = hypot(dels, deln)
         weights = dist^power
 
         dels_weights = dels*weights
@@ -155,7 +155,7 @@ function wall_dGx_neg(globaldata, idx, configData)
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = sqrt(dels*dels + deln*deln)
+        dist = hypot(dels, deln)
         weights = dist^power
 
         dels_weights = dels*weights
@@ -243,7 +243,7 @@ function wall_dGy_neg(globaldata, idx, configData)
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = sqrt(dels*dels + deln*deln)
+        dist = hypot(dels, deln)
         weights = dist^power
 
         dels_weights = dels*weights
