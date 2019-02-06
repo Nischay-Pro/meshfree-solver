@@ -1,7 +1,7 @@
 function outer_dGx_pos(globaldata, idx, configData, max_q, min_q)
 
-    power = configData["core"]["power"]
-    limiter_flag = configData["core"]["limiter_flag"]
+    power::Float64 = configData["core"]["power"]
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -88,8 +88,8 @@ end
 
 function outer_dGx_neg(globaldata, idx, configData, max_q, min_q)
 
-    power = configData["core"]["power"]
-    limiter_flag = configData["core"]["limiter_flag"]
+    power::Float64 = configData["core"]["power"]
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -175,8 +175,8 @@ end
 
 function outer_dGy_pos(globaldata, idx, configData, max_q, min_q)
 
-    power = configData["core"]["power"]
-    limiter_flag = configData["core"]["limiter_flag"]
+    power::Float64 = configData["core"]["power"]
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -195,7 +195,6 @@ function outer_dGy_pos(globaldata, idx, configData, max_q, min_q)
     ty = -nx
 
     for itm in globaldata[idx].ypos_conn
-
         x_k = globaldata[itm].x
         y_k = globaldata[itm].y
 

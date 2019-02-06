@@ -7,10 +7,10 @@ end
 
 function compute_cl_cd_cm(globaldata, configData, wallindices)
 
-    rho_inf = configData["core"]["rho_inf"]
-    Mach = configData["core"]["mach"]
-    pr_inf = configData["core"]["pr_inf"]
-    shapes = configData["core"]["shapes"]
+    rho_inf::Float64 = configData["core"]["rho_inf"]
+    Mach::Float64 = configData["core"]["mach"]
+    pr_inf::Float64 = configData["core"]["pr_inf"]
+    shapes = convert(Int ,configData["core"]["shapes"])
     theta = calculateTheta(configData)
 
     temp = 0.5*rho_inf*Mach*Mach
@@ -39,11 +39,8 @@ function compute_cl_cd_cm(globaldata, configData, wallindices)
             ds2 = hypot(rx - mx, ry - my)
 
             ds = 0.5*(ds1 + ds2)
-
-
             nx = globaldata[itm].nx
             ny = globaldata[itm].ny
-
             cp = globaldata[itm].prim[3] - pr_inf
             cp = -cp/temp
 
@@ -65,8 +62,4 @@ function compute_cl_cd_cm(globaldata, configData, wallindices)
     Cd = H*cos(theta) + V*sin(theta)
     Cm = pitch_mom
 
-    # if configData["core"]["clcd_flag"]
-    #     print("Cl",Cl)
-    #     print("Cd",Cd)
-    # end
 end

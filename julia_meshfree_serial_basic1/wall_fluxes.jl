@@ -1,7 +1,7 @@
 function wall_dGx_pos(globaldata, idx, configData, max_q, min_q)
-    idx = convert(Int, idx)
-    power = configData["core"]["power"]
-    limiter_flag = configData["core"]["limiter_flag"]
+
+    power::Float64 = configData["core"]["power"]
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -92,8 +92,8 @@ end
 
 function wall_dGx_neg(globaldata, idx, configData, max_q, min_q)
     idx = convert(Int, idx)
-    power = configData["core"]["power"]
-    limiter_flag = configData["core"]["limiter_flag"]
+    power::Float64 = configData["core"]["power"]
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -180,8 +180,8 @@ end
 
 function wall_dGy_neg(globaldata, idx, configData, max_q, min_q)
     idx = convert(Int, idx)
-    power = configData["core"]["power"]
-    limiter_flag = configData["core"]["limiter_flag"]
+    power::Float64 = configData["core"]["power"]
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)

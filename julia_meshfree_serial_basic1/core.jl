@@ -1,9 +1,9 @@
 function getInitialPrimitive(configData)
-    rho_inf = parse(Float64, configData["core"]["rho_inf"])
-    mach = parse(Float64, configData["core"]["mach"])
+    rho_inf::Float64 = configData["core"]["rho_inf"]
+    mach::Float64 = configData["core"]["mach"]
     machcos = mach * cos(calculateTheta(configData))
     machsin = mach * sin(calculateTheta(configData))
-    pr_inf = parse(Float64, configData["core"]["pr_inf"])
+    pr_inf::Float64 = configData["core"]["pr_inf"]
     primal = [rho_inf, machcos, machsin, pr_inf]
     return primal
 end
@@ -11,22 +11,15 @@ end
 function getInitialPrimitive2(configData)
     dataman = open("prim_soln_clean")
     data = read(dataman, String)
-    data = split(data, "\n")
+    data1 = split(data, "\n")
     finaldata = Array{Array{Float64,1},1}(undef, 0)
-    for (idx,itm) in enumerate(data)
+    for (idx,itm) in enumerate(data1)
         # try
         da = split(itm)
-        # TODO - Check this list comprehension
-        # da = list(map(float, da))
-        # print(da)
-        da = parse.(Float64, da)
-        push!(finaldata, da)
-        # catch
-        #     print(idx)
-        # end
+        da1 = parse.(Float64, da)
+        push!(finaldata, da1)
     end
     close(dataman)
-    # print(length(finaldata))
     return finaldata
 end
 
@@ -77,17 +70,17 @@ function calculateConnectivity(globaldata, idx)
 
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
-        if dels <= 0
+        if dels <= 0.0
             push!(xpos_conn, itm)
         end
-        if dels >= 0
+        if dels >= 0.0
             push!(xneg_conn, itm)
         end
         if flag == 2
-            if deln <= 0
+            if deln <= 0.0
                 push!(ypos_conn, itm)
             end
-            if deln >= 0
+            if deln >= 0.0
                 push!(yneg_conn, itm)
             end
         elseif flag == 1
@@ -120,7 +113,7 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
 end
 
 function q_var_derivatives(globaldata, configData)
-    power = Int(configData["core"]["power"])
+    power::Float64 = configData["core"]["power"]
 
     for (idx, itm) in enumerate(globaldata)
         rho = itm.prim[1]
@@ -139,9 +132,9 @@ function q_var_derivatives(globaldata, configData)
     for (idx,itm) in enumerate(globaldata)
         x_i = itm.x
         y_i = itm.y
-        sum_delx_sqr = 0
-        sum_dely_sqr = 0
-        sum_delx_dely = 0
+        sum_delx_sqr = zero(Float64)
+        sum_dely_sqr = zero(Float64)
+        sum_delx_dely = zero(Float64)
         sum_delx_delq = zeros(Float64, 4)
         sum_dely_delq = zeros(Float64, 4)
         for conn in itm.conn
@@ -151,11 +144,11 @@ function q_var_derivatives(globaldata, configData)
             dely = y_k - y_i
             dist = hypot(delx, dely)
             weights = dist ^ power
-            sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
-            sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
-            sum_delx_dely = sum_delx_dely + ((delx * dely) * weights)
-            sum_delx_delq = sum_delx_delq + (weights * delx * (globaldata[conn].q - globaldata[idx].q))
-            sum_dely_delq = sum_dely_delq + (weights * dely * (globaldata[conn].q - globaldata[idx].q))
+            sum_delx_sqr +=(delx * delx) * weights
+            sum_dely_sqr += (dely * dely) * weights
+            sum_delx_dely += (delx * dely) * weights
+            sum_delx_delq += weights * delx * (globaldata[conn].q - globaldata[idx].q)
+            sum_dely_delq += weights * dely * (globaldata[conn].q - globaldata[idx].q)
         end
         det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
         one_by_det = 1 / det
