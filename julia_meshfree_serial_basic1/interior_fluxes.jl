@@ -4,9 +4,9 @@ function interior_dGx_pos(globaldata, idx, configData)
     power = configData["core"]["power"]
     limiter_flag = configData["core"]["limiter_flag"]
 
-    sum_delx_sqr = 0
-    sum_dely_sqr = 0
-    sum_delx_dely = 0
+    sum_delx_sqr = zero(Float64)
+    sum_dely_sqr = zero(Float64)
+    sum_delx_dely = zero(Float64)
 
     sum_delx_delf = zeros(Float64,4)
     sum_dely_delf = zeros(Float64,4)
@@ -96,9 +96,9 @@ function interior_dGx_neg(globaldata, idx, configData)
     power = configData["core"]["power"]
     limiter_flag = configData["core"]["limiter_flag"]
 
-    sum_delx_sqr = 0
-    sum_dely_sqr = 0
-    sum_delx_dely = 0
+    sum_delx_sqr = zero(Float64)
+    sum_dely_sqr = zero(Float64)
+    sum_delx_dely = zero(Float64)
 
     sum_delx_delf = zeros(Float64,4)
     sum_dely_delf = zeros(Float64,4)
@@ -184,9 +184,9 @@ function interior_dGy_pos(globaldata, idx, configData)
     power = configData["core"]["power"]
     limiter_flag = configData["core"]["limiter_flag"]
 
-    sum_delx_sqr = 0
-    sum_dely_sqr = 0
-    sum_delx_dely = 0
+    sum_delx_sqr = zero(Float64)
+    sum_dely_sqr = zero(Float64)
+    sum_delx_dely = zero(Float64)
 
     sum_delx_delf = zeros(Float64,4)
     sum_dely_delf = zeros(Float64,4)
@@ -270,9 +270,9 @@ function interior_dGy_neg(globaldata, idx, configData)
     power = configData["core"]["power"]
     limiter_flag = configData["core"]["limiter_flag"]
 
-    sum_delx_sqr = 0
-    sum_dely_sqr = 0
-    sum_delx_dely = 0
+    sum_delx_sqr = zero(Float64)
+    sum_dely_sqr = zero(Float64)
+    sum_delx_dely = zero(Float64)
 
     sum_delx_delf = zeros(Float64,4)
     sum_dely_delf = zeros(Float64,4)

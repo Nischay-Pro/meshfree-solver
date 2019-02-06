@@ -105,19 +105,18 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
     q_var_derivatives(globaldata, configData)
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 222\n")
-    globaldata = cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+    cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 333\n")
-    globaldata = func_delta(globaldata, configData)
+    func_delta(globaldata, configData)
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 444\n")
-    globaldata, res_old = state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
+    state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 555\n")
     compute_cl_cd_cm(globaldata, configData, wallindices)
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 666\n")
-    return res_old, globaldata
 end
 
 function q_var_derivatives(globaldata, configData)

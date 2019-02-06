@@ -18,9 +18,7 @@ function func_delta(globaldata, configData)
                 x_k = globaldata[itm].x
                 y_k = globaldata[itm].y
 
-                dist = (x_k - x_i)*(x_k - x_i) + (y_k - y_i)*(y_k - y_i)
-                dist = sqrt(dist)
-
+                dist = hypot((x_k - x_i),(y_k - y_i))
                 mod_u = hypot(u1,u2)
 
                 delta_t = dist/(mod_u + 3*sqrt(pr/rho))
@@ -34,7 +32,6 @@ function func_delta(globaldata, configData)
             globaldata[idx].delta = min_delt
         end
     end
-    return globaldata
 end
 
 function state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
@@ -165,8 +162,6 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
 
     println("Iteration Number ", iter)
     # # print("Residue ", residue)
-
-    return globaldata, res_old
 end
 
 function primitive_to_conserved(globaldata, itm, nx, ny)

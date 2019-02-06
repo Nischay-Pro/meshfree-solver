@@ -6,6 +6,8 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
     phi = Array{Float64,1}(undef, 0)
     del_pos = zero(Float64)
     del_neg = zero(Float64)
+    max_q = zero(Float64)
+    min_q = zero(Float64)
     for i in 1:4
         q = globaldata[idx].q[i]
         del_neg = qtilde[i] - q
@@ -13,10 +15,10 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
             push!(phi, 1.0)
         elseif abs(del_neg) > 1e-5
             if del_neg > 0.0
-                max_q = maximum(globaldata, idx, i)
+                maximum(globaldata, idx, i, max_q)
                 del_pos = max_q - q
             elseif del_neg < 0.0
-                min_q = minimum(globaldata, idx, i)
+                minimum(globaldata, idx, i, min_q)
                 del_pos = min_q - q
             end
             num = (del_pos*del_pos) + (epsi*epsi)
@@ -27,7 +29,6 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
             den = den*del_neg
 
             temp = num/den
-
             if temp < 1.0
                 push!(phi, temp)
             else
@@ -38,29 +39,27 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
     return phi
 end
 
-function maximum(globaldata, idx::Int, i::Int)
-    maxval::Float64 = globaldata[idx].q[i]
+@inline function maximum(globaldata, idx, i, maxval)
+    maxval = globaldata[idx].q[i]
     for itm in globaldata[idx].conn
         if maxval < globaldata[itm].q[i]
             maxval = globaldata[itm].q[i]
         end
     end
-    return maxval
 end
 
-function minimum(globaldata, idx::Int, i::Int)
-    minval::Float64 = globaldata[idx].q[i]
+@inline function minimum(globaldata, idx, i, minval)
+    minval = globaldata[idx].q[i]
     for itm in globaldata[idx].conn
         if minval > globaldata[itm].q[i]
             minval = globaldata[itm].q[i]
         end
     end
-    return minval
 end
 
 function smallest_dist(globaldata, idx::Int)
-    min_dist::Float64 = 1000.0
-    ds::Float64 = zero(Float64)
+    min_dist = 1000.0
+    ds = zero(Float64)
     for itm in globaldata[idx].conn
         ds = hypot(globaldata[idx].x - globaldata[itm].x, globaldata[idx].y - globaldata[itm].y)
         if ds < min_dist
@@ -72,7 +71,6 @@ end
 
 function max_q_values(globaldata, idx)
     maxq = globaldata[idx].q
-
     for itm in globaldata[idx].conn
         currq = globaldata[itm].q
         for i in 1:4

@@ -9,13 +9,13 @@ include("core.jl")
 export getInitialPrimitive, getInitialPrimitive2, calculateNormals, calculateConnectivity, fpi_solver, q_var_derivatives
 
 include("flux_residual.jl")
-export cal_flux_residual
+export cal_flux_residual, wallindices_flux_residual, outerindices_flux_residual, interiorindices_flux_residual
 
 include("interior_fluxes.jl")
 export interior_dGx_pos, interior_dGx_neg, interior_dGy_pos, interior_dGy_neg
 
 include("limiters.jl")
-export venkat_limiter, maximum, smallest_dist, min_q_values, qtilde_to_primitive
+export venkat_limiter, maximum, minimum, smallest_dist, min_q_values, qtilde_to_primitive
 
 include("meshfree_solver.jl")
 export main
