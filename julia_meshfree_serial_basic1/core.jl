@@ -12,7 +12,7 @@ function getInitialPrimitive2(configData)
     dataman = open("prim_soln_clean")
     data = read(dataman, String)
     data = split(data, "\n")
-    finaldata = []
+    finaldata = Array{Array{Float64,1},1}(undef, 0)
     for (idx,itm) in enumerate(data)
         # try
         da = split(itm)
@@ -63,7 +63,7 @@ function calculateConnectivity(globaldata, idx)
 
     flag = ptInterest.flag_1
 
-    xpos_conn,xneg_conn,ypos_conn,yneg_conn = [],[],[],[]
+    xpos_conn,xneg_conn,ypos_conn,yneg_conn = Array{Int,1}(undef, 0),Array{Int,1}(undef, 0),Array{Int,1}(undef, 0),Array{Int,1}(undef, 0)
 
     tx = ny
     ty = -nx
@@ -127,23 +127,13 @@ function q_var_derivatives(globaldata, configData)
         u1 = itm.prim[2]
         u2 = itm.prim[3]
         pr = itm.prim[4]
-        # print(rho)
-        # print("\n")
+
         beta = 0.5 * (itm.prim[1] / itm.prim[4])
-        try
-            a = log(rho)
-            b = log(beta)
-        catch
-            println(rho)
-            println(beta)
-            println(idx)
-        end
         globaldata[idx].q[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
         two_times_beta = 2 * beta
         globaldata[idx].q[2] = (two_times_beta * u1)
         globaldata[idx].q[3] = (two_times_beta * u2)
         globaldata[idx].q[4] = -two_times_beta
-
     end
 
     for (idx,itm) in enumerate(globaldata)
@@ -155,12 +145,7 @@ function q_var_derivatives(globaldata, configData)
         sum_delx_delq = zeros(Float64, 4)
         sum_dely_delq = zeros(Float64, 4)
         for conn in itm.conn
-            # print(conn)
-            # print(" 123 \n")
-            # print(itm.conn)
             x_k = globaldata[conn].x
-            # print(x_k)
-            # print("   \n\n")
             y_k = globaldata[conn].y
             delx = x_k - x_i
             dely = y_k - y_i

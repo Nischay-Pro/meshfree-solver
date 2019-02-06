@@ -1,9 +1,6 @@
 function main()
-
-    globaldata = []
-
+    globaldata = Array{Point,1}(undef, 0)
     configData = getConfig()
-
     wallpts, Interiorpts, outerpts = 0,0,0
     wallptsidx = Array{Int,1}(undef, 0)
     Interiorptsidx = Array{Int,1}(undef, 0)
@@ -19,7 +16,7 @@ function main()
 
     for (idx, itm) in enumerate(splitdata)
         itmdata = split(itm, " ")
-        temp = Point(parse.(Int,itmdata[1]), parse.(Float64,itmdata[2]), parse.(Float64, itmdata[3]), 1, 1, parse.(Int,itmdata[6]), parse.(Int,itmdata[7]), parse.(Int,itmdata[8]), parse.(Int,itmdata[9:end]), parse.(Float64, itmdata[4]), parse.(Float64, itmdata[5]), defprimal[idx], nothing, zeros(Float64, 4), nothing, nothing, 0, 0, 0, 0, nothing, nothing, nothing, nothing, nothing, nothing)
+        temp = Point(parse.(Int,itmdata[1]), parse.(Float64,itmdata[2]), parse.(Float64, itmdata[3]), 1, 1, parse.(Int,itmdata[6]), parse.(Int,itmdata[7]), parse.(Int,itmdata[8]), parse.(Int,itmdata[9:end]), parse.(Float64, itmdata[4]), parse.(Float64, itmdata[5]), defprimal[idx], zeros(Float64, 4), zeros(Float64, 4), Array{Array{Float64,1},1}(undef, 0), 0.0, 0, 0, 0, 0, Array{Int,1}(undef, 0), Array{Int,1}(undef, 0), Array{Int,1}(undef, 0), Array{Int,1}(undef, 0), 0.0, 0.0)
         # print(convert(String, temp))
         # print(globaldata)
         # print("123\n")

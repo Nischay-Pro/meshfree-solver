@@ -1,4 +1,4 @@
-function venkat_limiter(qtilde, globaldata, idx, configData)
+function venkat_limiter(qtilde, globaldata, idx, configData, max_q, min_q)
     VL_CONST = configData["core"]["vl_const"]
     ds = globaldata[idx].short_distance
     epsi = VL_CONST * ds
@@ -6,8 +6,8 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
     phi = Array{Float64,1}(undef, 0)
     del_pos = zero(Float64)
     del_neg = zero(Float64)
-    max_q = zero(Float64)
-    min_q = zero(Float64)
+    # max_q = zero(Float64)
+    # min_q = zero(Float64)
     for i in 1:4
         q = globaldata[idx].q[i]
         del_neg = qtilde[i] - q
@@ -16,10 +16,10 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
         elseif abs(del_neg) > 1e-5
             if del_neg > 0.0
                 maximum(globaldata, idx, i, max_q)
-                del_pos = max_q - q
+                del_pos = max_q[1] - q
             elseif del_neg < 0.0
                 minimum(globaldata, idx, i, min_q)
-                del_pos = min_q - q
+                del_pos = min_q[1] - q
             end
             num = (del_pos*del_pos) + (epsi*epsi)
             num = num*del_neg + 2 *del_neg*del_neg*del_pos
@@ -39,20 +39,20 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
     return phi
 end
 
-@inline function maximum(globaldata, idx, i, maxval)
-    maxval = globaldata[idx].q[i]
+@inline function maximum(globaldata, idx, i, max_q::AbstractVector{T}) where T
+    max_q[1] = globaldata[idx].q[i]
     for itm in globaldata[idx].conn
-        if maxval < globaldata[itm].q[i]
-            maxval = globaldata[itm].q[i]
+        if max_q[1] < globaldata[itm].q[i]
+            max_q[1] = globaldata[itm].q[i]
         end
     end
 end
 
-@inline function minimum(globaldata, idx, i, minval)
-    minval = globaldata[idx].q[i]
+@inline function minimum(globaldata, idx, i, min_q::AbstractVector{T}) where T
+    min_q[1] = globaldata[idx].q[i]
     for itm in globaldata[idx].conn
-        if minval > globaldata[itm].q[i]
-            minval = globaldata[itm].q[i]
+        if min_q[1] > globaldata[itm].q[i]
+            min_q[1] = globaldata[itm].q[i]
         end
     end
 end

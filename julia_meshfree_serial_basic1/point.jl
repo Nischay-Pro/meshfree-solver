@@ -12,22 +12,22 @@ mutable struct Point
     ny::Float64
     # Size 4 (Pressure, vx, vy, density) x numberpts
     prim::Array{Float64,1}
-    flux_res
+    flux_res::Array{Float64,1}
     # Size 4 (Pressure, vx, vy, density) x numberpts
     q::Array{Float64,1}
     # Size 2(x,y) 4(Pressure, vx, vy, density) numberpts
-    dq
-    entropy
+    dq::Array{Array{Float64,1},1}
+    entropy::Float64
     xpos_nbhs::Int
     xneg_nbhs::Int
     ypos_nbhs::Int
     yneg_nbhs::Int
-    xpos_conn
-    xneg_conn
-    ypos_conn
-    yneg_conn
-    delta
-    short_distance
+    xpos_conn::Array{Int,1}
+    xneg_conn::Array{Int,1}
+    ypos_conn::Array{Int,1}
+    yneg_conn::Array{Int,1}
+    delta::Float64
+    short_distance::Float64
 end
 
 # point = Point(locaslID, x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, flux_res, q, dq, entropy, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta)
