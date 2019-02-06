@@ -33,7 +33,7 @@ function interiorindices_flux_residual(globaldata, configData, interiorindices, 
 		Gxn = interior_dGx_neg(globaldata, itm, configData, max_q, min_q)
 		Gyp = interior_dGy_pos(globaldata, itm, configData, max_q, min_q)
 		Gyn = interior_dGy_neg(globaldata, itm, configData, max_q, min_q)
-		GTemp = Gxp + Gxn + Gyp + Gyn
+		GTemp = @.(Gxp + Gxn + Gyp + Gyn)
 		globaldata[itm].flux_res = GTemp
 	end
 end

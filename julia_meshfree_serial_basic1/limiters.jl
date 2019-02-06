@@ -57,7 +57,7 @@ end
     end
 end
 
-function smallest_dist(globaldata, idx::Int64)
+@inline function smallest_dist(globaldata, idx::Int64)
     min_dist = 1000.0
     for itm in globaldata[idx].conn
         ds = hypot(globaldata[idx].x - globaldata[itm].x, globaldata[idx].y - globaldata[itm].y)
@@ -68,7 +68,7 @@ function smallest_dist(globaldata, idx::Int64)
     globaldata[idx].short_distance = min_dist
 end
 
-function max_q_values(globaldata, idx)
+@inline function max_q_values(globaldata, idx)
     maxq = globaldata[idx].q
     for itm in globaldata[idx].conn
         currq = globaldata[itm].q
@@ -81,7 +81,7 @@ function max_q_values(globaldata, idx)
     return maxq
 end
 
-function min_q_values(globaldata, idx)
+@inline function min_q_values(globaldata, idx)
     minq = globaldata[idx].q
     for itm in globaldata[idx].conn
         currq = globaldata[itm].q
@@ -94,7 +94,7 @@ function min_q_values(globaldata, idx)
     return minq
 end
 
-function qtilde_to_primitive(qtilde, configData)
+@inline function qtilde_to_primitive(qtilde, configData)
 
     gamma::Float64 = configData["core"]["gamma"]
     beta = -qtilde[4] * 0.5

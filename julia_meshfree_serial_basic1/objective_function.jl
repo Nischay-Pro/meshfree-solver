@@ -10,18 +10,18 @@ function compute_cl_cd_cm(globaldata, configData, wallindices)
     rho_inf::Float64 = configData["core"]["rho_inf"]
     Mach::Float64 = configData["core"]["mach"]
     pr_inf::Float64 = configData["core"]["pr_inf"]
-    shapes = convert(Int ,configData["core"]["shapes"])
+    shapes::Int64 = configData["core"]["shapes"]
     theta = calculateTheta(configData)
 
     temp = 0.5*rho_inf*Mach*Mach
 
-    H = [0.0 for i in 1:shapes]
-    V = [0.0 for i in 1:shapes]
-    pitch_mom = [0.0 for i in 1:shapes]
+    H = zeros(Float64, shapes)
+    V = zeros(Float64, shapes)
+    pitch_mom = zeros(Float64, shapes)
 
-    Cl = [0.0 for i in 1:shapes]
-    Cd = [0.0 for i in 1:shapes]
-    Cm = [0.0 for i in 1:shapes]
+    Cl = zeros(Float64, shapes)
+    Cd = zeros(Float64, shapes)
+    Cm = zeros(Float64, shapes)
 
     open("cp_file", "a") do the_file
         for itm in wallindices
@@ -54,10 +54,6 @@ function compute_cl_cd_cm(globaldata, configData, wallindices)
         end
     end
 
-    # V = np.array(V)
-    # H = np.array(H)
-
-    # TODO - Make this work
     Cl = V*cos(theta) - H*sin(theta)
     Cd = H*cos(theta) + V*sin(theta)
     Cm = pitch_mom

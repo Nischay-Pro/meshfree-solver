@@ -1,13 +1,13 @@
 mutable struct Point
-    localID::Int
+    localID::Int64
     x::Float64
     y::Float64
-    left::Int
-    right::Int
-    flag_1::Int
-    flag_2::Int
-    nbhs::Int
-    conn::Array{Int,1}
+    left::Int64
+    right::Int64
+    flag_1::Int64
+    flag_2::Int64
+    nbhs::Int64
+    conn::Array{Int64,1}
     nx::Float64
     ny::Float64
     # Size 4 (Pressure, vx, vy, density) x numberpts
@@ -18,14 +18,14 @@ mutable struct Point
     # Size 2(x,y) 4(Pressure, vx, vy, density) numberpts
     dq::Array{Array{Float64,1},1}
     entropy::Float64
-    xpos_nbhs::Int
-    xneg_nbhs::Int
-    ypos_nbhs::Int
-    yneg_nbhs::Int
-    xpos_conn::Array{Int,1}
-    xneg_conn::Array{Int,1}
-    ypos_conn::Array{Int,1}
-    yneg_conn::Array{Int,1}
+    xpos_nbhs::Int64
+    xneg_nbhs::Int64
+    ypos_nbhs::Int64
+    yneg_nbhs::Int64
+    xpos_conn::Array{Int64,1}
+    xneg_conn::Array{Int64,1}
+    ypos_conn::Array{Int64,1}
+    yneg_conn::Array{Int64,1}
     delta::Float64
     short_distance::Float64
 end
