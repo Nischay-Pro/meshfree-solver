@@ -20,3 +20,7 @@ test_cpu2
 test_gpu
 test_gpu2
 test1
+grids/*
+*.dat
+result-*
+*.out

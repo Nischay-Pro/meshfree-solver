@@ -58,3 +58,7 @@ def qtilde_to_primitive_cuda(qtilde, gamma, result):
     result[3] = pr
 
     return result
+
+@cuda.reduce
+def sum_reduce(a, b):
+    return a + b

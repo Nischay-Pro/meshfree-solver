@@ -11,7 +11,7 @@ import numba
 from numba import cuda
 import convert
 from numba import vectorize, float64
-from cuda_func import add, subtract, multiply
+from cuda_func import add, subtract, multiply, sum_reduce
 
 def getInitialPrimitive(configData):
     rho_inf = float(configData["core"]["rho_inf"])
@@ -126,7 +126,7 @@ def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interior
                 for idx in range(len(globaldata)):
                     if idx > 0:
                         itm = globaldata[idx]
-                        the_file.write("%.13f \n" % (itm.prim[0]))
+                        the_file.write("%.13f %.13f %.13f %.13f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
             objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
         return res_old, globaldata
     else:
@@ -136,9 +136,11 @@ def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interior
 def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
     stream = cuda.stream()
     globaldata_gpu = convert.convert_globaldata_to_gpu_globaldata(globaldata)
+    sum_res_sqr = np.zeros((len(globaldata)), dtype=np.float64)
     print("start")
     with stream.auto_synchronize():
         globaldata_gpu = cuda.to_device(globaldata_gpu, stream)
+        sum_res_sqr_gpu = cuda.to_device(sum_res_sqr, stream)
         threadsperblock = (128, 1)
         blockspergrid_x = math.ceil(len(globaldata) / threadsperblock[0])
         blockspergrid_y = math.ceil(1)
@@ -146,27 +148,33 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         for i in range(1, iter):
             if i == 1:
                 print("Compiling CUDA Kernel. This might take a while...")
-            else:
-                print("Iteration %s" % str(i))
             q_var_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu)
             cuda.synchronize()
-            q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData['core']['power'])
+            q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']))
             cuda.synchronize()
-            flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData['core']['power'], configData['core']['vl_const'], configData['core']['gamma'])
+            flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']), float(configData['core']['vl_const']), float(configData['core']['gamma']))
             cuda.synchronize()
-            state_update_cuda.func_delta_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, configData["core"]["cfl"])
+            state_update_cuda.func_delta_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData["core"]["cfl"]))
             cuda.synchronize()
-            state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](globaldata_gpu, configData["core"]["mach"], configData["core"]["gamma"], configData["core"]["pr_inf"], configData["core"]["rho_inf"], configData["core"]["aoa"])
+            state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](globaldata_gpu, float(configData["core"]["mach"]), float(configData["core"]["gamma"]), float(configData["core"]["pr_inf"]), float(configData["core"]["rho_inf"]), float(configData["core"]["aoa"]), sum_res_sqr_gpu)
             cuda.synchronize()
-            if i == 1:
-                print("Iteration 1")
+            temp_gpu = sum_reduce(sum_res_sqr_gpu)
+            residue = math.sqrt(temp_gpu) / len(globaldata)
+            if i <= 2:
+                res_old = residue
+                residue = 0
+            else:
+                residue = math.log10(residue / res_old)
+            print("Iteration: %s Residue: %s" % (str(i), residue))
+            with open('residue', 'a+') as the_file:
+                the_file.write("%s %s\n" % (i, residue))
         temp = globaldata_gpu.copy_to_host()
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
     with open('test_gpu', 'w+') as the_file:
         for idx in range(len(globaldata)):
             if idx > 0:
                 itm = globaldata[idx]
-                the_file.write("%.13f \n" % (itm.prim[0]))
+                the_file.write("%.13f %.13f %.13f %.13f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     return res_old, globaldata
         

@@ -38,11 +38,12 @@ def func_delta_cuda_kernel(globaldata, cfl):
         globaldata[idx]['delta'] = min_delt
 
 @cuda.jit()
-def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa):
+def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr_gpu):
     tx = cuda.threadIdx.x
     bx = cuda.blockIdx.x
     bw = cuda.blockDim.x
     idx =  bx * bw + tx
+    sum_res_sqr_gpu[idx] = 0
 
     U = cuda.local.array((4), numba.float64)
     temp1 = cuda.local.array((4), numba.float64)
@@ -71,6 +72,9 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa):
             U3_rot = U[2]
             U[1] = U2_rot*ny + U3_rot*nx
             U[2] = U3_rot*ny - U2_rot*nx
+
+            res_sqr = (U[0] - temp) ** 2
+            sum_res_sqr_gpu[idx] = res_sqr
 
             tempU[0] = U[0]
             temp = 1 / U[0]
@@ -123,6 +127,9 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa):
             U3_rot = U[2]
             U[1] = U2_rot*ny + U3_rot*nx
             U[2] = U3_rot*ny - U2_rot*nx
+
+            res_sqr = (U[0] - temp) ** 2
+            sum_res_sqr_gpu[idx] = res_sqr
 
             tempU[0] = U[0]
             temp = 1 / U[0]
