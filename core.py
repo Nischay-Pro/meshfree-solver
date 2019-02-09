@@ -122,11 +122,11 @@ def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interior
             globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
             globaldata = state_update.func_delta(globaldata, configData)
             globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, i, res_old)
-            with open('test_cpu', 'w+') as the_file:
-                for idx in range(len(globaldata)):
-                    if idx > 0:
-                        itm = globaldata[idx]
-                        the_file.write("%.13f %.13f %.13f %.13f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
+            # with open('test_cpu', 'w+') as the_file:
+            #     for idx in range(len(globaldata)):
+            #         if idx > 0:
+            #             itm = globaldata[idx]
+            #             the_file.write("%.13f %.13f %.13f %.13f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
             objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
         return res_old, globaldata
     else:
@@ -170,11 +170,11 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
                 the_file.write("%s %s\n" % (i, residue))
         temp = globaldata_gpu.copy_to_host()
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
-    with open('test_gpu', 'w+') as the_file:
-        for idx in range(len(globaldata)):
-            if idx > 0:
-                itm = globaldata[idx]
-                the_file.write("%.13f %.13f %.13f %.13f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
+    # with open('test_gpu', 'w+') as the_file:
+    #     for idx in range(len(globaldata)):
+    #         if idx > 0:
+    #             itm = globaldata[idx]
+    #             the_file.write("%.13f %.13f %.13f %.13f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     return res_old, globaldata
         
