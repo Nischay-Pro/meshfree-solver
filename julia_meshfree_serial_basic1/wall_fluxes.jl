@@ -85,7 +85,7 @@ function wall_dGx_pos(globaldata, idx, configData, max_q, min_q)
     end
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
-    one_by_det = 1 / det
+    one_by_det = 1.0 / det
     G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
     return G
 end
@@ -172,8 +172,7 @@ function wall_dGx_neg(globaldata, idx, configData, max_q, min_q)
         sum_dely_delf = sum_dely_delf + (G_k - G_i) * deln_weights
     end
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
-    one_by_det = 1 / det
-
+    one_by_det = 1.0 / det
     G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
     return G
 end
@@ -260,8 +259,7 @@ function wall_dGy_neg(globaldata, idx, configData, max_q, min_q)
     end
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
-    one_by_det = 1 / det
-
+    one_by_det = 1.0 / det
     G = (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
 
     return G

@@ -1,9 +1,9 @@
 {
     "core":{
         "cfl": 0.8,
-        "max_iters": 5,
-        "mach": 0.63,
-        "aoa": 2,
+        "max_iters": 2,
+        "mach": 0.85,
+        "aoa": 1,
         "power": 0,
         "limiter_flag": 1,
         "vl_const": 150,
@@ -11,7 +11,7 @@
         "interior_points_normal_flag": 0,
         "shapes": 1,
         "rho_inf": 1,
-        "pr_inf": 0.71428571428,
+        "pr_inf": 0.7142857142857143,
         "gamma": 1.4,
         "clcd_flag": false
     },

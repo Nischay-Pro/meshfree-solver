@@ -16,11 +16,11 @@ def main():
     splitdata = data1.split("\n")
     splitdata = splitdata[:-1]
 
-    defprimal = core.getInitialPrimitive2(configData)
+    defprimal = core.getInitialPrimitive(configData)
 
     for idx, itm in enumerate(splitdata):
         itmdata = itm.split(" ")
-        temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), 1, 1, int(itmdata[5]), int(itmdata[6]), int(itmdata[7]), list(map(int,itmdata[8:])), float(itmdata[3]), float(itmdata[4]), defprimal[idx], None, None, None, None, None, None, None, None, None, None, None, None, None)
+        temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), 1, 1, int(itmdata[5]), int(itmdata[6]), int(itmdata[7]), list(map(int,itmdata[8:])), float(itmdata[3]), float(itmdata[4]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None)
         globaldata.append(temp)
         if int(itmdata[5]) == 1:
             wallpts += 1

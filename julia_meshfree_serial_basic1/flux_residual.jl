@@ -12,7 +12,7 @@ function wallindices_flux_residual(globaldata, configData, wallindices, max_q, m
 		Gxn = wall_dGx_neg(globaldata, itm, configData, max_q, min_q)
 		Gyn = wall_dGy_neg(globaldata, itm, configData, max_q, min_q)
 		GTemp = Gxp + Gxn + Gyn
-		GTemp = GTemp * 2
+		GTemp = GTemp * 2.0
 		globaldata[itm].flux_res = GTemp
 	end
 end

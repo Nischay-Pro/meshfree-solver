@@ -95,21 +95,38 @@ end
 function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 111\n")
+
     q_var_derivatives(globaldata, configData)
-    # println(IOContext(stdout, :compact => false), globaldata[1].prim)
+    println("q1")
+    println(IOContext(stdout, :compact => false), globaldata[1].q)
+    # println("Prim")
+    # println(IOContext(stdout, :compact => false), globaldata[2].prim)
     # print(" 222\n")
+    # println(IOContext(stdout, :compact => false), globaldata[100].dq)
     cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 333\n")
     func_delta(globaldata, configData)
+    # if iter > 49
+    #     println(IOContext(stdout, :compact => false), globaldata[100].flux_res)
+    # end
+    # println(IOContext(stdout, :compact => false), globaldata[100].delta)
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 444\n")
+    # println("Prim1")
+    # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
+    # if iter > 49
+    #     println(IOContext(stdout, :compact => false), globaldata[1].prim)
+    # end
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 555\n")
-    compute_cl_cd_cm(globaldata, configData, wallindices)
+    # compute_cl_cd_cm(globaldata, configData, wallindices)
+    # println("Prim2")
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 666\n")
+    println("q2")
+    println(IOContext(stdout, :compact => false), globaldata[1].q)
 end
 
 function q_var_derivatives(globaldata, configData)
@@ -121,9 +138,12 @@ function q_var_derivatives(globaldata, configData)
         u2 = itm.prim[3]
         pr = itm.prim[4]
 
-        beta = 0.5 * (itm.prim[1] / itm.prim[4])
+        beta::Float64 = 0.5 * (rho / pr)
         globaldata[idx].q[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
-        two_times_beta = 2 * beta
+        two_times_beta = 2.0 * beta
+        # if idx == 1
+        #     println(globaldata[idx].q[1])
+        # end
         globaldata[idx].q[2] = (two_times_beta * u1)
         globaldata[idx].q[3] = (two_times_beta * u2)
         globaldata[idx].q[4] = -two_times_beta

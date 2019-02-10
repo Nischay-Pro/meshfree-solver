@@ -107,13 +107,15 @@ def calculateConnectivity(globaldata, idx):
 def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
 
     globaldata = q_var_derivatives(globaldata, configData)
-
+    print("{:.15f}".format(globaldata[1].q[0]))
     globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
 
     globaldata = state_update.func_delta(globaldata, configData)
-
+    # print("Prim1")
+    # print(globaldata[1].prim)
     globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
-
+    # print("Prim2")
+    # print(globaldata[1].prim)
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
 
     return res_old, globaldata
@@ -128,12 +130,14 @@ def q_var_derivatives(globaldata, configData):
             pr = itm.prim[3]
 
             beta = 0.5 * (rho / pr)
-
+            # if idx == 1:
+            #     print(beta)
             tempq = np.zeros(4, dtype=np.float64)
 
             tempq[0] = (math.log(rho) + (math.log(beta) * 2.5) - (beta * ((u1*u1) + (u2 * u2))))
             two_times_beta = 2 * beta
-
+            # if idx == 1:
+            #     print("{:.15f}".format(tempq[0]))
             tempq[1] = (two_times_beta * u1)
             tempq[2] = (two_times_beta * u2)
             tempq[3] = -two_times_beta
