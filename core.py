@@ -70,7 +70,7 @@ def calculateNormals(left, right, mx, my):
 
     return (nx,ny)
 
-def calculateConnectivity(globaldata, idx):
+def calculateConnectivity(globaldata, idx, configData):
     ptInterest = globaldata[idx]
     currx = ptInterest.x
     curry = ptInterest.y
@@ -100,17 +100,17 @@ def calculateConnectivity(globaldata, idx):
         if dels >= 0:
             xneg_conn.append(itm)
 
-        if flag == 2:
+        if flag == configData["point"]["interior"]:
             if deln <= 0:
                 ypos_conn.append(itm)
             
             if deln >= 0:
                 yneg_conn.append(itm)
 
-        elif flag == 1:
+        elif flag == configData["point"]["wall"]:
             yneg_conn.append(itm)
         
-        elif flag == 3:
+        elif flag == configData["point"]["outer"]:
             ypos_conn.append(itm)
         
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
@@ -122,11 +122,26 @@ def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interior
             globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
             globaldata = state_update.func_delta(globaldata, configData)
             globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, i, res_old)
-            # with open('test_cpu', 'w+') as the_file:
-            #     for idx in range(len(globaldata)):
-            #         if idx > 0:
-            #             itm = globaldata[idx]
-            #             the_file.write("%.13f %.13f %.13f %.13f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
+            if i >= 1 and i <= 70:
+                with open('stuff/%s' % i, 'w+') as the_file:
+                    itm = globaldata[1]
+                    the_file.write("1\n")
+                    the_file.write("q\n")
+                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.q[0], itm.q[1], itm.q[2], itm.q[3]))
+                    the_file.write("dQ\n")
+                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[0][0], itm.dq[0][1], itm.dq[0][2], itm.dq[0][3]))
+                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[1][0], itm.dq[1][1], itm.dq[1][2], itm.dq[1][3]))
+                    the_file.write("Primitive\n")
+                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
+                    itm = globaldata[100]
+                    the_file.write("100\n")
+                    the_file.write("q\n")
+                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.q[0], itm.q[1], itm.q[2], itm.q[3]))
+                    the_file.write("dQ\n")
+                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[0][0], itm.dq[0][1], itm.dq[0][2], itm.dq[0][3]))
+                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[1][0], itm.dq[1][1], itm.dq[1][2], itm.dq[1][3]))
+                    the_file.write("Primitive\n")
+                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
             objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
         return res_old, globaldata
     else:
@@ -135,13 +150,16 @@ def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interior
 
 def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
     stream = cuda.stream()
+    print("Converting Globaldata to GPU")
     globaldata_gpu = convert.convert_globaldata_to_gpu_globaldata(globaldata)
     sum_res_sqr = np.zeros((len(globaldata)), dtype=np.float64)
     print("start")
     with stream.auto_synchronize():
+        print("Pushing GPU Globaldata to GPU")
+        globaldata_gpu[1]
         globaldata_gpu = cuda.to_device(globaldata_gpu, stream)
         sum_res_sqr_gpu = cuda.to_device(sum_res_sqr, stream)
-        threadsperblock = (128, 1)
+        threadsperblock = (32, 1)
         blockspergrid_x = math.ceil(len(globaldata) / threadsperblock[0])
         blockspergrid_y = math.ceil(1)
         blockspergrid = (blockspergrid_x, blockspergrid_y)
@@ -152,11 +170,11 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
             cuda.synchronize()
             q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']))
             cuda.synchronize()
-            flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']), float(configData['core']['vl_const']), float(configData['core']['gamma']))
+            flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']), float(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]))
             cuda.synchronize()
             state_update_cuda.func_delta_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData["core"]["cfl"]))
             cuda.synchronize()
-            state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](globaldata_gpu, float(configData["core"]["mach"]), float(configData["core"]["gamma"]), float(configData["core"]["pr_inf"]), float(configData["core"]["rho_inf"]), float(configData["core"]["aoa"]), sum_res_sqr_gpu)
+            state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](globaldata_gpu, float(configData["core"]["mach"]), float(configData["core"]["gamma"]), float(configData["core"]["pr_inf"]), float(configData["core"]["rho_inf"]), float(configData["core"]["aoa"]), sum_res_sqr_gpu, int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]))
             cuda.synchronize()
             temp_gpu = sum_reduce(sum_res_sqr_gpu)
             residue = math.sqrt(temp_gpu) / len(globaldata)
@@ -170,11 +188,25 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
                 the_file.write("%s %s\n" % (i, residue))
         temp = globaldata_gpu.copy_to_host()
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
-    # with open('test_gpu', 'w+') as the_file:
-    #     for idx in range(len(globaldata)):
-    #         if idx > 0:
-    #             itm = globaldata[idx]
-    #             the_file.write("%.13f %.13f %.13f %.13f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
+    with open('stuff/%s' % i, 'w+') as the_file:
+        itm = globaldata[1]
+        the_file.write("1\n")
+        the_file.write("q\n")
+        the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.q[0], itm.q[1], itm.q[2], itm.q[3]))
+        the_file.write("dQ\n")
+        the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[0][0], itm.dq[0][1], itm.dq[0][2], itm.dq[0][3]))
+        the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[1][0], itm.dq[1][1], itm.dq[1][2], itm.dq[1][3]))
+        the_file.write("Primitive\n")
+        the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
+        itm = globaldata[100]
+        the_file.write("100\n")
+        the_file.write("q\n")
+        the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.q[0], itm.q[1], itm.q[2], itm.q[3]))
+        the_file.write("dQ\n")
+        the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[0][0], itm.dq[0][1], itm.dq[0][2], itm.dq[0][3]))
+        the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[1][0], itm.dq[1][1], itm.dq[1][2], itm.dq[1][3]))
+        the_file.write("Primitive\n")
+        the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     return res_old, globaldata
         

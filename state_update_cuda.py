@@ -38,7 +38,7 @@ def func_delta_cuda_kernel(globaldata, cfl):
         globaldata[idx]['delta'] = min_delt
 
 @cuda.jit()
-def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr_gpu):
+def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr_gpu, wall, interior, outer):
     tx = cuda.threadIdx.x
     bx = cuda.blockIdx.x
     bw = cuda.blockDim.x
@@ -57,7 +57,7 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr
         flag_1 = globaldata[idx]['flag_1']
         nx = globaldata[idx]['nx']
         ny = globaldata[idx]['ny']
-        if flag_1 == 1:
+        if flag_1 == wall:
 
             primitive_to_conserved_cuda_kernel(globaldata, idx, nx, ny, U)
 
@@ -88,7 +88,7 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr
             globaldata[idx]['prim'][2] = tempU[2]
             globaldata[idx]['prim'][3] = tempU[3]
 
-        elif flag_1 == 3:
+        elif flag_1 == outer:
 
             conserved_vector_Ubar_cuda_kernel(globaldata, idx, nx, ny, Mach, gamma, pr_inf, rho_inf, aoa, U)
 
@@ -114,7 +114,7 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr
             globaldata[idx]['prim'][2] = tempU[2]
             globaldata[idx]['prim'][3] = tempU[3]
 
-        elif flag_1 == 2:
+        elif flag_1 == interior:
 
             primitive_to_conserved_cuda_kernel(globaldata, idx, nx, ny, U)
 

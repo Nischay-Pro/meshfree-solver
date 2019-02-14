@@ -24,3 +24,5 @@ grids/*
 *.dat
 result-*
 *.out
+config.json
+stuff/*

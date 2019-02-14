@@ -1,5 +1,6 @@
 import numpy as np
 import point
+from progress import printProgressBar
 
 def convert_globaldata_to_gpu_globaldata(globaldata):
     point_dtype = np.dtype([('localID', np.int32),
@@ -29,6 +30,9 @@ def convert_globaldata_to_gpu_globaldata(globaldata):
                             ('delta', np.float64)], align=True)
     temp = np.zeros(len(globaldata), dtype=point_dtype)
     for idx in range(len(globaldata)):
+        printProgressBar(
+            idx, len(globaldata) - 1, prefix="Progress:", suffix="Complete", length=50
+        )
         if idx > 0:
             temp[idx]['localID'] = globaldata[idx].localID
             temp[idx]['x'] = globaldata[idx].x
@@ -70,7 +74,8 @@ def convert_globaldata_to_gpu_globaldata(globaldata):
             yneg_conn = np.pad(yneg_conn, (0, N), 'constant')
             temp[idx]['yneg_conn'] = yneg_conn
             temp[idx]['delta'] = globaldata[idx].delta
-    
+            if idx == 1:
+                print(temp[1])
     return temp    
 
 def convert_gpu_globaldata_to_globaldata(globaldata):

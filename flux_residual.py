@@ -45,7 +45,7 @@ def cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, co
 	return globaldata
 
 @cuda.jit()
-def cal_flux_residual_cuda_kernel(globaldata, power, vl_const, gamma):
+def cal_flux_residual_cuda_kernel(globaldata, power, vl_const, gamma, wall, interior, outer):
 	tx = cuda.threadIdx.x
 	bx = cuda.blockIdx.x
 	bw = cuda.blockDim.x
@@ -53,7 +53,7 @@ def cal_flux_residual_cuda_kernel(globaldata, power, vl_const, gamma):
 	if idx > 0 and idx < len(globaldata):
 		itm = globaldata[idx]
 		flag_1 = itm['flag_1']
-		if flag_1 == 1:
+		if flag_1 == wall:
 
 			Gxp = cuda.local.array((4), dtype=numba.float64)
 			Gxn = cuda.local.array((4), dtype=numba.float64)
@@ -80,7 +80,7 @@ def cal_flux_residual_cuda_kernel(globaldata, power, vl_const, gamma):
 			globaldata[idx]['flux_res'][2] = GTemp[2]
 			globaldata[idx]['flux_res'][3] = GTemp[3]
 
-		elif flag_1 == 2:
+		elif flag_1 == interior:
 
 			Gxp = cuda.local.array((4), dtype=numba.float64)
 			Gxn = cuda.local.array((4), dtype=numba.float64)
@@ -109,7 +109,7 @@ def cal_flux_residual_cuda_kernel(globaldata, power, vl_const, gamma):
 			globaldata[idx]['flux_res'][2] = GTemp[2]
 			globaldata[idx]['flux_res'][3] = GTemp[3]
 
-		elif flag_1 == 3:
+		elif flag_1 == outer:
 
 			Gxp = cuda.local.array((4), dtype=numba.float64)
 			Gxn = cuda.local.array((4), dtype=numba.float64)
