@@ -30,9 +30,9 @@ def convert_globaldata_to_gpu_globaldata(globaldata):
                             ('delta', np.float64)], align=True)
     temp = np.zeros(len(globaldata), dtype=point_dtype)
     for idx in range(len(globaldata)):
-        printProgressBar(
-            idx, len(globaldata) - 1, prefix="Progress:", suffix="Complete", length=50
-        )
+        # printProgressBar(
+        #     idx, len(globaldata) - 1, prefix="Progress:", suffix="Complete", length=50
+        # )
         if idx > 0:
             temp[idx]['localID'] = globaldata[idx].localID
             temp[idx]['x'] = globaldata[idx].x

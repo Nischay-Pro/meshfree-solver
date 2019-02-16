@@ -35,9 +35,9 @@ def main():
 
     print("Converting RAW dataset to Globaldata")
     for idx, itm in enumerate(splitdata):
-        printProgressBar(
-            idx, len(splitdata) - 1, prefix="Progress:", suffix="Complete", length=50
-        )
+        # printProgressBar(
+        #     idx, len(splitdata) - 1, prefix="Progress:", suffix="Complete", length=50
+        # )
         itmdata = itm.split(" ")
         if not original_format:
             temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), 1, 1, int(itmdata[5]), int(itmdata[6]), int(itmdata[7]), list(map(int,itmdata[8:])), float(itmdata[3]), float(itmdata[4]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None)

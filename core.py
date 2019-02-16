@@ -122,26 +122,26 @@ def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interior
             globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
             globaldata = state_update.func_delta(globaldata, configData)
             globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, i, res_old)
-            if i >= 1 and i <= 70:
-                with open('stuff/%s' % i, 'w+') as the_file:
-                    itm = globaldata[1]
-                    the_file.write("1\n")
-                    the_file.write("q\n")
-                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.q[0], itm.q[1], itm.q[2], itm.q[3]))
-                    the_file.write("dQ\n")
-                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[0][0], itm.dq[0][1], itm.dq[0][2], itm.dq[0][3]))
-                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[1][0], itm.dq[1][1], itm.dq[1][2], itm.dq[1][3]))
-                    the_file.write("Primitive\n")
-                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
-                    itm = globaldata[100]
-                    the_file.write("100\n")
-                    the_file.write("q\n")
-                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.q[0], itm.q[1], itm.q[2], itm.q[3]))
-                    the_file.write("dQ\n")
-                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[0][0], itm.dq[0][1], itm.dq[0][2], itm.dq[0][3]))
-                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[1][0], itm.dq[1][1], itm.dq[1][2], itm.dq[1][3]))
-                    the_file.write("Primitive\n")
-                    the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
+            # if i >= 1 and i <= 70:
+            #     with open('stuff/%s' % i, 'w+') as the_file:
+            #         itm = globaldata[1]
+            #         the_file.write("1\n")
+            #         the_file.write("q\n")
+            #         the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.q[0], itm.q[1], itm.q[2], itm.q[3]))
+            #         the_file.write("dQ\n")
+            #         the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[0][0], itm.dq[0][1], itm.dq[0][2], itm.dq[0][3]))
+            #         the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[1][0], itm.dq[1][1], itm.dq[1][2], itm.dq[1][3]))
+            #         the_file.write("Primitive\n")
+            #         the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
+            #         itm = globaldata[100]
+            #         the_file.write("100\n")
+            #         the_file.write("q\n")
+            #         the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.q[0], itm.q[1], itm.q[2], itm.q[3]))
+            #         the_file.write("dQ\n")
+            #         the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[0][0], itm.dq[0][1], itm.dq[0][2], itm.dq[0][3]))
+            #         the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[1][0], itm.dq[1][1], itm.dq[1][2], itm.dq[1][3]))
+            #         the_file.write("Primitive\n")
+            #         the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
             objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
         return res_old, globaldata
     else:
