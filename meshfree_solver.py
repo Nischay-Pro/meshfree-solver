@@ -3,8 +3,20 @@ import core
 import config
 import argparse
 from progress import printProgressBar
+try:
+    from mpi4py import MPI
+    MPI_CAPABLE = True
+except ImportError:
+    MPI_CAPABLE = False
 
 def main():
+
+    if MPI_CAPABLE:
+        comm = MPI.COMM_WORLD
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        print(size, rank)
+        exit()
 
     globaldata = ["start"]
 
