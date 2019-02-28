@@ -1,4 +1,4 @@
-CC     = icpc
+CC     = g++
 CCFLAG = -march=native -O3 -pipe -Wall -Wextra -Wunused-parameter \
                         -Wunused-variable
 INC    = -I$(METIS_DIR)/include

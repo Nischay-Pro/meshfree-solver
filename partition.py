@@ -1,6 +1,5 @@
 from __future__ import print_function
 from mpi4py import MPI
-import time
 
 comm = MPI.COMM_WORLD
 
