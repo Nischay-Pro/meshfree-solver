@@ -41,7 +41,6 @@ def main():
                         if exists_in_file(itm2, line):
                             base = os.path.basename(itm2)
                             base = base.split("_")[0]
-                            corebase = base
                             base = base.replace("partGrid", "")
                             base = int(base)
                             path = os.path.dirname(itm2)
@@ -68,9 +67,9 @@ def exists_in_file(file, string):
     string.pop(-1)
     string = " ".join(string)
     if string[0] != "-":
-        args = ["grep", "'%s [0-9]\{1,20\} [0-9]\{1,20\}'" % string, file]
+        args = ["grep", "'%s [0-9]\\{1,20\\} [0-9]\\{1,20\\}'" % string, file]
     else:
-        args = ["grep", "'\%s [0-9]\{1,20\} [0-9]\{1,20\}'" % string, file]
+        args = ["grep", "'\\%s [0-9]\\{1,20\\} [0-9]\\{1,20\\}'" % string, file]
     result = s.getoutput(" ".join(args))
     if len(result) > 0:
         return True
