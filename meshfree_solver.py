@@ -84,14 +84,14 @@ def main():
     print("Starting FPI Solver")
     core.fpi_solver(config.getConfig()["core"]["max_iters"] + 1, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx, res_old)
 
-    print("Writing to prim val disk")
-    for idx, itm in enumerate(globaldata):
-        if idx > 0:
-            primtowrite = globaldata[idx].prim
-            with open("primvals.txt", "a") as the_file:
-                for itm in primtowrite:
-                    the_file.write(str(itm) + " ")
-                the_file.write("\n")
+    print("Done")
+    # for idx, itm in enumerate(globaldata):
+    #     if idx > 0:
+    #         primtowrite = globaldata[idx].prim
+    #         with open("primvals.txt", "a") as the_file:
+    #             for itm in primtowrite:
+    #                 the_file.write(str(itm) + " ")
+    #             the_file.write("\n")
 
 if __name__ == "__main__":
     main()

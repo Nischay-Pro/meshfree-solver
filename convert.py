@@ -74,8 +74,6 @@ def convert_globaldata_to_gpu_globaldata(globaldata):
             yneg_conn = np.pad(yneg_conn, (0, N), 'constant')
             temp[idx]['yneg_conn'] = yneg_conn
             temp[idx]['delta'] = globaldata[idx].delta
-            if idx == 1:
-                print(temp[1])
     return temp    
 
 def convert_gpu_globaldata_to_globaldata(globaldata):

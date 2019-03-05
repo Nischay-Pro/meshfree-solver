@@ -153,7 +153,6 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
     print("Converting Globaldata to GPU")
     globaldata_gpu = convert.convert_globaldata_to_gpu_globaldata(globaldata)
     sum_res_sqr = np.zeros((len(globaldata)), dtype=np.float64)
-    print("start")
     with stream.auto_synchronize():
         print("Pushing GPU Globaldata to GPU")
         globaldata_gpu[1]
