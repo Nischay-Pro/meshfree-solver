@@ -1,8 +1,9 @@
 import numpy as np
 import point
 import sys
+from mpi4py import MPI
 
-def sync_ghost(globaldata_local, globaldata_ghost, globaldata_table, comm, foreign_communicators):
+def sync_ghost(globaldata_local, globaldata_ghost, globaldata_table, comm, foreign_communicators, sync_tags):
     communication_array = {}
     for itm in globaldata_ghost.keys():
         val = globaldata_ghost[itm]
@@ -18,58 +19,87 @@ def sync_ghost(globaldata_local, globaldata_ghost, globaldata_table, comm, forei
     # print(foreign_communicators)
     if foreign_communicators != None:
         for keys in keys_list:
-            comm.isend(communication_array[keys], dest=keys)
+            comm.send(communication_array[keys], dest=keys)
 
         for i in foreign_communicators:
             data = comm.recv(source=i)
             result = {}
-            for itm in data:
-                localID = globaldata_table[itm]
-                result[itm] = globaldata_local[localID]
-            wait_queue.append(comm.isend(result, dest=i))
+            for tag in sync_tags:
+                for itm in data:
+                    localID = globaldata_table[itm]
+                    result[itm] = reducedStructure(globaldata_local[localID], tag)
+                comm.send(result, dest=i, tag=tag)
     
     else:
+
         foreign_communicators = []
         for i in range(comm.Get_size()):
             if i != comm.Get_rank():
+                req = None
                 if i in communication_array.keys():
-                    comm.send(communication_array[i], dest=i)
+                    req = comm.isend(communication_array[i], dest=i)
                 else:
-                    comm.send(None, dest=i)
+                    req = comm.isend([None], dest=i)
+                wait_queue.append(req)
+
+        for itm in wait_queue:
+            MPI.Request.Wait(itm)
 
         for i in range(comm.Get_size()):
             if i != comm.Get_rank():
                 data = comm.recv(source=i)
-                if data == None:
+                if data[0] == None:
                     pass
                 else:
                     foreign_communicators.append(i)
                     result = {}
-                    for itm in data:
-                        localID = globaldata_table[itm]
-                        result[itm] = globaldata_local[localID]
-                    wait_queue.append(comm.isend(result, dest=i))
+                    for tag in sync_tags:
+                        for itm in data:
+                            localID = globaldata_table[itm]
+                            result[itm] = reducedStructure(globaldata_local[localID], tag)
+                        comm.send(result, dest=i, tag=tag)
                     
-        
         foreign_communicators.sort()
 
     comm.Barrier()
 
     for itm in keys_list:
-        data = comm.recv(source=itm)
-        for key in data.keys():
-            localID = globaldata_table[key]
-            globaldata_ghost[localID].q = data[key].q
-            globaldata_ghost[localID].dq = data[key].dq
-            globaldata_ghost[localID].flux_res = data[key].flux_res
-            globaldata_ghost[localID].prim = data[key].prim
-            globaldata_ghost[localID].delta = data[key].delta
-            globaldata_ghost[localID].maxq = data[key].maxq
-            globaldata_ghost[localID].minq = data[key].minq
-            globaldata_ghost[localID].ds = data[key].ds
-    print("Updated Successfully")
+        for tag in sync_tags:
+            data = comm.recv(source=itm, tag=tag)
+            for key in data.keys():
+                localID = globaldata_table[key]
+                response = data[key]
+                if tag == 0:
+                    globaldata_ghost[localID].dq = response
+                elif tag == 1:
+                    globaldata_ghost[localID].minq = response
+                elif tag == 2:
+                    globaldata_ghost[localID].maxq = response
+                elif tag == 3:
+                    globaldata_ghost[localID].ds = response
+                elif tag == 4:
+                    globaldata_ghost[localID].prim = response
+
+    # print("Updated Successfully")
 
     return globaldata_ghost, foreign_communicators
+
+def reducedStructure(point, tag):
+    if tag == 0:
+        dq = np.array(point.dq).tolist()
+        return dq
+    elif tag == 1:
+        minq = point.minq
+        return minq
+    elif tag == 2:
+        maxq = point.maxq
+        return maxq
+    elif tag == 3:
+        ds = point.ds
+        return ds
+    elif tag == 4:
+        prim = np.array(point.prim).tolist()
+        return prim
 
 # def convert_to_numpy(point_obj):
 #     point_dtype = np.dtype([('localID', np.int32),

@@ -175,11 +175,12 @@ def fpi_solver_mpi(iter, globaldata_local, configData, globaldata_ghost, res_old
         globaldata_local, globaldata_ghost = q_var_derivatives_mpi(globaldata_local, globaldata_ghost, configData, ds=ds)
         comm.Barrier()
         ds = True
-        globaldata_ghost, foreign_communicators = mpicore.sync_ghost(globaldata_local, globaldata_ghost, globaldata_table, comm, foreign_communicators)
+        globaldata_ghost, foreign_communicators = mpicore.sync_ghost(globaldata_local, globaldata_ghost, globaldata_table, comm, foreign_communicators, [0, 1, 2, 3])
         globaldata_local = flux_residual_mpi.cal_flux_residual_mpi(globaldata_local, globaldata_ghost, wallindices, outerindices, interiorindices, configData)
         globaldata_local = state_update_mpi.func_delta_mpi(globaldata_local, globaldata_ghost, configData)
         globaldata_local, res_old = state_update_mpi.state_update_mpi(globaldata_local, wallindices, outerindices, interiorindices, configData, i, res_old, comm)
-        exit()
+        comm.Barrier()
+        globaldata_ghost, foreign_communicators = mpicore.sync_ghost(globaldata_local, globaldata_ghost, globaldata_table, comm, foreign_communicators, [4])
         # objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     return res_old, globaldata_local   
 

@@ -112,6 +112,8 @@ def main():
         #                 the_file.write(str(itm) + " ")
         #             the_file.write("\n")
     else:
+        print(comm.Get_size())
+        print(comm.Get_rank())
         globaldata_ghost = {}
         globaldata_local = {}
         globaldata_table = {}
