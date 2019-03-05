@@ -2,7 +2,7 @@ import math
 import core
 import numpy as np
 
-def compute_cl_cd_cm(globaldata, configData, wallindices):
+def compute_cl_cd_cm(globaldata, configData, wallindices, comm=None):
 
     rho_inf = configData["core"]["rho_inf"]
     Mach = configData["core"]["mach"]
@@ -20,7 +20,12 @@ def compute_cl_cd_cm(globaldata, configData, wallindices):
     Cd = [0 for i in range(shapes)]
     Cm = [0 for i in range(shapes)]
 
-    with open('cp_file', 'a') as the_file:
+    if comm != None:
+        file_id = "_" + str(comm.Get_rank())
+    else:
+        file_id = ""
+
+    with open('cp_file%s' % file_id, 'a') as the_file:
 
         for itm in wallindices:
             left = globaldata[itm].left

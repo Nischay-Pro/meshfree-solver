@@ -181,7 +181,7 @@ def fpi_solver_mpi(iter, globaldata_local, configData, globaldata_ghost, res_old
         globaldata_local, res_old = state_update_mpi.state_update_mpi(globaldata_local, wallindices, outerindices, interiorindices, configData, i, res_old, comm)
         comm.Barrier()
         globaldata_ghost, foreign_communicators = mpicore.sync_ghost(globaldata_local, globaldata_ghost, globaldata_table, comm, foreign_communicators, [4])
-        # objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
+        # objective_function.compute_cl_cd_cm(globaldata_local, configData, wallindices, comm=comm)
     return res_old, globaldata_local   
 
 def q_var_derivatives(globaldata, configData):
