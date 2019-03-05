@@ -1,8 +1,10 @@
 import math
 from numba import jit
+import functools
 
 
 #@jit(nopython=True)
+@functools.lru_cache(maxsize=None)
 def flux_Gxp(nx, ny, u1, u2, rho, pr):
 
     Gxp = []
@@ -37,6 +39,7 @@ def flux_Gxp(nx, ny, u1, u2, rho, pr):
     return Gxp
 
 #@jit(nopython=True)
+@functools.lru_cache(maxsize=None)
 def flux_Gxn(nx, ny, u1, u2, rho, pr):
 
     Gxn = []
@@ -73,6 +76,7 @@ def flux_Gxn(nx, ny, u1, u2, rho, pr):
     return Gxn
 
 #@jit(nopython=True)
+@functools.lru_cache(maxsize=None)
 def flux_Gyp(nx, ny, u1, u2, rho, pr):
 
     Gyp = []
@@ -110,6 +114,7 @@ def flux_Gyp(nx, ny, u1, u2, rho, pr):
     return Gyp
 
 #@jit(nopython=True)
+@functools.lru_cache(maxsize=None)
 def flux_Gyn(nx, ny, u1, u2, rho, pr):
 
     Gyn = []
@@ -146,6 +151,7 @@ def flux_Gyn(nx, ny, u1, u2, rho, pr):
     return Gyn
 
 #@jit(nopython=True)
+@functools.lru_cache(maxsize=None)
 def flux_Gx(Gx, nx, ny, u1, u2, rho, pr):
     tx = ny
     ty = -nx
@@ -164,6 +170,7 @@ def flux_Gx(Gx, nx, ny, u1, u2, rho, pr):
     Gx[3] = (pr + rho_e)*ut
 
 #@jit(nopython=True)
+@functools.lru_cache(maxsize=None)
 def flux_Gy(Gy, nx, ny, u1, u2, rho, pr):
     tx = ny
     ty = -nx

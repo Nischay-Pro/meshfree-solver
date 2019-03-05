@@ -4,9 +4,9 @@ import config
 import argparse
 from progress import printProgressBar
 import numpy as np
-import dill
 try:
     from mpi4py import MPI
+    import dill
     MPI_CAPABLE = True
     MPI.pickle.__init__(dill.dumps, dill.loads)
 except ImportError:

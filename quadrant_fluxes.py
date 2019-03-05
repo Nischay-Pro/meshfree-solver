@@ -1,7 +1,9 @@
 import math
 from numba import jit
+import functools
 
 #@jit(nopython=True)
+@functools.lru_cache(maxsize=None)
 def flux_quad_GxI(nx, ny, u1, u2, rho, pr):
     G = []
 
@@ -41,6 +43,7 @@ def flux_quad_GxI(nx, ny, u1, u2, rho, pr):
     return G
 
 #@jit(nopython=True)
+@functools.lru_cache(maxsize=None)
 def flux_quad_GxII(nx, ny, u1, u2, rho, pr):
     G = []
 
@@ -85,6 +88,7 @@ def flux_quad_GxII(nx, ny, u1, u2, rho, pr):
     return G
 
 #@jit(nopython=True)
+@functools.lru_cache(maxsize=None)
 def flux_quad_GxIII(nx, ny, u1, u2, rho, pr):
 
     G = []
@@ -131,6 +135,7 @@ def flux_quad_GxIII(nx, ny, u1, u2, rho, pr):
     return G
 
 #@jit(nopython=True)
+@functools.lru_cache(maxsize=None)
 def flux_quad_GxIV(nx, ny, u1, u2, rho, pr):
 
     G = []

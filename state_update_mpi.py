@@ -2,7 +2,10 @@ import config
 import math
 import numpy as np
 import core
-from mpi4py import MPI
+try:
+    from mpi4py import MPI
+except ImportError:
+    pass
 
 def func_delta_mpi(globaldata_local, globaldata_ghost, configData):
     cfl = configData["core"]["cfl"]

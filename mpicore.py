@@ -1,7 +1,10 @@
 import numpy as np
 import point
 import sys
-from mpi4py import MPI
+try:
+    from mpi4py import MPI
+except:
+    pass
 
 def sync_ghost(globaldata_local, globaldata_ghost, globaldata_table, comm, foreign_communicators, sync_tags):
     communication_array = {}
