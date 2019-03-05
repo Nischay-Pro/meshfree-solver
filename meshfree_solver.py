@@ -7,8 +7,9 @@ import numpy as np
 try:
     from mpi4py import MPI
     import dill
+    import msgpack
     MPI_CAPABLE = True
-    # MPI.pickle.__init__(dill.dumps, dill.loads)
+    MPI.pickle.__init__(msgpack.dumps, msgpack.loads)
 except ImportError:
     MPI_CAPABLE = False
 
@@ -112,8 +113,6 @@ def main():
         #                 the_file.write(str(itm) + " ")
         #             the_file.write("\n")
     else:
-        print(comm.Get_size())
-        print(comm.Get_rank())
         globaldata_ghost = {}
         globaldata_local = {}
         globaldata_table = {}
@@ -185,7 +184,8 @@ def main():
 
         res_old = 0
 
-        print("Starting FPI Solver")
+        if rank == 0:
+            print("Starting FPI Solver")
         core.fpi_solver_mpi(config.getConfig()["core"]["max_iters"] + 1, globaldata_local, configData, globaldata_ghost, res_old, wallptsidx, outerptsidx, interiorptsidx, comm, globaldata_table)
 
 

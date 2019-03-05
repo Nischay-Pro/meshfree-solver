@@ -151,10 +151,10 @@ def state_update_mpi(globaldata_local, wallindices, outerindices, interiorindice
         else:
             residue = math.log10(res_new/res_old)
 
-        print(res_old)
+        # print(res_old)
 
-        # with open('residue', 'a') as the_file:
-        #     the_file.write("%i %f" % (iter, residue))
+        with open('residue', 'a') as the_file:
+            the_file.write("%i %f" % (iter, residue))
         
         print("Iteration Number: ", iter)
         print("Residue: ", residue)
