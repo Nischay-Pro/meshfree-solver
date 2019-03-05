@@ -73,7 +73,7 @@ def sync_ghost(globaldata_local, globaldata_ghost, globaldata_table, comm, forei
                 localID = globaldata_table[key]
                 response = data[key]
                 if tag == 0:
-                    globaldata_ghost[localID].dq = response
+                    globaldata_ghost[localID].dq = np.array(response)
                 elif tag == 1:
                     globaldata_ghost[localID].minq = response
                 elif tag == 2:
@@ -81,7 +81,7 @@ def sync_ghost(globaldata_local, globaldata_ghost, globaldata_table, comm, forei
                 elif tag == 3:
                     globaldata_ghost[localID].ds = response
                 elif tag == 4:
-                    globaldata_ghost[localID].prim = response
+                    globaldata_ghost[localID].prim = np.array(response)
 
     # print("Updated Successfully")
 

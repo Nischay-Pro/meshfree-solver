@@ -1,9 +1,10 @@
 import math
+import numpy as np
 
 def venkat_limiter(qtilde, globaldata_local, globaldata_ghost, idx, configData):
     ghost = False
     VL_CONST = configData["core"]["vl_const"]
-    phi = []
+    phi = np.zeros(4, dtype=np.float64)
     del_pos, del_neg = 0,0
     for i in range(4):
         try:
@@ -13,7 +14,7 @@ def venkat_limiter(qtilde, globaldata_local, globaldata_ghost, idx, configData):
             ghost = True
         del_neg = qtilde[i] - q
         if abs(del_neg) <= 1e-5:
-            phi.append(1)
+            phi[i] = 1
         elif abs(del_neg) > 1e-5:
             if del_neg > 0:
                 if not ghost:
@@ -45,9 +46,9 @@ def venkat_limiter(qtilde, globaldata_local, globaldata_ghost, idx, configData):
             temp = num/den
 
             if temp < 1:
-                phi.append(temp)
+                phi[i] = temp
             else:
-                phi.append(1)
+                phi[i] = 1
     return phi
 
 
