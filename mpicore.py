@@ -75,9 +75,9 @@ def sync_ghost(globaldata_local, globaldata_ghost, globaldata_table, comm, forei
                 if tag == 0:
                     globaldata_ghost[localID].dq = np.array(response)
                 elif tag == 1:
-                    globaldata_ghost[localID].minq = response
+                    globaldata_ghost[localID].minq = np.array(response)
                 elif tag == 2:
-                    globaldata_ghost[localID].maxq = response
+                    globaldata_ghost[localID].maxq = np.array(response)
                 elif tag == 3:
                     globaldata_ghost[localID].ds = response
                 elif tag == 4:
@@ -92,10 +92,10 @@ def reducedStructure(point, tag):
         dq = np.array(point.dq).tolist()
         return dq
     elif tag == 1:
-        minq = point.minq
+        minq = np.array(point.minq).tolist()
         return minq
     elif tag == 2:
-        maxq = point.maxq
+        maxq = np.array(point.maxq).tolist()
         return maxq
     elif tag == 3:
         ds = point.ds

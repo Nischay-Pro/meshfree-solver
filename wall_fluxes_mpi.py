@@ -28,10 +28,10 @@ def wall_dGx_pos(globaldata_local, globaldata_ghost, idx, configData):
 
     for itm in globaldata_local[idx].xpos_conn:
         ghost = False
-        try:
+        if itm in globaldata_local:
             x_k = globaldata_local[itm].x
             y_k = globaldata_local[itm].y
-        except:
+        else:
             x_k = globaldata_ghost[itm].x
             y_k = globaldata_ghost[itm].y
             ghost = True
@@ -53,22 +53,23 @@ def wall_dGx_pos(globaldata_local, globaldata_ghost, idx, configData):
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = globaldata_local[idx].q - 0.5*(delx*globaldata_local[idx].dq[0] + dely*globaldata_local[idx].dq[1])
+        qtilde_i = globaldata_local[idx].q - (0.5*(delx*globaldata_local[idx].dq[0] + dely*globaldata_local[idx].dq[1]))
         if not ghost:
-            qtilde_k = globaldata_local[itm].q - 0.5*(delx*globaldata_local[itm].dq[0] + dely*globaldata_local[itm].dq[1])
+            qtilde_k = globaldata_local[itm].q - (0.5*(delx*globaldata_local[itm].dq[0] + dely*globaldata_local[itm].dq[1]))
         else:
-            qtilde_k = globaldata_ghost[itm].q - 0.5*(delx*globaldata_ghost[itm].dq[0] + dely*globaldata_ghost[itm].dq[1])
+            qtilde_k = globaldata_ghost[itm].q - (0.5*(delx*globaldata_ghost[itm].dq[0] + dely*globaldata_ghost[itm].dq[1]))
+            
 
         if limiter_flag == 1:
 
             phi_i = limiters_mpi.venkat_limiter(qtilde_i, globaldata_local, globaldata_ghost, idx, configData)
             phi_k = limiters_mpi.venkat_limiter(qtilde_k, globaldata_local, globaldata_ghost, itm, configData)
             
-            qtilde_i = globaldata_local[idx].q - 0.5 * phi_i * (delx*globaldata_local[idx].dq[0] + dely*globaldata_local[idx].dq[1])
+            qtilde_i = globaldata_local[idx].q - (0.5 * phi_i * (delx*globaldata_local[idx].dq[0] + dely*globaldata_local[idx].dq[1]))
             if not ghost:
-                qtilde_k = globaldata_local[itm].q - 0.5 * phi_k * (delx*globaldata_local[itm].dq[0] + dely*globaldata_local[itm].dq[1])
+                qtilde_k = globaldata_local[itm].q - (0.5 * phi_k * (delx*globaldata_local[itm].dq[0] + dely*globaldata_local[itm].dq[1]))
             else:
-                qtilde_k = globaldata_ghost[itm].q - 0.5 * phi_k * (delx*globaldata_ghost[itm].dq[0] + dely*globaldata_ghost[itm].dq[1])
+                qtilde_k = globaldata_ghost[itm].q - (0.5 * phi_k * (delx*globaldata_ghost[itm].dq[0] + dely*globaldata_ghost[itm].dq[1]))
                 
         result = core.qtilde_to_primitive(qtilde_i, configData)
 
@@ -83,7 +84,6 @@ def wall_dGx_pos(globaldata_local, globaldata_ghost, idx, configData):
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
 
     one_by_det = 1 / det
-
 
     G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
 
@@ -113,10 +113,10 @@ def wall_dGx_neg(globaldata_local, globaldata_ghost, idx, configData):
 
     for itm in globaldata_local[idx].xneg_conn:
         ghost = False
-        try:
+        if itm in globaldata_local:
             x_k = globaldata_local[itm].x
             y_k = globaldata_local[itm].y
-        except:
+        else:
             x_k = globaldata_ghost[itm].x
             y_k = globaldata_ghost[itm].y
             ghost = True
@@ -196,10 +196,10 @@ def wall_dGy_neg(globaldata_local, globaldata_ghost, idx, configData):
 
     for itm in globaldata_local[idx].yneg_conn:
         ghost = False
-        try:
+        if itm in globaldata_local:
             x_k = globaldata_local[itm].x
             y_k = globaldata_local[itm].y
-        except:
+        else:
             x_k = globaldata_ghost[itm].x
             y_k = globaldata_ghost[itm].y
             ghost = True

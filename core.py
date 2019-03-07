@@ -159,16 +159,17 @@ def calculateConnectivityMPI(globaldata_local, idx, configData, globaldata_ghost
 
 
 def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
+    np.set_printoptions(precision=13)
     for i in range(1, iter):
         globaldata = q_var_derivatives(globaldata, configData)
         globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
-        exit()
         globaldata = state_update.func_delta(globaldata, configData)
         globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, i, res_old)
         objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     return res_old, globaldata    
 
 def fpi_solver_mpi(iter, globaldata_local, configData, globaldata_ghost, res_old, wallindices, outerindices, interiorindices, comm, globaldata_table):
+    np.set_printoptions(precision=13)
     foreign_communicators = None
     ds = False
     for i in range(1, iter):
@@ -185,6 +186,12 @@ def fpi_solver_mpi(iter, globaldata_local, configData, globaldata_ghost, res_old
         comm.Barrier()
         globaldata_ghost, foreign_communicators = mpicore.sync_ghost(globaldata_local, globaldata_ghost, globaldata_table, comm, foreign_communicators, [4])
         # objective_function.compute_cl_cd_cm(globaldata_local, configData, wallindices, comm=comm)
+        # if comm.rank == 0:
+        #     np.set_printoptions(precision=17)
+        #     print(globaldata_local[1].x)
+        #     print(globaldata_local[1].y)
+        #     print(globaldata_local[1].dq)
+        #     print(globaldata_local[1].prim)
     return res_old, globaldata_local   
 
 def q_var_derivatives(globaldata, configData):
@@ -316,10 +323,11 @@ def q_var_derivatives_mpi(globaldata_local, globaldata_ghost, configData, ds=Fal
 
     for idx in globaldata_local.keys():
         if idx > 0:
-
+            globaldata_local[idx].maxq = np.zeros(4, dtype=np.float64) 
+            globaldata_local[idx].minq = np.zeros(4, dtype=np.float64)
             for i in range(4): 
-                globaldata_local[idx].maxq = limiters_mpi.maximum(globaldata_local, globaldata_ghost, idx, i, False)
-                globaldata_local[idx].minq = limiters_mpi.minimum(globaldata_local, globaldata_ghost, idx, i, False)
+                globaldata_local[idx].maxq[i] = limiters_mpi.maximum(globaldata_local, globaldata_ghost, idx, i, False)
+                globaldata_local[idx].minq[i] = limiters_mpi.minimum(globaldata_local, globaldata_ghost, idx, i, False)
 
             itm = globaldata_local[idx]
             x_i = itm.x

@@ -104,15 +104,10 @@ def main():
         print("Starting FPI Solver")
         core.fpi_solver(config.getConfig()["core"]["max_iters"] + 1, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx, res_old)
 
-        # print("Writing to prim val disk")
-        # for idx, itm in enumerate(globaldata):
-        #     if idx > 0:
-        #         primtowrite = globaldata[idx].prim
-        #         with open("primvals.txt", "a") as the_file:
-        #             for itm in primtowrite:
-        #                 the_file.write(str(itm) + " ")
-        #             the_file.write("\n")
     else:
+        if comm.rank == 0:
+            print("Running in MPI mode")
+            print("Running with %s cores" % comm.size)
         globaldata_ghost = {}
         globaldata_local = {}
         globaldata_table = {}
@@ -122,18 +117,21 @@ def main():
         wallptsidx, interiorptsidx, outerptsidx = [],[],[]
         total_parts = str(size)
         padding_length = len(total_parts)
+        if comm.rank == 0:
+            print("Getting Primitive Values Default")
         defprimal = core.getInitialPrimitive(configData)
         if padding_length == 1:
             padding_length += 1
         partition_file = args.partition
         partition_file = partition_file.split("0")[0]
         file_path = args.partition + "0" + str(rank)
+        if comm.rank == 0:
+            print("Loading partition: %s" % args.partition)
         with open(file_path) as fileobject:
             for row, line in enumerate(fileobject):
                 if row == 0:
                     foreigner = line
                     foreigner = tuple(map(int, foreigner.split(" ")))
-                    total_points = foreigner[0]
                     total_local_points = foreigner[1]
                     total_ghost_points = foreigner[2]
                 if row > 0:
@@ -159,6 +157,9 @@ def main():
         assert len(globaldata_ghost) == total_ghost_points, "Invalid number of Ghost Points"
         assert len(globaldata_local) == total_local_points, "Invalid number of Local Points"
 
+        if comm.rank == 0:
+            print("Calculating Normals")
+
         for idx in globaldata_local.keys():
             if globaldata_local[idx].flag_1 == configData["point"]["wall"] or globaldata_local[idx].flag_1 == configData["point"]["outer"]:
                 currpt = globaldata_local[idx].getxy()
@@ -178,6 +179,8 @@ def main():
                 normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
                 globaldata_local[idx].setNormals(normals)
 
+        if comm.rank == 0:
+            print("Calculating Connectivity")
         for idx in globaldata_local.keys():
             connectivity = core.calculateConnectivityMPI(globaldata_local, idx, configData, globaldata_ghost)
             globaldata_local[idx].setConnectivity(connectivity)

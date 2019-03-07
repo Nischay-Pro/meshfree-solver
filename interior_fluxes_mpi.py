@@ -4,6 +4,7 @@ import limiters_mpi
 import split_fluxes
 import quadrant_fluxes
 import core
+from numba import jit
 
 def interior_dGx_pos(globaldata_local, globaldata_ghost, idx, configData):
 
@@ -28,10 +29,10 @@ def interior_dGx_pos(globaldata_local, globaldata_ghost, idx, configData):
 
     for itm in globaldata_local[idx].xpos_conn:
         ghost = False
-        try:
+        if itm in globaldata_local:
             x_k = globaldata_local[itm].x
             y_k = globaldata_local[itm].y
-        except:
+        else:
             x_k = globaldata_ghost[itm].x
             y_k = globaldata_ghost[itm].y
             ghost = True
@@ -110,10 +111,10 @@ def interior_dGx_neg(globaldata_local, globaldata_ghost, idx, configData):
 
     for itm in globaldata_local[idx].xneg_conn:
         ghost = False
-        try:
+        if itm in globaldata_local:
             x_k = globaldata_local[itm].x
             y_k = globaldata_local[itm].y
-        except:
+        else:
             x_k = globaldata_ghost[itm].x
             y_k = globaldata_ghost[itm].y
             ghost = True
@@ -192,10 +193,10 @@ def interior_dGy_pos(globaldata_local, globaldata_ghost, idx, configData):
 
     for itm in globaldata_local[idx].ypos_conn:
         ghost = False
-        try:
+        if itm in globaldata_local:
             x_k = globaldata_local[itm].x
             y_k = globaldata_local[itm].y
-        except:
+        else:
             x_k = globaldata_ghost[itm].x
             y_k = globaldata_ghost[itm].y
             ghost = True
@@ -273,10 +274,10 @@ def interior_dGy_neg(globaldata_local, globaldata_ghost, idx, configData):
 
     for itm in globaldata_local[idx].yneg_conn:
         ghost = False
-        try:
+        if itm in globaldata_local:
             x_k = globaldata_local[itm].x
             y_k = globaldata_local[itm].y
-        except:
+        else:
             x_k = globaldata_ghost[itm].x
             y_k = globaldata_ghost[itm].y
             ghost = True

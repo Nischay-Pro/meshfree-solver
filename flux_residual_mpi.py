@@ -12,7 +12,7 @@ def cal_flux_residual_mpi(globaldata_local, globaldata_ghost, wallindices, outer
 
 		GTemp = Gxp + Gxn + Gyn
 		GTemp = GTemp * 2
-
+		
 		globaldata_local[itm].flux_res = GTemp
 		
 	for itm in outerindices:

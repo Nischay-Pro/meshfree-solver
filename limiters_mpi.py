@@ -4,35 +4,25 @@ import numpy as np
 def venkat_limiter(qtilde, globaldata_local, globaldata_ghost, idx, configData):
     ghost = False
     VL_CONST = configData["core"]["vl_const"]
-    phi = np.zeros(4, dtype=np.float64)
+    phi = np.empty(4, dtype=np.float64)
     del_pos, del_neg = 0,0
+    if idx in globaldata_local:
+        itm = globaldata_local[idx]
+    else:
+        itm = globaldata_ghost[idx]
     for i in range(4):
-        try:
-            q = globaldata_local[idx].q[i]
-        except:
-            q = globaldata_ghost[idx].q[i]
-            ghost = True
+        q = itm.q[i]
         del_neg = qtilde[i] - q
         if abs(del_neg) <= 1e-5:
             phi[i] = 1
         elif abs(del_neg) > 1e-5:
             if del_neg > 0:
-                if not ghost:
-                    max_q = globaldata_local[idx].maxq
-                else:
-                    max_q = globaldata_ghost[idx].maxq
+                max_q = itm.maxq[i]
                 del_pos = max_q - q
             elif del_neg < 0:
-                if not ghost:
-                    min_q = globaldata_local[idx].minq
-                else:
-                    min_q = globaldata_ghost[idx].minq
+                min_q = itm.minq[i]
                 del_pos = min_q - q
-
-            if not ghost:
-                ds = globaldata_local[idx].ds
-            else:
-                ds = globaldata_ghost[idx].ds
+            ds = itm.ds
             epsi = VL_CONST * ds
             epsi = math.pow(epsi,3)
 
