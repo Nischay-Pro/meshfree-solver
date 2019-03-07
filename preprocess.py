@@ -55,6 +55,7 @@ def main():
             key = int(os.path.basename(itm).split("_")[0].replace("partGrid",""))
             data = the_file.read().split("\n")
             data.pop(-1)
+            data.pop(0)
             for itm2 in data:
                 itm2 = itm2.split(" ")
                 itm2 = int(itm2[1])
@@ -78,6 +79,8 @@ def main():
                                 if checker in partition_original[itm2]:
                                     line = line.replace("\n","") + "%s \n" %(itm2)
                 file.write(line)
+
+    shutil.rmtree('temp')
 
 
 if __name__ == "__main__":

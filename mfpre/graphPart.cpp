@@ -15,7 +15,8 @@ using namespace std;
 typedef struct point {
     idx_t id;
     double x, y;
-    int left, right;
+    // int left, right;
+    double left, right;
     double pr, rho, u1,u2;
     idx_t flag1, flag2;
 } point;
@@ -187,7 +188,8 @@ public:
 	        write << fixed;
             write << inputToLoc[partnId][ptVec[i].id] << " " << inputToGlob[i] 
                 << setprecision(20)  << " " << ptVec[i].x << " " << ptVec[i].y 
-		        << " " << inputToLoc[partnId][ptVec[i].left] << " " << inputToLoc[partnId][ptVec[i].right]
+		        // << " " << inputToLoc[partnId][ptVec[i].left] << " " << inputToLoc[partnId][ptVec[i].right]
+		        << " " << ptVec[i].left << " " << ptVec[i].right
                 << " " << ptVec[i].flag1 << " " << ptVec[i].flag2 << " ";
             write << xadjVec[i+1]-xadjVec[i] << " ";
             for(idx_t j=xadjVec[i]; j<xadjVec[i+1]; j++){

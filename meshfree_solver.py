@@ -24,6 +24,12 @@ def main():
 
     configData = config.getConfig()
 
+    original_format = configData["core"]["format"]
+    if original_format == 0:
+        original_format = True
+    else:
+        original_format = False
+
     wallpts, interiorpts, outerpts = 0,0,0
     wallptsidx, interiorptsidx, outerptsidx, table = [],[],[],[]
 
@@ -47,12 +53,6 @@ def main():
         print("Getting Primitive Values Default")
         defprimal = core.getInitialPrimitive(configData)
 
-        original_format = configData["core"]["format"]
-        if original_format == 0:
-            original_format = True
-        else:
-            original_format = False
-
         print("Converting RAW dataset to Globaldata")
         for idx, itm in enumerate(splitdata):
             # printProgressBar(
@@ -74,6 +74,8 @@ def main():
                 outerpts += 1
                 outerptsidx.append(int(itmdata[0]))
             table.append(int(itmdata[0]))
+
+        print("Calculating Normals")
 
         if original_format:
             for idx in wallptsidx:
@@ -140,7 +142,10 @@ def main():
                     temp.pop(-1)
                     if curr_local != total_local_points:
                         # Local Points
-                        globaldata_local[idx] = Point(idx, float(temp[2]), float(temp[3]), int(temp[4]), int(temp[5]), int(temp[6]), int(temp[7]), int(temp[8]), tuple(map(int,temp[9:])), 1, 0, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, foreign=False, globalID=int(temp[1]))
+                        if original_format:
+                            globaldata_local[idx] = Point(idx, float(temp[2]), float(temp[3]), int(temp[4]), int(temp[5]), int(temp[6]), int(temp[7]), int(temp[8]), tuple(map(int,temp[9:])), 1, 0, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, foreign=False, globalID=int(temp[1]))
+                        else:
+                            globaldata_local[idx] = Point(idx, float(temp[2]), float(temp[3]), 1, 1, int(temp[6]), int(temp[7]), int(temp[8]), tuple(map(int,temp[9:])), float(temp[4]), float(temp[5]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, foreign=False, globalID=int(temp[1]))
                         globaldata_table[int(temp[1])] = idx
                         if int(temp[6]) == configData["point"]["wall"]:
                             wallptsidx.append(idx)
@@ -157,27 +162,27 @@ def main():
         assert len(globaldata_ghost) == total_ghost_points, "Invalid number of Ghost Points"
         assert len(globaldata_local) == total_local_points, "Invalid number of Local Points"
 
-        if comm.rank == 0:
+        if comm.rank == 0 and original_format:
             print("Calculating Normals")
 
-        for idx in globaldata_local.keys():
-            if globaldata_local[idx].flag_1 == configData["point"]["wall"] or globaldata_local[idx].flag_1 == configData["point"]["outer"]:
-                currpt = globaldata_local[idx].getxy()
+            for idx in globaldata_local.keys():
+                if globaldata_local[idx].flag_1 == configData["point"]["wall"] or globaldata_local[idx].flag_1 == configData["point"]["outer"]:
+                    currpt = globaldata_local[idx].getxy()
 
-                leftpt = globaldata_local[idx].left
-                if leftpt in globaldata_local.keys():
-                    leftpt = globaldata_local[leftpt].getxy()
-                else:
-                    leftpt = globaldata_ghost[leftpt].getxy()
+                    leftpt = globaldata_local[idx].left
+                    if leftpt in globaldata_local.keys():
+                        leftpt = globaldata_local[leftpt].getxy()
+                    else:
+                        leftpt = globaldata_ghost[leftpt].getxy()
 
-                rightpt = globaldata_local[idx].right
-                if rightpt in globaldata_local.keys():
-                    rightpt = globaldata_local[rightpt].getxy()
-                else:
-                    rightpt = globaldata_ghost[rightpt].getxy()
+                    rightpt = globaldata_local[idx].right
+                    if rightpt in globaldata_local.keys():
+                        rightpt = globaldata_local[rightpt].getxy()
+                    else:
+                        rightpt = globaldata_ghost[rightpt].getxy()
 
-                normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
-                globaldata_local[idx].setNormals(normals)
+                    normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
+                    globaldata_local[idx].setNormals(normals)
 
         if comm.rank == 0:
             print("Calculating Connectivity")
