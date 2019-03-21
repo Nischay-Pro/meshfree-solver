@@ -115,8 +115,74 @@ def calculateConnectivity(globaldata, idx, configData):
         
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 
+def calculateConnectivityDtype(globaldata, idx, configData):
+    ptInterest = globaldata[idx]
+    currx = ptInterest['x']
+    curry = ptInterest['y']
+    nx = ptInterest['nx']
+    ny = ptInterest['ny']
+
+    flag = ptInterest['flag_1']
+
+    xpos_conn,xneg_conn,ypos_conn,yneg_conn = [],[],[],[]
+
+    tx = ny
+    ty = -nx
+
+    for itm in ptInterest['conn'][:ptInterest['nbhs']]:
+        itmx = globaldata[itm]['x']
+        itmy = globaldata[itm]['y']
+
+        delx = itmx - currx
+        dely = itmy - curry
+
+        dels = delx*tx + dely*ty
+        deln = delx*nx + dely*ny
+
+        if dels <= 0:
+            xpos_conn.append(itm)
+        
+        if dels >= 0:
+            xneg_conn.append(itm)
+
+        if flag == configData["point"]["interior"]:
+            if deln <= 0:
+                ypos_conn.append(itm)
+            
+            if deln >= 0:
+                yneg_conn.append(itm)
+
+        elif flag == configData["point"]["wall"]:
+            yneg_conn.append(itm)
+        
+        elif flag == configData["point"]["outer"]:
+            ypos_conn.append(itm)
+        
+    return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
+
+def setConnectivityDtype(globaldata, conn, idx):
+
+    for idx, itm in conn[0]:
+        globaldata[idx]['xpos_conn'][idx] = itm
+    globaldata[idx]['xpos_nbhs'] = len(conn[0])
+
+    for idx, itm in conn[1]:
+        globaldata[idx]['xneg_conn'][idx] = itm
+    globaldata[idx]['xneg_nbhs'] = len(conn[1])
+
+    for idx, itm in conn[2]:
+        globaldata[idx]['ypos_conn'][idx] = itm
+    globaldata[idx]['ypos_nbhs'] = len(conn[2])
+
+    for idx, itm in conn[3]:
+        globaldata[idx]['yneg_conn'][idx] = itm
+    globaldata[idx]['yneg_nbhs'] = len(conn[3])
+
+    return globaldata
+
 def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
     if not cuda.is_available():
+        exit()
         for i in range(1, iter):
             globaldata = q_var_derivatives(globaldata, configData)
             globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
@@ -150,18 +216,20 @@ def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interior
 
 def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
     stream = cuda.stream()
-    print("Converting Globaldata to GPU")
-    globaldata_gpu = convert.convert_globaldata_to_gpu_globaldata(globaldata)
+    # print("Converting Globaldata to GPU")
+    # globaldata_gpu = convert.convert_globaldata_to_gpu_globaldata(globaldata)
+    globaldata_gpu = globaldata
     sum_res_sqr = np.zeros((len(globaldata)), dtype=np.float64)
     with stream.auto_synchronize():
         print("Pushing GPU Globaldata to GPU")
         globaldata_gpu[1]
         globaldata_gpu = cuda.to_device(globaldata_gpu, stream)
         sum_res_sqr_gpu = cuda.to_device(sum_res_sqr, stream)
-        threadsperblock = (32, 1)
+        threadsperblock = (8, 1)
         blockspergrid_x = math.ceil(len(globaldata) / threadsperblock[0])
         blockspergrid_y = math.ceil(1)
         blockspergrid = (blockspergrid_x, blockspergrid_y)
+        exit()
         for i in range(1, iter):
             if i == 1:
                 print("Compiling CUDA Kernel. This might take a while...")
@@ -188,17 +256,8 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         temp = globaldata_gpu.copy_to_host()
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
     with open('stuff/%s' % i, 'w+') as the_file:
-        itm = globaldata[1]
+        itm = globaldata[247]
         the_file.write("1\n")
-        the_file.write("q\n")
-        the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.q[0], itm.q[1], itm.q[2], itm.q[3]))
-        the_file.write("dQ\n")
-        the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[0][0], itm.dq[0][1], itm.dq[0][2], itm.dq[0][3]))
-        the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.dq[1][0], itm.dq[1][1], itm.dq[1][2], itm.dq[1][3]))
-        the_file.write("Primitive\n")
-        the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.prim[0], itm.prim[1], itm.prim[2], itm.prim[3]))
-        itm = globaldata[100]
-        the_file.write("100\n")
         the_file.write("q\n")
         the_file.write("%.17f %.17f %.17f %.17f\n" % (itm.q[0], itm.q[1], itm.q[2], itm.q[3]))
         the_file.write("dQ\n")

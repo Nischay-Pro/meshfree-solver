@@ -27,3 +27,7 @@ result-*
 config.json
 stuff/*
 mfpre/*
+*.nsight-cuprof-report
+test_*
+*.bak
+test*
