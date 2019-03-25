@@ -13,7 +13,7 @@ def func_delta(globaldata, configData):
                 u1 = globaldata[itm].prim[1]
                 u2 = globaldata[itm].prim[2]
                 pr = globaldata[itm].prim[3]
-
+                
                 x_i = globaldata[idx].x
                 y_i = globaldata[idx].y
 
@@ -37,7 +37,7 @@ def func_delta(globaldata, configData):
     return globaldata
 
 def state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old):
-    max_res = 0
+    max_res = 0	
     sum_res_sqr = 0
     for itm in wallindices:
         nx = globaldata[itm].nx
@@ -73,13 +73,6 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
 
         globaldata[itm].prim = tempU
 
-        if itm == 100:
-            print(tempU[0])
-            print(tempU[1])
-            print(tempU[2])
-            print(tempU[3])
-
-
     for itm in outerindices:
         nx = globaldata[itm].nx
         ny = globaldata[itm].ny
@@ -102,7 +95,7 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         tempU[1] = U[1]*temp
         tempU[2] = U[2]*temp
         tempU[3] = (0.4*U[3]) - (0.2*temp)*(U[1]*U[1] + U[2]*U[2])
-
+        
 
         globaldata[itm].prim = tempU
 
@@ -118,13 +111,13 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         U[1] = U2_rot*ny + U3_rot*nx
         U[2] = U3_rot*ny - U2_rot*nx
 
-        # res_sqr = (U[0] - temp)*(U[0] - temp)
+        res_sqr = (U[0] - temp)*(U[0] - temp)
 
-        # if res_sqr > max_res:
-        #     max_res = res_sqr
-        #     max_res_point = itm
+        if res_sqr > max_res:
+            max_res = res_sqr
+            max_res_point = itm
 
-        # sum_res_sqr = sum_res_sqr + res_sqr
+        sum_res_sqr = sum_res_sqr + res_sqr
 
         tempU = np.zeros(4, dtype=np.float64)
         tempU[0] = U[0]
@@ -133,22 +126,20 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         tempU[2] = U[2]*temp
         tempU[3] = (0.4*U[3]) - (0.2*temp)*(U[1]*U[1] + U[2]*U[2])
         globaldata[itm].prim = tempU
+    
+    res_new = math.sqrt(sum_res_sqr)/ len(globaldata)
 
-    res_old = 0
+    if iter <= 2:
+        res_old = res_new
+        residue = 0
+    else:
+        residue = math.log10(res_new/res_old)
 
-    # res_new = math.sqrt(sum_res_sqr)/ len(globaldata)
-
-    # if iter <= 2:
-    #     res_old = res_new
-    #     residue = 0
-    # else:
-    #     residue = math.log10(res_new/res_old)
-
-    # with open('residue', 'a') as the_file:
-    #     the_file.write("%i %f" % (iter, residue))
-
+    with open('residue', 'a') as the_file:
+        the_file.write("%i %f" % (iter, residue))
+    
     print("Iteration Number: ", iter)
-    # print("Residue: ", residue)
+    print("Residue: ", residue)
 
     return globaldata, res_old
 
@@ -157,16 +148,14 @@ def primitive_to_conserved(globaldata, itm, nx, ny):
     U = []
 
     rho = globaldata[itm].prim[0]
-    U.append(rho)
+    U.append(rho) 
     temp1 = rho*globaldata[itm].prim[1]
     temp2 = rho*globaldata[itm].prim[2]
 
     U.append(temp1*ny - temp2*nx)
     U.append(temp1*nx + temp2*ny)
     U.append(2.5*globaldata[itm].prim[3] + 0.5*(temp1*temp1 + temp2*temp2)/rho)
-    # if itm == 1:
-    #     print("U")
-    #     print(U)
+
     return U
 
 def conserved_vector_Ubar(globaldata, itm, nx, ny, configData):
