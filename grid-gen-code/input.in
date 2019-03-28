@@ -1,0 +1,5 @@
+160 60			   <= Imax, Jmax (no of grid points)
+10.0                       <= Radius of the outer boundary
+2                          <= direction of outer boundary (1= anticlockwise 2= clockwise)
+2                          <= shift the center of the circle by 0.5 (1 = no, 2 = yes)
+0.0d0 0.0d0 0.12           <= Naca profile parameters (m, p, t) == (0,0,.12==> Naca 0012)

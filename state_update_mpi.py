@@ -2,6 +2,7 @@ import config
 import math
 import numpy as np
 import core
+import point
 try:
     from mpi4py import MPI
 except ImportError:
@@ -71,7 +72,6 @@ def state_update_mpi(globaldata_local, wallindices, outerindices, interiorindice
 
         if res_sqr > max_res:
             max_res = res_sqr
-            max_res_point = itm
 
         sum_res_sqr = sum_res_sqr + res_sqr
 
@@ -82,8 +82,10 @@ def state_update_mpi(globaldata_local, wallindices, outerindices, interiorindice
         tempU[2] = U[2]*temp
 
         tempU[3] = (0.4*U[3]) - ((0.2*temp)*(U[1]*U[1] + U[2]*U[2]))
-
-        globaldata_local[itm].prim = tempU
+        itep = globaldata_local[itm]
+        tempPt = point.Point(itep.localID, itep.x, itep.y, itep.left, itep.right, itep.flag_1, itep.flag_2, itep.nbhs, itep.conn, itep.nx, itep.ny, tempU, itep.flux_res, itep.q, itep.dq, itep.entropy, itep.xpos_nbhs, itep.xneg_nbhs, itep.ypos_nbhs, itep.yneg_nbhs, itep.xpos_conn, itep.xneg_conn, itep.ypos_conn, itep.yneg_conn, itep.delta)
+        globaldata_local[itm] = tempPt
+        # globaldata_local[itm].setPrimitive(tempU)
 
     for itm in outerindices:
         nx = globaldata_local[itm].nx
@@ -108,8 +110,10 @@ def state_update_mpi(globaldata_local, wallindices, outerindices, interiorindice
         tempU[2] = U[2]*temp
         tempU[3] = (0.4*U[3]) - (0.2*temp)*(U[1]*U[1] + U[2]*U[2])
         
-
-        globaldata_local[itm].prim = tempU
+        itep = globaldata_local[itm]
+        tempPt = point.Point(itep.localID, itep.x, itep.y, itep.left, itep.right, itep.flag_1, itep.flag_2, itep.nbhs, itep.conn, itep.nx, itep.ny, tempU, itep.flux_res, itep.q, itep.dq, itep.entropy, itep.xpos_nbhs, itep.xneg_nbhs, itep.ypos_nbhs, itep.yneg_nbhs, itep.xpos_conn, itep.xneg_conn, itep.ypos_conn, itep.yneg_conn, itep.delta)
+        globaldata_local[itm] = tempPt
+        # globaldata_local[itm].setPrimitive(tempU)
 
     for itm in interiorindices:
         nx = globaldata_local[itm].nx
@@ -127,7 +131,6 @@ def state_update_mpi(globaldata_local, wallindices, outerindices, interiorindice
 
         if res_sqr > max_res:
             max_res = res_sqr
-            max_res_point = itm
 
         sum_res_sqr = sum_res_sqr + res_sqr
 
@@ -137,7 +140,12 @@ def state_update_mpi(globaldata_local, wallindices, outerindices, interiorindice
         tempU[1] = U[1]*temp
         tempU[2] = U[2]*temp
         tempU[3] = (0.4*U[3]) - (0.2*temp)*(U[1]*U[1] + U[2]*U[2])
-        globaldata_local[itm].prim = tempU
+
+        itep = globaldata_local[itm]
+        tempPt = point.Point(itep.localID, itep.x, itep.y, itep.left, itep.right, itep.flag_1, itep.flag_2, itep.nbhs, itep.conn, itep.nx, itep.ny, tempU, itep.flux_res, itep.q, itep.dq, itep.entropy, itep.xpos_nbhs, itep.xneg_nbhs, itep.ypos_nbhs, itep.yneg_nbhs, itep.xpos_conn, itep.xneg_conn, itep.ypos_conn, itep.yneg_conn, itep.delta)
+        globaldata_local[itm] = tempPt
+        # globaldata_local[itm].setPrimitive(tempU)
+
 
     total_res_sqr = np.zeros(1, dtype="float64")
     total_points = np.zeros(1, dtype="int64")

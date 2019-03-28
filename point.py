@@ -55,3 +55,7 @@ class Point:
 
         self.yneg_conn = conn[3]
         self.yneg_nbhs = len(conn[3])
+
+    def setPrimitive(self, prim):
+        # self.prim = prim
+        None

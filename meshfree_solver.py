@@ -4,6 +4,7 @@ import config
 import argparse
 from progress import printProgressBar
 import numpy as np
+import tracemalloc
 try:
     from mpi4py import MPI
     import dill
@@ -194,8 +195,14 @@ def main():
 
         if rank == 0:
             print("Starting FPI Solver")
+        tracemalloc.start()
         core.fpi_solver_mpi(config.getConfig()["core"]["max_iters"] + 1, globaldata_local, configData, globaldata_ghost, res_old, wallptsidx, outerptsidx, interiorptsidx, comm, globaldata_table)
-
+        snapshot = tracemalloc.take_snapshot()
+        top_stats = snapshot.statistics('lineno')
+        if rank == 0:
+            print("[ Top 10 ]")
+            for stat in top_stats[:10]:
+                print(stat)
 
 if __name__ == "__main__":
     main()
