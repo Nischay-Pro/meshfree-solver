@@ -30,7 +30,10 @@ def convert_globaldata_to_gpu_globaldata(globaldata, singlePrecision=False):
                             ('xneg_conn', np.int32, (20,)),
                             ('ypos_conn', np.int32, (20,)),
                             ('yneg_conn', np.int32, (20,)),
-                            ('delta', pres)], align=True)
+                            ('delta', pres),
+                            ('min_dist', np.float64),
+                            ('minq', np.float64, (4,)),
+                            ('maxq', np.float64, (4,))], align=True)
     temp = np.zeros(len(globaldata), dtype=point_dtype)
     for idx in trange(len(globaldata)):
         if idx > 0:
@@ -74,6 +77,9 @@ def convert_globaldata_to_gpu_globaldata(globaldata, singlePrecision=False):
             yneg_conn = np.pad(yneg_conn, (0, N), 'constant')
             temp[idx]['yneg_conn'] = yneg_conn
             temp[idx]['delta'] = globaldata[idx].delta
+            temp[idx]['min_dist'] = globaldata[idx].min_dist
+            temp[idx]['minq'] = globaldata[idx].minq
+            temp[idx]['maxq'] = globaldata[idx].maxq
     return temp    
 
 def convert_gpu_globaldata_to_globaldata(globaldata):
@@ -85,6 +91,6 @@ def convert_gpu_globaldata_to_globaldata(globaldata):
         xneg_conn = itm['xneg_conn'][:itm['xneg_nbhs']]
         ypos_conn = itm['ypos_conn'][:itm['ypos_nbhs']]
         yneg_conn = itm['yneg_conn'][:itm['yneg_nbhs']]
-        temp = point.Point(itm['localID'], itm['x'], itm['y'], itm['left'], itm['right'], itm['flag_1'], itm['flag_2'], itm['nbhs'], conn, itm['nx'], itm['ny'], itm['prim'], itm['flux_res'], itm['q'], itm['dq'], itm['entropy'], itm['xpos_nbhs'], itm['xneg_nbhs'], itm['ypos_nbhs'], itm['yneg_nbhs'], xpos_conn, xneg_conn, ypos_conn, yneg_conn, itm['delta'])
+        temp = point.Point(itm['localID'], itm['x'], itm['y'], itm['left'], itm['right'], itm['flag_1'], itm['flag_2'], itm['nbhs'], conn, itm['nx'], itm['ny'], itm['prim'], itm['flux_res'], itm['q'], itm['dq'], itm['entropy'], itm['xpos_nbhs'], itm['xneg_nbhs'], itm['ypos_nbhs'], itm['yneg_nbhs'], xpos_conn, xneg_conn, ypos_conn, yneg_conn, itm['delta'], itm['min_dist'], itm['minq'], itm['maxq'])
         globaldata_cpu[idx] = temp
     return globaldata_cpu

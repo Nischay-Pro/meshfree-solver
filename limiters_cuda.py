@@ -3,7 +3,7 @@ from numba import cuda
 import numba
 
 @cuda.jit(device=True)
-def venkat_limiter(qtilde, globaldata, idx, VL_CONST, phi, max_q, min_q, ds):
+def venkat_limiter(qtilde, globaldata, idx, VL_CONST, phi):
     del_pos = 0
     del_neg = 0
     for i in range(4):
@@ -13,17 +13,17 @@ def venkat_limiter(qtilde, globaldata, idx, VL_CONST, phi, max_q, min_q, ds):
             phi[i] = 1
         elif math.fabs(del_neg) > 1e-5:
             if del_neg > 0:
-                max_q[0] = 0
-                maximum(globaldata, idx, i, max_q)
-                del_pos = max_q[0] - q
+                # max_q[0] = 0
+                # maximum(globaldata, idx, i, max_q)
+                del_pos = globaldata[idx]['maxq'][i] - q
             elif del_neg < 0:
-                min_q[0] = 0
-                minimum(globaldata, idx, i, min_q)
-                del_pos = min_q[0] - q
+                # min_q[0] = 0
+                # minimum(globaldata, idx, i, min_q)
+                del_pos = globaldata[idx]['minq'][i] - q
 
-            ds[0] = 0
-            smallest_dist(globaldata, idx, ds)
-            epsi = VL_CONST * ds[0]
+            # ds[0] = 0
+            # smallest_dist(globaldata, idx, ds)
+            epsi = VL_CONST * globaldata[idx]['min_dist']
             epsi = math.pow(epsi,3)
 
             num = (del_pos*del_pos) + (epsi*epsi)
@@ -42,17 +42,17 @@ def venkat_limiter(qtilde, globaldata, idx, VL_CONST, phi, max_q, min_q, ds):
 
 @cuda.jit(device=True)
 def maximum(globaldata, idx, i, maxval):
-    maxval[0] = globaldata[idx]['q'][i]
+    maxval[i] = globaldata[idx]['q'][i]
     for itm in globaldata[idx]['conn'][:globaldata[idx]['nbhs']]:
-        if maxval[0] < globaldata[itm]['q'][i]:
-            maxval[0] = globaldata[itm]['q'][i]
+        if maxval[i] < globaldata[itm]['q'][i]:
+            maxval[i] = globaldata[itm]['q'][i]
 
 @cuda.jit(device=True)
 def minimum(globaldata, idx, i, minval):
-    minval[0] = globaldata[idx]['q'][i]
+    minval[i] = globaldata[idx]['q'][i]
     for itm in globaldata[idx]['conn'][:globaldata[idx]['nbhs']]:
-        if minval[0] > globaldata[itm]['q'][i]:
-            minval[0] = globaldata[itm]['q'][i]
+        if minval[i] > globaldata[itm]['q'][i]:
+            minval[i] = globaldata[itm]['q'][i]
 
 @cuda.jit(device=True)
 def smallest_dist(globaldata, idx, min_dist):

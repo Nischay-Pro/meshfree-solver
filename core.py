@@ -14,6 +14,7 @@ import convert
 from numba import vectorize, float64
 from cuda_func import add, subtract, multiply, sum_reduce
 import os
+import limiters_cuda
 
 def getInitialPrimitive(configData):
     rho_inf = float(configData["core"]["rho_inf"])
@@ -154,6 +155,7 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         for i in range(1, iter):
             if i == 1:
                 print("Compiling CUDA Kernel. This might take a while...")
+                c = time.time()
             q_var_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu)
             cuda.synchronize()
             q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']))
@@ -164,6 +166,8 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
             cuda.synchronize()
             state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](globaldata_gpu, float(configData["core"]["mach"]), float(configData["core"]["gamma"]), float(configData["core"]["pr_inf"]), float(configData["core"]["rho_inf"]), float(configData["core"]["aoa"]), sum_res_sqr_gpu, int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]))
             cuda.synchronize()
+            if i == 1:
+                d = time.time()
             temp_gpu = sum_reduce(sum_res_sqr_gpu)
             residue = math.sqrt(temp_gpu) / len(globaldata)
             if i <= 2:
@@ -177,7 +181,7 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         temp = globaldata_gpu.copy_to_host()
     b = time.time()
     with open('grid_{}.txt'.format(len(globaldata)), 'a+') as the_file:
-        the_file.write("Block Dimensions: ({}, 1)\nRuntime: {}\n".format(int(configData['core']['blockGridX']), (b - a)))
+        the_file.write("Block Dimensions: ({}, 1)\nRuntime: {}\n".format(int(configData['core']['blockGridX']), (b - a - (d - c))))
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     return res_old, globaldata
@@ -292,6 +296,11 @@ def q_var_cuda_kernel(globaldata):
         globaldata[idx]['q'][1] = tempq[1]
         globaldata[idx]['q'][2] = tempq[2]
         globaldata[idx]['q'][3] = tempq[3]
+
+        
+        for i in range(4):
+            limiters_cuda.minimum(globaldata, idx, i, globaldata[idx]['minq'])
+            limiters_cuda.maximum(globaldata, idx, i, globaldata[idx]['maxq'])
         
 
 @cuda.jit()

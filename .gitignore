@@ -35,3 +35,4 @@ cuthill_test
 *.nvprof
 test_*
 testresult*
+grid_*

@@ -29,11 +29,6 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
     G_i = cuda.local.array((4), numba.float64)
     G_k = cuda.local.array((4), numba.float64)
 
-    ## Venkat
-    max_q = cuda.local.array((1), numba.float64)
-    min_q = cuda.local.array((1), numba.float64)
-    ds = cuda.local.array((1), numba.float64)
-
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
 
@@ -94,17 +89,9 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
         zeros(phi_i, phi_i)
         zeros(phi_k, phi_k)
 
-        zeros(max_q, max_q)
-        zeros(min_q, min_q)
-        zeros(ds, ds)
+        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i)
 
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i, max_q, min_q, ds)
-
-        zeros(max_q, max_q)
-        zeros(min_q, min_q)
-        zeros(ds, ds)
-
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k, max_q, min_q, ds)
+        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
@@ -188,11 +175,6 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
     G_i = cuda.local.array((4), numba.float64)
     G_k = cuda.local.array((4), numba.float64)
 
-    ## Venkat
-    max_q = cuda.local.array((1), numba.float64)
-    min_q = cuda.local.array((1), numba.float64)
-    ds = cuda.local.array((1), numba.float64)
-
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
 
@@ -253,17 +235,9 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
         zeros(phi_i, phi_i)
         zeros(phi_k, phi_k)
 
-        zeros(max_q, max_q)
-        zeros(min_q, min_q)
-        zeros(ds, ds)
+        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i)
 
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i, max_q, min_q, ds)
-
-        zeros(max_q, max_q)
-        zeros(min_q, min_q)
-        zeros(ds, ds)
-
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k, max_q, min_q, ds)
+        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
@@ -347,11 +321,6 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
     G_i = cuda.local.array((4), numba.float64)
     G_k = cuda.local.array((4), numba.float64)
 
-    ## Venkat
-    max_q = cuda.local.array((1), numba.float64)
-    min_q = cuda.local.array((1), numba.float64)
-    ds = cuda.local.array((1), numba.float64)
-
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
 
@@ -412,17 +381,9 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
         zeros(phi_i, phi_i)
         zeros(phi_k, phi_k)
 
-        zeros(max_q, max_q)
-        zeros(min_q, min_q)
-        zeros(ds, ds)
+        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i)
 
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i, max_q, min_q, ds)
-
-        zeros(max_q, max_q)
-        zeros(min_q, min_q)
-        zeros(ds, ds)
-
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k, max_q, min_q, ds)
+        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
@@ -506,11 +467,6 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store):
     G_i = cuda.local.array((4), numba.float64)
     G_k = cuda.local.array((4), numba.float64)
 
-    ## Venkat
-    max_q = cuda.local.array((1), numba.float64)
-    min_q = cuda.local.array((1), numba.float64)
-    ds = cuda.local.array((1), numba.float64)
-
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
 
@@ -571,17 +527,9 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store):
         zeros(phi_i, phi_i)
         zeros(phi_k, phi_k)
 
-        zeros(max_q, max_q)
-        zeros(min_q, min_q)
-        zeros(ds, ds)
+        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i)
 
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i, max_q, min_q, ds)
-
-        zeros(max_q, max_q)
-        zeros(min_q, min_q)
-        zeros(ds, ds)
-
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k, max_q, min_q, ds)
+        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
