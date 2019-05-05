@@ -27,3 +27,11 @@ result-*
 config.json
 stuff/*
 mfpre/*
+out/*
+fort_prof/*
+cuthill_test
+*.nsight-cuprof-report
+*.poly
+*.nvprof
+test_*
+testresult*

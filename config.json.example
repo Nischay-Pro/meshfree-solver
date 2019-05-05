@@ -14,7 +14,9 @@
         "pr_inf": 0.7142857142857143,
         "gamma": 1.4,
         "clcd_flag": false,
-        "format": 0
+        "format": 0,
+        "singlePrecision": false,
+        "blockGridX": 64
     },
     "point":{
         "wall": 0,

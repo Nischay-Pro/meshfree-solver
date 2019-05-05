@@ -1,38 +1,38 @@
 import numpy as np
 import point
-from progress import printProgressBar
+from tqdm import trange
 
-def convert_globaldata_to_gpu_globaldata(globaldata):
+def convert_globaldata_to_gpu_globaldata(globaldata, singlePrecision=False):
+    pres = np.float64
+    if singlePrecision:
+        pres = np.float32
     point_dtype = np.dtype([('localID', np.int32),
                             ('x', np.float64),
                             ('y', np.float64),
                             ('left', np.int32),
                             ('right', np.int32),
-                            ('flag_1', np.int32),
-                            ('flag_2', np.int32),
-                            ('nbhs', np.int32),
+                            ('flag_1', np.int8),
+                            ('flag_2', np.int8),
+                            ('nbhs', np.int8),
                             ('conn', np.int32, (20,)),
-                            ('nx', np.float64),
-                            ('ny', np.float64),
-                            ('prim', np.float64, (4,)),
-                            ('flux_res', np.float64, (4,)),
-                            ('q', np.float64, (4,)),
-                            ('dq', np.float64, (2, 4)),
-                            ('entropy', np.float64),
-                            ('xpos_nbhs', np.int32),
-                            ('xneg_nbhs', np.int32),
-                            ('ypos_nbhs', np.int32),
-                            ('yneg_nbhs', np.int32),
+                            ('nx', pres),
+                            ('ny', pres),
+                            ('prim', pres, (4,)),
+                            ('flux_res', pres, (4,)),
+                            ('q', pres, (4,)),
+                            ('dq', pres, (2, 4)),
+                            ('entropy', pres),
+                            ('xpos_nbhs', np.int8),
+                            ('xneg_nbhs', np.int8),
+                            ('ypos_nbhs', np.int8),
+                            ('yneg_nbhs', np.int8),
                             ('xpos_conn', np.int32, (20,)),
                             ('xneg_conn', np.int32, (20,)),
                             ('ypos_conn', np.int32, (20,)),
                             ('yneg_conn', np.int32, (20,)),
-                            ('delta', np.float64)], align=True)
+                            ('delta', pres)], align=True)
     temp = np.zeros(len(globaldata), dtype=point_dtype)
-    for idx in range(len(globaldata)):
-        printProgressBar(
-            idx, len(globaldata) - 1, prefix="Progress:", suffix="Complete", length=50
-        )
+    for idx in trange(len(globaldata)):
         if idx > 0:
             temp[idx]['localID'] = globaldata[idx].localID
             temp[idx]['x'] = globaldata[idx].x
@@ -78,7 +78,7 @@ def convert_globaldata_to_gpu_globaldata(globaldata):
 
 def convert_gpu_globaldata_to_globaldata(globaldata):
     globaldata_cpu = np.zeros(len(globaldata), dtype=object)
-    for idx in range(len(globaldata)):
+    for idx in trange(len(globaldata)):
         itm = globaldata[idx]
         conn = itm['conn'][:itm['nbhs']]
         xpos_conn = itm['xpos_conn'][:itm['xpos_nbhs']]
