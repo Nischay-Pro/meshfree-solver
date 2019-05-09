@@ -123,6 +123,7 @@ function q_var_derivatives(globaldata, configData)
         globaldata[idx].q[2] = (two_times_beta * u1)
         globaldata[idx].q[3] = (two_times_beta * u2)
         globaldata[idx].q[4] = -two_times_beta
+        
     end
 
     for (idx,itm) in enumerate(globaldata)

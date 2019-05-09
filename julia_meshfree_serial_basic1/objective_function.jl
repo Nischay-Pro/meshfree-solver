@@ -5,7 +5,7 @@ function calculateTheta(configData)
     return theta
 end
 
-function compute_cl_cd_cm(globaldata, configData, wallindices)
+function compute_cl_cd_cm(globaldata, configData, shapeindices)
 
     rho_inf::Float64 = configData["core"]["rho_inf"]
     Mach::Float64 = configData["core"]["mach"]
@@ -24,7 +24,7 @@ function compute_cl_cd_cm(globaldata, configData, wallindices)
     Cm = zeros(Float64, shapes)
 
     open("cp_file", "w") do the_file
-        for itm in wallindices
+        for itm in shapeindices
             # print(wallindices)
             left = globaldata[itm].left
             right = globaldata[itm].right
@@ -41,7 +41,7 @@ function compute_cl_cd_cm(globaldata, configData, wallindices)
             ds = 0.5*(ds1 + ds2)
             nx = globaldata[itm].nx
             ny = globaldata[itm].ny
-            cp = globaldata[itm].prim[3] - pr_inf
+            cp = globaldata[itm].prim[4] - pr_inf
             cp = -cp/temp
 
             flag_2 = globaldata[itm].flag_2
