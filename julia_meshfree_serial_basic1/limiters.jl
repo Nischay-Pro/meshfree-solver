@@ -1,4 +1,4 @@
-function venkat_limiter(qtilde, globaldata, idx, configData, max_q, min_q)
+function venkat_limiter(qtilde, globaldata, idx, configData)
     VL_CONST::Float64 = configData["core"]["vl_const"]
     ds = globaldata[idx].short_distance
     epsi = VL_CONST * ds
