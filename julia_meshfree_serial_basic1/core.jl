@@ -123,7 +123,7 @@ function q_var_derivatives(globaldata, configData)
         globaldata[idx].q[2] = (two_times_beta * u1)
         globaldata[idx].q[3] = (two_times_beta * u2)
         globaldata[idx].q[4] = -two_times_beta
-        
+
     end
 
     for (idx,itm) in enumerate(globaldata)
@@ -157,6 +157,12 @@ function q_var_derivatives(globaldata, configData)
         sum_delx_delq2 = sum_delx_delq * sum_delx_dely
         tempsumy = one_by_det * (sum_dely_delq2 - sum_delx_delq2)
         globaldata[idx].dq = [tempsumx, tempsumy]
+
+        for i in 1:4
+            maximum(globaldata, idx, i)
+            minimum(globaldata, idx, i)
+        end
+
     end
 end
 

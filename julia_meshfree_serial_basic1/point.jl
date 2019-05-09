@@ -28,6 +28,8 @@ mutable struct Point
     yneg_conn::Array{Int64,1}
     delta::Float64
     short_distance::Float64
+    max_q::Array{Float64,1}
+    min_q::Array{Float64,1}
 end
 
 # point = Point(locaslID, x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, flux_res, q, dq, entropy, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta)

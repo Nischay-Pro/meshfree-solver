@@ -15,11 +15,11 @@ function venkat_limiter(qtilde, globaldata, idx, configData, max_q, min_q)
             push!(phi, 1.0)
         elseif abs(del_neg) > 1e-5
             if del_neg > 0.0
-                maximum(globaldata, idx, i, max_q)
-                del_pos = max_q[1] - q
+                # maximum(globaldata, idx, i, max_q)
+                del_pos = globaldata[idx].max_q[i] - q
             elseif del_neg < 0.0
-                minimum(globaldata, idx, i, min_q)
-                del_pos = min_q[1] - q
+                # minimum(globaldata, idx, i, min_q)
+                del_pos = globaldata[idx].min_q[i] - q
             end
             num = (del_pos*del_pos) + (epsi*epsi)
             num = (num*del_neg) + 2 * (del_neg*del_neg*del_pos)
@@ -39,20 +39,20 @@ function venkat_limiter(qtilde, globaldata, idx, configData, max_q, min_q)
     return phi
 end
 
-@inline function maximum(globaldata, idx::Int64, i::Int64, max_q::AbstractVector{T}) where T
-    max_q[1] = copy(globaldata[idx].q[i])
+@inline function maximum(globaldata, idx::Int64, i::Int64)
+    globaldata[idx].max_q[i] = copy(globaldata[idx].q[i])
     for itm in globaldata[idx].conn
-        if max_q[1] < globaldata[itm].q[i]
-            max_q[1] = globaldata[itm].q[i]
+        if globaldata[idx].max_q[i] < globaldata[itm].q[i]
+            globaldata[idx].max_q[i] = globaldata[itm].q[i]
         end
     end
 end
 
-@inline function minimum(globaldata, idx::Int64, i::Int64, min_q::AbstractVector{T}) where T
-    min_q[1] = copy(globaldata[idx].q[i])
+@inline function minimum(globaldata, idx::Int64, i::Int64)
+    globaldata[idx].min_q[i] = copy(globaldata[idx].q[i])
     for itm in globaldata[idx].conn
-        if min_q[1] > globaldata[itm].q[i]
-            min_q[1] = globaldata[itm].q[i]
+        if globaldata[idx].min_q[i] > globaldata[itm].q[i]
+            globaldata[idx].min_q[i] = globaldata[itm].q[i]
         end
     end
 end
