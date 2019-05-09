@@ -297,12 +297,6 @@ def q_var_cuda_kernel(globaldata):
         globaldata[idx]['q'][2] = tempq[2]
         globaldata[idx]['q'][3] = tempq[3]
 
-        
-        for i in range(4):
-            limiters_cuda.minimum(globaldata, idx, i, globaldata[idx]['minq'])
-            limiters_cuda.maximum(globaldata, idx, i, globaldata[idx]['maxq'])
-        
-
 @cuda.jit()
 def q_var_derivatives_cuda_kernel(globaldata, power):
     tx = cuda.threadIdx.x
@@ -331,6 +325,10 @@ def q_var_derivatives_cuda_kernel(globaldata, power):
         sum_dely_delq[1] = 0
         sum_dely_delq[2] = 0
         sum_dely_delq[3] = 0
+        
+        for i in range(4):
+            limiters_cuda.minimum(globaldata, idx, i, globaldata[idx]['minq'])
+            limiters_cuda.maximum(globaldata, idx, i, globaldata[idx]['maxq'])
 
         for conn in itm['conn'][:itm['nbhs']]:
 
