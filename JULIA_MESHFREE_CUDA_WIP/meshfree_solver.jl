@@ -1,6 +1,6 @@
 
 function main()
-    globaldata = Array{Point,1}(undef, 0)
+    globaldata = Array{Point,1}(undef, getConfig()["core"]["points"])
     configData = getConfig()
     wallpts, Interiorpts, outerpts, shapepts = 0,0,0,0
     wallptsidx = Array{Int,1}(undef, 0)
@@ -35,7 +35,7 @@ function main()
         # print(convert(String, temp))
         # print(globaldata)
         # print("123\n")
-        push!(globaldata, temp)
+        globaldata[idx] = temp
         # if count == 0
         #     print(temp)
         # end

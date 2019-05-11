@@ -166,62 +166,17 @@ function q_var_derivatives(globaldata, configData)
     end
 end
 
-# function q_var_derivatives_cuda(globaldata, config)
-#     tpl = Template("""
-#             struct Point{
-#                 int localID;
-#                 double x;
-#                 double y;
-#                 int left;
-#                 int right;
-#                 int flag_1;
-#                 int flag_2;
-#                 int* nbhs;
-#                 int* conn;
-#                 float nx;
-#                 float ny;
-#                 float* prim;
-#                 float* flux_res;
-#                 float* q;
-#                 float* dq;
-#                 float* entropy;
-#                 int xpos_nbhs;
-#                 int xneg_nbhs;
-#                 int ypos_nbhs;
-#                 int yneg_nbhs;
-#                 int* xpos_conn;
-#                 int* xneg_conn;
-#                 int* ypos_conn;
-#                 int* yneg_conn;
-#                 float delta;
-#             };
+# function q_var_cuda_kernel(globaldata)
+#     tx = threadIdx().x
+#     bx = blockIdx().x
+#     bw = blockDim().x_i
+#     idx =  bx * bw + tx
+#     if idx > 0 && idx < length(globaldata)
+#         itm = globaldata[idx]
+#         rho = itm.prim[1]
+#         u1 = itm.prim[2]
+#         u2 = itm.prim[3]
+#         pr = itm.prim[4]
 
-#             __global__ void q_var_derivatives()
-#             {
-
-#                 int i = (blockIdx.x)* blockDim.x + threadIdx.x;
-#                 int j = (blockIdx.y)* blockDim.y + threadIdx.y;
-
-#                 int width = {{ POINT_WIDTH }};
-
-#                 double r = {{ DELTA }};
-
-#                 double u1 = u_old[i + (width * j)];
-#                 double ul = u_old[(i-1) + (width * j)];
-#                 double ur = u_old[(i+1) + (width * j)];
-#                 double utop = u_old[i + (width * (j+1))];
-#                 double ubottom = u_old[i + (width * (j-1))];
-#                 double test = 0;
-
-#                 if (i > 0 && i < {{ POINT_SIZE_X }} - 1 && j > 0 && j < {{ POINT_SIZE_Y }} - 1){
-#                     test = u1 + (r * (ul + ur + utop + ubottom - (4 * u1)));
-#                     u_new[i + width * j] = test;
-#                 }
-
-
-#             }""")
-
-#     rendered_tpl = tpl.render(POINT_SIZE_X=1, POINT_SIZE_Y=2, POINT_WIDTH=3, DELTA=4)
-#     mod = SourceModule(rendered_tpl)
-#     heatCalculate = mod.get_function("heatCalculate")
+#     end
 # end

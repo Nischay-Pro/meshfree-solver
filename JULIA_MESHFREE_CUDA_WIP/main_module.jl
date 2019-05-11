@@ -3,6 +3,9 @@ __precompile__()
 module main_module
 
 using Printf
+using CuArrays
+using CUDAnative
+using CUDAdrv
 # using PyCall
 
 # const math = PyNULL()
