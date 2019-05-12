@@ -1,4 +1,4 @@
-__precompile__()
+# __precompile__()
 
 module main_module
 
@@ -39,7 +39,7 @@ include("outer_fluxes.jl")
 export outer_dGx_pos, outer_dGx_neg, outer_dGy_pos
 
 include("point.jl")
-export Point, setNormals, getxy, setConnectivity
+export Point, setNormals, getxy, setConnectivity, convertToArray
 
 include("quadrant_fluxes.jl")
 export flux_quad_GxI, flux_quad_GxII, flux_quad_GxIII, flux_quad_GxIV

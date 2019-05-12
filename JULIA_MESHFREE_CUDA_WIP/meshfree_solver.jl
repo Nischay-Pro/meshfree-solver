@@ -1,6 +1,12 @@
 
 function main()
     globaldata = Array{Point,1}(undef, getConfig()["core"]["points"])
+    globaldataCommon = zeros(Float64, 141, getConfig()["core"]["points"])
+    # globaldataCommon = zeros(Float64, 38, getConfig()["core"]["points"])
+
+    # globaldataDq = [Array{Array{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
+    # gpuGlobaldataDq = [CuArray{CuArray{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
+    # gpu_globaldata = CuArray{Point,1}(undef, getConfig()["core"]["points"])
     configData = getConfig()
     wallpts, Interiorpts, outerpts, shapepts = 0,0,0,0
     wallptsidx = Array{Int,1}(undef, 0)
@@ -20,7 +26,34 @@ function main()
     # count = 0
     for (idx, itm) in enumerate(splitdata)
         itmdata = split(itm, " ")
-        temp = Point(parse(Int,itmdata[1]), parse(Float64,itmdata[2]), parse(Float64, itmdata[3]), parse(Int,itmdata[1]) - 1, parse(Int,itmdata[1]) + 1, parse(Int,itmdata[6]), parse(Int,itmdata[7]), parse(Int,itmdata[8]), parse.(Int, itmdata[9:end]), parse(Float64, itmdata[4]), parse(Float64, itmdata[5]), copy(defprimal), zeros(Float64, 4), zeros(Float64, 4), Array{Array{Float64,1},1}(undef, 0), 0.0, 0, 0, 0, 0, Array{Int,1}(undef, 0), Array{Int,1}(undef, 0), Array{Int,1}(undef, 0), Array{Int,1}(undef, 0), 0.0, 0.0, zeros(Float64, 4), zeros(Float64, 4))
+        temp =     Point(parse(Int,itmdata[1]),
+                        parse(Float64,itmdata[2]),
+                        parse(Float64, itmdata[3]),
+                        parse(Int,itmdata[1]) - 1,
+                        parse(Int,itmdata[1]) + 1,
+                        parse(Int,itmdata[6]),
+                        parse(Int,itmdata[7]),
+                        parse(Int,itmdata[8]),
+                        parse.(Int, itmdata[9:end]),
+                        parse(Float64, itmdata[4]),
+                        parse(Float64, itmdata[5]),
+                        copy(defprimal),
+                        zeros(Float64, 4),
+                        zeros(Float64, 4),
+                        Array{Array{Float64,1},1}(undef, 0),
+                        0.0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        Array{Int,1}(undef, 0),
+                        Array{Int,1}(undef, 0),
+                        Array{Int,1}(undef, 0),
+                        Array{Int,1}(undef, 0),
+                        0.0,
+                        0.0,
+                        zeros(Float64, 4),
+                        zeros(Float64, 4))
 
         if parse(Int, itmdata[1]) == 1
             temp.left = 160
@@ -36,6 +69,9 @@ function main()
         # print(globaldata)
         # print("123\n")
         globaldata[idx] = temp
+        # globaldataLocalID[idx] = parse(Int,itmdata[1])
+        # globaldataCommon[1:8, idx] =
+        # globaldataDq[idx] = Array{Array{Float64,1},2}(undef, 2 , 4)
         # if count == 0
         #     print(temp)
         # end
@@ -69,8 +105,30 @@ function main()
         connectivity = calculateConnectivity(globaldata, idx)
         setConnectivity(globaldata[idx], connectivity)
         smallest_dist(globaldata, idx)
+        convertToArray(globaldataCommon, globaldata[idx], idx)
     end
-
+    # print(globaldata[1].dq)
+    # println(typeof(globaldata))
+    # println(globaldata[2762])
+    # println(globaldata[2763])
+    # globaldata_copy = deepcopy(globaldata)
+    # gpu_globaldata[1:2000] = CuArray(globaldata[1:2000])
+    # println(typeof(gpuGlobaldataDq))
+    # gpuGlobaldataLocalID = CuArray(globaldataLocalID)
+    gpuGlobaldataCommon = CuArray(globaldataCommon)
+    globaldataCommon1 = Array(gpuGlobaldataCommon)
+    println(globaldataCommon1[:,1])
+    # gpuGlobaldataDq = CuArray(globaldataDq)
+    # println()
+    # println(isbitstype(globaldata) == true)
+    # d_globaldata_out = similar(d_globaldata)
+    # d_globaldata2 = CuArray(globaldata[2001:4000])
+    # d_globaldata = CuArray(globaldata_copy)
+    # testarray = Array(d_globaldata)
+    # globaldata[1:256] = Array(globaldata1)
+    # println(sizeof(d_globaldata))
+    # println(sizeof(globaldata[2762]))
+    # println(sizeof(globaldata[2763]))
     res_old = 0
     # print(Int(getConfig()["core"]["max_iters"]) + 1)
     for i in 1:(Int(getConfig()["core"]["max_iters"]))

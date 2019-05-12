@@ -95,6 +95,7 @@ end
 function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # print(" 111\n")
+
     q_var_derivatives(globaldata, configData)
 
     cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
