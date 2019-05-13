@@ -1,7 +1,7 @@
 
 function main()
     globaldata = Array{Point,1}(undef, getConfig()["core"]["points"])
-    globaldataCommon = zeros(Float64, 141, getConfig()["core"]["points"])
+    globaldataCommon = zeros(Float64, 145, getConfig()["core"]["points"])
     # globaldataCommon = zeros(Float64, 38, getConfig()["core"]["points"])
 
     # globaldataDq = [Array{Array{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
@@ -115,9 +115,8 @@ function main()
     # gpu_globaldata[1:2000] = CuArray(globaldata[1:2000])
     # println(typeof(gpuGlobaldataDq))
     # gpuGlobaldataLocalID = CuArray(globaldataLocalID)
-    gpuGlobaldataCommon = CuArray(globaldataCommon)
-    globaldataCommon1 = Array(gpuGlobaldataCommon)
-    println(globaldataCommon1[:,1])
+    gpuGlobalDataCommon = CuArray(globaldataCommon)
+
     # gpuGlobaldataDq = CuArray(globaldataDq)
     # println()
     # println(isbitstype(globaldata) == true)
@@ -131,9 +130,19 @@ function main()
     # println(sizeof(globaldata[2763]))
     res_old = 0
     # print(Int(getConfig()["core"]["max_iters"]) + 1)
-    for i in 1:(Int(getConfig()["core"]["max_iters"]))
-        fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
-    end
+    # for i in 1:(Int(getConfig()["core"]["max_iters"]))
+    println(globaldata[3])
+    fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+    # end
+    # for i in 1:(Int(getConfig()["core"]["max_iters"]))
+    #     fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+    # end
+
+    fpi_solver_cuda(1, gpuGlobalDataCommon, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+    globalDataCommon1 = Array(gpuGlobalDataCommon)
+
+    println(globalDataCommon1[:,3])
+
     compute_cl_cd_cm(globaldata, configData, shapeptsidx)
 
     # println(IOContext(stdout, :compact => false), globaldata[1].q)

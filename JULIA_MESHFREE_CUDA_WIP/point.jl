@@ -73,26 +73,31 @@ function convertToArray(targetArray, originalStruct::Point, idx)
                                         ] ,
                                         originalStruct.prim , #31
                                         originalStruct.flux_res , #35
-                                        zeros(Float64, 8) , #39
+                                        zeros(Float64, 4) , #39
+                                        zeros(Float64, 8) , #43
                                         [
-                                            originalStruct.entropy , #47
+                                            originalStruct.entropy , #51
                                             originalStruct.xpos_nbhs ,
                                             originalStruct.xneg_nbhs ,
                                             originalStruct.ypos_nbhs ,
                                             originalStruct.yneg_nbhs
                                         ] ,
-                                        zeros(Float64, 20) , #52
-                                        zeros(Float64, 20) , #72
-                                        zeros(Float64, 20) , #92
-                                        zeros(Float64, 20) , #112
+                                        zeros(Float64, 20) , #56
+                                        zeros(Float64, 20) , #76
+                                        zeros(Float64, 20) , #96
+                                        zeros(Float64, 20) , #116
                                         [
-                                            originalStruct.delta , #132
-                                            originalStruct.short_distance #133
+                                            originalStruct.delta , #136
+                                            originalStruct.short_distance #137
                                         ] ,
-                                        zeros(Float64, 4) , #134
-                                        zeros(Float64, 4) #138
+                                        zeros(Float64, 4) , #138
+                                        zeros(Float64, 4) #142
                                         )
     targetArray[9:8 + originalStruct.nbhs, idx] = originalStruct.conn
+    targetArray[56:55+ originalStruct.xpos_nbhs] = originalStruct.xpos_conn
+    targetArray[76:75+ originalStruct.xneg_nbhs] = originalStruct.xneg_conn
+    targetArray[96:95+ originalStruct.ypos_nbhs] = originalStruct.ypos_conn
+    targetArray[116:115+ originalStruct.yneg_nbhs] = originalStruct.yneg_conn
 end
 
 
