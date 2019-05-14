@@ -298,7 +298,7 @@ def q_var_cuda_kernel(globaldata):
         globaldata[idx]['q'][3] = tempq[3]
 
 @cuda.jit()
-def q_var_derivatives_cuda_kernel(globaldata,  ):
+def q_var_derivatives_cuda_kernel(globaldata, power):
     tx = cuda.threadIdx.x
     bx = cuda.blockIdx.x
     bw = cuda.blockDim.x

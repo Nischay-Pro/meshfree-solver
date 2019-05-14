@@ -21,7 +21,8 @@ export getConfig
 # export getInitialPrimitive, getInitialPrimitive2, calculateNormals, calculateConnectivity, fpi_solver, q_var_derivatives
 
 include("core_cuda.jl")
-export getInitialPrimitive, getInitialPrimitive2, calculateNormals, calculateConnectivity, fpi_solver_cuda, q_var_derivatives_kernel
+export getInitialPrimitive, getInitialPrimitive2, calculateNormals, calculateConnectivity,
+fpi_solver_cuda, q_var_cuda_kernel, q_var_derivatives_kernel, max_min_kernel
 
 include("flux_residual.jl")
 export cal_flux_residual, wallindices_flux_residual, outerindices_flux_residual, interiorindices_flux_residual

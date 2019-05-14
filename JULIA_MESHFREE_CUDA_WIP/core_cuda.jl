@@ -115,16 +115,25 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, configData, wallindices, out
     # ctx = CuContext(dev)
     # out1 = CuArray(zeros(Float64, 32))
     # out2 = CuArray(ones(Float64, 32))
-    threadsperblock = configData["core"]["threadsperblock"]
+    threadsperblock = Int(configData["core"]["threadsperblock"])
     blockspergrid = Int(ceil(length(gpuGlobalDataCommon[1,:])/threadsperblock))
     println(blockspergrid)
-    @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon) #, out1, out2)
+    @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataCommon) #, out1, out2)
+    synchronize(str)
+    sum_delx_sqr = zeros(Float64, 1)
+    sum_dely_sqr = zeros(Float64, 1)
+    sum_delx_dely = zeros(Float64, 1)
+    sum_delx_delq = cuzeros(Float64, 4)
+    sum_dely_delq = cuzeros(Float64, 4)
+    @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, cu(sum_delx_sqr),
+                                                                                cu(sum_dely_sqr), cu(sum_delx_dely),
+                                                                                cu(sum_delx_delq), cu(sum_dely_delq))
     synchronize(str)
     # synchronize()
     # println(Array(out1))
 end
 
-function q_var_derivatives_kernel(gpuGlobalDataCommon) #out1, out2)
+function q_var_cuda_kernel(gpuGlobalDataCommon) #out1, out2)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -148,6 +157,80 @@ function q_var_derivatives_kernel(gpuGlobalDataCommon) #out1, out2)
     return
 end
 
+function q_var_derivatives_kernel(gpuGlobalDataCommon, sum_delx_sqr, sum_dely_sqr, sum_delx_dely, sum_delx_delq,
+                                    sum_dely_delq)
+    tx = threadIdx().x
+    bx = blockIdx().x - 1
+    bw = blockDim().x
+    idx = bx * bw + tx
+    # itm = CuArray(Float64, 145)
+
+    sum_delx_sqr = 0.0
+    sum_dely_sqr = 0.0
+    sum_delx_dely = 0.0
+    fill!(sum_delx_delq, 0.0)
+    fill!(sum_dely_delq, 0.0)
+
+    if idx > 0 && idx <= gpuGlobalDataCommon[1,end]
+        x_i = gpuGlobalDataCommon[2, idx]
+        y_i = gpuGlobalDataCommon[3, idx]
+        for iter in 9:28
+            conn = Int(gpuGlobalDataCommon[iter, idx])
+            if conn == 0.0
+                break
+            end
+            x_k = gpuGlobalDataCommon[2, conn]
+            y_k = gpuGlobalDataCommon[3, conn]
+            delx = x_k - x_i
+            dely = y_k - y_i
+            dist = CUDAnative.hypot(delx, dely)
+            weights = dist ^ 0
+            sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
+            sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
+            sum_delx_dely = sum_delx_dely + ((delx * dely) * weights)
+            for i in 1:4
+                sum_delx_delq[i] += (weights * delx * (gpuGlobalDataCommon[38+i,conn] - gpuGlobalDataCommon[38+i,idx]))
+                sum_dely_delq[i] += (weights * dely * (gpuGlobalDataCommon[38+i,conn] - gpuGlobalDataCommon[38+i,idx]))
+            end
+        end
+        det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
+        one_by_det = 1.0 / det
+        gpuGlobalDataCommon[43, idx] = one_by_det * (sum_delx_delq[1] * sum_dely_sqr - sum_dely_delq[1] * sum_delx_dely)
+        gpuGlobalDataCommon[44, idx] = one_by_det * (sum_delx_delq[2] * sum_dely_sqr - sum_dely_delq[2] * sum_delx_dely)
+        gpuGlobalDataCommon[45, idx] = one_by_det * (sum_delx_delq[3] * sum_dely_sqr - sum_dely_delq[3] * sum_delx_dely)
+        gpuGlobalDataCommon[46, idx] = one_by_det * (sum_delx_delq[4] * sum_dely_sqr - sum_dely_delq[4] * sum_delx_dely)
+        gpuGlobalDataCommon[47, idx] = one_by_det * (sum_dely_delq[1] * sum_delx_sqr - sum_delx_delq[1] * sum_delx_dely)
+        gpuGlobalDataCommon[48, idx] = one_by_det * (sum_dely_delq[2] * sum_delx_sqr - sum_delx_delq[2] * sum_delx_dely)
+        gpuGlobalDataCommon[49, idx] = one_by_det * (sum_dely_delq[3] * sum_delx_sqr - sum_delx_delq[3] * sum_delx_dely)
+        gpuGlobalDataCommon[50, idx] = one_by_det * (sum_dely_delq[4] * sum_delx_sqr - sum_delx_delq[4] * sum_delx_dely)
+        @cuda dynamic=true threads=4 max_min_kernel(gpuGlobalDataCommon, idx)
+
+    end
+    return
+end
+
+@inline function max_min_kernel(gpuGlobalDataCommon, idx::Int64)
+    tx = threadIdx().x
+    bx = blockIdx().x - 1
+    bw = blockDim().x
+    i = bx * bw + tx
+    gpuGlobalDataCommon[137+i, idx] = gpuGlobalDataCommon[38+i,idx]
+    gpuGlobalDataCommon[141+i, idx] = gpuGlobalDataCommon[38+i,idx]
+    for iter in 9:28
+        conn = Int(gpuGlobalDataCommon[iter, idx])
+        if conn == 0.0
+            break
+        end
+        if gpuGlobalDataCommon[137+i, idx] < gpuGlobalDataCommon[38+i,conn]
+            gpuGlobalDataCommon[137+i, idx] = gpuGlobalDataCommon[38+i,conn]
+        end
+        if gpuGlobalDataCommon[141+i, idx] > gpuGlobalDataCommon[38+i,conn]
+            gpuGlobalDataCommon[141+i, idx] = gpuGlobalDataCommon[38+i,conn]
+        end
+    end
+    return
+end
+
 function q_var_derivatives(globaldata, configData)
     power::Float64 = configData["core"]["power"]
 
@@ -165,13 +248,11 @@ function q_var_derivatives(globaldata, configData)
         # end
         globaldata[idx].q[2] = (two_times_beta * u1)
         globaldata[idx].q[3] = (two_times_beta * u2)
-        # globaldata[idx].q[4] = -two_times_beta
+        globaldata[idx].q[4] = -two_times_beta
         # if idx == 3
         #     println(globaldata[3])
         # end
     end
-
-
 
     for (idx,itm) in enumerate(globaldata)
         x_i = itm.x
@@ -211,21 +292,6 @@ function q_var_derivatives(globaldata, configData)
         end
 
     end
+
+    println(globaldata[3])
 end
-
-
-
-# function q_var_cuda_kernel(globaldata)
-#     tx = threadIdx().x
-#     bx = blockIdx().x
-#     bw = blockDim().x_i
-#     idx =  bx * bw + tx
-#     if idx > 0 && idx < length(globaldata)
-#         itm = globaldata[idx]
-#         rho = itm.prim[1]
-#         u1 = itm.prim[2]
-#         u2 = itm.prim[3]
-#         pr = itm.prim[4]
-
-#     end
-# end
