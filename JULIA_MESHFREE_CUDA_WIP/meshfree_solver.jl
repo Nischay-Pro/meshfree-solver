@@ -116,7 +116,27 @@ function main()
     # println(typeof(gpuGlobaldataDq))
     # gpuGlobaldataLocalID = CuArray(globaldataLocalID)
     gpuGlobalDataCommon = CuArray(globaldataCommon)
-
+    gpuConfigData = CuArray([
+                            getConfig()["core"]["points"],#1
+                            getConfig()["core"]["cfl"],
+                            getConfig()["core"]["max_iters"],
+                            getConfig()["core"]["mach"],
+                            getConfig()["core"]["aoa"],#5
+                            getConfig()["core"]["power"],
+                            getConfig()["core"]["limiter_flag"],
+                            getConfig()["core"]["vl_const"],
+                            getConfig()["core"]["initial_conditions_flag"],
+                            getConfig()["core"]["interior_points_normal_flag"],#10
+                            getConfig()["core"]["shapes"],
+                            getConfig()["core"]["rho_inf"],
+                            getConfig()["core"]["pr_inf"],
+                            getConfig()["core"]["threadsperblock"],
+                            getConfig()["core"]["gamma"],#15
+                            getConfig()["core"]["clcd_flag"],
+                            getConfig()["point"]["wall"],
+                            getConfig()["point"]["interior"],
+                            getConfig()["point"]["outer"]
+                        ])
     # gpuGlobaldataDq = CuArray(globaldataDq)
     # println()
     # println(isbitstype(globaldata) == true)
@@ -138,7 +158,7 @@ function main()
     #     fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
     # end
 
-    fpi_solver_cuda(1, gpuGlobalDataCommon, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+    fpi_solver_cuda(1, gpuGlobalDataCommon, gpuConfigData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
     globalDataCommon1 = Array(gpuGlobalDataCommon)
 
     println(globalDataCommon1[:,3])

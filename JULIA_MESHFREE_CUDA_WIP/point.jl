@@ -73,8 +73,8 @@ function convertToArray(targetArray, originalStruct::Point, idx)
                                         ] ,
                                         originalStruct.prim , #31
                                         originalStruct.flux_res , #35
-                                        zeros(Float64, 4) , #39
-                                        zeros(Float64, 8) , #43
+                                        zeros(Float64, 4) , #39 q
+                                        zeros(Float64, 8) , #43 dq
                                         [
                                             originalStruct.entropy , #51
                                             originalStruct.xpos_nbhs ,

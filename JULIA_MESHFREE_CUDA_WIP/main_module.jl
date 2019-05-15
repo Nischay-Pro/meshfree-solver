@@ -27,6 +27,9 @@ fpi_solver_cuda, q_var_cuda_kernel, q_var_derivatives_kernel, max_min_kernel
 include("flux_residual.jl")
 export cal_flux_residual, wallindices_flux_residual, outerindices_flux_residual, interiorindices_flux_residual
 
+include("flux_residual_cuda.jl")
+export cal_flux_residual_kernel
+
 include("interior_fluxes.jl")
 export interior_dGx_pos, interior_dGx_neg, interior_dGy_pos, interior_dGy_neg
 
@@ -56,5 +59,8 @@ export func_delta, state_update, primitive_to_conserved, conserved_vector_Ubar
 
 include("wall_fluxes.jl")
 export wall_dGx_pos, wall_dGx_neg, wall_dGy_neg
+
+include("wall_fluxes_cuda.jl")
+export wall_dGx_pos_kernel
 
 end

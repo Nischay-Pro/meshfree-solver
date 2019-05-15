@@ -106,7 +106,7 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
 
 end
 
-function fpi_solver_cuda(iter, gpuGlobalDataCommon, configData, wallindices, outerindices, interiorindices, res_old)
+function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, wallindices, outerindices, interiorindices, res_old)
     if iter == 1
         println("Compiling CUDA Kernel. This might take a while...")
     end
@@ -115,7 +115,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, configData, wallindices, out
     # ctx = CuContext(dev)
     # out1 = CuArray(zeros(Float64, 32))
     # out2 = CuArray(ones(Float64, 32))
-    threadsperblock = Int(configData["core"]["threadsperblock"])
+    threadsperblock = Int(gpuConfigData[14])
     blockspergrid = Int(ceil(length(gpuGlobalDataCommon[1,:])/threadsperblock))
     println(blockspergrid)
     @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataCommon) #, out1, out2)
@@ -123,11 +123,16 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, configData, wallindices, out
     sum_delx_sqr = zeros(Float64, 1)
     sum_dely_sqr = zeros(Float64, 1)
     sum_delx_dely = zeros(Float64, 1)
-    sum_delx_delq = cuzeros(Float64, 4)
-    sum_dely_delq = cuzeros(Float64, 4)
-    @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, cu(sum_delx_sqr),
-                                                                                cu(sum_dely_sqr), cu(sum_delx_dely),
-                                                                                cu(sum_delx_delq), cu(sum_dely_delq))
+    four_array_store1 = cuzeros(Float64, 4)
+    four_array_store2 = cuzeros(Float64, 4)
+    four_array_store3 = cuzeros(Float64, 4)
+    four_array_store4 = cuzeros(Float64, 4)
+    @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData,
+                                                                                cu(four_array_store1), cu(four_array_store2))
+    synchronize(str)
+    @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel(gpuGlobalDataCommon, gpuConfigData, cu(four_array_store1),
+                                                                                cu(four_array_store2), cu(four_array_store3),
+                                                                                cu(four_array_store4))
     synchronize(str)
     # synchronize()
     # println(Array(out1))
@@ -157,8 +162,7 @@ function q_var_cuda_kernel(gpuGlobalDataCommon) #out1, out2)
     return
 end
 
-function q_var_derivatives_kernel(gpuGlobalDataCommon, sum_delx_sqr, sum_dely_sqr, sum_delx_dely, sum_delx_delq,
-                                    sum_dely_delq)
+function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData, sum_delx_delq, sum_dely_delq)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -184,7 +188,8 @@ function q_var_derivatives_kernel(gpuGlobalDataCommon, sum_delx_sqr, sum_dely_sq
             delx = x_k - x_i
             dely = y_k - y_i
             dist = CUDAnative.hypot(delx, dely)
-            weights = dist ^ 0
+            power = gpuConfigData[6]
+            weights = CUDAnative.pow(dist, power)
             sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
             sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
             sum_delx_dely = sum_delx_dely + ((delx * dely) * weights)
