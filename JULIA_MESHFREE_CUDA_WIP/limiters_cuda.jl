@@ -1,23 +1,25 @@
 function venkat_limiter_kernel(qtilde, gpuGlobalDataCommon, idx, gpuConfigData, phi)
     VL_CONST = gpuConfigData[8]
-    ds = gpuGlobalDataCommon[137]
-    epsi = VL_CONST * ds
-    epsi = CUDAnative.pow(epsi ^ 3)
+    ds = gpuGlobalDataCommon[137, idx]
+    # @cuprintf("Type is %s", typeof(VL_CONST))
+    epsigh = VL_CONST * ds
+    power3 = 3.0
+    epsi = CUDAnative.pow(epsigh, power3)
     del_pos = 0.0
     del_neg = 0.0
 
     for i in 1:4
-        q = gpuGlobalDataCommon[38 + i]
+        q = gpuGlobalDataCommon[38 + i, idx]
         del_neg = qtilde[i] - q
         if abs(del_neg) <= 1e-5
             phi[i] = 1.0
         elseif abs(del_neg) > 1e-5
             if del_neg > 0.0
                 # maximum(globaldata, idx, i, max_q)
-                del_pos = gpuGlobalDataCommon[137+i] - q
+                del_pos = gpuGlobalDataCommon[137+i, idx] - q
             elseif del_neg < 0.0
                 # minimum(globaldata, idx, i, min_q)
-                del_pos = gpuGlobalDataCommon[141+i] - q
+                del_pos = gpuGlobalDataCommon[141+i, idx] - q
             end
             num = (del_pos*del_pos) + (epsi*epsi)
             num = (num*del_neg) + 2 * (del_neg*del_neg*del_pos)

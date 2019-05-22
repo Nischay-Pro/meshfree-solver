@@ -1,4 +1,4 @@
-# __precompile__()
+__precompile__()
 
 module main_module
 
@@ -36,6 +36,9 @@ export interior_dGx_pos, interior_dGx_neg, interior_dGy_pos, interior_dGy_neg
 include("limiters.jl")
 export venkat_limiter, maximum, minimum, smallest_dist, min_q_values, qtilde_to_primitive
 
+include("limiters_cuda.jl")
+export venkat_limiter_kernel
+
 include("meshfree_solver.jl")
 export main
 
@@ -51,8 +54,14 @@ export Point, setNormals, getxy, setConnectivity, convertToArray
 include("quadrant_fluxes.jl")
 export flux_quad_GxI, flux_quad_GxII, flux_quad_GxIII, flux_quad_GxIV
 
+include("quadrant_fluxes_cuda.jl")
+export flux_quad_GxI_kernel, flux_quad_GxII_kernel, flux_quad_GxIII_kernel, flux_quad_GxIV_kernel
+
 include("split_fluxes.jl")
 export flux_Gxp, flux_Gxn, flux_Gyp, flux_Gyn, flux_Gx, flux_Gy
+
+include("split_fluxes_cuda.jl")
+export flux_Gxp_kernel, flux_Gxn_kernel, flux_Gyp_kernel, flux_Gyn_kernel, flux_Gx_kernel, flux_Gy_kernel
 
 include("state_update.jl")
 export func_delta, state_update, primitive_to_conserved, conserved_vector_Ubar

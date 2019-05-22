@@ -82,10 +82,10 @@ function convertToArray(targetArray, originalStruct::Point, idx)
                                             originalStruct.ypos_nbhs ,
                                             originalStruct.yneg_nbhs
                                         ] ,
-                                        zeros(Float64, 20) , #56
-                                        zeros(Float64, 20) , #76
-                                        zeros(Float64, 20) , #96
-                                        zeros(Float64, 20) , #116
+                                        zeros(Float64, 20) , #56 xpos_conn
+                                        zeros(Float64, 20) , #76 xneg_conn
+                                        zeros(Float64, 20) , #96 ypos_conn
+                                        zeros(Float64, 20) , #116 yneg_conn
                                         [
                                             originalStruct.delta , #136
                                             originalStruct.short_distance #137

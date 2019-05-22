@@ -18,6 +18,11 @@ function wallindices_flux_residual(globaldata, configData, wallindices)
 		# 	println()
 		# end
 		GTemp = GTemp * 2.0
+		# if itm == 3
+		# 	println("GTemp is")
+		# 	println(GTemp)
+		# 	# println(globaldata[3])
+		# end
 		globaldata[itm].flux_res = GTemp
 	end
 end

@@ -120,19 +120,29 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, wallindices, 
     println(blockspergrid)
     @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataCommon) #, out1, out2)
     synchronize(str)
-    sum_delx_sqr = zeros(Float64, 1)
-    sum_dely_sqr = zeros(Float64, 1)
-    sum_delx_dely = zeros(Float64, 1)
-    four_array_store1 = cuzeros(Float64, 4)
-    four_array_store2 = cuzeros(Float64, 4)
-    four_array_store3 = cuzeros(Float64, 4)
-    four_array_store4 = cuzeros(Float64, 4)
+    # sum_delx_sqr = zeros(Float64, 1)
+    # sum_dely_sqr = zeros(Float64, 1)
+    # sum_delx_dely = zeros(Float64, 1)
+    four_array_store1 = zeros(Float64, 4)
+    four_array_store2 = zeros(Float64, 4)
+    four_array_store3 = zeros(Float64, 4)
+    four_array_store4 = zeros(Float64, 4)
+    four_array_store5 = zeros(Float64, 4)
+    four_array_store6 = zeros(Float64, 4)
+    four_array_store7 = zeros(Float64, 4)
+    four_array_store8 = zeros(Float64, 4)
+    four_array_store9 = zeros(Float64, 4)
+    four_array_store10 = zeros(Float64, 4)
+
     @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData,
                                                                                 cu(four_array_store1), cu(four_array_store2))
     synchronize(str)
     @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel(gpuGlobalDataCommon, gpuConfigData, cu(four_array_store1),
                                                                                 cu(four_array_store2), cu(four_array_store3),
-                                                                                cu(four_array_store4))
+                                                                                cu(four_array_store4), cu(four_array_store5),
+                                                                                cu(four_array_store6), cu(four_array_store7),
+                                                                                cu(four_array_store8), cu(four_array_store9),
+                                                                                cu(four_array_store10))
     synchronize(str)
     # synchronize()
     # println(Array(out1))
@@ -209,7 +219,7 @@ function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData, sum_delx_d
         gpuGlobalDataCommon[49, idx] = one_by_det * (sum_dely_delq[3] * sum_delx_sqr - sum_delx_delq[3] * sum_delx_dely)
         gpuGlobalDataCommon[50, idx] = one_by_det * (sum_dely_delq[4] * sum_delx_sqr - sum_delx_delq[4] * sum_delx_dely)
         @cuda dynamic=true threads=4 max_min_kernel(gpuGlobalDataCommon, idx)
-
+        CUDAnative.synchronize()
     end
     return
 end
@@ -298,5 +308,5 @@ function q_var_derivatives(globaldata, configData)
 
     end
 
-    println(globaldata[3])
+    # println(globaldata[3])
 end
