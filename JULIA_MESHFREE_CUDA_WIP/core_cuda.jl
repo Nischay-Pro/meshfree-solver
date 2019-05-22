@@ -100,6 +100,8 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
 
     cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
 
+    println(globaldata[3])
+
     func_delta(globaldata, configData)
 
     state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)

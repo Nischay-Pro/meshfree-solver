@@ -88,12 +88,12 @@ function flux_quad_GxIII_kernel(nx, ny, u1, u2, rho, pr, G)
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
-    S1 = ut*sqrt(beta)
-    S2 = un*sqrt(beta)
-    B1 = 0.5*exp(-S1*S1)/sqrt(pi*beta)
-    B2 = 0.5*exp(-S2*S2)/sqrt(pi*beta)
-    A1pos = 0.5*(1.0 + SpecialFunctions.erf(S1))
-    A2pos = 0.5*(1.0 + SpecialFunctions.erf(S2))
+    S1 = ut*CUDAnative.sqrt(beta)
+    S2 = un*CUDAnative.sqrt(beta)
+    B1 = 0.5*CUDAnative.exp(-S1*S1)/CUDAnative.sqrt(pi*beta)
+    B2 = 0.5*CUDAnative.exp(-S2*S2)/CUDAnative.sqrt(pi*beta)
+    A1pos = 0.5*(1.0 + CUDAnative.erf(S1))
+    A2pos = 0.5*(1.0 + CUDAnative.erf(S2))
 
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un

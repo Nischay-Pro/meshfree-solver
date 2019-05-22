@@ -48,6 +48,9 @@ export calculateTheta, compute_cl_cd_cm
 include("outer_fluxes.jl")
 export outer_dGx_pos, outer_dGx_neg, outer_dGy_pos
 
+include("outer_fluxes_cuda.jl")
+export outer_dGx_pos_kernel, outer_dGx_neg_kernel, outer_dGy_pos_kernel
+
 include("point.jl")
 export Point, setNormals, getxy, setConnectivity, convertToArray
 

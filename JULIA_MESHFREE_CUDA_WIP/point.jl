@@ -94,10 +94,10 @@ function convertToArray(targetArray, originalStruct::Point, idx)
                                         zeros(Float64, 4) #142
                                         )
     targetArray[9:8 + originalStruct.nbhs, idx] = originalStruct.conn
-    targetArray[56:55+ originalStruct.xpos_nbhs] = originalStruct.xpos_conn
-    targetArray[76:75+ originalStruct.xneg_nbhs] = originalStruct.xneg_conn
-    targetArray[96:95+ originalStruct.ypos_nbhs] = originalStruct.ypos_conn
-    targetArray[116:115+ originalStruct.yneg_nbhs] = originalStruct.yneg_conn
+    targetArray[56:55+ originalStruct.xpos_nbhs, idx] = originalStruct.xpos_conn
+    targetArray[76:75+ originalStruct.xneg_nbhs, idx] = originalStruct.xneg_conn
+    targetArray[96:95+ originalStruct.ypos_nbhs, idx] = originalStruct.ypos_conn
+    targetArray[116:115+ originalStruct.yneg_nbhs, idx] = originalStruct.yneg_conn
 end
 
 
