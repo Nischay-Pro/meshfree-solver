@@ -1,5 +1,5 @@
 
-function interior_dGx_pos(globaldata, idx, configData)
+function interior_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_i, phi_k, G_i, G_k, sum_delx_delf, sum_dely_delf, result)
 
     power::Float64 = configData["core"]["power"]
     limiter_flag::Float64 = configData["core"]["limiter_flag"]
@@ -91,7 +91,7 @@ function interior_dGx_pos(globaldata, idx, configData)
     return G
 end
 
-function interior_dGx_neg(globaldata, idx, configData)
+function interior_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_i, phi_k, G_i, G_k, sum_delx_delf, sum_dely_delf, result)
 
     power::Float64 = configData["core"]["power"]
     limiter_flag::Float64 = configData["core"]["limiter_flag"]
@@ -179,7 +179,7 @@ function interior_dGx_neg(globaldata, idx, configData)
     return G
 end
 
-function interior_dGy_pos(globaldata, idx, configData)
+function interior_dGy_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_i, phi_k, G_i, G_k, sum_delx_delf, sum_dely_delf, result)
 
     power::Float64 = configData["core"]["power"]
     limiter_flag::Float64 = configData["core"]["limiter_flag"]
@@ -265,7 +265,7 @@ function interior_dGy_pos(globaldata, idx, configData)
     return G
 end
 
-function interior_dGy_neg(globaldata, idx, configData)
+function interior_dGy_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_i, phi_k, G_i, G_k, sum_delx_delf, sum_dely_delf, result)
 
     power::Float64 = configData["core"]["power"]
     limiter_flag::Float64 = configData["core"]["limiter_flag"]

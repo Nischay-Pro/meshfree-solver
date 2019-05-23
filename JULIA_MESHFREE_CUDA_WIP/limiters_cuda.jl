@@ -1,4 +1,4 @@
-function venkat_limiter_kernel(qtilde, gpuGlobalDataCommon, idx, gpuConfigData, phi)
+@inline function venkat_limiter_kernel(qtilde, gpuGlobalDataCommon, idx, gpuConfigData, phi)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataCommon[137, idx]
     # @cuprintf("Type is %s", typeof(VL_CONST))
@@ -116,6 +116,9 @@ end
     temp2 = temp1 - (CUDAnative.log(beta)/(gamma-1))
     rho = CUDAnative.exp(temp2)
     pr = rho*temp
-    result = (u1,u2,rho,pr)
+    result[1] = u1
+    result[2] = u2
+    result[3] = rho
+    result[4] = pr
     return nothing
 end

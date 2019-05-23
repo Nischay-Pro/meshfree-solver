@@ -1,5 +1,5 @@
 function outer_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_i, phi_k, G_i, G_k,
-                        sum_delx_delf, sum_dely_delf)
+                        sum_delx_delf, sum_dely_delf, result)
 
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
@@ -18,7 +18,7 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
     qtilde_i = (0,0,0,0)
     qtilde_k = (0,0,0,0)
 
-    result = (0,0,0,0)
+
 
     x_i = gpuGlobalDataCommon[2, idx]
     y_i = gpuGlobalDataCommon[3, idx]
@@ -63,8 +63,8 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
                     )
 
         if limiter_flag == 1
-            @cuda dynamic=true venkat_limiter_kernel(qtilde_i, gpuGlobalDataCommon, idx, gpuConfigData, phi_i)
-            @cuda dynamic=true venkat_limiter_kernel(qtilde_k, gpuGlobalDataCommon, conn, gpuConfigData, phi_k)
+            venkat_limiter_kernel(qtilde_i, gpuGlobalDataCommon, idx, gpuConfigData, phi_i)
+            venkat_limiter_kernel(qtilde_k, gpuGlobalDataCommon, conn, gpuConfigData, phi_k)
             CUDAnative.synchronize()
             qtilde_i =  (
                             gpuGlobalDataCommon[39, idx] - 0.5*phi_i[1]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
@@ -84,10 +84,10 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
             @cuprintf("\n Havent written the code - die \n")
         end
 
-        @cuda dynamic=true qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, result)
-        @cuda dynamic=true flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_i)
-        @cuda dynamic=true qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, result)
-        @cuda dynamic=true flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_k)
+        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, result)
+        flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_i)
+        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, result)
+        flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_k)
         CUDAnative.synchronize()
         for i in 1:4
             sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
@@ -104,7 +104,7 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
 end
 
 function outer_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_i, phi_k, G_i, G_k,
-                        sum_delx_delf, sum_dely_delf)
+                        sum_delx_delf, sum_dely_delf, result)
 
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
@@ -123,7 +123,7 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
     qtilde_i = (0,0,0,0)
     qtilde_k = (0,0,0,0)
 
-    result = (0,0,0,0)
+
 
     x_i = gpuGlobalDataCommon[2, idx]
     y_i = gpuGlobalDataCommon[3, idx]
@@ -168,8 +168,8 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
                     )
 
         if limiter_flag == 1
-            @cuda dynamic=true venkat_limiter_kernel(qtilde_i, gpuGlobalDataCommon, idx, gpuConfigData, phi_i)
-            @cuda dynamic=true venkat_limiter_kernel(qtilde_k, gpuGlobalDataCommon, conn, gpuConfigData, phi_k)
+            venkat_limiter_kernel(qtilde_i, gpuGlobalDataCommon, idx, gpuConfigData, phi_i)
+            venkat_limiter_kernel(qtilde_k, gpuGlobalDataCommon, conn, gpuConfigData, phi_k)
             CUDAnative.synchronize()
             qtilde_i =  (
                             gpuGlobalDataCommon[39, idx] - 0.5*phi_i[1]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
@@ -189,10 +189,10 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
             @cuprintf("\n Havent written the code - die \n")
         end
 
-        @cuda dynamic=true qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, result)
-        @cuda dynamic=true flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_i)
-        @cuda dynamic=true qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, result)
-        @cuda dynamic=true flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_k)
+        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, result)
+        flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_i)
+        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, result)
+        flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_k)
         CUDAnative.synchronize()
         for i in 1:4
             sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
@@ -209,7 +209,7 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
 end
 
 function outer_dGy_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_i, phi_k, G_i, G_k,
-                        sum_delx_delf, sum_dely_delf)
+                        sum_delx_delf, sum_dely_delf, result)
 
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
@@ -228,7 +228,7 @@ function outer_dGy_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
     qtilde_i = (0,0,0,0)
     qtilde_k = (0,0,0,0)
 
-    result = (0,0,0,0)
+
 
     x_i = gpuGlobalDataCommon[2, idx]
     y_i = gpuGlobalDataCommon[3, idx]
@@ -273,8 +273,8 @@ function outer_dGy_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
                     )
 
         if limiter_flag == 1
-            @cuda dynamic=true venkat_limiter_kernel(qtilde_i, gpuGlobalDataCommon, idx, gpuConfigData, phi_i)
-            @cuda dynamic=true venkat_limiter_kernel(qtilde_k, gpuGlobalDataCommon, conn, gpuConfigData, phi_k)
+            venkat_limiter_kernel(qtilde_i, gpuGlobalDataCommon, idx, gpuConfigData, phi_i)
+            venkat_limiter_kernel(qtilde_k, gpuGlobalDataCommon, conn, gpuConfigData, phi_k)
             CUDAnative.synchronize()
             qtilde_i =  (
                             gpuGlobalDataCommon[39, idx] - 0.5*phi_i[1]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
@@ -294,10 +294,10 @@ function outer_dGy_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
             @cuprintf("\n Havent written the code - die \n")
         end
 
-        @cuda dynamic=true qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, result)
-        @cuda dynamic=true flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_i)
-        @cuda dynamic=true qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, result)
-        @cuda dynamic=true flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_k)
+        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, result)
+        flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_i)
+        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, result)
+        flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_k)
         CUDAnative.synchronize()
         for i in 1:4
             sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights

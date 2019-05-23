@@ -9,11 +9,11 @@ function wall_dGx_pos(globaldata, idx, configData)
 
     sum_delx_delf = zeros(Float64, 4)
     sum_dely_delf = zeros(Float64, 4)
-    qtilde = zeros(Float64, 4)
+    # qtilde = zeros(Float64, 4)
     phi_i = zeros(Float64, 4)
     result = zeros(Float64, 4)
-    G_i = zeros(Float64, 4)
-    G_k = zeros(Float64, 4)
+    # G_i = zeros(Float64, 4)
+    # G_k = zeros(Float64, 4)
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
 
@@ -122,14 +122,14 @@ function wall_dGx_pos(globaldata, idx, configData)
     one_by_det = 1.0 / det
     # if idx == 3
     #     println("Serial is ")
-    #     println(sum_delx_sqr)
-    #     println(sum_dely_sqr)
-    #     println(sum_delx_dely)
-    #     println(qtilde_i)
-    #     println(phi_i)
-    #     println(G_k)
-    #     println(G_i)
-    #     print(result)
+    # #     println(sum_delx_sqr)
+    # #     println(sum_dely_sqr)
+    # #     println(sum_delx_dely)
+    #     # println(qtilde_i)
+    #     # println(phi_i)
+    # #     println(G_k)
+    # #     println(G_i)
+    #     println(result)
     # end
 
     G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det

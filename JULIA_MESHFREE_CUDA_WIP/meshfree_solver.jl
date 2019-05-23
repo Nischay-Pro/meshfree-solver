@@ -162,6 +162,10 @@ function main()
     globalDataCommon1 = Array(gpuGlobalDataCommon)
 
     println(globalDataCommon1[:,3])
+    println()
+    println(globalDataCommon1[:,200])
+    println()
+    println(globalDataCommon1[:,end])
 
     compute_cl_cd_cm(globaldata, configData, shapeptsidx)
 

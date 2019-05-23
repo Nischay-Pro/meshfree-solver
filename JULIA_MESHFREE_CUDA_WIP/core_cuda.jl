@@ -135,7 +135,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, wallindices, 
     four_array_store8 = zeros(Float64, 4)
     four_array_store9 = zeros(Float64, 4)
     four_array_store10 = zeros(Float64, 4)
-
+    four_array_store11 = zeros(Float64, 4)
     @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData,
                                                                                 cu(four_array_store1), cu(four_array_store2))
     synchronize(str)
@@ -144,7 +144,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, wallindices, 
                                                                                 cu(four_array_store4), cu(four_array_store5),
                                                                                 cu(four_array_store6), cu(four_array_store7),
                                                                                 cu(four_array_store8), cu(four_array_store9),
-                                                                                cu(four_array_store10))
+                                                                                cu(four_array_store10), cu(four_array_store11))
     synchronize(str)
     # synchronize()
     # println(Array(out1))

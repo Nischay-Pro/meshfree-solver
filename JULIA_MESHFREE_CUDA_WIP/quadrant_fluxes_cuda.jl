@@ -1,5 +1,5 @@
 
-function flux_quad_GxI_kernel(nx, ny, u1, u2, rho, pr, G)
+@inline function flux_quad_GxI_kernel(nx, ny, u1, u2, rho, pr, G)
     # G = Array{Float64,1}(undef, 0)
     tx = ny
     ty = -nx
@@ -37,7 +37,7 @@ function flux_quad_GxI_kernel(nx, ny, u1, u2, rho, pr, G)
     return nothing
 end
 
-function flux_quad_GxII_kernel(nx, ny, u1, u2, rho, pr, G)
+@inline function flux_quad_GxII_kernel(nx, ny, u1, u2, rho, pr, G)
     # G = Array{Float64,1}(undef, 0)
     tx = ny
     ty = -nx
@@ -55,8 +55,10 @@ function flux_quad_GxII_kernel(nx, ny, u1, u2, rho, pr, G)
 
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
+    # @cuprintf("\n====\n")
+    # @cuprintf("\n G[1] is %f", rho * A2neg* (ut*A1pos + B1))
     G[1] = rho * A2neg* (ut*A1pos + B1)
-
+    # @cuprintf("\n rho, pi, beta, ut is %f %f", rho, pr)
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1pos + ut*B1
     G[2] = rho*A2neg*temp2
@@ -78,7 +80,7 @@ function flux_quad_GxII_kernel(nx, ny, u1, u2, rho, pr, G)
     return nothing
 end
 
-function flux_quad_GxIII_kernel(nx, ny, u1, u2, rho, pr, G)
+@inline function flux_quad_GxIII_kernel(nx, ny, u1, u2, rho, pr, G)
     # G = Array{Float64,1}(undef, 0)
 
     tx = ny
@@ -120,7 +122,7 @@ function flux_quad_GxIII_kernel(nx, ny, u1, u2, rho, pr, G)
     return nothing
 end
 
-function flux_quad_GxIV_kernel(nx, ny, u1, u2, rho, pr, G)
+@inline function flux_quad_GxIV_kernel(nx, ny, u1, u2, rho, pr, G)
     # G = Array{Float64,1}(undef, 0)
 
     tx = ny
