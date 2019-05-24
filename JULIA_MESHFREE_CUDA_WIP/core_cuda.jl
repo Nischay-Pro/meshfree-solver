@@ -100,12 +100,13 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
 
     cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
 
-    println(globaldata[3])
-
     func_delta(globaldata, configData)
 
+    println(globaldata[3])
+    println("")
     state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
-
+    println("")
+    println(globaldata[3])
 end
 
 function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, wallindices, outerindices, interiorindices, res_old)
@@ -115,7 +116,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, wallindices, 
     # dev::CuDevice=CuDevice(0)
     str = CuStream()
     # ctx = CuContext(dev)
-    # out1 = CuArray(zeros(Float64, 32))
+    # out1 = CuArray(zeros(Float64, 4))
     # out2 = CuArray(ones(Float64, 32))
     threadsperblock = Int(gpuConfigData[14])
     blockspergrid = Int(ceil(length(gpuGlobalDataCommon[1,:])/threadsperblock))
@@ -136,6 +137,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, wallindices, 
     four_array_store9 = zeros(Float64, 4)
     four_array_store10 = zeros(Float64, 4)
     four_array_store11 = zeros(Float64, 4)
+    # four_array_store12 = zeros(Float64, 4)
     @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData,
                                                                                 cu(four_array_store1), cu(four_array_store2))
     synchronize(str)
@@ -146,8 +148,13 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, wallindices, 
                                                                                 cu(four_array_store8), cu(four_array_store9),
                                                                                 cu(four_array_store10), cu(four_array_store11))
     synchronize(str)
+    @cuda blocks=blockspergrid threads=threadsperblock func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
+    synchronize(str)
+    @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataCommon, gpuConfigData)
+    synchronize(str)
     # synchronize()
     # println(Array(out1))
+    return nothing
 end
 
 function q_var_cuda_kernel(gpuGlobalDataCommon) #out1, out2)

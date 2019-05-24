@@ -67,18 +67,34 @@ function state_update_wall(globaldata, itm, max_res, sum_res_sqr, U)
     #     println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # end
     primitive_to_conserved(globaldata, itm, nx, ny, U)
+    # if itm == 3
+    #     println("\n Values are ")
+    #     println(U)
+    #     println()
+    # end
     # if itm == 2
     #     println("Prim1.01a2.2")
     #     println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # end
     temp = U[1]
     U -= (globaldata[itm].delta .* globaldata[itm].flux_res)
+
+    # if itm == 3
+    #     println("\n Values are ")
+    #     println(U)
+    #     println()
+    # end
     U[3] = zero(Float64)
     U2_rot = U[2]
     U3_rot = U[3]
     U[2] = U2_rot*ny + U3_rot*nx
     U[3] = U3_rot*ny - U2_rot*nx
     res_sqr = (U[1] - temp)*(U[1] - temp)
+    # if itm == 3
+    #     println("\n Values are ")
+    #     println(U)
+    #     println()
+    # end
     # if itm == 2
     #     println("Prim1.01a2.3")
     #     println(IOContext(stdout, :compact => false), globaldata[1].prim)

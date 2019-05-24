@@ -72,6 +72,9 @@ export flux_Gxp_kernel, flux_Gxn_kernel, flux_Gyp_kernel, flux_Gyn_kernel, flux_
 include("state_update.jl")
 export func_delta, state_update, primitive_to_conserved, conserved_vector_Ubar
 
+include("state_update_cuda.jl")
+export func_delta_kernel, state_update_kernel
+
 include("wall_fluxes.jl")
 export wall_dGx_pos, wall_dGx_neg, wall_dGy_neg
 

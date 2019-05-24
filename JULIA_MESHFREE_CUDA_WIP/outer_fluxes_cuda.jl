@@ -85,9 +85,9 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
         end
 
         qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, result)
-        flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_i)
+        flux_quad_GxIII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_i)
         qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, result)
-        flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_k)
+        flux_quad_GxIII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_k)
         CUDAnative.synchronize()
         for i in 1:4
             sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
@@ -103,7 +103,7 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
     return nothing
 end
 
-function outer_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_i, phi_k, G_i, G_k,
+function outer_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxn, phi_i, phi_k, G_i, G_k,
                         sum_delx_delf, sum_dely_delf, result)
 
     power = gpuConfigData[6]
@@ -123,8 +123,6 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
     qtilde_i = (0,0,0,0)
     qtilde_k = (0,0,0,0)
 
-
-
     x_i = gpuGlobalDataCommon[2, idx]
     y_i = gpuGlobalDataCommon[3, idx]
     nx = gpuGlobalDataCommon[29, idx]
@@ -133,7 +131,7 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
     tx = ny
     ty = -nx
 
-    for iter in 56:75
+    for iter in 76:95
         conn = Int(gpuGlobalDataCommon[iter, idx])
         if conn == 0.0
             break
@@ -190,9 +188,9 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
         end
 
         qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, result)
-        flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_i)
+        flux_quad_GxIV_kernel(nx, ny, result[1], result[2], result[3], result[4], G_i)
         qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, result)
-        flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_k)
+        flux_quad_GxIV_kernel(nx, ny, result[1], result[2], result[3], result[4], G_k)
         CUDAnative.synchronize()
         for i in 1:4
             sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
@@ -203,12 +201,12 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
     for i in 1:4
-        Gxp[i] = (sum_delx_delf[i]*sum_dely_sqr - sum_dely_delf[i]*sum_delx_dely)*one_by_det
+        Gxn[i] = (sum_delx_delf[i]*sum_dely_sqr - sum_dely_delf[i]*sum_delx_dely)*one_by_det
     end
     return nothing
 end
 
-function outer_dGy_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_i, phi_k, G_i, G_k,
+function outer_dGy_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gyp, phi_i, phi_k, G_i, G_k,
                         sum_delx_delf, sum_dely_delf, result)
 
     power = gpuConfigData[6]
@@ -238,7 +236,7 @@ function outer_dGy_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
     tx = ny
     ty = -nx
 
-    for iter in 56:75
+    for iter in 96:115
         conn = Int(gpuGlobalDataCommon[iter, idx])
         if conn == 0.0
             break
@@ -295,9 +293,9 @@ function outer_dGy_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
         end
 
         qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, result)
-        flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_i)
+        flux_Gyp_kernel(nx, ny, result[1], result[2], result[3], result[4], G_i)
         qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, result)
-        flux_quad_GxII_kernel(nx, ny, result[1], result[2], result[3], result[4], G_k)
+        flux_Gyp_kernel(nx, ny, result[1], result[2], result[3], result[4], G_k)
         CUDAnative.synchronize()
         for i in 1:4
             sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
@@ -308,7 +306,7 @@ function outer_dGy_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData, Gxp, phi_
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
     for i in 1:4
-        Gxp[i] = (sum_delx_delf[i]*sum_dely_sqr - sum_dely_delf[i]*sum_delx_dely)*one_by_det
+        Gyp[i] = (sum_delx_delf[i]*sum_dely_sqr - sum_dely_delf[i]*sum_delx_dely)*one_by_det
     end
     return nothing
 end
