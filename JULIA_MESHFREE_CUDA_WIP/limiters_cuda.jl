@@ -1,4 +1,4 @@
-@inline function venkat_limiter_kernel(qtilde, gpuGlobalDataCommon, idx, gpuConfigData, phi)
+@inline function venkat_limiter_kernel(qtilde, gpuGlobalDataCommon, idx, gpuConfigData, phi1,phi2,phi3,phi4)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataCommon[137, idx]
     # @cuprintf("Type is %s", typeof(VL_CONST))
@@ -12,7 +12,16 @@
         q = gpuGlobalDataCommon[38 + i, idx]
         del_neg = qtilde[i] - q
         if abs(del_neg) <= 1e-5
-            phi[i] = 1.0
+            if i == 1
+                phi1 = 1.0
+            elseif i == 2
+                phi2 = 1.0
+            elseif i == 3
+                phi3 = 1.0
+            else
+                phi4 = 1.0
+            end
+
         elseif abs(del_neg) > 1e-5
             if del_neg > 0.0
                 # maximum(globaldata, idx, i, max_q)
@@ -30,9 +39,25 @@
 
             temp = num/den
             if temp < 1.0
-                phi[i] = temp
+                if i == 1
+                    phi1 = temp
+                elseif i == 2
+                    phi2 = temp
+                elseif i == 3
+                    phi3 = temp
+                else
+                    phi4 = temp
+                end
             else
-                phi[i] = 1.0
+                if i == 1
+                    phi1 = 1.0
+                elseif i == 2
+                    phi2 = 1.0
+                elseif i == 3
+                    phi3 = 1.0
+                else
+                    phi4 = 1.0
+                end
             end
         end
     end
@@ -97,7 +122,7 @@ end
     return nothing
 end
 
-@inline function qtilde_to_primitive_kernel(qtilde, gpuConfigData, result)
+@inline function qtilde_to_primitive_kernel(qtilde, gpuConfigData, result1,result2,result3,result4)
 
     gamma = gpuConfigData[15]
     q1 = qtilde[1]
@@ -116,9 +141,9 @@ end
     temp2 = temp1 - (CUDAnative.log(beta)/(gamma-1))
     rho = CUDAnative.exp(temp2)
     pr = rho*temp
-    result[1] = u1
-    result[2] = u2
-    result[3] = rho
-    result[4] = pr
+    result1 = u1
+    result2 = u2
+    result3 = rho
+    result4 = pr
     return nothing
 end

@@ -151,53 +151,46 @@ function main()
     res_old = 0
     # print(Int(getConfig()["core"]["max_iters"]) + 1)
     # for i in 1:(Int(getConfig()["core"]["max_iters"]))
-    println(globaldata[3])
-    fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+    # println(globaldata[3])
+    # fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
     # end
     # for i in 1:(Int(getConfig()["core"]["max_iters"]))
     #     fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
     # end
+    threadsperblock = Int(getConfig()["core"]["threadsperblock"])
+    blockspergrid = Int(ceil(getConfig()["core"]["points"]/threadsperblock))
+    CuArrays.@sync fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
+    # globalDataCommon1 = Array(gpuGlobalDataCommon)
 
-    fpi_solver_cuda(1, gpuGlobalDataCommon, gpuConfigData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
-    globalDataCommon1 = Array(gpuGlobalDataCommon)
-
-    println(globalDataCommon1[:,3])
-    println()
-    println(globalDataCommon1[:,200])
-    println()
-    println(globalDataCommon1[:,end])
-
-    compute_cl_cd_cm(globaldata, configData, shapeptsidx)
-
-    # println(IOContext(stdout, :compact => false), globaldata[1].q)
-    # println(IOContext(stdout, :compact => false), globaldata[1].dq)
-    # println(IOContext(stdout, :compact => false), globaldata[100].q)
-    # println(IOContext(stdout, :compact => false), globaldata[100].dq)
-    # println(IOContext(stdout, :compact => false), globaldata[1000].q)
-    # println(IOContext(stdout, :compact => false), globaldata[1000].dq)
+    # println(globalDataCommon1[:,3])
     # println()
-    # println(IOContext(stdout, :compact => false), globaldata[1].flux_res)
-    # println(IOContext(stdout, :compact => false), globaldata[100].flux_res)
-    # println(IOContext(stdout, :compact => false), globaldata[1000].flux_res)
+    # println(globalDataCommon1[:,200])
     # println()
-    # println(IOContext(stdout, :compact => false), globaldata[1].delta)
-    # println(IOContext(stdout, :compact => false), globaldata[100].delta)
-    # println(IOContext(stdout, :compact => false), globaldata[1000].delta)
-    # println()
-    # println(IOContext(stdout, :compact => false), globaldata[1].prim)
-    # println(IOContext(stdout, :compact => false), globaldata[100].prim)
-    # println(IOContext(stdout, :compact => false), globaldata[1000].prim)
-    # println(IOContext(stdout, :compact => false), globaldata[100].ypos_conn)
-    # println(IOContext(stdout, :compact => false), globaldata[100].yneg_conn)
+    # println(globalDataCommon1[:,end])
 
-    file  = open("primvals.txt", "w")
-    for (idx, itm) in enumerate(globaldata)
-        primtowrite = globaldata[idx].prim
-        for element in primtowrite
-            @printf(file,"%0.17f", element)
-            @printf(file, " ")
-        end
-        print(file, "\n")
-    end
-    close(file)
+    # compute_cl_cd_cm(globaldata, configData, shapeptsidx)
+
+    # file  = open("primvals.txt", "w")
+    # for (idx, itm) in enumerate(globaldata)
+    #     primtowrite = globaldata[idx].prim
+    #     for element in primtowrite
+    #         @printf(file,"%0.17f", element)
+    #         @printf(file, " ")
+    #     end
+    #     print(file, "\n")
+    # end
+    # close(file)
+
+    # println("Writing cuda file")
+    # file  = open("primvals_cuda.txt", "w")
+    # for idx in 1:getConfig()["core"]["points"]
+    #     primtowrite = globalDataCommon1[31:34, idx]
+    #     for element in primtowrite
+    #         @printf(file,"%0.17f", element)
+    #         @printf(file, " ")
+    #     end
+    #     print(file, "\n")
+    # end
+    # close(file)
+
 end

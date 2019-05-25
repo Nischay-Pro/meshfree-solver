@@ -1,5 +1,4 @@
 function outer_dGx_pos(globaldata, idx, configData)
-
     power::Float64 = configData["core"]["power"]
     limiter_flag::Float64 = configData["core"]["limiter_flag"]
 

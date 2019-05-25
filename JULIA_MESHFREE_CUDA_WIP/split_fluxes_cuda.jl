@@ -1,4 +1,4 @@
-function flux_Gxp_kernel(nx, ny, u1, u2, rho, pr, Gxp)
+function flux_Gxp_kernel(nx, ny, u1, u2, rho, pr, Gxp1, Gxp2, Gxp3, Gxp4)
 
     tx = ny
     ty = -nx
@@ -14,23 +14,23 @@ function flux_Gxp_kernel(nx, ny, u1, u2, rho, pr, Gxp)
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
 
-    Gxp[1]= (rho*(ut*A1pos + B1))
+    Gxp1= (rho*(ut*A1pos + B1))
 
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1pos + ut*B1
-    Gxp[2] = (rho*temp2)
+    Gxp2 = (rho*temp2)
 
     temp1 = ut*un*A1pos + un*B1
-    Gxp[3] = (rho*temp1)
+    Gxp3 = (rho*temp1)
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1pos
     temp1 = (6*pr_by_rho) + u_sqr
-    Gxp[4] = (rho*(temp2 + 0.5*temp1*B1))
+    Gxp4 = (rho*(temp2 + 0.5*temp1*B1))
     return nothing
 end
 
-function flux_Gxn_kernel(nx, ny, u1, u2, rho, pr, Gxn)
+function flux_Gxn_kernel(nx, ny, u1, u2, rho, pr, Gxn1, Gxn2, Gxn3, Gxn4)
 
     tx = ny
     ty = -nx
@@ -46,23 +46,23 @@ function flux_Gxn_kernel(nx, ny, u1, u2, rho, pr, Gxn)
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
 
-    Gxn[1] = (rho*(ut*A1neg - B1))
+    Gxn1 = (rho*(ut*A1neg - B1))
 
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1neg - ut*B1
-    Gxn[2] = (rho*temp2)
+    Gxn2 = (rho*temp2)
 
     temp1 = ut*un*A1neg - un*B1
-    Gxn[3] = (rho*temp1)
+    Gxn3 = (rho*temp1)
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1neg
     temp1 = (6*pr_by_rho) + u_sqr
-    Gxn[4] = (rho*(temp2 - 0.5*temp1*B1))
+    Gxn4 = (rho*(temp2 - 0.5*temp1*B1))
     return nothing
 end
 
-function flux_Gyp_kernel(nx, ny, u1, u2, rho, pr, Gyp)
+function flux_Gyp_kernel(nx, ny, u1, u2, rho, pr, Gyp1, Gyp2, Gyp3, Gyp4)
     tx = ny
     ty = -nx
 
@@ -77,25 +77,25 @@ function flux_Gyp_kernel(nx, ny, u1, u2, rho, pr, Gyp)
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
 
-    Gyp[1] = (rho*(un*A2pos + B2))
+    Gyp1 = (rho*(un*A2pos + B2))
 
     temp1 = pr_by_rho + un*un
     temp2 = temp1*A2pos + un*B2
 
     temp1 = ut*un*A2pos + ut*B2
-    Gyp[2] = (rho*temp1)
+    Gyp2 = (rho*temp1)
 
-    Gyp[3] = (rho*temp2)
+    Gyp3 = (rho*temp2)
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*un*temp1*A2pos
     temp1 = (6*pr_by_rho) + u_sqr
-    Gyp[4] = (rho*(temp2 + 0.5*temp1*B2))
+    Gyp4 = (rho*(temp2 + 0.5*temp1*B2))
 
     return nothing
 end
 
-function flux_Gyn_kernel(nx, ny, u1, u2, rho, pr, Gyn)
+function flux_Gyn_kernel(nx, ny, u1, u2, rho, pr, Gyn1, Gyn2, Gyn3, Gyn4)
     tx = ny
     ty = -nx
 
@@ -110,58 +110,58 @@ function flux_Gyn_kernel(nx, ny, u1, u2, rho, pr, Gyn)
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
 
-    Gyn[1] = (rho*(un*A2neg - B2))
+    Gyn1 = (rho*(un*A2neg - B2))
 
     temp1 = pr_by_rho + un*un
     temp2 = temp1*A2neg - un*B2
 
     temp1 = ut*un*A2neg - ut*B2
-    Gyn[2] = (rho*temp1)
+    Gyn2 = (rho*temp1)
 
-    Gyn[3] = (rho*temp2)
+    Gyn3 = (rho*temp2)
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*un*temp1*A2neg
     temp1 = (6*pr_by_rho) + u_sqr
-    Gyn[4] = (rho*(temp2 - 0.5*temp1*B2))
+    Gyn4 = (rho*(temp2 - 0.5*temp1*B2))
 
     return nothing
 end
 
-function flux_Gx_kernel(Gx, nx, ny, u1, u2, rho, pr)
+function flux_Gx_kernel(Gx1,Gx2,Gx3,Gx4, nx, ny, u1, u2, rho, pr)
     tx = ny
     ty = -nx
 
     ut = u1*tx + u2*ty
     un = u1*nx + u2*ny
 
-    Gx[1] = rho*ut
+    Gx1 = rho*ut
 
-    Gx[2] = pr + rho*ut*ut
+    Gx2 = pr + rho*ut*ut
 
-    Gx[3] = rho*ut*un
+    Gx3 = rho*ut*un
 
     temp1 = 0.5*(ut*ut + un*un)
     rho_e = 2.5*pr + rho*temp1
-    Gx[4] = (pr + rho_e)*ut
+    Gx4 = (pr + rho_e)*ut
     return nothing
 end
 
-function flux_Gy_kernel(Gy, nx, ny, u1, u2, rho, pr)
+function flux_Gy_kernel(Gy1,Gy2,Gy3,Gy4, nx, ny, u1, u2, rho, pr)
     tx = ny
     ty = -nx
 
     ut = u1*tx + u2*ty
     un = u1*nx + u2*ny
 
-    Gy[1] = rho*un
+    Gy1 = rho*un
 
-    Gy[2] = rho*ut*un
+    Gy2 = rho*ut*un
 
-    Gy[3] = pr + rho*un*un
+    Gy3 = pr + rho*un*un
 
     temp1 = 0.5*(ut*ut + un*un)
     rho_e = 2.5*pr + rho*temp1
-    Gy[4] = (pr + rho_e)*un
+    Gy4 = (pr + rho_e)*un
     return nothing
 end

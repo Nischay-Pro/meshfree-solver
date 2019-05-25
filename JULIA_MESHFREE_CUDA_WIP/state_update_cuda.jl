@@ -30,6 +30,7 @@ function func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
         end
         gpuGlobalDataCommon[136, idx] = min_delt
     end
+    sync_threads()
     return nothing
 end
 
@@ -40,25 +41,24 @@ function state_update_kernel(gpuGlobalDataCommon, gpuConfigData)
 	idx = bx * bw + tx
     max_res = zero(Float64)
     sum_res_sqr = zero(Float64)
-    # fill!(U, 0.0)
+
     if idx > 0 && idx <= gpuGlobalDataCommon[1,end]
         flag1 = gpuGlobalDataCommon[6, idx]
         if flag1 == gpuConfigData[17]
-            state_update_wall_kernel(gpuGlobalDataCommon, idx, max_res, sum_res_sqr)
-        elseif flag1 == gpuConfigData[18]
-            state_update_interior_kernel(gpuGlobalDataCommon, idx, max_res, sum_res_sqr)
-        elseif flag1 == gpuConfigData[19]
-            state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx, max_res, sum_res_sqr)
-        else
-            @cuprintf("Warning: There is problem with the flux flags in state_update %f \n", gpuGlobalDataCommon[6, idx])
+            state_update_wall_kernel(gpuGlobalDataCommon, idx)
+        end
+        if flag1 == gpuConfigData[18]
+            state_update_interior_kernel(gpuGlobalDataCommon, idx)
+        end
+        if flag1 == gpuConfigData[19]
+            state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx)
         end
     end
-    # res_old = 0
-    # @cuprintf("Iteration Number %d", iter)
+    sync_threads()
     return nothing
 end
 
-@inline function state_update_wall_kernel(gpuGlobalDataCommon, idx, max_res, sum_res_sqr)
+function state_update_wall_kernel(gpuGlobalDataCommon, idx)
     nx = gpuGlobalDataCommon[29, idx]
     ny = gpuGlobalDataCommon[30, idx]
 
@@ -97,11 +97,11 @@ end
     #     @cuprintf("\n Values are %f %f %f %f \n", U1,U2, U3, U4)
     # end
 
-    if res_sqr > max_res
-        max_res = res_sqr
-        max_res_point = idx
-    end
-    sum_res_sqr = sum_res_sqr + res_sqr
+    # if res_sqr > max_res
+    #     max_res = res_sqr
+    #     max_res_point = idx
+    # end
+    # sum_res_sqr = sum_res_sqr + res_sqr
 
     gpuGlobalDataCommon[31, idx] = U1
     temp = 1.0 / U1
@@ -111,7 +111,7 @@ end
     return nothing
 end
 
-@inline function state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx, max_res, sum_res_sqr)
+function state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx)
     nx = gpuGlobalDataCommon[29, idx]
     ny = gpuGlobalDataCommon[30, idx]
     Mach::Float64 = gpuConfigData[4]
@@ -183,32 +183,32 @@ end
     return nothing
 end
 
-@inline function state_update_interior_kernel(gpuGlobalDataCommon, idx, max_res, sum_res_sqr)
-    nx = gpuGlobalDataCommon[29, idx]
-    ny = gpuGlobalDataCommon[30, idx]
+function state_update_interior_kernel(gpuGlobalDataCommon, idx)
+    nxi = gpuGlobalDataCommon[29, idx]
+    nyi = gpuGlobalDataCommon[30, idx]
 
-    rho = gpuGlobalDataCommon[31, idx]
-    U1 = rho
-    temp1 = rho * gpuGlobalDataCommon[32, idx]
-    temp2 = rho * gpuGlobalDataCommon[33, idx]
-    U2 = temp1*ny - temp2*nx
-    U3 = temp1*nx + temp2*ny
-    U4 = 2.5*gpuGlobalDataCommon[34, idx] + 0.5*(temp1*temp1 + temp2*temp2)/rho
+    rhoi = gpuGlobalDataCommon[31, idx]
+    U1i = rhoi
+    temp1i = rhoi * gpuGlobalDataCommon[32, idx]
+    temp2i = rhoi * gpuGlobalDataCommon[33, idx]
+    U2i = temp1i*nyi - temp2i*nxi
+    U3i = temp1i*nxi + temp2i*nyi
+    U4i = 2.5*gpuGlobalDataCommon[34, idx] + 0.5*(temp1i*temp1i + temp2i*temp2i)/rhoi
 
-    temp = U1
-    U1 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx]
-    U2 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[36, idx]
-    U3 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[37, idx]
-    U4 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[38, idx]
-    U2_rot = U2
-    U3_rot = U3
-    U2 = U2_rot*ny + U3_rot*nx
-    U3 = U3_rot*ny - U2_rot*nx
+    tempi = U1i
+    U1i -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx]
+    U2i -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[36, idx]
+    U3i -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[37, idx]
+    U4i -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[38, idx]
+    U2_roti = U2i
+    U3_roti = U3i
+    U2i = U2_roti*nyi + U3_roti*nxi
+    U3i = U3_roti*nyi - U2_roti*nxi
 
-    gpuGlobalDataCommon[31, idx] = U1
-    temp = 1.0 / U1
-    gpuGlobalDataCommon[32, idx] = U2*temp
-    gpuGlobalDataCommon[33, idx] = U3*temp
-    gpuGlobalDataCommon[34, idx] = (0.4*U4) - ((0.2 * temp) * (U2 * U2 + U3 * U3))
+    gpuGlobalDataCommon[31, idx] = U1i
+    temp = 1.0 / U1i
+    gpuGlobalDataCommon[32, idx] = U2i*tempi
+    gpuGlobalDataCommon[33, idx] = U3i*tempi
+    gpuGlobalDataCommon[34, idx] = (0.4*U4i) - ((0.2 * tempi) * (U2i * U2i + U3i * U3i))
     return nothing
 end
