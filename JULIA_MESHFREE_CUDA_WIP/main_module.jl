@@ -2,6 +2,7 @@ __precompile__()
 
 module main_module
 
+using JSON
 using Printf
 using CuArrays
 using CUDAnative
@@ -40,7 +41,7 @@ include("limiters.jl")
 export venkat_limiter, maximum, minimum, smallest_dist, min_q_values, qtilde_to_primitive
 
 include("limiters_cuda.jl")
-export venkat_limiter_kernel
+export venkat_limiter_kernel_i, venkat_limiter_kernel_k
 
 include("meshfree_solver.jl")
 export main

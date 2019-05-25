@@ -110,31 +110,39 @@ end
 function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
 
     # dev::CuDevice=CuDevice(0)
-    # str = CuStream()
+    str = CuStream()
     # ctx = CuContext(dev)
 
     println("Blocks per grid is ")
     println(blockspergrid)
-
+    # gpuGlobalDataCommon = CuArray(globalDataCommon)
     for i in 1:iter
         if i == 1
             println("Compiling CUDA Kernel. This might take a while...")
         end
-        @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataCommon) #, out1, out2)
-        # synchronize(str)
-        @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData)
-        # synchronize(str)
-        @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel(gpuGlobalDataCommon, gpuConfigData)
-        # synchronize(str)
 
+        @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataCommon) #, out1, out2)
+        synchronize(str)
+        # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
+        @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData)
+        synchronize(str)
+        # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
+        @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel(gpuGlobalDataCommon, gpuConfigData)
+        synchronize(str)
+        # @cuprintf("\n It is %f ", gpuGlobalDataCommon[31, 3])
         @cuda blocks=blockspergrid threads=threadsperblock func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
-        # synchronize(str)
+        synchronize(str)
+        # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
         @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataCommon, gpuConfigData)
-        # synchronize(str)
+        synchronize(str)
+        # @cuprintf("\n It is ss %lf ", gpuGlobalDataCommon[31, 3])
         println("Iteration Number ", i)
     end
     # synchronize()
     # println(Array(out1))
+    # @cuprintf("\n It is ss2 %lf ", gpuGlobalDataCommon[31, 3])
+    # globalDataCommon = Array(gpuGlobalDataCommon)
+    # println("Test is ", globalDataCommon[31,3])
     return nothing
 end
 
@@ -144,6 +152,9 @@ function q_var_cuda_kernel(gpuGlobalDataCommon) #out1, out2)
     bw = blockDim().x
     idx = bx * bw + tx
     # itm = CuArray(Float64, 145)
+    # if idx == 3
+    #     @cuprintf("\n 1 It is %lf ", gpuGlobalDataCommon[31, 3])
+    # end
     if idx > 0 && idx <= gpuGlobalDataCommon[1,end]
 
         rho = gpuGlobalDataCommon[31, idx]

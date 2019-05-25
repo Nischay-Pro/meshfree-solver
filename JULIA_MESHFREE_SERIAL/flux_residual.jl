@@ -10,13 +10,13 @@ function wallindices_flux_residual(globaldata, configData, wallindices)
 		Gxn = wall_dGx_neg(globaldata, itm, configData)
 		Gyn = wall_dGy_neg(globaldata, itm, configData)
 		GTemp = Gxp + Gxn + Gyn
-		# if itm == 100
-		# 	println("=======")
-		# 	println(IOContext(stdout, :compact => false), Gxp)
-		# 	println(IOContext(stdout, :compact => false), Gxn)
-		# 	println(IOContext(stdout, :compact => false), Gyn)
-		# 	println()
-		# end
+		if itm == 3
+			println("=======")
+			println(IOContext(stdout, :compact => false), Gxp)
+			println(IOContext(stdout, :compact => false), Gxn)
+			println(IOContext(stdout, :compact => false), Gyn)
+			println()
+		end
 		GTemp = GTemp * 2.0
 		globaldata[itm].flux_res = GTemp
 	end

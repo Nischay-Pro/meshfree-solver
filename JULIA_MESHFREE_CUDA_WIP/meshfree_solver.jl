@@ -1,7 +1,7 @@
 
 function main()
     globaldata = Array{Point,1}(undef, getConfig()["core"]["points"])
-    globaldataCommon = zeros(Float64, 145, getConfig()["core"]["points"])
+    globalDataCommon = zeros(Float64, 173, getConfig()["core"]["points"])
     # globaldataCommon = zeros(Float64, 38, getConfig()["core"]["points"])
 
     # globaldataDq = [Array{Array{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
@@ -105,7 +105,7 @@ function main()
         connectivity = calculateConnectivity(globaldata, idx)
         setConnectivity(globaldata[idx], connectivity)
         smallest_dist(globaldata, idx)
-        convertToArray(globaldataCommon, globaldata[idx], idx)
+        convertToArray(globalDataCommon, globaldata[idx], idx)
     end
     # print(globaldata[1].dq)
     # println(typeof(globaldata))
@@ -115,7 +115,7 @@ function main()
     # gpu_globaldata[1:2000] = CuArray(globaldata[1:2000])
     # println(typeof(gpuGlobaldataDq))
     # gpuGlobaldataLocalID = CuArray(globaldataLocalID)
-    gpuGlobalDataCommon = CuArray(globaldataCommon)
+    gpuGlobalDataCommon = CuArray(globalDataCommon)
     gpuConfigData = CuArray([
                             getConfig()["core"]["points"],#1
                             getConfig()["core"]["cfl"],
@@ -159,10 +159,11 @@ function main()
     # end
     threadsperblock = Int(getConfig()["core"]["threadsperblock"])
     blockspergrid = Int(ceil(getConfig()["core"]["points"]/threadsperblock))
-    CuArrays.@sync fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
-    # globalDataCommon1 = Array(gpuGlobalDataCommon)
+    CuArrays.@sync begin fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
+    end
 
-    # println(globalDataCommon1[:,3])
+    globalDataCommon = Array(gpuGlobalDataCommon)
+    println(globalDataCommon[:,3])
     # println()
     # println(globalDataCommon1[:,200])
     # println()
@@ -181,16 +182,16 @@ function main()
     # end
     # close(file)
 
-    # println("Writing cuda file")
-    # file  = open("primvals_cuda.txt", "w")
-    # for idx in 1:getConfig()["core"]["points"]
-    #     primtowrite = globalDataCommon1[31:34, idx]
-    #     for element in primtowrite
-    #         @printf(file,"%0.17f", element)
-    #         @printf(file, " ")
-    #     end
-    #     print(file, "\n")
-    # end
-    # close(file)
+    println("Writing cuda file")
+    file  = open("primvals_cuda.txt", "w")
+    for idx in 1:getConfig()["core"]["points"]
+        primtowrite = globalDataCommon[31:34, idx]
+        for element in primtowrite
+            @printf(file,"%0.17f", element)
+            @printf(file, " ")
+        end
+        print(file, "\n")
+    end
+    close(file)
 
 end

@@ -88,10 +88,10 @@ function state_update_wall(globaldata, itm, max_res, sum_res_sqr, U)
         max_res_point = itm
     end
     sum_res_sqr = sum_res_sqr + res_sqr
-    # if itm == 2
-    #     println("Prim1.01a2.4")
-    #     println(IOContext(stdout, :compact => false), globaldata[1].prim)
-    # end
+    if itm == 3
+        println("U")
+        println(IOContext(stdout, :compact => false), U)
+    end
     globaldata[itm].prim[1] = U[1]
     temp = 1.0 / U[1]
     globaldata[itm].prim[2] = U[2]*temp

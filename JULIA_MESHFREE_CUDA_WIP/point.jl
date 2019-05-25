@@ -91,7 +91,9 @@ function convertToArray(targetArray, originalStruct::Point, idx)
                                             originalStruct.short_distance #137
                                         ] ,
                                         zeros(Float64, 4) , #138
-                                        zeros(Float64, 4) #142
+                                        zeros(Float64, 4) , #142
+                                        zeros(Float64, 28)  #146|150|154|158|162|166|170
+                                                            #phii| phik |Gi| Gk|sumdelx|sumdely|result)
                                         )
     targetArray[9:8 + originalStruct.nbhs, idx] = originalStruct.conn
     targetArray[56:55+ originalStruct.xpos_nbhs, idx] = originalStruct.xpos_conn

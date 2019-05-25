@@ -1,4 +1,3 @@
-import JSON
 function getConfig()
     open("config.json","r") do io
         dicttext = read(io, String)

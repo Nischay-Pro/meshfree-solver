@@ -93,16 +93,16 @@ function calculateConnectivity(globaldata, idx)
 end
 
 function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
-    # println(IOContext(stdout, :compact => false), globaldata[1].prim)
+    # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # print(" 111\n")
     q_var_derivatives(globaldata, configData)
-
+    # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
-
+    # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     func_delta(globaldata, configData)
-
+    # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
-
+    # println(IOContext(stdout, :compact => false), globaldata[3].prim)
 end
 
 function q_var_derivatives(globaldata, configData)
