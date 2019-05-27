@@ -10,15 +10,13 @@ function wallindices_flux_residual(globaldata, configData, wallindices)
 		Gxn = wall_dGx_neg(globaldata, itm, configData)
 		Gyn = wall_dGy_neg(globaldata, itm, configData)
 		GTemp = Gxp + Gxn + Gyn
-		if itm == 3
-			println("=======")
-			println(IOContext(stdout, :compact => false), Gxp)
-			println(IOContext(stdout, :compact => false), Gxn)
-			println(IOContext(stdout, :compact => false), Gyn)
-			println()
-		end
 		GTemp = GTemp * 2.0
 		globaldata[itm].flux_res = GTemp
+		# if itm == 3
+		# 	println(IOContext(stdout, :compact => false), Gxp)
+		# 	println(IOContext(stdout, :compact => false), Gxp + Gxn)
+		# 	println(IOContext(stdout, :compact => false), Gxp + Gxn + Gyn)
+		# end
 	end
 end
 
@@ -38,6 +36,14 @@ function interiorindices_flux_residual(globaldata, configData, interiorindices)
 		Gxn = interior_dGx_neg(globaldata, itm, configData)
 		Gyp = interior_dGy_pos(globaldata, itm, configData)
 		Gyn = interior_dGy_neg(globaldata, itm, configData)
+		# if itm == 1
+		# 	println("=======")
+		# 	println(IOContext(stdout, :compact => false), Gxp)
+		# 	println(IOContext(stdout, :compact => false), Gxn + Gxp)
+		# 	println(IOContext(stdout, :compact => false), Gxn + Gxp + Gyp)
+		# 	println(IOContext(stdout, :compact => false), Gxn + Gxp + Gyp + Gyn)
+		# 	println()
+		# end
 		GTemp = @.(Gxp + Gxn + Gyp + Gyn)
 		globaldata[itm].flux_res = GTemp
 	end

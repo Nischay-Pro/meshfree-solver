@@ -163,7 +163,8 @@ function main()
     end
 
     globalDataCommon = Array(gpuGlobalDataCommon)
-    println(globalDataCommon[:,3])
+    println()
+    println(globalDataCommon[:,1])
     # println()
     # println(globalDataCommon1[:,200])
     # println()

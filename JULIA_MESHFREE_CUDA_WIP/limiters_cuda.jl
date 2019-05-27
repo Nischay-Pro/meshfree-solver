@@ -64,7 +64,7 @@
     return nothing
 end
 
-@inline function venkat_limiter_kernel_k(qtilde, gpuGlobalDataCommon, idx, gpuConfigData)
+@inline function venkat_limiter_kernel_k(qtilde, gpuGlobalDataCommon, idx, gpuConfigData, trueidx)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataCommon[137, idx]
     # @cuprintf("Type is %s", typeof(VL_CONST))
@@ -79,13 +79,13 @@ end
         del_neg = qtilde[i] - q
         if abs(del_neg) <= 1e-5
             if i == 1
-                gpuGlobalDataCommon[150,idx] = 1.0
+                gpuGlobalDataCommon[150,trueidx] = 1.0
             elseif i == 2
-                gpuGlobalDataCommon[151,idx] = 1.0
+                gpuGlobalDataCommon[151,trueidx] = 1.0
             elseif i == 3
-                gpuGlobalDataCommon[152,idx] = 1.0
+                gpuGlobalDataCommon[152,trueidx] = 1.0
             else
-                gpuGlobalDataCommon[153,idx] = 1.0
+                gpuGlobalDataCommon[153,trueidx] = 1.0
             end
 
         elseif abs(del_neg) > 1e-5
@@ -106,23 +106,23 @@ end
             temp = num/den
             if temp < 1.0
                 if i == 1
-                    gpuGlobalDataCommon[150,idx] = temp
+                    gpuGlobalDataCommon[150,trueidx] = temp
                 elseif i == 2
-                    gpuGlobalDataCommon[151,idx] = temp
+                    gpuGlobalDataCommon[151,trueidx] = temp
                 elseif i == 3
-                    gpuGlobalDataCommon[152,idx] = temp
+                    gpuGlobalDataCommon[152,trueidx] = temp
                 else
-                    gpuGlobalDataCommon[153,idx] = temp
+                    gpuGlobalDataCommon[153,trueidx] = temp
                 end
             else
                 if i == 1
-                    gpuGlobalDataCommon[150,idx] = 1.0
+                    gpuGlobalDataCommon[150,trueidx] = 1.0
                 elseif i == 2
-                    gpuGlobalDataCommon[151,idx] = 1.0
+                    gpuGlobalDataCommon[151,trueidx] = 1.0
                 elseif i == 3
-                    gpuGlobalDataCommon[152,idx] = 1.0
+                    gpuGlobalDataCommon[152,trueidx] = 1.0
                 else
-                    gpuGlobalDataCommon[153,idx] = 1.0
+                    gpuGlobalDataCommon[153,trueidx] = 1.0
                 end
             end
         end

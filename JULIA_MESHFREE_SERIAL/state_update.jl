@@ -88,10 +88,10 @@ function state_update_wall(globaldata, itm, max_res, sum_res_sqr, U)
         max_res_point = itm
     end
     sum_res_sqr = sum_res_sqr + res_sqr
-    if itm == 3
-        println("U")
-        println(IOContext(stdout, :compact => false), U)
-    end
+    # if itm == 3
+    #     println("U")
+    #     println(IOContext(stdout, :compact => false), U)
+    # end
     globaldata[itm].prim[1] = U[1]
     temp = 1.0 / U[1]
     globaldata[itm].prim[2] = U[2]*temp
@@ -128,6 +128,10 @@ end
     #     println("Prim1.11")
     #     println(IOContext(stdout, :compact => false), globaldata[itm].prim)
     # end
+    if itm == 1
+        println(IOContext(stdout, :compact => false), U)
+        # println(IOContext(stdout, :compact => false), temp)
+    end
     temp = U[1]
     U = U - globaldata[itm].delta .* globaldata[itm].flux_res
     U2_rot = U[2]
@@ -135,6 +139,10 @@ end
     U[2] = U2_rot*ny + U3_rot*nx
     U[3] = U3_rot*ny - U2_rot*nx
 
+    if itm == 1
+        println(IOContext(stdout, :compact => false), U)
+        println(IOContext(stdout, :compact => false), temp)
+    end
     globaldata[itm].prim[1] = U[1]
     temp = 1.0 / U[1]
     globaldata[itm].prim[2] = U[2]*temp

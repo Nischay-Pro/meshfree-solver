@@ -170,6 +170,9 @@ function q_var_cuda_kernel(gpuGlobalDataCommon) #out1, out2)
         gpuGlobalDataCommon[41, idx] = two_times_beta * u2
         gpuGlobalDataCommon[42, idx] = -two_times_beta
     end
+    # if idx ==3
+    #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[39, idx],gpuGlobalDataCommon[40, idx],gpuGlobalDataCommon[41, idx],gpuGlobalDataCommon[42, idx])
+    # end
     sync_threads()
     return nothing
 end
@@ -225,7 +228,7 @@ function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData)
         gpuGlobalDataCommon[49, idx] = one_by_det * (sum_dely_delq3 * sum_delx_sqr - sum_delx_delq3 * sum_delx_dely)
         gpuGlobalDataCommon[50, idx] = one_by_det * (sum_dely_delq4 * sum_delx_sqr - sum_delx_delq4 * sum_delx_dely)
         @cuda dynamic=true threads=4 max_min_kernel(gpuGlobalDataCommon, idx)
-        CUDAnative.synchronize()
+        # CUDAnative.synchronize()
     end
     sync_threads()
     return nothing
@@ -253,67 +256,67 @@ end
     return nothing
 end
 
-function q_var_derivatives(globaldata, configData)
-    power::Float64 = configData["core"]["power"]
+# function q_var_derivatives(globaldata, configData)
+#     power::Float64 = configData["core"]["power"]
 
-    for (idx, itm) in enumerate(globaldata)
-        rho = itm.prim[1]
-        u1 = itm.prim[2]
-        u2 = itm.prim[3]
-        pr = itm.prim[4]
+#     for (idx, itm) in enumerate(globaldata)
+#         rho = itm.prim[1]
+#         u1 = itm.prim[2]
+#         u2 = itm.prim[3]
+#         pr = itm.prim[4]
 
-        beta::Float64 = 0.5 * (rho / pr)
-        globaldata[idx].q[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
-        two_times_beta = 2.0 * beta
-        # if idx == 1
-        #     println(globaldata[idx].q[1])
-        # end
-        globaldata[idx].q[2] = (two_times_beta * u1)
-        globaldata[idx].q[3] = (two_times_beta * u2)
-        globaldata[idx].q[4] = -two_times_beta
-        # if idx == 3
-        #     println(globaldata[3])
-        # end
-    end
+#         beta::Float64 = 0.5 * (rho / pr)
+#         globaldata[idx].q[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
+#         two_times_beta = 2.0 * beta
+#         # if idx == 1
+#         #     println(globaldata[idx].q[1])
+#         # end
+#         globaldata[idx].q[2] = (two_times_beta * u1)
+#         globaldata[idx].q[3] = (two_times_beta * u2)
+#         globaldata[idx].q[4] = -two_times_beta
+#         # if idx == 3
+#         #     println(globaldata[3])
+#         # end
+#     end
 
-    for (idx,itm) in enumerate(globaldata)
-        x_i = itm.x
-        y_i = itm.y
-        sum_delx_sqr = zero(Float64)
-        sum_dely_sqr = zero(Float64)
-        sum_delx_dely = zero(Float64)
-        sum_delx_delq = zeros(Float64, 4)
-        sum_dely_delq = zeros(Float64, 4)
-        for conn in itm.conn
-            x_k = globaldata[conn].x
-            y_k = globaldata[conn].y
-            delx = x_k - x_i
-            dely = y_k - y_i
-            dist = hypot(delx, dely)
-            weights = dist ^ power
-            sum_delx_sqr += ((delx * delx) * weights)
-            sum_dely_sqr += ((dely * dely) * weights)
-            sum_delx_dely += ((delx * dely) * weights)
-            sum_delx_delq += (weights * delx * (globaldata[conn].q - globaldata[idx].q))
-            sum_dely_delq += (weights * dely * (globaldata[conn].q - globaldata[idx].q))
-        end
-        det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
-        one_by_det = 1.0 / det
-        sum_delx_delq1 = sum_delx_delq * sum_dely_sqr
-        sum_dely_delq1 = sum_dely_delq * sum_delx_dely
-        tempsumx = one_by_det * (sum_delx_delq1 - sum_dely_delq1)
+#     for (idx,itm) in enumerate(globaldata)
+#         x_i = itm.x
+#         y_i = itm.y
+#         sum_delx_sqr = zero(Float64)
+#         sum_dely_sqr = zero(Float64)
+#         sum_delx_dely = zero(Float64)
+#         sum_delx_delq = zeros(Float64, 4)
+#         sum_dely_delq = zeros(Float64, 4)
+#         for conn in itm.conn
+#             x_k = globaldata[conn].x
+#             y_k = globaldata[conn].y
+#             delx = x_k - x_i
+#             dely = y_k - y_i
+#             dist = hypot(delx, dely)
+#             weights = dist ^ power
+#             sum_delx_sqr += ((delx * delx) * weights)
+#             sum_dely_sqr += ((dely * dely) * weights)
+#             sum_delx_dely += ((delx * dely) * weights)
+#             sum_delx_delq += (weights * delx * (globaldata[conn].q - globaldata[idx].q))
+#             sum_dely_delq += (weights * dely * (globaldata[conn].q - globaldata[idx].q))
+#         end
+#         det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
+#         one_by_det = 1.0 / det
+#         sum_delx_delq1 = sum_delx_delq * sum_dely_sqr
+#         sum_dely_delq1 = sum_dely_delq * sum_delx_dely
+#         tempsumx = one_by_det * (sum_delx_delq1 - sum_dely_delq1)
 
-        sum_dely_delq2 = sum_dely_delq * sum_delx_sqr
-        sum_delx_delq2 = sum_delx_delq * sum_delx_dely
-        tempsumy = one_by_det * (sum_dely_delq2 - sum_delx_delq2)
-        globaldata[idx].dq = [tempsumx, tempsumy]
+#         sum_dely_delq2 = sum_dely_delq * sum_delx_sqr
+#         sum_delx_delq2 = sum_delx_delq * sum_delx_dely
+#         tempsumy = one_by_det * (sum_dely_delq2 - sum_delx_delq2)
+#         globaldata[idx].dq = [tempsumx, tempsumy]
 
-        for i in 1:4
-            maximum(globaldata, idx, i)
-            minimum(globaldata, idx, i)
-        end
+#         for i in 1:4
+#             maximum(globaldata, idx, i)
+#             minimum(globaldata, idx, i)
+#         end
 
-    end
+#     end
 
-    # println(globaldata[3])
-end
+#     # println(globaldata[3])
+# end

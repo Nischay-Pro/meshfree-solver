@@ -98,7 +98,7 @@ function main()
     # println(IOContext(stdout, :compact => false), globaldata[1000].prim)
     # println(IOContext(stdout, :compact => false), globaldata[100].ypos_conn)
     # println(IOContext(stdout, :compact => false), globaldata[100].yneg_conn)
-
+    println(globaldata[1])
     file  = open("primvals.txt", "w")
     for (idx, itm) in enumerate(globaldata)
         primtowrite = globaldata[idx].prim

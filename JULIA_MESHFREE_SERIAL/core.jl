@@ -125,7 +125,7 @@ function q_var_derivatives(globaldata, configData)
         globaldata[idx].q[4] = -two_times_beta
 
     end
-
+    # println(IOContext(stdout, :compact => false), globaldata[3].q)
     for (idx,itm) in enumerate(globaldata)
         x_i = itm.x
         y_i = itm.y
@@ -162,8 +162,10 @@ function q_var_derivatives(globaldata, configData)
             maximum(globaldata, idx, i)
             minimum(globaldata, idx, i)
         end
-
     end
+    # println(IOContext(stdout, :compact => false), globaldata[3].dq)
+    # println(IOContext(stdout, :compact => false), globaldata[3].max_q)
+    # println(IOContext(stdout, :compact => false), globaldata[3].min_q)
 end
 
 # function q_var_derivatives_cuda(globaldata, config)

@@ -9,7 +9,7 @@ function func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
         min_delt = one(Float64)
         for iter in 9:28
             conn = Int(gpuGlobalDataCommon[iter, idx])
-            if conn == 0.0
+            if conn == zero(Float64)
                 break
             end
             rho = gpuGlobalDataCommon[31, conn]
@@ -184,31 +184,37 @@ function state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx)
 end
 
 function state_update_interior_kernel(gpuGlobalDataCommon, idx)
-    nxi = gpuGlobalDataCommon[29, idx]
-    nyi = gpuGlobalDataCommon[30, idx]
+    nx = gpuGlobalDataCommon[29, idx]
+    ny = gpuGlobalDataCommon[30, idx]
 
-    rhoi = gpuGlobalDataCommon[31, idx]
-    U1i = rhoi
-    temp1i = rhoi * gpuGlobalDataCommon[32, idx]
-    temp2i = rhoi * gpuGlobalDataCommon[33, idx]
-    U2i = temp1i*nyi - temp2i*nxi
-    U3i = temp1i*nxi + temp2i*nyi
-    U4i = 2.5*gpuGlobalDataCommon[34, idx] + 0.5*(temp1i*temp1i + temp2i*temp2i)/rhoi
-
-    tempi = U1i
-    U1i -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx]
-    U2i -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[36, idx]
-    U3i -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[37, idx]
-    U4i -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[38, idx]
-    U2_roti = U2i
-    U3_roti = U3i
-    U2i = U2_roti*nyi + U3_roti*nxi
-    U3i = U3_roti*nyi - U2_roti*nxi
-
-    gpuGlobalDataCommon[31, idx] = U1i
-    temp = 1.0 / U1i
-    gpuGlobalDataCommon[32, idx] = U2i*tempi
-    gpuGlobalDataCommon[33, idx] = U3i*tempi
-    gpuGlobalDataCommon[34, idx] = (0.4*U4i) - ((0.2 * tempi) * (U2i * U2i + U3i * U3i))
+    rho = gpuGlobalDataCommon[31, idx]
+    U1 = rho
+    temp1 = rho * gpuGlobalDataCommon[32, idx]
+    temp2 = rho * gpuGlobalDataCommon[33, idx]
+    U2 = temp1*ny - temp2*nx
+    U3 = temp1*nx + temp2*ny
+    U4 = 2.5*gpuGlobalDataCommon[34, idx] + 0.5*(temp1*temp1 + temp2*temp2)/rho
+    # if idx == 1
+    #     @cuprintf("\n %.17f %.17f %.17f %.17f", U1, U2, U3, U4)
+    #     # @cuprintf("\n %.17f ", temp1)
+    # end
+    temp = U1
+    U1 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx]
+    U2 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[36, idx]
+    U3 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[37, idx]
+    U4 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[38, idx]
+    U2_rot = U2
+    U3_rot = U3
+    U2 = U2_rot*ny + U3_rot*nx
+    U3 = U3_rot*ny - U2_rot*nx
+    # if idx == 1
+    #     @cuprintf("\n %.17f %.17f %.17f %.17f", U1, U2, U3, U4)
+    #     @cuprintf("\n %.17f ", temp)
+    # end
+    gpuGlobalDataCommon[31, idx] = U1
+    temp = 1.0 / U1
+    gpuGlobalDataCommon[32, idx] = U2*temp
+    gpuGlobalDataCommon[33, idx] = U3*temp
+    gpuGlobalDataCommon[34, idx] = (0.4*U4) - ((0.2 * temp) * (U2 * U2 + U3 * U3))
     return nothing
 end
