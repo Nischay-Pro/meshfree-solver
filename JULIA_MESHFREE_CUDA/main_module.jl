@@ -49,6 +49,9 @@ export main
 include("objective_function.jl")
 export calculateTheta, compute_cl_cd_cm
 
+include("objective_function_cuda.jl")
+export compute_cl_cd_cm_kernel, calculateTheta
+
 # include("outer_fluxes.jl")
 # export outer_dGx_pos, outer_dGx_neg, outer_dGy_pos
 

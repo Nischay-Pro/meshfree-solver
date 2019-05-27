@@ -1,10 +1,3 @@
-
-# TODO - Check deg2rad
-function calculateTheta(configData)
-    theta = deg2rad(Float64(configData["core"]["aoa"]))
-    return theta
-end
-
 function compute_cl_cd_cm(globaldata, configData, shapeindices)
 
     rho_inf::Float64 = configData["core"]["rho_inf"]

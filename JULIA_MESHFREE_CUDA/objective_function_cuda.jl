@@ -5,7 +5,7 @@ function calculateTheta(configData)
     return theta
 end
 
-function compute_cl_cd_cm(globaldata, configData, shapeindices)
+function compute_cl_cd_cm_kernel(globalDataCommon, configData, shapeindices)
 
     rho_inf::Float64 = configData["core"]["rho_inf"]
     Mach::Float64 = configData["core"]["mach"]
@@ -22,29 +22,29 @@ function compute_cl_cd_cm(globaldata, configData, shapeindices)
     Cl = zeros(Float64, shapes)
     Cd = zeros(Float64, shapes)
     Cm = zeros(Float64, shapes)
-
-    open("cp_file", "w") do the_file
+    println("===CP File===")
+    open("cp_file_cuda.txt", "w") do the_file
         for itm in shapeindices
             # print(wallindices)
-            left = globaldata[itm].left
-            right = globaldata[itm].right
-            lx = globaldata[left].x
-            ly = globaldata[left].y
-            rx = globaldata[right].x
-            ry = globaldata[right].y
-            mx = globaldata[itm].x
-            my = globaldata[itm].y
+            left = Int(globalDataCommon[4, itm])
+            right = Int(globalDataCommon[5, itm])
+            lx = globalDataCommon[2, left]
+            ly = globalDataCommon[3, left]
+            rx = globalDataCommon[2, right]
+            ry = globalDataCommon[3, right]
+            mx = globalDataCommon[2, itm]
+            my = globalDataCommon[3, itm]
 
             ds1 = hypot(mx - lx, my - ly)
             ds2 = hypot(rx - mx, ry - my)
 
             ds = 0.5*(ds1 + ds2)
-            nx = globaldata[itm].nx
-            ny = globaldata[itm].ny
-            cp = globaldata[itm].prim[4] - pr_inf
+            nx = globalDataCommon[29, itm]
+            ny = globalDataCommon[30, itm]
+            cp = globalDataCommon[34, itm] - pr_inf
             cp = -cp/temp
 
-            flag_2 = globaldata[itm].flag_2
+            flag_2 = Int(globalDataCommon[7, itm])
 
             print(the_file, flag_2, " ", mx, " ",  cp, "\n")
             H[flag_2] += cp * nx * ds
@@ -57,5 +57,4 @@ function compute_cl_cd_cm(globaldata, configData, shapeindices)
     Cl = V*cos(theta) - H*sin(theta)
     Cd = H*cos(theta) + V*sin(theta)
     Cm = pitch_mom
-
 end

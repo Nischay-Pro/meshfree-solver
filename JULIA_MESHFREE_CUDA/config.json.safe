@@ -1,9 +1,10 @@
 {
     "core":{
-        "cfl": 0.8,
+        "points":9600,
+        "cfl": 0.2,
         "max_iters": 10000,
-        "mach": 0.85,
-        "aoa": 1.0,
+        "mach": 1.2,
+        "aoa": 0.0,
         "power": 0,
         "limiter_flag": 1,
         "vl_const": 150,
@@ -12,16 +13,13 @@
         "shapes": 1,
         "rho_inf": 1.0,
         "pr_inf": 0.7142857142857142,
+        "threadsperblock": 32,
         "gamma": 1.4,
         "clcd_flag": false
     },
-    "global":{
-        "redis": {
-            "host": "localhost",
-            "port": 6379,
-            "password": "",
-            "db": 0,
-            "prefix": "NONE"
-        }
+    "point":{
+        "wall": 1,
+        "interior": 2,
+        "outer": 3
     }
 }

@@ -170,7 +170,7 @@ function main()
     # println()
     # println(globalDataCommon1[:,end])
 
-    # compute_cl_cd_cm(globaldata, configData, shapeptsidx)
+    compute_cl_cd_cm_kernel(globalDataCommon, configData, shapeptsidx)
 
     # file  = open("primvals.txt", "w")
     # for (idx, itm) in enumerate(globaldata)
