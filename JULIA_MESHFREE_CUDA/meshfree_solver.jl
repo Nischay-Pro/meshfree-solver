@@ -15,7 +15,7 @@ function main()
     shapeptsidx = Array{Int,1}(undef, 0)
     table = Array{Int,1}(undef, 0)
 
-    file1 = open("partGridNew")
+    file1 = open("partGridNew--160-60")
     data1 = read(file1, String)
     splitdata = split(data1, "\n")
     # print(splitdata[1:3])
@@ -33,8 +33,9 @@ function main()
                         parse(Int,itmdata[1]) + 1,
                         parse(Int,itmdata[6]),
                         parse(Int,itmdata[7]),
-                        parse(Int,itmdata[8]),
-                        parse.(Int, itmdata[9:end]),
+                        parse(Float64,itmdata[8]),
+                        parse(Int,itmdata[9]),
+                        parse.(Int, itmdata[10:end-1]),
                         parse(Float64, itmdata[4]),
                         parse(Float64, itmdata[5]),
                         copy(defprimal),
@@ -50,7 +51,6 @@ function main()
                         Array{Int,1}(undef, 0),
                         Array{Int,1}(undef, 0),
                         Array{Int,1}(undef, 0),
-                        0.0,
                         0.0,
                         zeros(Float64, 4),
                         zeros(Float64, 4))
@@ -157,20 +157,34 @@ function main()
     # for i in 1:(Int(getConfig()["core"]["max_iters"]))
     #     fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
     # end
+
+
+
     threadsperblock = Int(getConfig()["core"]["threadsperblock"])
     blockspergrid = Int(ceil(getConfig()["core"]["points"]/threadsperblock))
-    CuArrays.@sync begin fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
+    fpi_solver_cuda(1, gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
+    function test_code(gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
+        @timeit to "nest 1" begin
+            CuArrays.@sync begin fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
+            end
+        end
     end
 
-    globalDataCommon = Array(gpuGlobalDataCommon)
-    println()
-    println(globalDataCommon[:,1])
+    test_code(gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
+
+    open("timer_cuda.txt", "w") do io
+        print_timer(io, to)
+    end
+    # globalDataCommon = Array(gpuGlobalDataCommon)
+
+    # println()
+    # println(globalDataCommon[:,1])
     # println()
     # println(globalDataCommon1[:,200])
     # println()
     # println(globalDataCommon1[:,end])
 
-    compute_cl_cd_cm_kernel(globalDataCommon, configData, shapeptsidx)
+    # compute_cl_cd_cm_kernel(globalDataCommon, configData, shapeptsidx)
 
     # file  = open("primvals.txt", "w")
     # for (idx, itm) in enumerate(globaldata)
@@ -183,16 +197,16 @@ function main()
     # end
     # close(file)
 
-    println("Writing cuda file")
-    file  = open("primvals_cuda.txt", "w")
-    for idx in 1:getConfig()["core"]["points"]
-        primtowrite = globalDataCommon[31:34, idx]
-        for element in primtowrite
-            @printf(file,"%0.17f", element)
-            @printf(file, " ")
-        end
-        print(file, "\n")
-    end
-    close(file)
+    # println("Writing cuda file")
+    # file  = open("primvals_cuda.txt", "w")
+    # for idx in 1:getConfig()["core"]["points"]
+    #     primtowrite = globalDataCommon[31:34, idx]
+    #     for element in primtowrite
+    #         @printf(file,"%0.17f", element)
+    #         @printf(file, " ")
+    #     end
+    #     print(file, "\n")
+    # end
+    # close(file)
 
 end

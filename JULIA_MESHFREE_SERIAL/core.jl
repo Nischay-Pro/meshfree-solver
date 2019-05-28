@@ -101,8 +101,11 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     func_delta(globaldata, configData)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
+    # residue = 0
     state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
+    # residue = res_old
+
 end
 
 function q_var_derivatives(globaldata, configData)

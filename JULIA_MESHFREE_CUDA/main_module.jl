@@ -4,9 +4,13 @@ module main_module
 
 using JSON
 using Printf
+using TimerOutputs
+using DelimitedFiles
 using CuArrays
 using CUDAnative
 using CUDAdrv
+
+const to = TimerOutput()
 # using PyCall
 
 # const math = PyNULL()

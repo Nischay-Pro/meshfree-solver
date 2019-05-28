@@ -1,0 +1,1 @@
+push!(LOAD_PATH, "/home/kumar/Julia/meshfree-solver/JULIA_MESHFREE_CUDA/"); println("\n===\n"); using main_module; println("\n===\n"); main()

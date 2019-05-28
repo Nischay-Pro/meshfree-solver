@@ -9,7 +9,7 @@ function main()
     shapeptsidx = Array{Int,1}(undef, 0)
     table = Array{Int,1}(undef, 0)
 
-    file1 = open("partGridNew")
+    file1 = open("partGridNew--1280-480")
     data1 = read(file1, String)
     splitdata = split(data1, "\n")
     # print(splitdata[1:3])
@@ -20,15 +20,31 @@ function main()
     # count = 0
     for (idx, itm) in enumerate(splitdata)
         itmdata = split(itm, " ")
-        temp = Point(parse(Int,itmdata[1]), parse(Float64,itmdata[2]), parse(Float64, itmdata[3]), parse(Int,itmdata[1]) - 1, parse(Int,itmdata[1]) + 1, parse(Int,itmdata[6]), parse(Int,itmdata[7]), parse(Int,itmdata[8]), parse.(Int, itmdata[9:end]), parse(Float64, itmdata[4]), parse(Float64, itmdata[5]), copy(defprimal), zeros(Float64, 4), zeros(Float64, 4), Array{Array{Float64,1},1}(undef, 0), 0.0, 0, 0, 0, 0, Array{Int,1}(undef, 0), Array{Int,1}(undef, 0), Array{Int,1}(undef, 0), Array{Int,1}(undef, 0), 0.0, 0.0, zeros(Float64, 4), zeros(Float64, 4))
+        temp = Point(parse(Int,itmdata[1]),
+                    parse(Float64,itmdata[2]),
+                    parse(Float64, itmdata[3]),
+                    parse(Int,itmdata[1]) - 1,
+                    parse(Int,itmdata[1]) + 1,
+                    parse(Int,itmdata[6]),
+                    parse(Int,itmdata[7]),
+                    parse(Float64,itmdata[8]),
+                    parse(Int,itmdata[9]),
+                    parse.(Int, itmdata[10:end-1]),
+                    parse(Float64, itmdata[4]),
+                    parse(Float64, itmdata[5]),
+                    copy(defprimal),
+                    zeros(Float64, 4),
+                    zeros(Float64, 4),
+                    Array{Array{Float64,1},1}(undef, 0), 0.0, 0, 0, 0, 0, Array{Int,1}(undef, 0), Array{Int,1}(undef, 0),
+                    Array{Int,1}(undef, 0), Array{Int,1}(undef, 0), 0.0, zeros(Float64, 4), zeros(Float64, 4))
 
         if parse(Int, itmdata[1]) == 1
-            temp.left = 160
+            temp.left = 1280
             temp.right = 2
         end
 
-        if parse(Int, itmdata[1]) == 160
-            temp.left = 159
+        if parse(Int, itmdata[1]) == 1280
+            temp.left = 1279
             temp.right = 1
         end
 
@@ -68,14 +84,34 @@ function main()
     for idx in table
         connectivity = calculateConnectivity(globaldata, idx)
         setConnectivity(globaldata[idx], connectivity)
-        smallest_dist(globaldata, idx)
+        # smallest_dist(globaldata, idx)
     end
 
-    res_old = 0
+    res_old = zeros(Float64, 1)
     # print(Int(getConfig()["core"]["max_iters"]) + 1)
-    for i in 1:(Int(getConfig()["core"]["max_iters"]))
-        fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+    function run_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+        for i in 1:(Int(getConfig()["core"]["max_iters"]))
+            fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+        end
     end
+
+    fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+
+
+    res_old[1] = 0.0
+
+    function test_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+        @timeit to "nest 4" begin
+            run_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+        end
+    end
+
+    test_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+    # println(to)
+    open("timer.txt", "w") do io
+        print_timer(io, to)
+    end
+
     compute_cl_cd_cm(globaldata, configData, shapeptsidx)
 
     # println(IOContext(stdout, :compact => false), globaldata[1].q)
@@ -98,7 +134,7 @@ function main()
     # println(IOContext(stdout, :compact => false), globaldata[1000].prim)
     # println(IOContext(stdout, :compact => false), globaldata[100].ypos_conn)
     # println(IOContext(stdout, :compact => false), globaldata[100].yneg_conn)
-    println(globaldata[1])
+    # println(globaldata[1])
     file  = open("primvals.txt", "w")
     for (idx, itm) in enumerate(globaldata)
         primtowrite = globaldata[idx].prim

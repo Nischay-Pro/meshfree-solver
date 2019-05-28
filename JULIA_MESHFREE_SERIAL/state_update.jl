@@ -27,7 +27,7 @@ end
 
 function state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
     max_res = zero(Float64)
-    sum_res_sqr = zero(Float64)
+    sum_res_sqr = zeros(Float64, 1)
     U = zeros(Float64, 4)
 
     # println("Prim1.01a")
@@ -35,6 +35,9 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
     for itm in wallindices
         U = copy(zeros(Float64, 4))
         state_update_wall(globaldata, itm, max_res, sum_res_sqr, U)
+        # if itm == 3
+        #     println(sum_res_sqr)
+        # end
     end
 
     # println("Prim1.01b")
@@ -53,8 +56,22 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
         # end
         state_update_interior(globaldata, itm, max_res, sum_res_sqr, U)
     end
+    # println(sum_res_sqr[1])
+    # println(length(globaldata))
+    res_new = sqrt(sum_res_sqr[1])/ length(globaldata)
+    residue = 0
+    # println(res_old)
+    if iter <= 2
+        res_old[1] = res_new
+        residue = 0
+    else
+        residue = log10(res_new/res_old[1])
+    end
+    open("residue.txt", "a+") do residue_io
+        @printf(residue_io, "%d %s\n", iter, residue)
+    end
 
-    res_old = 0
+    # res_old = 0
 
     println("Iteration Number ", iter)
 end
@@ -83,15 +100,11 @@ function state_update_wall(globaldata, itm, max_res, sum_res_sqr, U)
     #     println("Prim1.01a2.3")
     #     println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # end
-    if res_sqr > max_res
-        max_res = res_sqr
-        max_res_point = itm
-    end
-    sum_res_sqr = sum_res_sqr + res_sqr
-    # if itm == 3
-    #     println("U")
-    #     println(IOContext(stdout, :compact => false), U)
+    # if res_sqr > max_res
+    #     max_res = res_sqr
+    #     max_res_point = itm
     # end
+    sum_res_sqr[1] += res_sqr
     globaldata[itm].prim[1] = U[1]
     temp = 1.0 / U[1]
     globaldata[itm].prim[2] = U[2]*temp
@@ -128,21 +141,30 @@ end
     #     println("Prim1.11")
     #     println(IOContext(stdout, :compact => false), globaldata[itm].prim)
     # end
-    if itm == 1
-        println(IOContext(stdout, :compact => false), U)
-        # println(IOContext(stdout, :compact => false), temp)
-    end
+    # if itm == 1
+    #     println(IOContext(stdout, :compact => false), U)
+    #     # println(IOContext(stdout, :compact => false), temp)
+    # end
     temp = U[1]
     U = U - globaldata[itm].delta .* globaldata[itm].flux_res
     U2_rot = U[2]
     U3_rot = U[3]
     U[2] = U2_rot*ny + U3_rot*nx
     U[3] = U3_rot*ny - U2_rot*nx
-
-    if itm == 1
-        println(IOContext(stdout, :compact => false), U)
-        println(IOContext(stdout, :compact => false), temp)
-    end
+    res_sqr = (U[1] - temp)*(U[1] - temp)
+    # if itm == 2
+    #     println("Prim1.01a2.3")
+    #     println(IOContext(stdout, :compact => false), globaldata[1].prim)
+    # end
+    # if res_sqr > max_res
+    #     max_res = res_sqr
+    #     max_res_point = itm
+    # end
+    sum_res_sqr[1] += + res_sqr
+    # if itm == 1
+    #     println(IOContext(stdout, :compact => false), U)
+    #     println(IOContext(stdout, :compact => false), temp)
+    # end
     globaldata[itm].prim[1] = U[1]
     temp = 1.0 / U[1]
     globaldata[itm].prim[2] = U[2]*temp

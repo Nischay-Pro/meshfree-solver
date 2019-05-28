@@ -6,6 +6,7 @@ mutable struct Point
     right::Int64
     flag_1::Int64
     flag_2::Int64
+    short_distance::Float64
     nbhs::Int64
     conn::Array{Int64,1}
     nx::Float64
@@ -27,7 +28,6 @@ mutable struct Point
     ypos_conn::Array{Int64,1}
     yneg_conn::Array{Int64,1}
     delta::Float64
-    short_distance::Float64
     max_q::Array{Float64,1}
     min_q::Array{Float64,1}
 end

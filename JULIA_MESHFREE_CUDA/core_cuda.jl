@@ -92,20 +92,20 @@ function calculateConnectivity(globaldata, idx)
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 end
 
-function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
-    # println(IOContext(stdout, :compact => false), globaldata[1].prim)
-    # print(" 111\n")
+# function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
+#     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
+#     # print(" 111\n")
 
-    q_var_derivatives(globaldata, configData)
+#     q_var_derivatives(globaldata, configData)
 
-    cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+#     cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
 
-    func_delta(globaldata, configData)
+#     func_delta(globaldata, configData)
 
-    state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
-    # println("")
-    println(globaldata[3])
-end
+#     state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
+#     # println("")
+#     println(globaldata[3])
+# end
 
 function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
 
