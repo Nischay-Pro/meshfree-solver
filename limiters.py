@@ -11,13 +11,13 @@ def venkat_limiter(qtilde, globaldata, idx, configData):
             phi.append(1)
         elif abs(del_neg) > 1e-5:
             if del_neg > 0:
-                max_q = maximum(globaldata, idx, i)
+                max_q = globaldata[idx].maxq[i]
                 del_pos = max_q - q
             elif del_neg < 0:
-                min_q = minimum(globaldata, idx, i)
+                min_q = globaldata[idx].minq[i]
                 del_pos = min_q - q
 
-            ds = smallest_dist(globaldata,idx)
+            ds = globaldata[idx].min_dist
             epsi = VL_CONST * ds
             epsi = math.pow(epsi,3)
 

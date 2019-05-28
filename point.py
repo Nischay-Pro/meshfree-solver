@@ -1,5 +1,5 @@
 class Point:
-    def __init__(self, localID, x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, flux_res, q, dq, entropy, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta, foreign=False, foreign_core=0, globalID=0, maxq=0, minq=0, ds=0):
+    def __init__(self, localID, x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, flux_res, q, dq, entropy, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta, min_dist, minq, maxq):
         self.localID = localID
         self.x = x
         self.y = y
@@ -28,12 +28,9 @@ class Point:
         self.ypos_conn = ypos_conn
         self.yneg_conn = yneg_conn
         self.delta = delta
-        self.foreign = foreign
-        self.foreign_core = foreign_core
-        self.globalID = globalID
-        self.maxq = maxq
+        self.min_dist = min_dist
         self.minq = minq
-        self.ds = ds
+        self.maxq = maxq
     
 
     def setNormals(self, n):
@@ -55,7 +52,3 @@ class Point:
 
         self.yneg_conn = conn[3]
         self.yneg_nbhs = len(conn[3])
-
-    def setPrimitive(self, prim):
-        # self.prim = prim
-        None

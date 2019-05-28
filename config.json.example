@@ -20,8 +20,5 @@
         "wall": 0,
         "interior": 1,
         "outer": 2
-    },
-    "partition":{
-        "legacy": false
     }
 }
