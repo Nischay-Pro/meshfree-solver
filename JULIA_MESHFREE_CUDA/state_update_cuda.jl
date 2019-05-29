@@ -34,25 +34,26 @@ function func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
     return nothing
 end
 
-function state_update_kernel(gpuGlobalDataCommon, gpuConfigData)
+function state_update_kernel(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
 	idx = bx * bw + tx
     max_res = zero(Float64)
-    sum_res_sqr = zero(Float64)
-
     if idx > 0 && idx <= gpuGlobalDataCommon[1,end]
         flag1 = gpuGlobalDataCommon[6, idx]
         if flag1 == gpuConfigData[17]
             state_update_wall_kernel(gpuGlobalDataCommon, idx)
         end
-        if flag1 == gpuConfigData[18]
-            state_update_interior_kernel(gpuGlobalDataCommon, idx)
-        end
+        # if flag1 == gpuConfigData[18]
+            # state_update_interior_kernel(gpuGlobalDataCommon, idx, gpuSumResSqr)
+        # end
         if flag1 == gpuConfigData[19]
             state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx)
         end
+    end
+    if flag1 != gpuConfigData[19]
+        gpuSumResSqr[idx] = gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx] * gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx]
     end
     sync_threads()
     return nothing
@@ -91,7 +92,7 @@ function state_update_wall_kernel(gpuGlobalDataCommon, idx)
     U2 = U2_rot*ny + U3_rot*nx
     U3 = U3_rot*ny - U2_rot*nx
     res_sqr = (U1 - temp)*(U1 - temp)
-
+    # gpuSumResSqr[idx] = res_sqr
     # if idx == 3
     #     @cuprintf("\n ======= ")
     #     @cuprintf("\n Values are %f %f %f %f \n", U1,U2, U3, U4)
@@ -183,7 +184,7 @@ function state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx)
     return nothing
 end
 
-function state_update_interior_kernel(gpuGlobalDataCommon, idx)
+function state_update_interior_kernel(gpuGlobalDataCommon, idx, gpuSumResSqr)
     nx = gpuGlobalDataCommon[29, idx]
     ny = gpuGlobalDataCommon[30, idx]
 
@@ -198,6 +199,8 @@ function state_update_interior_kernel(gpuGlobalDataCommon, idx)
     #     @cuprintf("\n %.17f %.17f %.17f %.17f", U1, U2, U3, U4)
     #     # @cuprintf("\n %.17f ", temp1)
     # end
+    res_sqr = (U1 - temp)*(U1 - temp)
+    # gpuSumResSqr[idx] = res_sqr
     temp = U1
     U1 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx]
     U2 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[36, idx]

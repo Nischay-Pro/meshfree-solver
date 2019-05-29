@@ -107,7 +107,12 @@ end
 #     println(globaldata[3])
 # end
 
-function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
+function tester(gpu_input, gpu_output)
+
+    # println(temp_gpu)
+end
+
+function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
 
     # dev::CuDevice=CuDevice(0)
     str = CuStream()
@@ -115,12 +120,13 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, threadsperblo
 
     println("Blocks per grid is ")
     println(blockspergrid)
+    residue_io = open("residue_cuda.txt", "a+")
+
     # gpuGlobalDataCommon = CuArray(globalDataCommon)
     for i in 1:iter
         if i == 1
             println("Compiling CUDA Kernel. This might take a while...")
         end
-
         @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataCommon) #, out1, out2)
         synchronize(str)
         # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
@@ -133,12 +139,28 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, threadsperblo
         @cuda blocks=blockspergrid threads=threadsperblock func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
         synchronize(str)
         # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
-        @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataCommon, gpuConfigData)
+        @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr)
         synchronize(str)
-        # @cuprintf("\n It is ss %lf ", gpuGlobalDataCommon[31, 3])
+        gpu_reduced(+, gpuSumResSqr, gpuSumResSqrOutput)
+        temp_gpu = Array(gpuSumResSqrOutput)[1]
+    #     # @cuprintf("\n It is ss %lf ", gpuGlobalDataCommon[31, 3])
+    #     # CUDAnative.sumReduce(gpuSumResSqr, temp_gpu, getConfig()["core"]["points"])
+    #     # gpu_reduce(+, gpuSumResSqr, gpuSumResSqrOutput)
+
+        # temp_gpu = Array(gpuSumResSqrOutput)[1]
+        residue = sqrt(temp_gpu) / getConfig()["core"]["points"]
+            if i <= 2
+                res_old = residue
+                residue = 0
+            else
+                residue = log10(residue / res_old)
+            end
+
+        @printf(residue_io, "%d %s\n", i, residue)
         println("Iteration Number ", i)
     end
-    # synchronize()
+    synchronize()
+    close(residue_io)
     # println(Array(out1))
     # @cuprintf("\n It is ss2 %lf ", gpuGlobalDataCommon[31, 3])
     # globalDataCommon = Array(gpuGlobalDataCommon)
@@ -254,6 +276,90 @@ end
         end
     end
     return nothing
+end
+
+@inline function reduce_warp(op::F, val::T)::T where {F<:Function,T}
+    offset = CUDAnative.warpsize() ÷ 2
+    # TODO: this can be unrolled if warpsize is known...
+    while offset > 0
+        val = op(val, shfl_down(val, offset))
+        offset ÷= 2
+    end
+    return val
+end
+
+# Reduce a value across a block, using shared memory for communication
+@inline function reduce_block(op::F, val::T)::T where {F<:Function,T}
+    # shared mem for 32 partial sums
+    shared = @cuStaticSharedMem(T, 32)
+
+    wid, lane = fldmod1(threadIdx().x, CUDAnative.warpsize())
+
+    # each warp performs partial reduction
+    val = reduce_warp(op, val)
+
+    # write reduced value to shared memory
+    if lane == 1
+        @inbounds shared[wid] = val
+    end
+
+    # wait for all partial reductions
+    sync_threads()
+
+    # read from shared memory only if that warp existed
+    @inbounds val = (threadIdx().x <= fld(blockDim().x, CUDAnative.warpsize())) ? shared[lane] : zero(T)
+
+    # final reduce within first warp
+    if wid == 1
+        val = reduce_warp(op, val)
+    end
+
+    return val
+end
+
+# Reduce an array across a complete grid
+@inline function reduce_grid(op::F, input::CuDeviceVector{T}, output::CuDeviceVector{T},
+                     len::Integer) where {F<:Function,T}
+    # TODO: neutral element depends on the operator (see Base's 2 and 3 argument `reduce`)
+    val = zero(T)
+
+    # reduce multiple elements per thread (grid-stride loop)
+    # TODO: step range (see JuliaGPU/CUDAnative.jl#12)
+    i = (blockIdx().x-1) * blockDim().x + threadIdx().x
+    step = blockDim().x * gridDim().x
+    while i <= len
+        @inbounds val = op(val, input[i])
+        i += step
+    end
+
+    val = reduce_block(op, val)
+
+    if threadIdx().x == 1
+        @inbounds output[blockIdx().x] = val
+    end
+
+    return
+end
+
+"""
+Reduce a large array.
+Kepler-specific implementation, ie. you need sm_30 or higher to run this code.
+"""
+@inline function gpu_reduced(op::Function, input::CuArray{T}, output::CuArray{T}) where {T}
+    len = length(input)
+
+    # TODO: these values are hardware-dependent, with recent GPUs supporting more threads
+    threads = 512
+    blocks = min((len + threads - 1) ÷ threads, 1024)
+
+    # the output array must have a size equal to or larger than the number of thread blocks
+    # in the grid because each block writes to a unique location within the array.
+    if length(output) < blocks
+        throw(ArgumentError("output array too small, should be at least $blocks elements"))
+    end
+
+    @cuda blocks=blocks threads=threads reduce_grid(op, input, output, len)
+    @cuda threads=1024 reduce_grid(op, output, output, blocks)
 end
 
 # function q_var_derivatives(globaldata, configData)

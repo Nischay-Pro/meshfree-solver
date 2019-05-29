@@ -26,6 +26,9 @@ include("core_cuda.jl")
 export getInitialPrimitive, getInitialPrimitive2, calculateNormals, calculateConnectivity,
 fpi_solver_cuda, q_var_cuda_kernel, q_var_derivatives_kernel, max_min_kernel
 
+# include("cuda_funcs.jl")
+# export reduce_warp, reduce_block, reduce_grid, gpu_reduce
+
 include("flux_residual_cuda.jl")
 export cal_flux_residual_kernel
 

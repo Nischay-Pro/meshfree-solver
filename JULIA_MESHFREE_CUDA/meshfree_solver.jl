@@ -115,6 +115,8 @@ function main()
     # gpu_globaldata[1:2000] = CuArray(globaldata[1:2000])
     # println(typeof(gpuGlobaldataDq))
     # gpuGlobaldataLocalID = CuArray(globaldataLocalID)
+    gpuSumResSqr = CuArray(zeros(Float64, getConfig()["core"]["points"]))
+    gpuSumResSqrOutput = CuArray(zeros(Float64, getConfig()["core"]["points"]))
     gpuGlobalDataCommon = CuArray(globalDataCommon)
     gpuConfigData = CuArray([
                             getConfig()["core"]["points"],#1
@@ -158,19 +160,25 @@ function main()
     #     fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
     # end
 
-
+    # len = 10^7
+    # input = ones(Int32, len)
+    # output = similar(input)
+    # gpu_input = CuArray(input)
+    # gpu_output = CuArray(output)
 
     threadsperblock = Int(getConfig()["core"]["threadsperblock"])
     blockspergrid = Int(ceil(getConfig()["core"]["points"]/threadsperblock))
-    fpi_solver_cuda(1, gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
-    function test_code(gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
+
+    function test_code(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
+        fpi_solver_cuda(1, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, res_old)
+        res_old = 0
         @timeit to "nest 1" begin
-            CuArrays.@sync begin fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
+            CuArrays.@sync begin fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
             end
         end
     end
 
-    test_code(gpuGlobalDataCommon, gpuConfigData, threadsperblock,blockspergrid)
+    test_code(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
 
     open("timer_cuda.txt", "w") do io
         print_timer(io, to)

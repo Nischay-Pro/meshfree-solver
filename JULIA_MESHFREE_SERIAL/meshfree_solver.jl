@@ -9,7 +9,7 @@ function main()
     shapeptsidx = Array{Int,1}(undef, 0)
     table = Array{Int,1}(undef, 0)
 
-    file1 = open("partGridNew--1280-480")
+    file1 = open("partGridNew--2560-960")
     data1 = read(file1, String)
     splitdata = split(data1, "\n")
     # print(splitdata[1:3])
@@ -39,12 +39,12 @@ function main()
                     Array{Int,1}(undef, 0), Array{Int,1}(undef, 0), 0.0, zeros(Float64, 4), zeros(Float64, 4))
 
         if parse(Int, itmdata[1]) == 1
-            temp.left = 1280
+            temp.left = 2560
             temp.right = 2
         end
 
-        if parse(Int, itmdata[1]) == 1280
-            temp.left = 1279
+        if parse(Int, itmdata[1]) == 2560
+            temp.left = 2559
             temp.right = 1
         end
 
@@ -112,7 +112,7 @@ function main()
         print_timer(io, to)
     end
 
-    compute_cl_cd_cm(globaldata, configData, shapeptsidx)
+    # compute_cl_cd_cm(globaldata, configData, shapeptsidx)
 
     # println(IOContext(stdout, :compact => false), globaldata[1].q)
     # println(IOContext(stdout, :compact => false), globaldata[1].dq)
@@ -135,14 +135,14 @@ function main()
     # println(IOContext(stdout, :compact => false), globaldata[100].ypos_conn)
     # println(IOContext(stdout, :compact => false), globaldata[100].yneg_conn)
     # println(globaldata[1])
-    file  = open("primvals.txt", "w")
-    for (idx, itm) in enumerate(globaldata)
-        primtowrite = globaldata[idx].prim
-        for element in primtowrite
-            @printf(file,"%0.17f", element)
-            @printf(file, " ")
-        end
-        print(file, "\n")
-    end
-    close(file)
+    # file  = open("primvals.txt", "w")
+    # for (idx, itm) in enumerate(globaldata)
+    #     primtowrite = globaldata[idx].prim
+    #     for element in primtowrite
+    #         @printf(file,"%0.17f", element)
+    #         @printf(file, " ")
+    #     end
+    #     print(file, "\n")
+    # end
+    # close(file)
 end
