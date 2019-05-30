@@ -1,9 +1,9 @@
 function venkat_limiter(qtilde, globaldata, idx, configData)
-    VL_CONST::Float64 = configData["core"]["vl_const"]
+    VL_CONST::Float64 = configData["core"]["vl_const"]::Float64
     ds = globaldata[idx].short_distance
     epsi = VL_CONST * ds
     epsi = epsi ^ 3
-    phi = Array{Float64,1}(undef, 0)
+    phi = zeros(Float64, 4)
     del_pos = zero(Float64)
     del_neg = zero(Float64)
     # max_q = zero(Float64)
@@ -12,7 +12,7 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
         q = copy(globaldata[idx].q[i])
         del_neg = qtilde[i] - q
         if abs(del_neg) <= 1e-5
-            push!(phi, 1.0)
+            phi[i] = 1.0
         elseif abs(del_neg) > 1e-5
             if del_neg > 0.0
                 # maximum(globaldata, idx, i, max_q)
@@ -30,9 +30,9 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
 
             temp = num/den
             if temp < 1.0
-                push!(phi, temp)
+                phi[i] = temp
             else
-                push!(phi, 1.0)
+                phi[i] = 1.0
             end
         end
     end

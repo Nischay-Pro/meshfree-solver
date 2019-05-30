@@ -44,14 +44,14 @@ function interior_dGx_pos(globaldata, idx, configData)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = (globaldata[idx].q) - 0.5*(delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
+        qtilde_i = @. @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
         qtilde_k = (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
 
         if limiter_flag == 1
             phi_i = venkat_limiter(qtilde_i, globaldata, idx, configData)
             phi_k = venkat_limiter(qtilde_k, globaldata, itm, configData)
-            qtilde_i = (globaldata[idx].q) - 0.5 * phi_i .* (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
-            qtilde_k = (globaldata[itm].q) - 0.5 * phi_k .* (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+            qtilde_i = @. (globaldata[idx].q) - 0.5 * phi_i * (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
+            qtilde_k = @. (globaldata[itm].q) - 0.5 * phi_k * (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
             # if idx == 1
             #     print("The len is ", size(globaldata[idx].xpos_conn))
             #     print("\n *****",itm, " ", phi_i, " ",phi_k, " ", qtilde_i, " ", qtilde_k, "****")
@@ -83,8 +83,8 @@ function interior_dGx_pos(globaldata, idx, configData)
         result = qtilde_to_primitive(qtilde_k, configData)
         flux_Gxp(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
-        sum_delx_delf = sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = sum_dely_delf + (G_k - G_i) * deln_weights
+        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
+        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
     end
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
@@ -139,14 +139,14 @@ function interior_dGx_neg(globaldata, idx, configData)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = (globaldata[idx].q) - 0.5*(delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
+        qtilde_i = @. @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
         qtilde_k = (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
 
         if limiter_flag == 1
             phi_i = (venkat_limiter(qtilde_i, globaldata, idx, configData))
             phi_k = (venkat_limiter(qtilde_k, globaldata, itm, configData))
-            qtilde_i = (globaldata[idx].q) - 0.5 * phi_i .* (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
-            qtilde_k = (globaldata[itm].q) - 0.5 * phi_k .* (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+            qtilde_i = @. (globaldata[idx].q) - 0.5 * phi_i * (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
+            qtilde_k = @. (globaldata[itm].q) - 0.5 * phi_k * (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
         end
         if limiter_flag == 2
             maxi = max_q_values(globaldata, idx)
@@ -240,14 +240,14 @@ function interior_dGy_pos(globaldata, idx, configData)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = (globaldata[idx].q) - 0.5*(delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
+        qtilde_i = @. @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
         qtilde_k = (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
 
         if limiter_flag == 1
             phi_i = (venkat_limiter(qtilde_i, globaldata, idx, configData))
             phi_k = (venkat_limiter(qtilde_k, globaldata, itm, configData))
-            qtilde_i = (globaldata[idx].q) - 0.5 * phi_i .* (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
-            qtilde_k = (globaldata[itm].q) - 0.5 * phi_k .* (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+            qtilde_i = @. (globaldata[idx].q) - 0.5 * phi_i * (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
+            qtilde_k = @. (globaldata[itm].q) - 0.5 * phi_k * (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
         end
         if limiter_flag == 2
             maxi = max_q_values(globaldata, idx)
@@ -336,14 +336,14 @@ function interior_dGy_neg(globaldata, idx, configData)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = (globaldata[idx].q) - 0.5*(delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
+        qtilde_i = @. @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
         qtilde_k = (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
 
         if limiter_flag == 1
             phi_i = (venkat_limiter(qtilde_i, globaldata, idx, configData))
             phi_k = (venkat_limiter(qtilde_k, globaldata, itm, configData))
-            qtilde_i = (globaldata[idx].q) - 0.5 * phi_i .* (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
-            qtilde_k = (globaldata[itm].q) - 0.5 * phi_k .* (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+            qtilde_i = @. (globaldata[idx].q) - 0.5 * phi_i * (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
+            qtilde_k = @. (globaldata[itm].q) - 0.5 * phi_k * (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
         end
         if limiter_flag == 2
             maxi = max_q_values(globaldata, idx)
@@ -370,8 +370,8 @@ function interior_dGy_neg(globaldata, idx, configData)
         result = qtilde_to_primitive(qtilde_k, configData)
         flux_Gyn(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
-        sum_delx_delf = sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = sum_dely_delf + (G_k - G_i) * deln_weights
+        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
+        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
         # if idx == 1
         #     println(IOContext(stdout, :compact => false), itm)
         #     println(IOContext(stdout, :compact => false), result)
