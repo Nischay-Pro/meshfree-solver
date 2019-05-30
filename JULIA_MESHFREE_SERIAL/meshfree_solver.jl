@@ -1,4 +1,3 @@
-
 function main()
     globaldata = Array{Point,1}(undef, 0)
     configData = getConfig()
@@ -84,12 +83,14 @@ function main()
     for idx in table
         connectivity = calculateConnectivity(globaldata, idx)
         setConnectivity(globaldata[idx], connectivity)
-        # smallest_dist(globaldata, idx)
+        smallest_dist(globaldata, idx)
     end
 
 
+    # println(typeof(globaldata))
+
     # print(Int(getConfig()["core"]["max_iters"]) + 1)
-    function run_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+    function run_code(globaldata, configData, wallptsidx::Array{Int64,1}, outerptsidx::Array{Int64,1}, Interiorptsidx::Array{Int64,1}, res_old)
         for i in 1:(Int(getConfig()["core"]["max_iters"]))
             fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
         end
@@ -97,10 +98,8 @@ function main()
 
     # @trace(fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old), maxdepth = 3)
 
-
-
     res_old = zeros(Float64, 1)
-    function test_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+    function test_code(globaldata, configData, wallptsidx::Array{Int64,1}, outerptsidx::Array{Int64,1}, Interiorptsidx::Array{Int64,1}, res_old)
         fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
         println("Starting process")
         res_old[1] = 0.0
@@ -138,14 +137,14 @@ function main()
     # println(IOContext(stdout, :compact => false), globaldata[100].ypos_conn)
     # println(IOContext(stdout, :compact => false), globaldata[100].yneg_conn)
     # println(globaldata[1])
-    # file  = open("primvals.txt", "w")
-    # for (idx, itm) in enumerate(globaldata)
-    #     primtowrite = globaldata[idx].prim
-    #     for element in primtowrite
-    #         @printf(file,"%0.17f", element)
-    #         @printf(file, " ")
-    #     end
-    #     print(file, "\n")
-    # end
-    # close(file)
+    file  = open("primvals.txt", "w")
+    for (idx, itm) in enumerate(globaldata)
+        primtowrite = globaldata[idx].prim
+        for element in primtowrite
+            @printf(file,"%0.17f", element)
+            @printf(file, " ")
+        end
+        print(file, "\n")
+    end
+    close(file)
 end

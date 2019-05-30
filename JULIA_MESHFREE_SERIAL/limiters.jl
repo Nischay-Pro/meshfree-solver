@@ -1,4 +1,5 @@
 function venkat_limiter(qtilde, globaldata, idx, configData)
+    smallest_dist(globaldata, idx)
     VL_CONST::Float64 = configData["core"]["vl_const"]::Float64
     ds = globaldata[idx].short_distance
     epsi = VL_CONST * ds
@@ -6,8 +7,6 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
     phi = zeros(Float64, 4)
     del_pos = zero(Float64)
     del_neg = zero(Float64)
-    # max_q = zero(Float64)
-    # min_q = zero(Float64)
     for i in 1:4
         q = copy(globaldata[idx].q[i])
         del_neg = qtilde[i] - q
@@ -15,10 +14,10 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
             phi[i] = 1.0
         elseif abs(del_neg) > 1e-5
             if del_neg > 0.0
-                # maximum(globaldata, idx, i, max_q)
+                maximum(globaldata, idx, i)
                 del_pos = globaldata[idx].max_q[i] - q
             elseif del_neg < 0.0
-                # minimum(globaldata, idx, i, min_q)
+                minimum(globaldata, idx, i)
                 del_pos = globaldata[idx].min_q[i] - q
             end
             num = (del_pos*del_pos) + (epsi*epsi)
@@ -46,6 +45,7 @@ end
             globaldata[idx].max_q[i] = globaldata[itm].q[i]
         end
     end
+    return  nothing
 end
 
 @inline function minimum(globaldata, idx::Int64, i::Int64)
@@ -55,6 +55,7 @@ end
             globaldata[idx].min_q[i] = globaldata[itm].q[i]
         end
     end
+    return nothing
 end
 
 @inline function smallest_dist(globaldata, idx::Int64)
@@ -66,6 +67,7 @@ end
         end
     end
     globaldata[idx].short_distance = min_dist
+    return nothing
 end
 
 @inline function max_q_values(globaldata, idx)
@@ -94,7 +96,7 @@ end
     return minq
 end
 
-@inline function qtilde_to_primitive(qtilde, configData)
+@inline function qtilde_to_primitive(result::Array{Float64,1}, qtilde::Array{Float64,1}, configData)
 
     gamma::Float64 = configData["core"]["gamma"]
     q1 = qtilde[1]
@@ -113,5 +115,9 @@ end
     temp2 = temp1 - (log(beta)/(gamma-1))
     rho = exp(temp2)
     pr = rho*temp
-    return (u1,u2,rho,pr)
+    result[1] = u1
+    result[2] = u2
+    result[3] = rho
+    result[4] = pr
+    return  nothing
 end

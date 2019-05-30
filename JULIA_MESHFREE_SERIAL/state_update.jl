@@ -23,7 +23,7 @@ function func_delta(globaldata, configData)
         end
         globaldata[idx].delta = min_delt
     end
-    return  nothing
+    return nothing
 end
 
 function state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
@@ -73,7 +73,6 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
     end
 
     # res_old = 0
-
     println("Iteration Number ", iter)
     return  nothing
 end

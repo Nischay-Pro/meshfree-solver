@@ -92,7 +92,7 @@ function calculateConnectivity(globaldata, idx)
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 end
 
-function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
+function fpi_solver(iter, globaldata, configData, wallindices::Array{Int64,1}, outerindices::Array{Int64,1}, interiorindices::Array{Int64,1}, res_old)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # print(" 111\n")
     q_var_derivatives(globaldata, configData)
@@ -105,7 +105,7 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
     state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # residue = res_old
-
+    return nothing
 end
 
 function q_var_derivatives(globaldata, configData)
@@ -161,14 +161,11 @@ function q_var_derivatives(globaldata, configData)
         tempsumy = one_by_det * (sum_dely_delq2 - sum_delx_delq2)
         globaldata[idx].dq = [tempsumx, tempsumy]
 
-        for i in 1:4
-            maximum(globaldata, idx, i)
-            minimum(globaldata, idx, i)
-        end
     end
     # println(IOContext(stdout, :compact => false), globaldata[3].dq)
     # println(IOContext(stdout, :compact => false), globaldata[3].max_q)
     # println(IOContext(stdout, :compact => false), globaldata[3].min_q)
+    return nothing
 end
 
 # function q_var_derivatives_cuda(globaldata, config)

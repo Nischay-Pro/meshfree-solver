@@ -21,6 +21,7 @@ function wall_dGx_pos(globaldata, idx, configData)
 
     G_i = zeros(Float64,4)
     G_k = zeros(Float64,4)
+    result = zeros(Float64,4)
 
     for itm in globaldata[idx].xpos_conn
 
@@ -97,7 +98,7 @@ function wall_dGx_pos(globaldata, idx, configData)
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), result)
         # end
-        result = qtilde_to_primitive(qtilde_i, configData)
+        qtilde_to_primitive(result, qtilde_i, configData)
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), itm)
         #     println(IOContext(stdout, :compact => false), result)
@@ -106,7 +107,7 @@ function wall_dGx_pos(globaldata, idx, configData)
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), result)
         # end
-        result = qtilde_to_primitive(qtilde_k, configData)
+        qtilde_to_primitive(result, qtilde_k, configData)
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), result)
         # end
@@ -137,9 +138,9 @@ function wall_dGx_pos(globaldata, idx, configData)
         sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
     end
 
-    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
-    G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
+    G = @. (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
     # if idx == 3
     #     println(IOContext(stdout, :compact => false), "===Gx===")
     #     # println(IOContext(stdout, :compact => false), sum_delx_sqr)
@@ -178,6 +179,7 @@ function wall_dGx_neg(globaldata, idx, configData)
 
     G_i = zeros(Float64,4)
     G_k = zeros(Float64,4)
+    result = zeros(Float64,4)
 
     for itm in globaldata[idx].xneg_conn
 
@@ -230,20 +232,19 @@ function wall_dGx_neg(globaldata, idx, configData)
                 end
             end
         end
-        result = qtilde_to_primitive(qtilde_i, configData)
+        qtilde_to_primitive(result, qtilde_i, configData)
         flux_quad_GxI(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
-        result = qtilde_to_primitive(qtilde_k, configData)
+        qtilde_to_primitive(result, qtilde_k, configData)
         flux_quad_GxI(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
         sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
         sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
 
     end
-    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
-    G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
-
+    G = @. (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
     return G
 end
 
@@ -270,6 +271,7 @@ function wall_dGy_neg(globaldata, idx, configData)
 
     G_i = zeros(Float64,4)
     G_k = zeros(Float64,4)
+    result = zeros(Float64,4)
 
     for itm in globaldata[idx].yneg_conn
 
@@ -321,10 +323,10 @@ function wall_dGy_neg(globaldata, idx, configData)
                 end
             end
         end
-        result = qtilde_to_primitive(qtilde_i, configData)
+        qtilde_to_primitive(result, qtilde_i, configData)
         flux_Gyn(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
-        result = qtilde_to_primitive(qtilde_k, configData)
+        qtilde_to_primitive(result, qtilde_k, configData)
         flux_Gyn(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
         sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
@@ -337,9 +339,9 @@ function wall_dGy_neg(globaldata, idx, configData)
         # end
     end
 
-    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
-    G = (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
+    G = @. (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
     # if idx == 3
     #     println(IOContext(stdout, :compact => false), "===Gx===")
     #     println(IOContext(stdout, :compact => false), sum_delx_delf)

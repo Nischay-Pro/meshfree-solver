@@ -21,6 +21,7 @@ function outer_dGx_pos(globaldata, idx, configData)
 
     G_i = zeros(Float64,4)
     G_k = zeros(Float64,4)
+    result = zeros(Float64,4)
 
     for itm in globaldata[idx].xpos_conn
 
@@ -72,20 +73,20 @@ function outer_dGx_pos(globaldata, idx, configData)
                 end
             end
         end
-        result = qtilde_to_primitive(qtilde_i, configData)
+        qtilde_to_primitive(result, qtilde_i, configData)
         flux_quad_GxIII(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
-        result = qtilde_to_primitive(qtilde_k, configData)
+        qtilde_to_primitive(result, qtilde_k, configData)
         flux_quad_GxIII(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
         sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
         sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
     end
 
-    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
 
-    G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
+    G = @. (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
     return G
 end
 
@@ -112,6 +113,7 @@ function outer_dGx_neg(globaldata, idx, configData)
 
     G_i = zeros(Float64,4)
     G_k = zeros(Float64,4)
+    result = zeros(Float64,4)
 
     for itm in globaldata[idx].xneg_conn
 
@@ -164,18 +166,18 @@ function outer_dGx_neg(globaldata, idx, configData)
                 end
             end
         end
-        result = qtilde_to_primitive(qtilde_i, configData)
+        qtilde_to_primitive(result, qtilde_i, configData)
         flux_quad_GxIV(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
-        result = qtilde_to_primitive(qtilde_k, configData)
+        qtilde_to_primitive(result, qtilde_k, configData)
         flux_quad_GxIV(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
         sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
         sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
     end
-    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
-    G = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
+    G = @. (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
     return G
 end
 
@@ -202,6 +204,7 @@ function outer_dGy_pos(globaldata, idx, configData)
 
     G_i = zeros(Float64,4)
     G_k = zeros(Float64,4)
+    result = zeros(Float64,4)
 
     for itm in globaldata[idx].ypos_conn
         x_k = globaldata[itm].x
@@ -252,10 +255,10 @@ function outer_dGy_pos(globaldata, idx, configData)
                 end
             end
         end
-        result = qtilde_to_primitive(qtilde_i, configData)
+        qtilde_to_primitive(result, qtilde_i, configData)
         flux_Gyp(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
-        result = qtilde_to_primitive(qtilde_k, configData)
+        qtilde_to_primitive(result, qtilde_k, configData)
         flux_Gyp(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
         # print(sum_delx_delf)
@@ -268,10 +271,10 @@ function outer_dGy_pos(globaldata, idx, configData)
         sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
 
     end
-    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
 
     one_by_det = 1 / det
 
-    G = (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
+    G = @. (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
     return G
 end
