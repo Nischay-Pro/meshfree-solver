@@ -9,7 +9,7 @@ function main()
     shapeptsidx = Array{Int,1}(undef, 0)
     table = Array{Int,1}(undef, 0)
 
-    file1 = open("partGridNew--2560-960")
+    file1 = open("partGridNew--160-60")
     data1 = read(file1, String)
     splitdata = split(data1, "\n")
     # print(splitdata[1:3])
@@ -39,12 +39,12 @@ function main()
                     Array{Int,1}(undef, 0), Array{Int,1}(undef, 0), 0.0, zeros(Float64, 4), zeros(Float64, 4))
 
         if parse(Int, itmdata[1]) == 1
-            temp.left = 2560
+            temp.left = 160
             temp.right = 2
         end
 
-        if parse(Int, itmdata[1]) == 2560
-            temp.left = 2559
+        if parse(Int, itmdata[1]) == 160
+            temp.left = 159
             temp.right = 1
         end
 
@@ -87,7 +87,7 @@ function main()
         # smallest_dist(globaldata, idx)
     end
 
-    res_old = zeros(Float64, 1)
+
     # print(Int(getConfig()["core"]["max_iters"]) + 1)
     function run_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
         for i in 1:(Int(getConfig()["core"]["max_iters"]))
@@ -95,12 +95,15 @@ function main()
         end
     end
 
-    fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+    # @trace(fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old), maxdepth = 3)
 
 
-    res_old[1] = 0.0
 
+    res_old = zeros(Float64, 1)
     function test_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+        fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+        println("Starting process")
+        res_old[1] = 0.0
         @timeit to "nest 4" begin
             run_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
         end

@@ -1,7 +1,7 @@
 function outer_dGx_pos(globaldata, idx, configData)
 
-    power::Float64 = configData["core"]["power"]
-    limiter_flag::Float64 = configData["core"]["limiter_flag"]
+    power::Float64 = configData["core"]["power"]::Float64
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -18,6 +18,9 @@ function outer_dGx_pos(globaldata, idx, configData)
 
     tx = ny
     ty = -nx
+
+    G_i = zeros(Float64,4)
+    G_k = zeros(Float64,4)
 
     for itm in globaldata[idx].xpos_conn
 
@@ -70,10 +73,10 @@ function outer_dGx_pos(globaldata, idx, configData)
             end
         end
         result = qtilde_to_primitive(qtilde_i, configData)
-        G_i = flux_quad_GxIII(nx, ny, result[1], result[2], result[3], result[4])
+        flux_quad_GxIII(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
         result = qtilde_to_primitive(qtilde_k, configData)
-        G_k = flux_quad_GxIII(nx, ny, result[1], result[2], result[3], result[4])
+        flux_quad_GxIII(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
         sum_delx_delf = sum_delx_delf + (G_k - G_i) * dels_weights
         sum_dely_delf = sum_dely_delf + (G_k - G_i) * deln_weights
@@ -88,8 +91,8 @@ end
 
 function outer_dGx_neg(globaldata, idx, configData)
 
-    power::Float64 = configData["core"]["power"]
-    limiter_flag::Float64 = configData["core"]["limiter_flag"]
+    power::Float64 = configData["core"]["power"]::Float64
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -106,6 +109,9 @@ function outer_dGx_neg(globaldata, idx, configData)
 
     tx = ny
     ty = -nx
+
+    G_i = zeros(Float64,4)
+    G_k = zeros(Float64,4)
 
     for itm in globaldata[idx].xneg_conn
 
@@ -159,10 +165,10 @@ function outer_dGx_neg(globaldata, idx, configData)
             end
         end
         result = qtilde_to_primitive(qtilde_i, configData)
-        G_i = flux_quad_GxIV(nx, ny, result[1], result[2], result[3], result[4])
+        flux_quad_GxIV(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
         result = qtilde_to_primitive(qtilde_k, configData)
-        G_k = flux_quad_GxIV(nx, ny, result[1], result[2], result[3], result[4])
+        flux_quad_GxIV(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
         sum_delx_delf = sum_delx_delf + (G_k - G_i) * dels_weights
         sum_dely_delf = sum_dely_delf + (G_k - G_i) * deln_weights
@@ -175,8 +181,8 @@ end
 
 function outer_dGy_pos(globaldata, idx, configData)
 
-    power::Float64 = configData["core"]["power"]
-    limiter_flag::Float64 = configData["core"]["limiter_flag"]
+    power::Float64 = configData["core"]["power"]::Float64
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -193,6 +199,9 @@ function outer_dGy_pos(globaldata, idx, configData)
 
     tx = ny
     ty = -nx
+
+    G_i = zeros(Float64,4)
+    G_k = zeros(Float64,4)
 
     for itm in globaldata[idx].ypos_conn
         x_k = globaldata[itm].x
@@ -244,10 +253,10 @@ function outer_dGy_pos(globaldata, idx, configData)
             end
         end
         result = qtilde_to_primitive(qtilde_i, configData)
-        G_i = flux_Gyp(nx, ny, result[1], result[2], result[3], result[4])
+        flux_Gyp(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
         result = qtilde_to_primitive(qtilde_k, configData)
-        G_k = flux_Gyp(nx, ny, result[1], result[2], result[3], result[4])
+        flux_Gyp(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
         # print(sum_delx_delf)
         # print(" ")

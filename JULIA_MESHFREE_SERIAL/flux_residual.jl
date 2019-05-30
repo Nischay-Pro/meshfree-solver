@@ -2,6 +2,7 @@ function cal_flux_residual(globaldata, wallindices, outerindices, interiorindice
 	wallindices_flux_residual(globaldata, configData, wallindices)
 	outerindices_flux_residual(globaldata, configData, outerindices)
 	interiorindices_flux_residual(globaldata, configData, interiorindices)
+	return nothing
 end
 
 function wallindices_flux_residual(globaldata, configData, wallindices)
@@ -9,8 +10,7 @@ function wallindices_flux_residual(globaldata, configData, wallindices)
 		Gxp = wall_dGx_pos(globaldata, itm, configData)
 		Gxn = wall_dGx_neg(globaldata, itm, configData)
 		Gyn = wall_dGy_neg(globaldata, itm, configData)
-		GTemp = Gxp + Gxn + Gyn
-		GTemp = GTemp * 2.0
+		GTemp = @.((Gxp + Gxn + Gyn) * 2)
 		globaldata[itm].flux_res = GTemp
 		# if itm == 3
 		# 	println(IOContext(stdout, :compact => false), Gxp)
@@ -18,6 +18,7 @@ function wallindices_flux_residual(globaldata, configData, wallindices)
 		# 	println(IOContext(stdout, :compact => false), Gxp + Gxn + Gyn)
 		# end
 	end
+	return nothing
 end
 
 function outerindices_flux_residual(globaldata, configData, outerindices)
@@ -25,9 +26,10 @@ function outerindices_flux_residual(globaldata, configData, outerindices)
 		Gxp = outer_dGx_pos(globaldata, itm, configData)
 		Gxn = outer_dGx_neg(globaldata, itm, configData)
 		Gyp = outer_dGy_pos(globaldata, itm, configData)
-		GTemp = Gxp + Gxn + Gyp
+		GTemp = @.(Gxp + Gxn + Gyp)
 		globaldata[itm].flux_res = GTemp
 	end
+	return nothing
 end
 
 function interiorindices_flux_residual(globaldata, configData, interiorindices)
@@ -47,4 +49,5 @@ function interiorindices_flux_residual(globaldata, configData, interiorindices)
 		GTemp = @.(Gxp + Gxn + Gyp + Gyn)
 		globaldata[itm].flux_res = GTemp
 	end
+	return nothing
 end

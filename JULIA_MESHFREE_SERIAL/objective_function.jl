@@ -1,16 +1,16 @@
 
 # TODO - Check deg2rad
 function calculateTheta(configData)
-    theta = deg2rad(Float64(configData["core"]["aoa"]))
+    theta = deg2rad(Float64(configData["core"]["aoa"]))::Float64
     return theta
 end
 
 function compute_cl_cd_cm(globaldata, configData, shapeindices)
 
-    rho_inf::Float64 = configData["core"]["rho_inf"]
-    Mach::Float64 = configData["core"]["mach"]
-    pr_inf::Float64 = configData["core"]["pr_inf"]
-    shapes::Int64 = configData["core"]["shapes"]
+    rho_inf::Float64 = configData["core"]["rho_inf"]::Float64
+    Mach::Float64 = configData["core"]["mach"]::Float64
+    pr_inf::Float64 = configData["core"]["pr_inf"]::Float64
+    shapes::Int64 = configData["core"]["shapes"]::Float64
     theta = calculateTheta(configData)
 
     temp = 0.5*rho_inf*Mach*Mach

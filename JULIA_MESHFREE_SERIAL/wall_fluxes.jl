@@ -1,7 +1,7 @@
 function wall_dGx_pos(globaldata, idx, configData)
 
-    power::Float64 = configData["core"]["power"]
-    limiter_flag::Float64 = configData["core"]["limiter_flag"]
+    power::Float64 = configData["core"]["power"]::Float64
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -18,6 +18,9 @@ function wall_dGx_pos(globaldata, idx, configData)
 
     tx::Float64 = ny
     ty::Float64 = -nx
+
+    G_i = zeros(Float64,4)
+    G_k = zeros(Float64,4)
 
     for itm in globaldata[idx].xpos_conn
 
@@ -99,7 +102,7 @@ function wall_dGx_pos(globaldata, idx, configData)
         #     println(IOContext(stdout, :compact => false), itm)
         #     println(IOContext(stdout, :compact => false), result)
         # end
-        G_i = flux_quad_GxII(nx, ny, result[1], result[2], result[3], result[4], flag)
+        flux_quad_GxII(G_i, nx, ny, result[1], result[2], result[3], result[4], flag)
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), result)
         # end
@@ -107,7 +110,7 @@ function wall_dGx_pos(globaldata, idx, configData)
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), result)
         # end
-        G_k = flux_quad_GxII(nx, ny, result[1], result[2], result[3], result[4], flag)
+        flux_quad_GxII(G_k, nx, ny, result[1], result[2], result[3], result[4], flag)
         # if idx == 100
         #     println("****")
         #     println(IOContext(stdout, :compact => false), phi_i)
@@ -154,8 +157,8 @@ end
 
 function wall_dGx_neg(globaldata, idx, configData)
     idx = convert(Int, idx)
-    power::Float64 = configData["core"]["power"]
-    limiter_flag::Float64 = configData["core"]["limiter_flag"]
+    power::Float64 = configData["core"]["power"]::Float64
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -172,6 +175,9 @@ function wall_dGx_neg(globaldata, idx, configData)
 
     tx = ny
     ty = -nx
+
+    G_i = zeros(Float64,4)
+    G_k = zeros(Float64,4)
 
     for itm in globaldata[idx].xneg_conn
 
@@ -225,10 +231,10 @@ function wall_dGx_neg(globaldata, idx, configData)
             end
         end
         result = qtilde_to_primitive(qtilde_i, configData)
-        G_i = flux_quad_GxI(nx, ny, result[1], result[2], result[3], result[4])
+        flux_quad_GxI(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
         result = qtilde_to_primitive(qtilde_k, configData)
-        G_k = flux_quad_GxI(nx, ny, result[1], result[2], result[3], result[4])
+        flux_quad_GxI(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
         sum_delx_delf = sum_delx_delf + (G_k - G_i) * dels_weights
         sum_dely_delf = sum_dely_delf + (G_k - G_i) * deln_weights
@@ -243,8 +249,8 @@ end
 
 function wall_dGy_neg(globaldata, idx, configData)
     idx = convert(Int, idx)
-    power::Float64 = configData["core"]["power"]
-    limiter_flag::Float64 = configData["core"]["limiter_flag"]
+    power::Float64 = configData["core"]["power"]::Float64
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -261,6 +267,9 @@ function wall_dGy_neg(globaldata, idx, configData)
 
     tx = ny
     ty = -nx
+
+    G_i = zeros(Float64,4)
+    G_k = zeros(Float64,4)
 
     for itm in globaldata[idx].yneg_conn
 
@@ -313,10 +322,10 @@ function wall_dGy_neg(globaldata, idx, configData)
             end
         end
         result = qtilde_to_primitive(qtilde_i, configData)
-        G_i = flux_Gyn(nx, ny, result[1], result[2], result[3], result[4])
+        flux_Gyn(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
         result = qtilde_to_primitive(qtilde_k, configData)
-        G_k = flux_Gyn(nx, ny, result[1], result[2], result[3], result[4])
+        flux_Gyn(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
         sum_delx_delf = sum_delx_delf + (G_k - G_i) * dels_weights
         sum_dely_delf = sum_dely_delf + (G_k - G_i) * deln_weights

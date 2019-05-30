@@ -1,9 +1,9 @@
 function getInitialPrimitive(configData)
-    rho_inf::Float64 = configData["core"]["rho_inf"]
-    mach::Float64 = configData["core"]["mach"]
-    machcos = mach * cos(calculateTheta(configData))
-    machsin = mach * sin(calculateTheta(configData))
-    pr_inf::Float64 = configData["core"]["pr_inf"]
+    rho_inf = configData["core"]["rho_inf"]::Float64
+    mach = configData["core"]["mach"]::Float64
+    machcos::Float64 = mach * cos(calculateTheta(configData))
+    machsin::Float64 = mach * sin(calculateTheta(configData))
+    pr_inf = configData["core"]["pr_inf"]::Float64
     primal = [rho_inf, machcos, machsin, pr_inf]
     return primal
 end
@@ -109,7 +109,7 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
 end
 
 function q_var_derivatives(globaldata, configData)
-    power::Float64 = configData["core"]["power"]
+    power::Float64 = configData["core"]["power"]::Float64
 
     for (idx, itm) in enumerate(globaldata)
         rho = itm.prim[1]

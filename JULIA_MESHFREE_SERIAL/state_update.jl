@@ -1,6 +1,6 @@
 import SpecialFunctions
 function func_delta(globaldata, configData)
-    cfl::Float64 = configData["core"]["cfl"]
+    cfl::Float64 = configData["core"]["cfl"]::Float64
     for (idx, store) in enumerate(globaldata)
         # TODO - Possible problem?
         min_delt = one(Float64)
@@ -23,6 +23,7 @@ function func_delta(globaldata, configData)
         end
         globaldata[idx].delta = min_delt
     end
+    return  nothing
 end
 
 function state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
@@ -74,6 +75,7 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
     # res_old = 0
 
     println("Iteration Number ", iter)
+    return  nothing
 end
 
 function state_update_wall(globaldata, itm, max_res, sum_res_sqr, U)
@@ -191,10 +193,10 @@ end
 end
 
 @inline function conserved_vector_Ubar(globaldata, itm, nx, ny, configData, Ubar)
-    Mach::Float64 = configData["core"]["mach"]
-    gamma::Float64 = configData["core"]["gamma"]
-    pr_inf::Float64 = configData["core"]["pr_inf"]
-    rho_inf::Float64 = configData["core"]["rho_inf"]
+    Mach::Float64 = configData["core"]["mach"]::Float64
+    gamma::Float64 = configData["core"]["gamma"]::Float64
+    pr_inf::Float64 = configData["core"]["pr_inf"]::Float64
+    rho_inf::Float64 = configData["core"]["rho_inf"]::Float64
     theta = calculateTheta(configData)
 
     u1_inf::Float64 = Mach*cos(theta)
