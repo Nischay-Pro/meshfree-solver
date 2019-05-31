@@ -1,4 +1,4 @@
-function func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
+@inline function func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
     cfl = gpuConfigData[2]
     tx = threadIdx().x
     bx = blockIdx().x - 1
@@ -34,7 +34,7 @@ function func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
     return nothing
 end
 
-function state_update_kernel(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr)
+@inline function state_update_kernel(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -91,7 +91,7 @@ function state_update_wall_kernel(gpuGlobalDataCommon, idx)
     U3_rot = U3
     U2 = U2_rot*ny + U3_rot*nx
     U3 = U3_rot*ny - U2_rot*nx
-    res_sqr = (U1 - temp)*(U1 - temp)
+    # res_sqr = (U1 - temp)*(U1 - temp)
     # gpuSumResSqr[idx] = res_sqr
     # if idx == 3
     #     @cuprintf("\n ======= ")
@@ -199,7 +199,7 @@ function state_update_interior_kernel(gpuGlobalDataCommon, idx, gpuSumResSqr)
     #     @cuprintf("\n %.17f %.17f %.17f %.17f", U1, U2, U3, U4)
     #     # @cuprintf("\n %.17f ", temp1)
     # end
-    res_sqr = (U1 - temp)*(U1 - temp)
+    # res_sqr = (U1 - temp)*(U1 - temp)
     # gpuSumResSqr[idx] = res_sqr
     temp = U1
     U1 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx]

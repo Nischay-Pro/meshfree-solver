@@ -50,5 +50,5 @@ function compute_cl_cd_cm(globaldata, configData, shapeindices)
     Cl = V*cos(theta) - H*sin(theta)
     Cd = H*cos(theta) + V*sin(theta)
     Cm = pitch_mom
-
+    return nothing
 end

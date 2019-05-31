@@ -107,10 +107,10 @@ end
 #     println(globaldata[3])
 # end
 
-function tester(gpu_input, gpu_output)
+# function tester(gpu_input, gpu_output)
 
-    # println(temp_gpu)
-end
+#     # println(temp_gpu)
+# end
 
 function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
 
@@ -142,21 +142,21 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr,
         @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr)
         synchronize(str)
         gpu_reduced(+, gpuSumResSqr, gpuSumResSqrOutput)
-        temp_gpu = Array(gpuSumResSqrOutput)[1]
-    #     # @cuprintf("\n It is ss %lf ", gpuGlobalDataCommon[31, 3])
-    #     # CUDAnative.sumReduce(gpuSumResSqr, temp_gpu, getConfig()["core"]["points"])
-    #     # gpu_reduce(+, gpuSumResSqr, gpuSumResSqrOutput)
+        temp_gpu = Array(gpuSumResSqrOutput[1:2])[1]
+    # #     # @cuprintf("\n It is ss %lf ", gpuGlobalDataCommon[31, 3])
+    # #     # CUDAnative.sumReduce(gpuSumResSqr, temp_gpu, getConfig()["core"]["points"])
+    # #     # gpu_reduce(+, gpuSumResSqr, gpuSumResSqrOutput)
 
-        # temp_gpu = Array(gpuSumResSqrOutput)[1]
-        residue = sqrt(temp_gpu) / getConfig()["core"]["points"]
-            if i <= 2
-                res_old = residue
-                residue = 0
-            else
-                residue = log10(residue / res_old)
-            end
+    #     # temp_gpu = Array(gpuSumResSqrOutput)[1]
+    #     residue = sqrt(temp_gpu) / getConfig()["core"]["points"]
+    #         if i <= 2
+    #             res_old = residue
+    #             residue = 0
+    #         else
+    #             residue = log10(residue / res_old)
+    #         end
 
-        @printf(residue_io, "%d %s\n", i, residue)
+    #     @printf(residue_io, "%d %s\n", i, residue)
         println("Iteration Number ", i)
     end
     synchronize()
@@ -168,7 +168,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr,
     return nothing
 end
 
-function q_var_cuda_kernel(gpuGlobalDataCommon) #out1, out2)
+@inline function q_var_cuda_kernel(gpuGlobalDataCommon) #out1, out2)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -199,7 +199,7 @@ function q_var_cuda_kernel(gpuGlobalDataCommon) #out1, out2)
     return nothing
 end
 
-function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData)
+@inline function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -249,32 +249,26 @@ function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData)
         gpuGlobalDataCommon[48, idx] = one_by_det * (sum_dely_delq2 * sum_delx_sqr - sum_delx_delq2 * sum_delx_dely)
         gpuGlobalDataCommon[49, idx] = one_by_det * (sum_dely_delq3 * sum_delx_sqr - sum_delx_delq3 * sum_delx_dely)
         gpuGlobalDataCommon[50, idx] = one_by_det * (sum_dely_delq4 * sum_delx_sqr - sum_delx_delq4 * sum_delx_dely)
-        @cuda dynamic=true threads=4 max_min_kernel(gpuGlobalDataCommon, idx)
+        # @cuda dynamic=true threads=4 max_min_kernel(gpuGlobalDataCommon, idx)
         # CUDAnative.synchronize()
+        for i in 1:4
+            gpuGlobalDataCommon[137+i, idx] = gpuGlobalDataCommon[38+i,idx]
+            gpuGlobalDataCommon[141+i, idx] = gpuGlobalDataCommon[38+i,idx]
+            for iter in 9:28
+                conn = Int(gpuGlobalDataCommon[iter, idx])
+                if conn == 0.0
+                    break
+                end
+                if gpuGlobalDataCommon[137+i, idx] < gpuGlobalDataCommon[38+i,conn]
+                    gpuGlobalDataCommon[137+i, idx] = gpuGlobalDataCommon[38+i,conn]
+                end
+                if gpuGlobalDataCommon[141+i, idx] > gpuGlobalDataCommon[38+i,conn]
+                    gpuGlobalDataCommon[141+i, idx] = gpuGlobalDataCommon[38+i,conn]
+                end
+            end
+        end
     end
     sync_threads()
-    return nothing
-end
-
-@inline function max_min_kernel(gpuGlobalDataCommon, idx::Int64)
-    tx = threadIdx().x
-    bx = blockIdx().x - 1
-    bw = blockDim().x
-    i = bx * bw + tx
-    gpuGlobalDataCommon[137+i, idx] = gpuGlobalDataCommon[38+i,idx]
-    gpuGlobalDataCommon[141+i, idx] = gpuGlobalDataCommon[38+i,idx]
-    for iter in 9:28
-        conn = Int(gpuGlobalDataCommon[iter, idx])
-        if conn == 0.0
-            break
-        end
-        if gpuGlobalDataCommon[137+i, idx] < gpuGlobalDataCommon[38+i,conn]
-            gpuGlobalDataCommon[137+i, idx] = gpuGlobalDataCommon[38+i,conn]
-        end
-        if gpuGlobalDataCommon[141+i, idx] > gpuGlobalDataCommon[38+i,conn]
-            gpuGlobalDataCommon[141+i, idx] = gpuGlobalDataCommon[38+i,conn]
-        end
-    end
     return nothing
 end
 

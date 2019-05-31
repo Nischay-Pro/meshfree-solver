@@ -1,4 +1,4 @@
-@inline function venkat_limiter_kernel_i(qtilde, gpuGlobalDataCommon, idx, gpuConfigData)
+function venkat_limiter_kernel_i(qtilde, gpuGlobalDataCommon, idx, gpuConfigData)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataCommon[137, idx]
     # @cuprintf("Type is %s", typeof(VL_CONST))
@@ -64,7 +64,7 @@
     return nothing
 end
 
-@inline function venkat_limiter_kernel_k(qtilde, gpuGlobalDataCommon, idx, gpuConfigData, trueidx)
+function venkat_limiter_kernel_k(qtilde, gpuGlobalDataCommon, idx, gpuConfigData, trueidx)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataCommon[137, idx]
     # @cuprintf("Type is %s", typeof(VL_CONST))
@@ -130,7 +130,7 @@ end
     return nothing
 end
 
-@inline function max_q_values_kernel(gpuGlobalDataCommon, idx, maxq)
+function max_q_values_kernel(gpuGlobalDataCommon, idx, maxq)
     maxq = (
                 gpuGlobalDataCommon[39, idx],
                 gpuGlobalDataCommon[40, idx],
@@ -159,7 +159,7 @@ end
     return nothing
 end
 
-@inline function min_q_values_kernel(gpuGlobalDataCommon, idx, minq)
+function min_q_values_kernel(gpuGlobalDataCommon, idx, minq)
     minq = (
                 gpuGlobalDataCommon[39, idx],
                 gpuGlobalDataCommon[40, idx],

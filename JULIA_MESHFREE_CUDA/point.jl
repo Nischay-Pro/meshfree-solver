@@ -37,6 +37,7 @@ end
 function setNormals(self::Point, n)
     self.nx = n[1]
     self.ny = n[2]
+    return nothing
 end
 
 function getxy(self::Point)
@@ -52,6 +53,7 @@ function setConnectivity(self::Point, conn)
     self.ypos_nbhs = length(conn[3])
     self.yneg_conn = conn[4]
     self.yneg_nbhs = length(conn[4])
+    return nothing
 end
 
 
@@ -100,6 +102,7 @@ function convertToArray(targetArray, originalStruct::Point, idx)
     targetArray[76:75+ originalStruct.xneg_nbhs, idx] = originalStruct.xneg_conn
     targetArray[96:95+ originalStruct.ypos_nbhs, idx] = originalStruct.ypos_conn
     targetArray[116:115+ originalStruct.yneg_nbhs, idx] = originalStruct.yneg_conn
+    return  nothing
 end
 
 
