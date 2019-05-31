@@ -169,7 +169,7 @@ function main()
     threadsperblock = Int(getConfig()["core"]["threadsperblock"])
     blockspergrid = Int(ceil(getConfig()["core"]["points"]/threadsperblock))
 
-    function test_code(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
+    function test_code(gpuGlobalDataCommon::CuArrays.CuArray{Float64,2}, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
         fpi_solver_cuda(1, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, res_old)
         res_old = 0
         @timeit to "nest 1" begin

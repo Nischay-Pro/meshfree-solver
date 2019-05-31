@@ -1,4 +1,4 @@
-function venkat_limiter_kernel_i(qtilde, gpuGlobalDataCommon, idx, gpuConfigData)
+function venkat_limiter_kernel_i(gpuGlobalDataCommon, idx, gpuConfigData, delx, dely)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataCommon[137, idx]
     # @cuprintf("Type is %s", typeof(VL_CONST))
@@ -13,7 +13,7 @@ function venkat_limiter_kernel_i(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
 
     for i in 1:4
         q = gpuGlobalDataCommon[38 + i, idx]
-        del_neg = qtilde[i] - q
+        del_neg = gpuGlobalDataCommon[38+i, idx] - 0.5*(delx * gpuGlobalDataCommon[42+i, idx] + dely * gpuGlobalDataCommon[46+i, idx]) - q
         if abs(del_neg) <= 1e-5
             if i == 1
                 gpuGlobalDataCommon[146,idx] = 1.0
@@ -58,7 +58,7 @@ function venkat_limiter_kernel_i(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
     return nothing
 end
 
-function venkat_limiter_kernel_k(qtilde, gpuGlobalDataCommon, idx, gpuConfigData, trueidx)
+function venkat_limiter_kernel_k(gpuGlobalDataCommon, idx, gpuConfigData, trueidx, delx, dely)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataCommon[137, idx]
     # @cuprintf("Type is %s", typeof(VL_CONST))
@@ -73,7 +73,7 @@ function venkat_limiter_kernel_k(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
 
     for i in 1:4
         q = gpuGlobalDataCommon[38 + i, idx]
-        del_neg = qtilde[i] - q
+        del_neg = gpuGlobalDataCommon[38+i, idx] - 0.5*(delx * gpuGlobalDataCommon[42+i, idx] + dely * gpuGlobalDataCommon[46+i, idx]) - q
         if abs(del_neg) <= 1e-5
             if i == 1
                 gpuGlobalDataCommon[150,trueidx] = 1.0
@@ -188,16 +188,36 @@ end
     globaldata[idx].short_distance = min_dist
 end
 
-function qtilde_to_primitive_kernel(qtilde, gpuConfigData, gpuGlobalDataCommon, idx)
+function qtildei_to_primitive_kernel(gpuConfigData, gpuGlobalDataCommon, idx, delx, dely)
 
     gamma = gpuConfigData[15]
-    beta = -qtilde[4]*0.5
+    beta = -(gpuGlobalDataCommon[42, idx] - 0.5*gpuGlobalDataCommon[149,idx]*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx]))*0.5
     temp = 0.5/beta
 
-    u1 = qtilde[2]*temp
-    u2 = qtilde[3]*temp
+    u1 = gpuGlobalDataCommon[40, idx] - 0.5*gpuGlobalDataCommon[147,idx]*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx])*temp
+    u2 = gpuGlobalDataCommon[41, idx] - 0.5*gpuGlobalDataCommon[148,idx]*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx])*temp
 
-    temp1 = qtilde[1] + beta*(u1*u1 + u2*u2)
+    temp1 = gpuGlobalDataCommon[39, idx] - 0.5*gpuGlobalDataCommon[146,idx]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]) + beta*(u1*u1 + u2*u2)
+    temp2 = temp1 - (CUDAnative.log(beta)/(gamma-1))
+    rho = CUDAnative.exp(temp2)
+    pr = rho*temp
+    gpuGlobalDataCommon[170, idx] = u1
+    gpuGlobalDataCommon[171, idx] = u2
+    gpuGlobalDataCommon[172, idx] = rho
+    gpuGlobalDataCommon[173, idx] = pr
+    return nothing
+end
+
+function qtildek_to_primitive_kernel(conn, gpuConfigData, gpuGlobalDataCommon, idx, delx, dely)
+
+    gamma = gpuConfigData[15]
+    beta = -(gpuGlobalDataCommon[42, conn] - 0.5*gpuGlobalDataCommon[153,idx]*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn]))*0.5
+    temp = 0.5/beta
+
+    u1 = gpuGlobalDataCommon[40, conn] - 0.5*gpuGlobalDataCommon[151,idx]*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn])*temp
+    u2 = gpuGlobalDataCommon[41, conn] - 0.5*gpuGlobalDataCommon[152,idx]*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn])*temp
+
+    temp1 = gpuGlobalDataCommon[39, conn] - 0.5*gpuGlobalDataCommon[150,idx]*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]) + beta*(u1*u1 + u2*u2)
     temp2 = temp1 - (CUDAnative.log(beta)/(gamma-1))
     rho = CUDAnative.exp(temp2)
     pr = rho*temp

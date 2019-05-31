@@ -6,8 +6,8 @@ function wall_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
 
-    qtilde_i = (0,0,0,0)
-    qtilde_k = (0,0,0,0)
+
+
 
     for i in 146:173
         gpuGlobalDataCommon[i, idx] = 0.0
@@ -54,40 +54,17 @@ function wall_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
         sum_dely_sqr = sum_dely_sqr + deln*deln_weights
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i =  (
-                        gpuGlobalDataCommon[39, idx] - 0.5*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-                        gpuGlobalDataCommon[40, idx] - 0.5*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-                        gpuGlobalDataCommon[41, idx] - 0.5*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-                        gpuGlobalDataCommon[42, idx] - 0.5*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
-                    )
-        qtilde_k = (
-                        gpuGlobalDataCommon[39, conn] - 0.5*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-                        gpuGlobalDataCommon[40, conn] - 0.5*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-                        gpuGlobalDataCommon[41, conn] - 0.5*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-                        gpuGlobalDataCommon[42, conn] - 0.5*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
-                    )
         # if idx == 3
         #     @cuprintf("\n %d", conn)
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", qtilde_k[1], qtilde_k[2], qtilde_k[3], qtilde_k[4])
         # end
 
-
         if limiter_flag == 1
-            venkat_limiter_kernel_i(qtilde_i, gpuGlobalDataCommon, idx, gpuConfigData)
-            venkat_limiter_kernel_k(qtilde_k, gpuGlobalDataCommon, conn, gpuConfigData, idx)
+            venkat_limiter_kernel_i(gpuGlobalDataCommon, idx, gpuConfigData, delx, dely)
+            venkat_limiter_kernel_k(gpuGlobalDataCommon, conn, gpuConfigData, idx, delx, dely)
             # CUDAnative.synchronize()
-            qtilde_i =  (
-                            gpuGlobalDataCommon[39, idx] - 0.5*gpuGlobalDataCommon[146,idx]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-                            gpuGlobalDataCommon[40, idx] - 0.5*gpuGlobalDataCommon[147,idx]*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-                            gpuGlobalDataCommon[41, idx] - 0.5*gpuGlobalDataCommon[148,idx]*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-                            gpuGlobalDataCommon[42, idx] - 0.5*gpuGlobalDataCommon[149,idx]*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
-                        )
-            qtilde_k = (
-                            gpuGlobalDataCommon[39, conn] - 0.5*gpuGlobalDataCommon[150,idx]*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-                            gpuGlobalDataCommon[40, conn] - 0.5*gpuGlobalDataCommon[151,idx]*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-                            gpuGlobalDataCommon[41, conn] - 0.5*gpuGlobalDataCommon[152,idx]*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-                            gpuGlobalDataCommon[42, conn] - 0.5*gpuGlobalDataCommon[153,idx]*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
-                        )
+
+
         end
         # if idx == 3
         #     @cuprintf("\n %d", conn)
@@ -102,7 +79,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
         #     @cuprintf("\n %d", conn)
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[170, idx], gpuGlobalDataCommon[171, idx], gpuGlobalDataCommon[172, idx], gpuGlobalDataCommon[173, idx])
         # end
-        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataCommon, idx)
+        qtildei_to_primitive_kernel(gpuConfigData, gpuGlobalDataCommon, idx, delx, dely)
         # if idx == 3
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[170, idx], gpuGlobalDataCommon[171, idx], gpuGlobalDataCommon[172, idx], gpuGlobalDataCommon[173, idx])
         # end
@@ -110,7 +87,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
         # if idx == 3
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[170, idx], gpuGlobalDataCommon[171, idx], gpuGlobalDataCommon[172, idx], gpuGlobalDataCommon[173, idx])
         # end
-        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, idx)
+        qtildek_to_primitive_kernel(conn, gpuConfigData, gpuGlobalDataCommon, idx, delx, dely)
         # if idx == 3
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[170, idx], gpuGlobalDataCommon[171, idx], gpuGlobalDataCommon[172, idx], gpuGlobalDataCommon[173, idx])
         # end
@@ -164,8 +141,8 @@ function wall_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
 
     # sum_delx_delf1,sum_delx_delf2,sum_delx_delf3,sum_delx_delf4 = 0.0,0.0,0.0,0.0
     # sum_dely_delf1,sum_dely_delf2,sum_dely_delf3,sum_dely_delf4 = 0.0,0.0,0.0,0.0
-    qtilde_i = (0,0,0,0)
-    qtilde_k = (0,0,0,0)
+
+
 
     for i in 146:173
         gpuGlobalDataCommon[i, idx] = 0.0
@@ -214,43 +191,19 @@ function wall_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
         sum_dely_sqr = sum_dely_sqr + deln*deln_weights
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i =  (
-                        gpuGlobalDataCommon[39, idx] - 0.5*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-                        gpuGlobalDataCommon[40, idx] - 0.5*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-                        gpuGlobalDataCommon[41, idx] - 0.5*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-                        gpuGlobalDataCommon[42, idx] - 0.5*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
-                    )
-        qtilde_k = (
-                        gpuGlobalDataCommon[39, conn] - 0.5*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-                        gpuGlobalDataCommon[40, conn] - 0.5*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-                        gpuGlobalDataCommon[41, conn] - 0.5*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-                        gpuGlobalDataCommon[42, conn] - 0.5*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
-                    )
 
         if limiter_flag == 1
-            venkat_limiter_kernel_i(qtilde_i, gpuGlobalDataCommon, idx, gpuConfigData)
-            venkat_limiter_kernel_k(qtilde_k, gpuGlobalDataCommon, conn, gpuConfigData, idx)
+            venkat_limiter_kernel_i(gpuGlobalDataCommon, idx, gpuConfigData, delx, dely)
+            venkat_limiter_kernel_k(gpuGlobalDataCommon, conn, gpuConfigData, idx, delx, dely)
             # CUDAnative.synchronize()
-            qtilde_i =  (
-                            gpuGlobalDataCommon[39, idx] - 0.5*gpuGlobalDataCommon[146,idx]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-                            gpuGlobalDataCommon[40, idx] - 0.5*gpuGlobalDataCommon[147,idx]*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-                            gpuGlobalDataCommon[41, idx] - 0.5*gpuGlobalDataCommon[148,idx]*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-                            gpuGlobalDataCommon[42, idx] - 0.5*gpuGlobalDataCommon[149,idx]*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
-                        )
-            qtilde_k = (
-                            gpuGlobalDataCommon[39, conn] - 0.5*gpuGlobalDataCommon[150,idx]*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-                            gpuGlobalDataCommon[40, conn] - 0.5*gpuGlobalDataCommon[151,idx]*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-                            gpuGlobalDataCommon[41, conn] - 0.5*gpuGlobalDataCommon[152,idx]*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-                            gpuGlobalDataCommon[42, conn] - 0.5*gpuGlobalDataCommon[153,idx]*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
-                        )
         end
 
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
-        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataCommon, idx)
+        qtildei_to_primitive_kernel(gpuConfigData, gpuGlobalDataCommon, idx, delx, dely)
         flux_quad_GxI_kernel(nx, ny, gpuGlobalDataCommon, idx, 1)
-        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, idx)
+        qtildek_to_primitive_kernel(conn, gpuConfigData, gpuGlobalDataCommon, idx, delx, dely)
         flux_quad_GxI_kernel(nx, ny, gpuGlobalDataCommon, idx, 2)
         # CUDAnative.synchronize()
         gpuGlobalDataCommon[162, idx] += (gpuGlobalDataCommon[158, idx] - gpuGlobalDataCommon[154, idx]) * dels_weights
@@ -299,8 +252,6 @@ function wall_dGy_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
 
     # sum_delx_delf1,sum_delx_delf2,sum_delx_delf3,sum_delx_delf4 = 0.0,0.0,0.0,0.0
     # sum_dely_delf1,sum_dely_delf2,sum_dely_delf3,sum_dely_delf4 = 0.0,0.0,0.0,0.0
-    qtilde_i = (0,0,0,0)
-    qtilde_k = (0,0,0,0)
 
     for i in 146:173
         gpuGlobalDataCommon[i, idx] = 0.0
@@ -349,43 +300,20 @@ function wall_dGy_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
         sum_dely_sqr = sum_dely_sqr + deln*deln_weights
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i =  (
-                        gpuGlobalDataCommon[39, idx] - 0.5*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-                        gpuGlobalDataCommon[40, idx] - 0.5*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-                        gpuGlobalDataCommon[41, idx] - 0.5*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-                        gpuGlobalDataCommon[42, idx] - 0.5*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
-                    )
-        qtilde_k = (
-                        gpuGlobalDataCommon[39, conn] - 0.5*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-                        gpuGlobalDataCommon[40, conn] - 0.5*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-                        gpuGlobalDataCommon[41, conn] - 0.5*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-                        gpuGlobalDataCommon[42, conn] - 0.5*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
-                    )
-
         if limiter_flag == 1
-            venkat_limiter_kernel_i(qtilde_i, gpuGlobalDataCommon, idx, gpuConfigData)
-            venkat_limiter_kernel_k(qtilde_k, gpuGlobalDataCommon, conn, gpuConfigData, idx)
+            venkat_limiter_kernel_i(gpuGlobalDataCommon, idx, gpuConfigData, delx, dely)
+            venkat_limiter_kernel_k(gpuGlobalDataCommon, conn, gpuConfigData, idx, delx, dely)
             # CUDAnative.synchronize()
-            qtilde_i =  (
-                            gpuGlobalDataCommon[39, idx] - 0.5*gpuGlobalDataCommon[146,idx]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-                            gpuGlobalDataCommon[40, idx] - 0.5*gpuGlobalDataCommon[147,idx]*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-                            gpuGlobalDataCommon[41, idx] - 0.5*gpuGlobalDataCommon[148,idx]*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-                            gpuGlobalDataCommon[42, idx] - 0.5*gpuGlobalDataCommon[149,idx]*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
-                        )
-            qtilde_k = (
-                            gpuGlobalDataCommon[39, conn] - 0.5*gpuGlobalDataCommon[150,idx]*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-                            gpuGlobalDataCommon[40, conn] - 0.5*gpuGlobalDataCommon[151,idx]*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-                            gpuGlobalDataCommon[41, conn] - 0.5*gpuGlobalDataCommon[152,idx]*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-                            gpuGlobalDataCommon[42, conn] - 0.5*gpuGlobalDataCommon[153,idx]*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
-                        )
+
+
         end
 
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
-        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataCommon, idx)
+        qtildei_to_primitive_kernel(gpuConfigData, gpuGlobalDataCommon, idx, delx, dely)
         flux_Gyn_kernel(nx, ny, gpuGlobalDataCommon, idx, 1)
-        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, idx)
+        qtildek_to_primitive_kernel(conn, gpuConfigData, gpuGlobalDataCommon, idx, delx, dely)
         flux_Gyn_kernel(nx, ny, gpuGlobalDataCommon, idx, 2)
         # CUDAnative.synchronize()
         gpuGlobalDataCommon[162, idx] += (gpuGlobalDataCommon[158, idx] - gpuGlobalDataCommon[154, idx]) * dels_weights
