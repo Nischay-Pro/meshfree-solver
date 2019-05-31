@@ -37,6 +37,7 @@ end
 function setNormals(self::Point, n)
     self.nx = n[1]
     self.ny = n[2]
+    return nothing
 end
 
 function getxy(self::Point)
@@ -52,6 +53,7 @@ function setConnectivity(self::Point, conn)
     self.ypos_nbhs = length(conn[3])
     self.yneg_conn = conn[4]
     self.yneg_nbhs = length(conn[4])
+    return nothing
 end
 
 # function setSmallestPointDistance(self::Point, distance)

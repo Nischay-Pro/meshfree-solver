@@ -1,4 +1,3 @@
-
 function interior_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
@@ -21,6 +20,19 @@ function interior_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
 
     tx = ny
     ty = -nx
+    x_k = 0.0
+    y_k = 0.0
+    delx = 0.0
+    dely = 0.0
+    dels = 0.0
+    deln = 0.0
+    dist = 0.0
+    weights = 0.0
+    dels_weights = 0.0
+    deln_weights = 0.0
+    sum_delx_sqr = 0.0
+    sum_dely_sqr = 0.0
+    sum_delx_dely = 0.0
 
     for iter in 56:75
         conn = Int(gpuGlobalDataCommon[iter, idx])
@@ -114,6 +126,20 @@ function interior_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
 
     qtilde_i = (0,0,0,0)
     qtilde_k = (0,0,0,0)
+    x_k = 0.0
+    y_k = 0.0
+    delx = 0.0
+    dely = 0.0
+    dels = 0.0
+    deln = 0.0
+    dist = 0.0
+    weights = 0.0
+    dels_weights = 0.0
+    deln_weights = 0.0
+    sum_delx_sqr = 0.0
+    sum_dely_sqr = 0.0
+    sum_delx_dely = 0.0
+
 
     for i in 146:173
         gpuGlobalDataCommon[i, idx] = 0.0
@@ -227,6 +253,20 @@ function interior_dGy_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
 
     qtilde_i = (0,0,0,0)
     qtilde_k = (0,0,0,0)
+    x_k = 0.0
+    y_k = 0.0
+    delx = 0.0
+    dely = 0.0
+    dels = 0.0
+    deln = 0.0
+    dist = 0.0
+    weights = 0.0
+    dels_weights = 0.0
+    deln_weights = 0.0
+    sum_delx_sqr = 0.0
+    sum_dely_sqr = 0.0
+    sum_delx_dely = 0.0
+
 
     for i in 146:173
         gpuGlobalDataCommon[i, idx] = 0.0
@@ -337,6 +377,20 @@ function interior_dGy_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
 
     qtilde_i = (0,0,0,0)
     qtilde_k = (0,0,0,0)
+    x_k = 0.0
+    y_k = 0.0
+    delx = 0.0
+    dely = 0.0
+    dels = 0.0
+    deln = 0.0
+    dist = 0.0
+    weights = 0.0
+    dels_weights = 0.0
+    deln_weights = 0.0
+    sum_delx_sqr = 0.0
+    sum_dely_sqr = 0.0
+    sum_delx_dely = 0.0
+
 
     for i in 146:173
         gpuGlobalDataCommon[i, idx] = 0.0

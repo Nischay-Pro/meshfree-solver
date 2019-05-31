@@ -7,6 +7,9 @@ function venkat_limiter_kernel_i(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
     epsi = CUDAnative.pow(epsigh, power3)
     del_pos = 0.0
     del_neg = 0.0
+    num = 0.0
+    den = 0.0
+    temp = 0.0
 
     for i in 1:4
         q = gpuGlobalDataCommon[38 + i, idx]
@@ -38,26 +41,17 @@ function venkat_limiter_kernel_i(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
             den = den*del_neg
 
             temp = num/den
-            if temp < 1.0
-                if i == 1
-                    gpuGlobalDataCommon[146,idx] = temp
-                elseif i == 2
-                    gpuGlobalDataCommon[147,idx] = temp
-                elseif i == 3
-                    gpuGlobalDataCommon[148,idx] = temp
-                else
-                    gpuGlobalDataCommon[149,idx] = temp
-                end
+            if temp >= 1.0
+                temp = 1.0
+            end
+            if i == 1
+                gpuGlobalDataCommon[146,idx] = temp
+            elseif i == 2
+                gpuGlobalDataCommon[147,idx] = temp
+            elseif i == 3
+                gpuGlobalDataCommon[148,idx] = temp
             else
-                if i == 1
-                    gpuGlobalDataCommon[146,idx] = 1.0
-                elseif i == 2
-                    gpuGlobalDataCommon[147,idx] = 1.0
-                elseif i == 3
-                    gpuGlobalDataCommon[148,idx] = 1.0
-                else
-                    gpuGlobalDataCommon[149,idx] = 1.0
-                end
+                gpuGlobalDataCommon[149,idx] = temp
             end
         end
     end
@@ -73,6 +67,9 @@ function venkat_limiter_kernel_k(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
     epsi = CUDAnative.pow(epsigh, power3)
     del_pos = 0.0
     del_neg = 0.0
+    num = 0.0
+    den = 0.0
+    temp = 0.0
 
     for i in 1:4
         q = gpuGlobalDataCommon[38 + i, idx]
@@ -104,26 +101,18 @@ function venkat_limiter_kernel_k(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
             den = den*del_neg
 
             temp = num/den
-            if temp < 1.0
-                if i == 1
-                    gpuGlobalDataCommon[150,trueidx] = temp
-                elseif i == 2
-                    gpuGlobalDataCommon[151,trueidx] = temp
-                elseif i == 3
-                    gpuGlobalDataCommon[152,trueidx] = temp
-                else
-                    gpuGlobalDataCommon[153,trueidx] = temp
-                end
+            if temp >= 1.0
+                temp = 1.0
+            end
+
+            if i == 1
+                gpuGlobalDataCommon[150,trueidx] = temp
+            elseif i == 2
+                gpuGlobalDataCommon[151,trueidx] = temp
+            elseif i == 3
+                gpuGlobalDataCommon[152,trueidx] = temp
             else
-                if i == 1
-                    gpuGlobalDataCommon[150,trueidx] = 1.0
-                elseif i == 2
-                    gpuGlobalDataCommon[151,trueidx] = 1.0
-                elseif i == 3
-                    gpuGlobalDataCommon[152,trueidx] = 1.0
-                else
-                    gpuGlobalDataCommon[153,trueidx] = 1.0
-                end
+                gpuGlobalDataCommon[153,trueidx] = temp
             end
         end
     end
@@ -199,22 +188,16 @@ end
     globaldata[idx].short_distance = min_dist
 end
 
-@inline function qtilde_to_primitive_kernel(qtilde, gpuConfigData, gpuGlobalDataCommon, idx)
+function qtilde_to_primitive_kernel(qtilde, gpuConfigData, gpuGlobalDataCommon, idx)
 
     gamma = gpuConfigData[15]
-    q1 = qtilde[1]
-    q2 = qtilde[2]
-    q3 = qtilde[3]
-    q4 = qtilde[4]
-
-    beta = -q4*0.5
-
+    beta = -qtilde[4]*0.5
     temp = 0.5/beta
 
-    u1 = q2*temp
-    u2 = q3*temp
+    u1 = qtilde[2]*temp
+    u2 = qtilde[3]*temp
 
-    temp1 = q1 + beta*(u1*u1 + u2*u2)
+    temp1 = qtilde[1] + beta*(u1*u1 + u2*u2)
     temp2 = temp1 - (CUDAnative.log(beta)/(gamma-1))
     rho = CUDAnative.exp(temp2)
     pr = rho*temp

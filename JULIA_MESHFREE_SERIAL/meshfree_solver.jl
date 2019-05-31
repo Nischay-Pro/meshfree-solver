@@ -96,13 +96,15 @@ function main()
         end
     end
 
-    # @trace(fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old), maxdepth = 3)
+
 
     res_old = zeros(Float64, 1)
     function test_code(globaldata, configData, wallptsidx::Array{Int64,1}, outerptsidx::Array{Int64,1}, Interiorptsidx::Array{Int64,1}, res_old)
         fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
         println("Starting process")
         res_old[1] = 0.0
+        # @trace(fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old), maxdepth = 3)
+        # res_old[1] = 0.0
         @timeit to "nest 4" begin
             run_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
         end
