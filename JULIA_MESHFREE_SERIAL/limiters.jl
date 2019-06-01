@@ -1,6 +1,6 @@
 function venkat_limiter(qtilde, globaldata, idx, configData)
     smallest_dist(globaldata, idx)
-    VL_CONST::Float64 = configData["core"]["vl_const"]::Float64
+    VL_CONST = configData["core"]["vl_const"]::Float64
     ds = globaldata[idx].short_distance
     epsi = VL_CONST * ds
     epsi = epsi ^ 3
@@ -38,7 +38,7 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
     return phi
 end
 
-@inline function maximum(globaldata, idx::Int64, i::Int64)
+@inline function maximum(globaldata, idx, i)
     globaldata[idx].max_q[i] = copy(globaldata[idx].q[i])
     for itm in globaldata[idx].conn
         if globaldata[idx].max_q[i] < globaldata[itm].q[i]
@@ -48,7 +48,7 @@ end
     return  nothing
 end
 
-@inline function minimum(globaldata, idx::Int64, i::Int64)
+@inline function minimum(globaldata, idx, i)
     globaldata[idx].min_q[i] = copy(globaldata[idx].q[i])
     for itm in globaldata[idx].conn
         if globaldata[idx].min_q[i] > globaldata[itm].q[i]
@@ -58,7 +58,7 @@ end
     return nothing
 end
 
-@inline function smallest_dist(globaldata, idx::Int64)
+@inline function smallest_dist(globaldata, idx)
     min_dist = 1000.0
     for itm in globaldata[idx].conn
         ds = hypot(globaldata[idx].x - globaldata[itm].x, globaldata[idx].y - globaldata[itm].y)
@@ -97,21 +97,13 @@ end
 end
 
 @inline function qtilde_to_primitive(result::Array{Float64,1}, qtilde::Array{Float64,1}, configData)
-
     gamma::Float64 = configData["core"]["gamma"]
-    q1 = qtilde[1]
-    q2 = qtilde[2]
-    q3 = qtilde[3]
-    q4 = qtilde[4]
-
-    beta = -q4*0.5
-
+    beta = -qtilde[4]*0.5
     temp = 0.5/beta
+    u1 = qtilde[2]*temp
+    u2 = qtilde[3]*temp
 
-    u1 = q2*temp
-    u2 = q3*temp
-
-    temp1 = q1 + beta*(u1*u1 + u2*u2)
+    temp1 = qtilde[1] + beta*(u1*u1 + u2*u2)
     temp2 = temp1 - (log(beta)/(gamma-1))
     rho = exp(temp2)
     pr = rho*temp

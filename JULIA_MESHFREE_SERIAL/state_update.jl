@@ -1,21 +1,17 @@
 import SpecialFunctions
 function func_delta(globaldata, configData)
-    cfl::Float64 = configData["core"]["cfl"]::Float64
+    cfl = configData["core"]["cfl"]::Float64
     for (idx, store) in enumerate(globaldata)
         # TODO - Possible problem?
         min_delt = one(Float64)
         for itm in globaldata[idx].conn
-            rho = globaldata[itm].prim[1]
-            u1 = globaldata[itm].prim[2]
-            u2 = globaldata[itm].prim[3]
-            pr = globaldata[itm].prim[4]
             x_i = globaldata[idx].x
             y_i = globaldata[idx].y
             x_k = globaldata[itm].x
             y_k = globaldata[itm].y
             dist = hypot((x_k - x_i),(y_k - y_i))
-            mod_u = hypot(u1,u2)
-            delta_t = dist/(mod_u + 3*sqrt(pr/rho))
+            mod_u = hypot(globaldata[itm].prim[2],globaldata[itm].prim[3])
+            delta_t = dist/(mod_u + 3*sqrt(globaldata[itm].prim[4]/globaldata[itm].prim[1]))
             delta_t *= cfl
             if min_delt > delta_t
                 min_delt = delta_t
@@ -34,7 +30,7 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
     # println("Prim1.01a")
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
     for itm in wallindices
-        U = copy(zeros(Float64, 4))
+        fill!(U, 0.0)
         state_update_wall(globaldata, itm, max_res, sum_res_sqr, U)
         # if itm == 3
         #     println(sum_res_sqr)
@@ -45,12 +41,12 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
 
     for itm in outerindices
-        U = copy(zeros(Float64, 4))
+        fill!(U, 0.0)
         state_update_outer(globaldata, configData, itm, max_res, sum_res_sqr, U)
     end
 
     for itm in interiorindices
-        U = copy(zeros(Float64, 4))
+        fill!(U, 0.0)
         # if itm == 1
         #     println("Prim1.01c")
         #     println(IOContext(stdout, :compact => false), globaldata[itm].prim)

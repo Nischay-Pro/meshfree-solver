@@ -7,6 +7,7 @@ end
 
 function wallindices_flux_residual(globaldata, configData, wallindices)
 	for itm in wallindices
+		# println(itm)
 		Gxp = wall_dGx_pos(globaldata, itm, configData)
 		Gxn = wall_dGx_neg(globaldata, itm, configData)
 		Gyn = wall_dGy_neg(globaldata, itm, configData)

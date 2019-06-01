@@ -92,23 +92,35 @@ function calculateConnectivity(globaldata, idx)
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 end
 
-function fpi_solver(iter, globaldata, configData, wallindices::Array{Int64,1}, outerindices::Array{Int64,1}, interiorindices::Array{Int64,1}, res_old)
+function fpi_solver(iter, globaldata, configData, wallindices::Array{Int32,1}, outerindices::Array{Int32,1}, interiorindices::Array{Int32,1}, res_old)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # print(" 111\n")
+    if iter == 1
+        println("Starting QVar")
+    end
     q_var_derivatives(globaldata, configData)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
+    if iter == 1
+        println("Starting Calflux")
+    end
     cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
+    if iter == 1
+        println("Starting FuncDelta")
+    end
     func_delta(globaldata, configData)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # residue = 0
+    if iter == 1
+        println("Starting StateUpdate")
+    end
     state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # residue = res_old
     return nothing
 end
 
-function q_var_derivatives(globaldata, configData)
+function q_var_derivatives(globaldata::Array{Point,1}, configData)
     power::Float64 = configData["core"]["power"]::Float64
 
     for (idx, itm) in enumerate(globaldata)
@@ -129,14 +141,16 @@ function q_var_derivatives(globaldata, configData)
 
     end
     # println(IOContext(stdout, :compact => false), globaldata[3].q)
+    sum_delx_delq = zeros(Float64, 4)
+    sum_dely_delq = zeros(Float64, 4)
     for (idx,itm) in enumerate(globaldata)
         x_i = itm.x
         y_i = itm.y
         sum_delx_sqr = zero(Float64)
         sum_dely_sqr = zero(Float64)
         sum_delx_dely = zero(Float64)
-        sum_delx_delq = zeros(Float64, 4)
-        sum_dely_delq = zeros(Float64, 4)
+        sum_delx_delq = fill!(sum_delx_delq, 0.0)
+        sum_dely_delq = fill!(sum_dely_delq, 0.0)
         for conn in itm.conn
             x_k = globaldata[conn].x
             y_k = globaldata[conn].y
@@ -147,20 +161,14 @@ function q_var_derivatives(globaldata, configData)
             sum_delx_sqr += ((delx * delx) * weights)
             sum_dely_sqr += ((dely * dely) * weights)
             sum_delx_dely += ((delx * dely) * weights)
-            sum_delx_delq += (weights * delx * (globaldata[conn].q - globaldata[idx].q))
-            sum_dely_delq += (weights * dely * (globaldata[conn].q - globaldata[idx].q))
+            sum_delx_delq += @. (weights * delx * (globaldata[conn].q - globaldata[idx].q))
+            sum_dely_delq += @. (weights * dely * (globaldata[conn].q - globaldata[idx].q))
         end
         det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
         one_by_det = 1.0 / det
-        sum_delx_delq1 = sum_delx_delq * sum_dely_sqr
-        sum_dely_delq1 = sum_dely_delq * sum_delx_dely
-        tempsumx = one_by_det * (sum_delx_delq1 - sum_dely_delq1)
-
-        sum_dely_delq2 = sum_dely_delq * sum_delx_sqr
-        sum_delx_delq2 = sum_delx_delq * sum_delx_dely
-        tempsumy = one_by_det * (sum_dely_delq2 - sum_delx_delq2)
+        tempsumx = @. one_by_det * (sum_delx_delq * sum_dely_sqr - sum_dely_delq * sum_delx_dely)
+        tempsumy = @. one_by_det * (sum_dely_delq * sum_delx_sqr - sum_delx_delq * sum_delx_dely)
         globaldata[idx].dq = [tempsumx, tempsumy]
-
     end
     # println(IOContext(stdout, :compact => false), globaldata[3].dq)
     # println(IOContext(stdout, :compact => false), globaldata[3].max_q)
