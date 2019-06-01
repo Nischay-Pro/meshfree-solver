@@ -45,8 +45,8 @@ function interior_dGx_pos(globaldata, idx, configData)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
-        qtilde_k = (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        qtilde_i = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        qtilde_k = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
 
         if limiter_flag == 1
             phi_i = venkat_limiter(qtilde_i, globaldata, idx, configData)
@@ -141,8 +141,8 @@ function interior_dGx_neg(globaldata, idx, configData)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
-        qtilde_k = (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        qtilde_i = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        qtilde_k = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
 
         if limiter_flag == 1
             phi_i = (venkat_limiter(qtilde_i, globaldata, idx, configData))
@@ -243,8 +243,8 @@ function interior_dGy_pos(globaldata, idx, configData)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
-        qtilde_k = (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        qtilde_i = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        qtilde_k = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
 
         if limiter_flag == 1
             phi_i = (venkat_limiter(qtilde_i, globaldata, idx, configData))
@@ -340,8 +340,8 @@ function interior_dGy_neg(globaldata, idx, configData)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
-        qtilde_k = (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        qtilde_i = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        qtilde_k = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
 
         if limiter_flag == 1
             phi_i = (venkat_limiter(qtilde_i, globaldata, idx, configData))

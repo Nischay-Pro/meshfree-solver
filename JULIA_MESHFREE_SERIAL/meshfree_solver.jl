@@ -51,7 +51,7 @@ function main()
         # @profile fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
         # Profile.print()
         # res_old[1] = 0.0
-        # println("Starting main function")
+        println("Starting main function")
         @timeit to "nest 4" begin
             run_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
         end

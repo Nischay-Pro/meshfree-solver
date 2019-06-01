@@ -6,6 +6,7 @@ function cal_flux_residual(globaldata, wallindices, outerindices, interiorindice
 end
 
 function wallindices_flux_residual(globaldata, configData, wallindices)
+	
 	for itm in wallindices
 		# println(itm)
 		Gxp = wall_dGx_pos(globaldata, itm, configData)

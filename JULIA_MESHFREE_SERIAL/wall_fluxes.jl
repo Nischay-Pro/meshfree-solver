@@ -44,8 +44,8 @@ function wall_dGx_pos(globaldata, idx, configData)
         sum_dely_sqr = sum_dely_sqr + deln*deln_weights
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = globaldata[idx].q - 0.5*(delx * globaldata[idx].dq[1] + dely * globaldata[idx].dq[2])
-        qtilde_k = globaldata[itm].q - 0.5*(delx * globaldata[itm].dq[1] + dely * globaldata[itm].dq[2])
+        qtilde_i = @. globaldata[idx].q - 0.5*(delx * globaldata[idx].dq[1] + dely * globaldata[idx].dq[2])
+        qtilde_k = @. globaldata[itm].q - 0.5*(delx * globaldata[itm].dq[1] + dely * globaldata[itm].dq[2])
 
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), itm)
@@ -157,7 +157,7 @@ function wall_dGx_pos(globaldata, idx, configData)
 end
 
 function wall_dGx_neg(globaldata, idx, configData)
-    idx = convert(Int, idx)
+    
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
 
@@ -249,7 +249,7 @@ function wall_dGx_neg(globaldata, idx, configData)
 end
 
 function wall_dGy_neg(globaldata, idx, configData)
-    idx = convert(Int, idx)
+    
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
 
