@@ -36,3 +36,4 @@ cuthill_test
 test_*
 testresult*
 grid_*
+runner.sh
