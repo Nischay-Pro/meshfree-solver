@@ -6,7 +6,7 @@ import numba
 from numba import cuda
 from cuda_func import add, zeros, multiply, qtilde_to_primitive_cuda, subtract, multiply_element_wise
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def outer_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
 
     sum_delx_sqr = 0
@@ -154,7 +154,7 @@ def outer_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
 
     multiply(one_by_det, temp1, store)
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def outer_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
 
     sum_delx_sqr = 0
@@ -303,7 +303,7 @@ def outer_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
     multiply(one_by_det, temp1, store)
 
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def outer_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
  
     sum_delx_sqr = 0

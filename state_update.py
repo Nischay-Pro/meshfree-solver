@@ -38,7 +38,7 @@ def func_delta(globaldata, configData):
 
     return globaldata
 
-@cuda.jit()
+@cuda.jit(inline=True)
 def func_delta_cuda_kernel(globaldata, cfl):
     tx = cuda.threadIdx.x
     bx = cuda.blockIdx.x

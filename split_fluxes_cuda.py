@@ -2,7 +2,7 @@ import math
 from numba import cuda
 import numba
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def flux_Gxp(nx, ny, u1, u2, rho, pr, Gxp):
 
     tx = ny
@@ -33,7 +33,7 @@ def flux_Gxp(nx, ny, u1, u2, rho, pr, Gxp):
     temp1 = (6*pr_by_rho) + u_sqr
     Gxp[3] = (rho*(temp2 + 0.5*temp1*B1))
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def flux_Gxn(nx, ny, u1, u2, rho, pr, Gxn):
 
     tx = ny
@@ -65,7 +65,7 @@ def flux_Gxn(nx, ny, u1, u2, rho, pr, Gxn):
     temp1 = (6*pr_by_rho) + u_sqr
     Gxn[3] = (rho*(temp2 - 0.5*temp1*B1))
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def flux_Gyp(nx, ny, u1, u2, rho, pr, Gyp):
 
     tx = ny
@@ -98,7 +98,7 @@ def flux_Gyp(nx, ny, u1, u2, rho, pr, Gyp):
     temp1 = (6*pr_by_rho) + u_sqr
     Gyp[3] = (rho*(temp2 + 0.5*temp1*B2))
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def flux_Gyn(nx, ny, u1, u2, rho, pr, Gyn):
 
     tx = ny
@@ -130,7 +130,7 @@ def flux_Gyn(nx, ny, u1, u2, rho, pr, Gyn):
     temp1 = (6*pr_by_rho) + u_sqr
     Gyn[3] = (rho*(temp2 - 0.5*temp1*B2))
 
-# @cuda.jit(device=True)
+# @cuda.jit(device=True, inline=True)
 # def flux_Gx(Gx, nx, ny, u1, u2, rho, pr, Gx):
 #     tx = ny
 #     ty = -nx

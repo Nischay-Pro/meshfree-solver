@@ -17,14 +17,18 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", help="Grid File Location", type=str, default="partGridNew")
+    parser.add_argument("-t", "--thread", help="Thread Block Size", type=int, default=0)
     args = parser.parse_args()
+
+    if not args.thread == 0:
+        configData["core"]["blockGridX"] = args.thread
 
     file1 = open(args.file)
     print("Loading file: %s" % args.file)
     data1 = file1.read()
     splitdata = data1.split("\n")
-    splitdata = splitdata[1:-1]
-
+    if len(splitdata[-1]) < 4:
+        splitdata = splitdata[:-1]
     print("Getting Primitive Values Default")
     defprimal = core.getInitialPrimitive(configData)
 
@@ -36,11 +40,11 @@ def main():
 
     print("Converting RAW dataset to Globaldata")
     for idx, itm in enumerate(tqdm(splitdata)):
-        itmdata = itm.split(" ")[1:-1]
+        itmdata = itm.split(" ")[:-1]
         if not original_format:
             temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), 1, 1, int(itmdata[5]), int(itmdata[6]), int(itmdata[8]), list(map(int,itmdata[9:])), float(itmdata[3]), float(itmdata[4]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[7]), None, None)
         else:
-            temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[6]), int(itmdata[7]), list(map(int,itmdata[8:])), 1, 0, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None)
+            temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[6]), int(itmdata[8]), list(map(int,itmdata[9:])), 1, 0, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[7]), None, None)
         globaldata.append(temp)
         if int(itmdata[5]) == configData["point"]["wall"]:
             wallpts += 1
@@ -76,6 +80,7 @@ def main():
     for idx in table:
         connectivity = core.calculateConnectivity(globaldata, idx, configData)
         globaldata[idx].setConnectivity(connectivity)
+        
 
     res_old = 0
 

@@ -2,7 +2,7 @@ import math
 from numba import cuda
 import numba
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def flux_quad_GxI(nx, ny, u1, u2, rho, pr, G):
 
     tx = ny
@@ -39,7 +39,7 @@ def flux_quad_GxI(nx, ny, u1, u2, rho, pr, G):
         
     G[3] = (rho*A2neg*(temp2 - temp3) - temp4)
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def flux_quad_GxII(nx, ny, u1, u2, rho, pr, G):
 
     tx = ny
@@ -80,7 +80,7 @@ def flux_quad_GxII(nx, ny, u1, u2, rho, pr, G):
 
     G[3] = (rho*A2neg*(temp2 + temp3) - temp4)
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def flux_quad_GxIII(nx, ny, u1, u2, rho, pr, G):
 
     tx = ny
@@ -122,7 +122,7 @@ def flux_quad_GxIII(nx, ny, u1, u2, rho, pr, G):
 
     G[3] = (rho*A2pos*(temp2 + temp3) + temp4)
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def flux_quad_GxIV(nx, ny, u1, u2, rho, pr, G):
 
     tx = ny

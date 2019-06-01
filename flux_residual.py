@@ -44,7 +44,7 @@ def cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, co
 
 	return globaldata
 
-@cuda.jit()
+@cuda.jit(inline=True)
 def cal_flux_residual_cuda_kernel(globaldata, power, vl_const, gamma, wall, interior, outer):
 	tx = cuda.threadIdx.x
 	bx = cuda.blockIdx.x

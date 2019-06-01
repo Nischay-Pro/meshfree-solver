@@ -31,13 +31,12 @@ def convert_globaldata_to_gpu_globaldata(globaldata, singlePrecision=False):
                             ('ypos_conn', np.int32, (20,)),
                             ('yneg_conn', np.int32, (20,)),
                             ('delta', pres),
-                            ('min_dist', np.float64),
-                            ('minq', np.float64, (4,)),
-                            ('maxq', np.float64, (4,))], align=True)
+                            ('min_dist', pres),
+                            ('minq', pres, (4,)),
+                            ('maxq', pres, (4,))], align=True)
     temp = np.zeros(len(globaldata), dtype=point_dtype)
     for idx in trange(len(globaldata)):
         if idx > 0:
-            temp[idx]['localID'] = globaldata[idx].localID
             temp[idx]['x'] = globaldata[idx].x
             temp[idx]['y'] = globaldata[idx].y
             temp[idx]['left'] = globaldata[idx].left
@@ -55,7 +54,6 @@ def convert_globaldata_to_gpu_globaldata(globaldata, singlePrecision=False):
             temp[idx]['flux_res'] = globaldata[idx].flux_res
             temp[idx]['q'] = globaldata[idx].q
             temp[idx]['dq'] = globaldata[idx].dq
-            temp[idx]['entropy'] = globaldata[idx].entropy
             temp[idx]['xpos_nbhs'] = globaldata[idx].xpos_nbhs
             temp[idx]['xneg_nbhs'] = globaldata[idx].xneg_nbhs
             temp[idx]['ypos_nbhs'] = globaldata[idx].ypos_nbhs
@@ -91,6 +89,6 @@ def convert_gpu_globaldata_to_globaldata(globaldata):
         xneg_conn = itm['xneg_conn'][:itm['xneg_nbhs']]
         ypos_conn = itm['ypos_conn'][:itm['ypos_nbhs']]
         yneg_conn = itm['yneg_conn'][:itm['yneg_nbhs']]
-        temp = point.Point(itm['localID'], itm['x'], itm['y'], itm['left'], itm['right'], itm['flag_1'], itm['flag_2'], itm['nbhs'], conn, itm['nx'], itm['ny'], itm['prim'], itm['flux_res'], itm['q'], itm['dq'], itm['entropy'], itm['xpos_nbhs'], itm['xneg_nbhs'], itm['ypos_nbhs'], itm['yneg_nbhs'], xpos_conn, xneg_conn, ypos_conn, yneg_conn, itm['delta'], itm['min_dist'], itm['minq'], itm['maxq'])
+        temp = point.Point(idx, itm['x'], itm['y'], itm['left'], itm['right'], itm['flag_1'], itm['flag_2'], itm['nbhs'], conn, itm['nx'], itm['ny'], itm['prim'], itm['flux_res'], itm['q'], itm['dq'], None, itm['xpos_nbhs'], itm['xneg_nbhs'], itm['ypos_nbhs'], itm['yneg_nbhs'], xpos_conn, xneg_conn, ypos_conn, yneg_conn, itm['delta'], itm['min_dist'], itm['minq'], itm['maxq'])
         globaldata_cpu[idx] = temp
     return globaldata_cpu

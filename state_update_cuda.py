@@ -4,7 +4,7 @@ import numba
 from numba import cuda
 from cuda_func import multiply, multiply_element_wise, add, subtract, zeros
 
-@cuda.jit()
+@cuda.jit(inline=True)
 def func_delta_cuda_kernel(globaldata, cfl):
     tx = cuda.threadIdx.x
     bx = cuda.blockIdx.x
@@ -37,7 +37,7 @@ def func_delta_cuda_kernel(globaldata, cfl):
 
         globaldata[idx]['delta'] = min_delt
 
-@cuda.jit()
+@cuda.jit(inline=True)
 def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr_gpu, wall, interior, outer):
     tx = cuda.threadIdx.x
     bx = cuda.blockIdx.x
@@ -141,7 +141,7 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr
             globaldata[idx]['prim'][2] = tempU[2]
             globaldata[idx]['prim'][3] = tempU[3]
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def primitive_to_conserved_cuda_kernel(globaldata, itm, nx, ny, result):
 
     U = cuda.local.array((4), numba.float64)
@@ -160,7 +160,7 @@ def primitive_to_conserved_cuda_kernel(globaldata, itm, nx, ny, result):
     result[2] = U[2]
     result[3] = U[3]
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def conserved_vector_Ubar_cuda_kernel(globaldata, itm, nx, ny, Mach, gamma, pr_inf, rho_inf, aoa, result):
 
     Ubar = cuda.local.array((4), numba.float64)

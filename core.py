@@ -12,7 +12,7 @@ import numba
 from numba import cuda
 import convert
 from numba import vectorize, float64
-from cuda_func import add, subtract, multiply, sum_reduce
+from cuda_func import add, subtract, multiply, sum_reduce, equalize
 import os
 import limiters_cuda
 
@@ -43,7 +43,7 @@ def calculateTheta(configData):
     theta = math.radians(float(configData["core"]["aoa"]))
     return theta
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def calculateThetaCuda(aoa, value):
     pi = 3.14159265358979323846
     value[0] = (pi/180) * aoa
@@ -157,15 +157,10 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
                 print("Compiling CUDA Kernel. This might take a while...")
                 c = time.time()
             q_var_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu)
-            cuda.synchronize()
             q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']))
-            cuda.synchronize()
-            flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']), float(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]))
-            cuda.synchronize()
+            flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]))
             state_update_cuda.func_delta_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData["core"]["cfl"]))
-            cuda.synchronize()
             state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](globaldata_gpu, float(configData["core"]["mach"]), float(configData["core"]["gamma"]), float(configData["core"]["pr_inf"]), float(configData["core"]["rho_inf"]), float(configData["core"]["aoa"]), sum_res_sqr_gpu, int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]))
-            cuda.synchronize()
             if i == 1:
                 d = time.time()
             temp_gpu = sum_reduce(sum_res_sqr_gpu)
@@ -186,8 +181,6 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     return res_old, globaldata
         
-    
-
 def q_var_derivatives(globaldata, configData):
     power = int(configData["core"]["power"])
     for idx,itm in enumerate(globaldata):
@@ -268,7 +261,7 @@ def q_var_derivatives(globaldata, configData):
 
     return globaldata
 
-@cuda.jit()
+@cuda.jit(inline=True)
 def q_var_cuda_kernel(globaldata):
     tx = cuda.threadIdx.x
     bx = cuda.blockIdx.x
@@ -297,7 +290,7 @@ def q_var_cuda_kernel(globaldata):
         globaldata[idx]['q'][2] = tempq[2]
         globaldata[idx]['q'][3] = tempq[3]
 
-@cuda.jit()
+@cuda.jit(inline=True)
 def q_var_derivatives_cuda_kernel(globaldata, power):
     tx = cuda.threadIdx.x
     bx = cuda.blockIdx.x
@@ -325,12 +318,19 @@ def q_var_derivatives_cuda_kernel(globaldata, power):
         sum_dely_delq[1] = 0
         sum_dely_delq[2] = 0
         sum_dely_delq[3] = 0
+
+        # minq = cuda.local.array((4), dtype=numba.float64)
+        # maxq = cuda.local.array((4), dtype=numba.float64)
+
+        # equalize(minq, globaldata[idx]['q'])
+        # equalize(maxq, globaldata[idx]['q'])
         
-        for i in range(4):
-            limiters_cuda.minimum(globaldata, idx, i, globaldata[idx]['minq'])
-            limiters_cuda.maximum(globaldata, idx, i, globaldata[idx]['maxq'])
+        # for i in range(4):
+        #     limiters_cuda.minimum(globaldata, idx, i, globaldata[idx]['minq'])
+        #     limiters_cuda.maximum(globaldata, idx, i, globaldata[idx]['maxq'])
 
         for conn in itm['conn'][:itm['nbhs']]:
+
 
 
             x_k = globaldata[conn]['x']
@@ -367,6 +367,9 @@ def q_var_derivatives_cuda_kernel(globaldata, power):
             subtract(globaldata[conn]['q'], globaldata[idx]['q'], temp)
             multiply((weights * dely), temp, temp)
             add(sum_dely_delq, temp, sum_dely_delq)
+
+        # equalize(globaldata[idx]['minq'], minq)
+        # equalize(globaldata[idx]['maxq'], maxq)
 
         det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
 
@@ -432,6 +435,15 @@ def q_var_derivatives_cuda_kernel(globaldata, power):
         globaldata[idx]['dq'][1][2] = tempsumy[2]
         globaldata[idx]['dq'][1][3] = tempsumy[3]
 
+@cuda.jit(inline=True)
+def min_max_q(globaldata, i):
+    tx = cuda.threadIdx.x
+    bx = cuda.blockIdx.x
+    bw = cuda.blockDim.x
+    idx =  bx * bw + tx
+    if idx > 0 and idx < len(globaldata):
+        limiters_cuda.minimum(globaldata, idx, i, globaldata[idx]['minq'])
+        limiters_cuda.maximum(globaldata, idx, i, globaldata[idx]['maxq'])
 
 def qtilde_to_primitive(qtilde, configData):
     

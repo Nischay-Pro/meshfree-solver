@@ -2,37 +2,37 @@ from numba import cuda
 from numba import vectorize, float64
 import math
 
-@cuda.jit('float64[:](float64[:], float64[:], float64[:])', device=True, inline=True)
+@cuda.jit(device=True, inline=True)
 def subtract(x, y, store):
     for i in range(len(x)):
         store[i] = x[i] - y[i]
-    return store
 
-@cuda.jit('float64[:](float64, float64[:], float64[:])', device=True, inline=True)
+@cuda.jit(device=True, inline=True)
 def multiply(x, y, store):
     for i in range(len(y)):
         store[i] = x * y[i]
-    return store
 
-@cuda.jit('float64[:](float64[:], float64[:], float64[:])', device=True, inline=True)
+@cuda.jit(device=True, inline=True)
 def multiply_element_wise(x, y, store):
     for i in range(len(y)):
         store[i] = x[i] * y[i]
-    return store
 
-@cuda.jit('float64[:](float64[:], float64[:], float64[:])', device=True, inline=True)
+@cuda.jit(device=True, inline=True)
 def add(x, y, store):
     for i in range(len(x)):
         store[i] = x[i] + y[i]
-    return store
 
-@cuda.jit('float64[:](float64[:], float64[:])', device=True, inline=True)
+@cuda.jit(device=True, inline=True)
 def zeros(x, store):
     for i in range(len(x)):
         store[i] = 0
-    return store
 
-@cuda.jit('float64[:](float64[:], float64, float64[:])', device=True, inline=True)
+@cuda.jit(device=True, inline=True)
+def equalize(x, y):
+    for i in range(len(y)):
+        x[i] = y[i]
+
+@cuda.jit(device=True, inline=True)
 def qtilde_to_primitive_cuda(qtilde, gamma, result):
 
     q1 = qtilde[0]
@@ -56,8 +56,6 @@ def qtilde_to_primitive_cuda(qtilde, gamma, result):
     result[1] = u2
     result[2] = rho
     result[3] = pr
-
-    return result
 
 @cuda.reduce
 def sum_reduce(a, b):
