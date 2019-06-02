@@ -4,6 +4,7 @@ function main()
     # globaldataCommon = zeros(Float64, 38, getConfig()["core"]["points"])
     file_name = "partGridNew--160-60"
     numPoints = returnFileLength(file_name)
+    println("Number of points ", numPoints)
     # globaldataDq = [Array{Array{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
     # gpuGlobaldataDq = [CuArray{CuArray{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
     # gpu_globaldata = CuArray{Point,1}(undef, getConfig()["core"]["points"])
@@ -104,22 +105,23 @@ function main()
     # gpu_output = CuArray(output)
 
     threadsperblock = Int(getConfig()["core"]["threadsperblock"])
-    blockspergrid = Int(ceil(getConfig()["core"]["points"]/threadsperblock))
+    blockspergrid = Int(ceil(numPoints/threadsperblock))
 
-    function test_code(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
+    function test_code(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old, numPoints)
         println("Starting warmup function")
-        fpi_solver_cuda(1, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, res_old)
+        fpi_solver_cuda(1, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, res_old, numPoints)
         res_old = 0
         println("Starting main function")
         @timeit to "nest 1" begin
-            CuArrays.@sync begin fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
+            CuArrays.@sync begin fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput,
+                threadsperblock,blockspergrid, res_old, numPoints)
             end
         end
     end
 
-    test_code(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
+    test_code(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old, numPoints)
 
-    open("timer_cuda" * string(getConfig()["core"]["points"]) * ".txt", "w") do io
+    open("timer_cuda" * string(numPoints) * ".txt", "w") do io
         print_timer(io, to)
     end
     # globalDataCommon = Array(gpuGlobalDataCommon)
@@ -145,8 +147,8 @@ function main()
     # close(file)
 
     # println("Writing cuda file")
-    # file  = open("primvals_cuda" * string(getConfig()["core"]["points"]) * ".txt", "w")
-    # for idx in 1:getConfig()["core"]["points"]
+    # file  = open("primvals_cuda" * string(numPoints) * ".txt", "w")
+    # for idx in 1:numPoints
     #     primtowrite = globalDataCommon[31:34, idx]
     #     for element in primtowrite
     #         @printf(file,"%0.17f", element)

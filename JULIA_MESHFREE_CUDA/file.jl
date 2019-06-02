@@ -49,6 +49,10 @@ function readFile(file_name::String, globaldata, table, defprimal)
             temp.right = 1
         end
 
+        if idx % 100000 == 0
+            println(idx)
+        end
+
         # print(convert(String, temp))
         # print(globaldata)
         # print("123\n")

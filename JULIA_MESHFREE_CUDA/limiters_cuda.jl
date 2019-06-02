@@ -1,4 +1,4 @@
-function venkat_limiter_kernel_i(qtilde, gpuGlobalDataCommon, idx, gpuConfigData)
+function venkat_limiter_kernel_i(gpuGlobalDataCommon, idx, gpuConfigData, delx, dely)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataCommon[137, idx]
     # @cuprintf("Type is %s", typeof(VL_CONST))
@@ -10,7 +10,7 @@ function venkat_limiter_kernel_i(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
 
     for i in 1:4
         q = gpuGlobalDataCommon[38 + i, idx]
-        del_neg = qtilde[i] - q
+        del_neg = gpuGlobalDataCommon[38+i, idx] - 0.5*(delx * gpuGlobalDataCommon[42+i, idx] + dely * gpuGlobalDataCommon[46+i, idx]) - q
         if abs(del_neg) <= 1e-5
             gpuGlobalDataCommon[145+i,idx] = 1.0
         elseif abs(del_neg) > 1e-5
@@ -38,7 +38,7 @@ function venkat_limiter_kernel_i(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
     return nothing
 end
 
-function venkat_limiter_kernel_k(qtilde, gpuGlobalDataCommon, idx, gpuConfigData, trueidx)
+function venkat_limiter_kernel_k(gpuGlobalDataCommon, idx, gpuConfigData, trueidx, delx, dely)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataCommon[137, idx]
     # @cuprintf("Type is %s", typeof(VL_CONST))
@@ -50,7 +50,7 @@ function venkat_limiter_kernel_k(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
 
     for i in 1:4
         q = gpuGlobalDataCommon[38 + i, idx]
-        del_neg = qtilde[i] - q
+        del_neg = gpuGlobalDataCommon[38+i, idx] - 0.5*(delx * gpuGlobalDataCommon[42+i, idx] + dely * gpuGlobalDataCommon[46+i, idx]) - q
         if abs(del_neg) <= 1e-5
             gpuGlobalDataCommon[149+i,trueidx] = 1.0
         elseif abs(del_neg) > 1e-5
@@ -151,9 +151,7 @@ end
 
     gamma = gpuConfigData[15]
     beta = -qtilde[4]*0.5
-
     temp = 0.5/beta
-
     u1 = qtilde[2]*temp
     u2 = qtilde[3]*temp
 

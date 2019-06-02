@@ -112,7 +112,7 @@ end
 #     # println(temp_gpu)
 # end
 
-function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
+function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old, numPoints)
 
     # dev::CuDevice=CuDevice(0)
     str = CuStream()
@@ -144,7 +144,6 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr,
         gpu_reduced(+, gpuSumResSqr, gpuSumResSqrOutput)
         temp_gpu = Array(gpuSumResSqrOutput)[1]
     # #     # @cuprintf("\n It is ss %lf ", gpuGlobalDataCommon[31, 3])
-    # #     # CUDAnative.sumReduce(gpuSumResSqr, temp_gpu, getConfig()["core"]["points"])
     # #     # gpu_reduce(+, gpuSumResSqr, gpuSumResSqrOutput)
 
     #     # temp_gpu = Array(gpuSumResSqrOutput)[1]
