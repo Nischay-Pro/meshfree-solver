@@ -147,7 +147,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr,
     # #     # gpu_reduce(+, gpuSumResSqr, gpuSumResSqrOutput)
 
     #     # temp_gpu = Array(gpuSumResSqrOutput)[1]
-        residue = sqrt(temp_gpu) / getConfig()["core"]["points"]
+        residue = sqrt(temp_gpu) / numPoints
             if i <= 2
                 res_old = residue
                 residue = 0
