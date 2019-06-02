@@ -12,16 +12,7 @@ function venkat_limiter_kernel_i(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
         q = gpuGlobalDataCommon[38 + i, idx]
         del_neg = qtilde[i] - q
         if abs(del_neg) <= 1e-5
-            if i == 1
-                gpuGlobalDataCommon[146,idx] = 1.0
-            elseif i == 2
-                gpuGlobalDataCommon[147,idx] = 1.0
-            elseif i == 3
-                gpuGlobalDataCommon[148,idx] = 1.0
-            else
-                gpuGlobalDataCommon[149,idx] = 1.0
-            end
-
+            gpuGlobalDataCommon[145+i,idx] = 1.0
         elseif abs(del_neg) > 1e-5
             if del_neg > 0.0
                 # maximum(globaldata, idx, i, max_q)
@@ -38,27 +29,10 @@ function venkat_limiter_kernel_i(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
             den = den*del_neg
 
             temp = num/den
-            if temp < 1.0
-                if i == 1
-                    gpuGlobalDataCommon[146,idx] = temp
-                elseif i == 2
-                    gpuGlobalDataCommon[147,idx] = temp
-                elseif i == 3
-                    gpuGlobalDataCommon[148,idx] = temp
-                else
-                    gpuGlobalDataCommon[149,idx] = temp
-                end
-            else
-                if i == 1
-                    gpuGlobalDataCommon[146,idx] = 1.0
-                elseif i == 2
-                    gpuGlobalDataCommon[147,idx] = 1.0
-                elseif i == 3
-                    gpuGlobalDataCommon[148,idx] = 1.0
-                else
-                    gpuGlobalDataCommon[149,idx] = 1.0
-                end
+            if temp > 1.0
+                temp = 1.0
             end
+            gpuGlobalDataCommon[145+i,idx] = temp
         end
     end
     return nothing
@@ -78,16 +52,7 @@ function venkat_limiter_kernel_k(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
         q = gpuGlobalDataCommon[38 + i, idx]
         del_neg = qtilde[i] - q
         if abs(del_neg) <= 1e-5
-            if i == 1
-                gpuGlobalDataCommon[150,trueidx] = 1.0
-            elseif i == 2
-                gpuGlobalDataCommon[151,trueidx] = 1.0
-            elseif i == 3
-                gpuGlobalDataCommon[152,trueidx] = 1.0
-            else
-                gpuGlobalDataCommon[153,trueidx] = 1.0
-            end
-
+            gpuGlobalDataCommon[149+i,trueidx] = 1.0
         elseif abs(del_neg) > 1e-5
             if del_neg > 0.0
                 # maximum(globaldata, idx, i, max_q)
@@ -104,27 +69,10 @@ function venkat_limiter_kernel_k(qtilde, gpuGlobalDataCommon, idx, gpuConfigData
             den = den*del_neg
 
             temp = num/den
-            if temp < 1.0
-                if i == 1
-                    gpuGlobalDataCommon[150,trueidx] = temp
-                elseif i == 2
-                    gpuGlobalDataCommon[151,trueidx] = temp
-                elseif i == 3
-                    gpuGlobalDataCommon[152,trueidx] = temp
-                else
-                    gpuGlobalDataCommon[153,trueidx] = temp
-                end
-            else
-                if i == 1
-                    gpuGlobalDataCommon[150,trueidx] = 1.0
-                elseif i == 2
-                    gpuGlobalDataCommon[151,trueidx] = 1.0
-                elseif i == 3
-                    gpuGlobalDataCommon[152,trueidx] = 1.0
-                else
-                    gpuGlobalDataCommon[153,trueidx] = 1.0
-                end
+            if temp > 1.0
+                temp = 1.0
             end
+            gpuGlobalDataCommon[149+i,trueidx] = temp
         end
     end
     return nothing

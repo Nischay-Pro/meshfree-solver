@@ -134,7 +134,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr,
         synchronize(str)
         # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
         @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel(gpuGlobalDataCommon, gpuConfigData)
-        synchronize(str)
+        # synchronize(str)
         # @cuprintf("\n It is %f ", gpuGlobalDataCommon[31, 3])
         @cuda blocks=blockspergrid threads=threadsperblock func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
         synchronize(str)
