@@ -1,4 +1,4 @@
-@inline function cal_flux_residual_kernel(gpuGlobalDataCommon, gpuConfigData)
+function cal_flux_residual_kernel(gpuGlobalDataCommon, gpuConfigData)
 	tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -49,6 +49,6 @@
 		# 	@cuprintf("Warning: There is problem with the flux flags %f \n", gpuGlobalDataCommon[6, idx])
 		end
 	end
-	sync_threads()
+	# sync_threads()
 	return nothing
 end

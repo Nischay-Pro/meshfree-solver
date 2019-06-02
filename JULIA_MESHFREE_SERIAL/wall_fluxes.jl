@@ -1,4 +1,4 @@
-function wall_dGx_pos(globaldata, idx, configData)
+function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -22,6 +22,8 @@ function wall_dGx_pos(globaldata, idx, configData)
     G_i = zeros(Float64,4)
     G_k = zeros(Float64,4)
     result = zeros(Float64,4)
+    # phi_i = zeros(Float64,4)
+    # phi_k = zeros(Float64,4)
 
     for itm in globaldata[idx].xpos_conn
 
@@ -53,8 +55,8 @@ function wall_dGx_pos(globaldata, idx, configData)
         # end
 
         if limiter_flag == 1
-            phi_i = venkat_limiter(qtilde_i, globaldata, idx, configData)
-            phi_k = venkat_limiter(qtilde_k, globaldata, itm, configData)
+            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
+            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
             qtilde_i = @. globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             qtilde_k = @. globaldata[itm].q - 0.5 * phi_k .* (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
@@ -156,7 +158,7 @@ function wall_dGx_pos(globaldata, idx, configData)
     return G
 end
 
-function wall_dGx_neg(globaldata, idx, configData)
+function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
     
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -180,6 +182,8 @@ function wall_dGx_neg(globaldata, idx, configData)
     G_i = zeros(Float64,4)
     G_k = zeros(Float64,4)
     result = zeros(Float64,4)
+    # phi_i = zeros(Float64,4)
+    # phi_k = zeros(Float64,4)
 
     for itm in globaldata[idx].xneg_conn
 
@@ -207,8 +211,8 @@ function wall_dGx_neg(globaldata, idx, configData)
         qtilde_k = @. globaldata[itm].q - 0.5*(delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
 
         if limiter_flag == 1
-            phi_i = venkat_limiter(qtilde_i, globaldata, idx, configData)
-            phi_k = venkat_limiter(qtilde_k, globaldata, itm, configData)
+            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
+            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
             qtilde_i = @. globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             qtilde_k = @. globaldata[itm].q - 0.5 * phi_k .* (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
@@ -248,7 +252,7 @@ function wall_dGx_neg(globaldata, idx, configData)
     return G
 end
 
-function wall_dGy_neg(globaldata, idx, configData)
+function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k)
     
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -272,6 +276,8 @@ function wall_dGy_neg(globaldata, idx, configData)
     G_i = zeros(Float64,4)
     G_k = zeros(Float64,4)
     result = zeros(Float64,4)
+    # phi_i = zeros(Float64,4)
+    # phi_k = zeros(Float64,4)
 
     for itm in globaldata[idx].yneg_conn
 
@@ -299,8 +305,8 @@ function wall_dGy_neg(globaldata, idx, configData)
         qtilde_k = @. globaldata[itm].q - 0.5*(delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
 
         if limiter_flag == 1
-            phi_i = venkat_limiter(qtilde_i, globaldata, idx, configData)
-            phi_k = venkat_limiter(qtilde_k, globaldata, itm, configData)
+            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
+            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
             qtilde_i = @. globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             qtilde_k = @. globaldata[itm].q - 0.5 * phi_k .* (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end

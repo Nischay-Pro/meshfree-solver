@@ -1,4 +1,4 @@
-@inline function func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
+function func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
     cfl = gpuConfigData[2]
     tx = threadIdx().x
     bx = blockIdx().x - 1
@@ -30,11 +30,11 @@
         end
         gpuGlobalDataCommon[136, idx] = min_delt
     end
-    sync_threads()
+    # sync_threads()
     return nothing
 end
 
-@inline function state_update_kernel(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr)
+function state_update_kernel(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -45,9 +45,9 @@ end
         if flag1 == gpuConfigData[17]
             state_update_wall_kernel(gpuGlobalDataCommon, idx)
         end
-        # if flag1 == gpuConfigData[18]
-            # state_update_interior_kernel(gpuGlobalDataCommon, idx, gpuSumResSqr)
-        # end
+        if flag1 == gpuConfigData[18]
+            state_update_interior_kernel(gpuGlobalDataCommon, idx)
+        end
         if flag1 == gpuConfigData[19]
             state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx)
         end
@@ -55,7 +55,7 @@ end
     if flag1 != gpuConfigData[19]
         gpuSumResSqr[idx] = gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx] * gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx]
     end
-    sync_threads()
+    # sync_threads()
     return nothing
 end
 
@@ -184,7 +184,7 @@ function state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx)
     return nothing
 end
 
-function state_update_interior_kernel(gpuGlobalDataCommon, idx, gpuSumResSqr)
+function state_update_interior_kernel(gpuGlobalDataCommon, idx)
     nx = gpuGlobalDataCommon[29, idx]
     ny = gpuGlobalDataCommon[30, idx]
 

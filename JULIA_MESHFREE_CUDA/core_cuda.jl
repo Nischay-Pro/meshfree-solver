@@ -142,21 +142,21 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr,
         @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr)
         synchronize(str)
         gpu_reduced(+, gpuSumResSqr, gpuSumResSqrOutput)
-        temp_gpu = Array(gpuSumResSqrOutput[1:2])[1]
+        temp_gpu = Array(gpuSumResSqrOutput)[1]
     # #     # @cuprintf("\n It is ss %lf ", gpuGlobalDataCommon[31, 3])
     # #     # CUDAnative.sumReduce(gpuSumResSqr, temp_gpu, getConfig()["core"]["points"])
     # #     # gpu_reduce(+, gpuSumResSqr, gpuSumResSqrOutput)
 
     #     # temp_gpu = Array(gpuSumResSqrOutput)[1]
-    #     residue = sqrt(temp_gpu) / getConfig()["core"]["points"]
-    #         if i <= 2
-    #             res_old = residue
-    #             residue = 0
-    #         else
-    #             residue = log10(residue / res_old)
-    #         end
+        residue = sqrt(temp_gpu) / getConfig()["core"]["points"]
+            if i <= 2
+                res_old = residue
+                residue = 0
+            else
+                residue = log10(residue / res_old)
+            end
 
-    #     @printf(residue_io, "%d %s\n", i, residue)
+        @printf(residue_io, "%d %s\n", i, residue)
         println("Iteration Number ", i)
     end
     synchronize()
@@ -168,7 +168,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr,
     return nothing
 end
 
-@inline function q_var_cuda_kernel(gpuGlobalDataCommon) #out1, out2)
+function q_var_cuda_kernel(gpuGlobalDataCommon) #out1, out2)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -195,11 +195,11 @@ end
     # if idx ==3
     #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[39, idx],gpuGlobalDataCommon[40, idx],gpuGlobalDataCommon[41, idx],gpuGlobalDataCommon[42, idx])
     # end
-    sync_threads()
+    # sync_threads()
     return nothing
 end
 
-@inline function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData)
+function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -268,7 +268,7 @@ end
             end
         end
     end
-    sync_threads()
+    # sync_threads()
     return nothing
 end
 
@@ -339,7 +339,7 @@ end
 Reduce a large array.
 Kepler-specific implementation, ie. you need sm_30 or higher to run this code.
 """
-@inline function gpu_reduced(op::Function, input::CuArray{T}, output::CuArray{T}) where {T}
+function gpu_reduced(op::Function, input::CuArray{T}, output::CuArray{T}) where {T}
     len = length(input)
 
     # TODO: these values are hardware-dependent, with recent GPUs supporting more threads

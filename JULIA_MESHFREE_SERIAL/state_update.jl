@@ -157,7 +157,7 @@ end
     #     max_res = res_sqr
     #     max_res_point = itm
     # end
-    sum_res_sqr[1] += + res_sqr
+    sum_res_sqr[1] += res_sqr
     # if itm == 1
     #     println(IOContext(stdout, :compact => false), U)
     #     println(IOContext(stdout, :compact => false), temp)

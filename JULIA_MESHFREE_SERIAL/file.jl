@@ -20,7 +20,7 @@ function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, o
                     parse(Int8,itmdata[7]),
                     parse(Float64,itmdata[8]),
                     parse(Int8,itmdata[9]),
-                    parse.(Int32, itmdata[10:end-1]),
+                    parse.(Int32, itmdata[10:end]),
                     parse(Float64, itmdata[4]),
                     parse(Float64, itmdata[5]),
                     copy(defprimal),
@@ -35,21 +35,21 @@ function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, o
         end
 
         if globaldata[idx].localID == 1
-            globaldata[idx].left = 160
+            globaldata[idx].left = 5120
             globaldata[idx].right = 2
         end
 
-        if globaldata[idx].localID == 160
-            globaldata[idx].left = 159
+        if globaldata[idx].localID == 5120
+            globaldata[idx].left = 5119
             globaldata[idx].right = 1
         end
-        if globaldata[idx].flag_1 == 1
+        if globaldata[idx].flag_1 == 0
             wallpts += 1
             push!(wallptsidx, globaldata[idx].localID)
-        elseif globaldata[idx].flag_1 == 2
+        elseif globaldata[idx].flag_1 == 1
             Interiorpts += 1
             push!(Interiorptsidx, globaldata[idx].localID)
-        elseif globaldata[idx].flag_1 == 3
+        elseif globaldata[idx].flag_1 == 2
             outerpts += 1
             push!(outerptsidx, globaldata[idx].localID)
         end

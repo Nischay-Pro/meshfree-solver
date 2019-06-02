@@ -3,7 +3,7 @@ function main()
     configData = getConfig()
     wallpts, Interiorpts, outerpts, shapepts = 0,0,0,0
 
-    file_name = "partGridNew--160-60"
+    file_name = "nice.dat"
 
     numPoints = returnFileLength(file_name)
     println(numPoints)
@@ -48,6 +48,7 @@ function main()
         res_old[1] = 0.0
         # @trace(fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old), maxdepth = 3)
         # res_old[1] = 0.0
+        # fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
         # @profile fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
         # Profile.print()
         # res_old[1] = 0.0
@@ -60,7 +61,7 @@ function main()
 
     test_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
     # # println(to)
-    open("timer.txt", "w") do io
+    open("timer" * string(numPoints) * ".txt", "w") do io
         print_timer(io, to)
     end
 

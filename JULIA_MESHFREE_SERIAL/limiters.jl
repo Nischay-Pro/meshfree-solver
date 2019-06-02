@@ -1,10 +1,10 @@
-function venkat_limiter(qtilde, globaldata, idx, configData)
+function venkat_limiter(qtilde, globaldata, idx, configData, phi)
     smallest_dist(globaldata, idx)
     VL_CONST = configData["core"]["vl_const"]::Float64
     ds = globaldata[idx].short_distance
     epsi = VL_CONST * ds
     epsi = epsi ^ 3
-    phi = zeros(Float64, 4)
+    # phi = zeros(Float64, 4)
     del_pos = zero(Float64)
     del_neg = zero(Float64)
     for i in 1:4
@@ -35,7 +35,7 @@ function venkat_limiter(qtilde, globaldata, idx, configData)
             end
         end
     end
-    return phi
+    return nothing
 end
 
 @inline function maximum(globaldata, idx, i)

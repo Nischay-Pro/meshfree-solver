@@ -8,60 +8,60 @@ function main()
     # gpuGlobaldataDq = [CuArray{CuArray{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
     # gpu_globaldata = CuArray{Point,1}(undef, getConfig()["core"]["points"])
     configData = getConfig()
-    wallpts, Interiorpts, outerpts, shapepts = 0,0,0,0
-    wallptsidx = Array{Int,1}(undef, 0)
-    Interiorptsidx = Array{Int,1}(undef, 0)
-    outerptsidx = Array{Int,1}(undef, 0)
-    shapeptsidx = Array{Int,1}(undef, 0)
-    table = Array{Int,1}(undef, 0)
+    # wallpts, Interiorpts, outerpts, shapepts = 0,0,0,0
+    # wallptsidx = Array{Int,1}(undef, 0)
+    # Interiorptsidx = Array{Int,1}(undef, 0)
+    # outerptsidx = Array{Int,1}(undef, 0)
+    # shapeptsidx = Array{Int,1}(undef, 0)
+    table = Array{Int,1}(undef, getConfig()["core"]["points"])
 
-    file1 = open("partGridNew--160-60")
+    file1 = open("partGridNew--2560-960")
     data1 = read(file1, String)
     splitdata = split(data1, "\n")
     # print(splitdata[1:3])
     splitdata = splitdata[1:end-1]
     # print(splitdata[1:3])
     defprimal = getInitialPrimitive(configData)
-
+    println("Passing to CPU Globaldata")
     # count = 0
     for (idx, itm) in enumerate(splitdata)
         itmdata = split(itm, " ")
-        temp =     Point(parse(Int,itmdata[1]),
-                        parse(Float64,itmdata[2]),
-                        parse(Float64, itmdata[3]),
-                        parse(Int,itmdata[1]) - 1,
-                        parse(Int,itmdata[1]) + 1,
-                        parse(Int,itmdata[6]),
-                        parse(Int,itmdata[7]),
-                        parse(Float64,itmdata[8]),
-                        parse(Int,itmdata[9]),
-                        parse.(Int, itmdata[10:end-1]),
-                        parse(Float64, itmdata[4]),
-                        parse(Float64, itmdata[5]),
-                        copy(defprimal),
-                        zeros(Float64, 4),
-                        zeros(Float64, 4),
-                        Array{Array{Float64,1},1}(undef, 0),
-                        0.0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        Array{Int,1}(undef, 0),
-                        Array{Int,1}(undef, 0),
-                        Array{Int,1}(undef, 0),
-                        Array{Int,1}(undef, 0),
-                        0.0,
-                        zeros(Float64, 4),
-                        zeros(Float64, 4))
+        temp =  Point(parse(Int,itmdata[1]),
+                    parse(Float64,itmdata[2]),
+                    parse(Float64, itmdata[3]),
+                    parse(Int,itmdata[1]) - 1,
+                    parse(Int,itmdata[1]) + 1,
+                    parse(Int,itmdata[6]),
+                    parse(Int,itmdata[7]),
+                    parse(Float64,itmdata[8]),
+                    parse(Int,itmdata[9]),
+                    parse.(Int, itmdata[10:end-1]),
+                    parse(Float64, itmdata[4]),
+                    parse(Float64, itmdata[5]),
+                    copy(defprimal),
+                    zeros(Float64, 4),
+                    zeros(Float64, 4),
+                    Array{Array{Float64,1},1}(undef, 0),
+                    0.0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    Array{Int,1}(undef, 0),
+                    Array{Int,1}(undef, 0),
+                    Array{Int,1}(undef, 0),
+                    Array{Int,1}(undef, 0),
+                    0.0,
+                    zeros(Float64, 4),
+                    zeros(Float64, 4))
 
         if parse(Int, itmdata[1]) == 1
-            temp.left = 160
+            temp.left = 2560
             temp.right = 2
         end
 
-        if parse(Int, itmdata[1]) == 160
-            temp.left = 159
+        if parse(Int, itmdata[1]) == 2560
+            temp.left = 2559
             temp.right = 1
         end
 
@@ -76,21 +76,20 @@ function main()
         #     print(temp)
         # end
 
-        if parse(Int, itmdata[6]) == 1
-            wallpts += 1
-            push!(wallptsidx, parse(Int,itmdata[1]))
-        elseif parse(Int, itmdata[6]) == 2
-            Interiorpts += 1
-            push!(Interiorptsidx, parse(Int,itmdata[1]))
-        elseif parse(Int,itmdata[1]) == 3
-            outerpts += 1
-            push!(outerptsidx, parse(Int,itmdata[1]))
-        end
-        if parse(Int, itmdata[7]) > 0
-            shapepts +=1
-            push!(shapeptsidx, parse(Int,itmdata[1]))
-        end
-        push!(table, parse(Int,itmdata[1]))
+        # if parse(Int, itmdata[6]) == 1
+        #     wallpts += 1
+        #     push!(wallptsidx, parse(Int,itmdata[1]))
+        # elseif parse(Int, itmdata[6]) == 2
+        #     Interiorpts += 1
+        #     push!(Interiorptsidx, parse(Int,itmdata[1]))
+        # elseif parse(Int,itmdata[1]) == 3
+        #     outerpts += 1
+        #     push!(outerptsidx, parse(Int,itmdata[1]))
+        # end
+        # if parse(Int, itmdata[7]) > 0
+        #     shapepts +=1
+        #     push!(shapeptsidx, parse(Int,itmdata[1]))
+        # end
         # if count == 0
         #     print(wallptsidx)
         #     print(Interiorptsidx)
@@ -98,8 +97,10 @@ function main()
         # end
         # count = 1
     end
-
+    table[:] = @view globaldata[:].localID
     # print(wallptsidx)
+
+    println("Passing to GPU Globaldata")
 
     for idx in table
         connectivity = calculateConnectivity(globaldata, idx)
@@ -139,6 +140,7 @@ function main()
                             getConfig()["point"]["interior"],
                             getConfig()["point"]["outer"]
                         ])
+    println("GPU ConfigGlobaldata Finished")
     # gpuGlobaldataDq = CuArray(globaldataDq)
     # println()
     # println(isbitstype(globaldata) == true)
@@ -169,7 +171,7 @@ function main()
     threadsperblock = Int(getConfig()["core"]["threadsperblock"])
     blockspergrid = Int(ceil(getConfig()["core"]["points"]/threadsperblock))
 
-    function test_code(gpuGlobalDataCommon::CuArrays.CuArray{Float64,2}, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
+    function test_code(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
         fpi_solver_cuda(1, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, res_old)
         res_old = 0
         @timeit to "nest 1" begin
@@ -180,7 +182,7 @@ function main()
 
     test_code(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old)
 
-    open("timer_cuda.txt", "w") do io
+    open("timer_cuda" * string(getConfig()["core"]["points"]) * ".txt", "w") do io
         print_timer(io, to)
     end
     # globalDataCommon = Array(gpuGlobalDataCommon)
