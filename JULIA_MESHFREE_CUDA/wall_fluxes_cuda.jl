@@ -124,12 +124,12 @@ function wall_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
     #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[162, idx],gpuGlobalDataCommon[163, idx],gpuGlobalDataCommon[164, idx],gpuGlobalDataCommon[165, idx])
     #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[166, idx],gpuGlobalDataCommon[167, idx],gpuGlobalDataCommon[168, idx],gpuGlobalDataCommon[169, idx])
     # end
-    gpuGlobalDataCommon[35, idx] += 2 * (gpuGlobalDataCommon[162, idx]*sum_dely_sqr - gpuGlobalDataCommon[166, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataCommon[36, idx] += 2 * (gpuGlobalDataCommon[163, idx]*sum_dely_sqr - gpuGlobalDataCommon[167, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataCommon[37, idx] += 2 * (gpuGlobalDataCommon[164, idx]*sum_dely_sqr - gpuGlobalDataCommon[168, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataCommon[38, idx] += 2 * (gpuGlobalDataCommon[165, idx]*sum_dely_sqr - gpuGlobalDataCommon[169, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[5, idx] += 2 * (gpuGlobalDataCommon[162, idx]*sum_dely_sqr - gpuGlobalDataCommon[166, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[6, idx] += 2 * (gpuGlobalDataCommon[163, idx]*sum_dely_sqr - gpuGlobalDataCommon[167, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[7, idx] += 2 * (gpuGlobalDataCommon[164, idx]*sum_dely_sqr - gpuGlobalDataCommon[168, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[8, idx] += 2 * (gpuGlobalDataCommon[165, idx]*sum_dely_sqr - gpuGlobalDataCommon[169, idx]*sum_delx_dely)*one_by_det
     # if idx ==3
-    #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[35, idx],gpuGlobalDataCommon[36, idx],gpuGlobalDataCommon[37, idx],gpuGlobalDataCommon[38, idx])
+    #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[5, idx],gpuGlobalDataRest[6, idx],gpuGlobalDataRest[7, idx],gpuGlobalDataRest[8, idx])
     # end
     return nothing
 end
@@ -243,12 +243,12 @@ function wall_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
 
-    gpuGlobalDataCommon[35, idx] += 2 * (gpuGlobalDataCommon[162, idx]*sum_dely_sqr - gpuGlobalDataCommon[166, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataCommon[36, idx] += 2 * (gpuGlobalDataCommon[163, idx]*sum_dely_sqr - gpuGlobalDataCommon[167, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataCommon[37, idx] += 2 * (gpuGlobalDataCommon[164, idx]*sum_dely_sqr - gpuGlobalDataCommon[168, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataCommon[38, idx] += 2 * (gpuGlobalDataCommon[165, idx]*sum_dely_sqr - gpuGlobalDataCommon[169, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[5, idx] += 2 * (gpuGlobalDataCommon[162, idx]*sum_dely_sqr - gpuGlobalDataCommon[166, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[6, idx] += 2 * (gpuGlobalDataCommon[163, idx]*sum_dely_sqr - gpuGlobalDataCommon[167, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[7, idx] += 2 * (gpuGlobalDataCommon[164, idx]*sum_dely_sqr - gpuGlobalDataCommon[168, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[8, idx] += 2 * (gpuGlobalDataCommon[165, idx]*sum_dely_sqr - gpuGlobalDataCommon[169, idx]*sum_delx_dely)*one_by_det
     # if idx ==3
-    #     @cuprintf("\n %f %f %f %f", gpuGlobalDataCommon[35, idx],gpuGlobalDataCommon[36, idx],gpuGlobalDataCommon[37, idx],gpuGlobalDataCommon[38, idx])
+    #     @cuprintf("\n %f %f %f %f", gpuGlobalDataRest[5, idx],gpuGlobalDataRest[6, idx],gpuGlobalDataRest[7, idx],gpuGlobalDataRest[8, idx])
     # end
     return nothing
 end
@@ -368,12 +368,12 @@ function wall_dGy_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
     #     @cuprintf("\n %f %f %f %f", gpuGlobalDataCommon[162, idx],gpuGlobalDataCommon[163, idx],gpuGlobalDataCommon[164, idx],gpuGlobalDataCommon[165, idx])
     #     @cuprintf("\n %f %f %f %f", gpuGlobalDataCommon[166, idx],gpuGlobalDataCommon[167, idx],gpuGlobalDataCommon[168, idx],gpuGlobalDataCommon[169, idx])
     # end
-    gpuGlobalDataCommon[35, idx] += 2 * (gpuGlobalDataCommon[166, idx]*sum_delx_sqr - gpuGlobalDataCommon[162, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataCommon[36, idx] += 2 * (gpuGlobalDataCommon[167, idx]*sum_delx_sqr - gpuGlobalDataCommon[163, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataCommon[37, idx] += 2 * (gpuGlobalDataCommon[168, idx]*sum_delx_sqr - gpuGlobalDataCommon[164, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataCommon[38, idx] += 2 * (gpuGlobalDataCommon[169, idx]*sum_delx_sqr - gpuGlobalDataCommon[165, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[5, idx] += 2 * (gpuGlobalDataCommon[166, idx]*sum_delx_sqr - gpuGlobalDataCommon[162, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[6, idx] += 2 * (gpuGlobalDataCommon[167, idx]*sum_delx_sqr - gpuGlobalDataCommon[163, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[7, idx] += 2 * (gpuGlobalDataCommon[168, idx]*sum_delx_sqr - gpuGlobalDataCommon[164, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[8, idx] += 2 * (gpuGlobalDataCommon[169, idx]*sum_delx_sqr - gpuGlobalDataCommon[165, idx]*sum_delx_dely)*one_by_det
     # if idx ==3
-    #     @cuprintf("\n %f %f %f %f", gpuGlobalDataCommon[35, idx],gpuGlobalDataCommon[36, idx],gpuGlobalDataCommon[37, idx],gpuGlobalDataCommon[38, idx])
+    #     @cuprintf("\n %f %f %f %f", gpuGlobalDataRest[5, idx],gpuGlobalDataRest[6, idx],gpuGlobalDataRest[7, idx],gpuGlobalDataRest[8, idx])
     # end
     return nothing
 end

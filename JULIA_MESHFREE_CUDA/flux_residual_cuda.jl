@@ -23,10 +23,10 @@ function cal_flux_residual_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, 
 end
 
 @inline function wall_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
-	gpuGlobalDataCommon[35, idx] = 0.0
-	gpuGlobalDataCommon[36, idx] = 0.0
-	gpuGlobalDataCommon[37, idx] = 0.0
-	gpuGlobalDataCommon[38, idx] = 0.0
+	gpuGlobalDataRest[5, idx] = 0.0
+	gpuGlobalDataRest[6, idx] = 0.0
+	gpuGlobalDataRest[7, idx] = 0.0
+	gpuGlobalDataRest[8, idx] = 0.0
 	wall_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
 	# sync_threads()
 	wall_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
@@ -36,10 +36,10 @@ end
 end
 
 @inline function interior_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
-	gpuGlobalDataCommon[35, idx] = 0.0
-	gpuGlobalDataCommon[36, idx] = 0.0
-	gpuGlobalDataCommon[37, idx] = 0.0
-	gpuGlobalDataCommon[38, idx] = 0.0
+	gpuGlobalDataRest[5, idx] = 0.0
+	gpuGlobalDataRest[6, idx] = 0.0
+	gpuGlobalDataRest[7, idx] = 0.0
+	gpuGlobalDataRest[8, idx] = 0.0
 	interior_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
 	# sync_threads()
 	interior_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
@@ -51,10 +51,10 @@ end
 end
 
 @inline function outer_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
-	gpuGlobalDataCommon[35, idx] = 0.0
-	gpuGlobalDataCommon[36, idx] = 0.0
-	gpuGlobalDataCommon[37, idx] = 0.0
-	gpuGlobalDataCommon[38, idx] = 0.0
+	gpuGlobalDataRest[5, idx] = 0.0
+	gpuGlobalDataRest[6, idx] = 0.0
+	gpuGlobalDataRest[7, idx] = 0.0
+	gpuGlobalDataRest[8, idx] = 0.0
 	outer_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
 	# sync_threads()
 	outer_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
