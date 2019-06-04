@@ -124,7 +124,7 @@ function main()
     open("timer_cuda" * string(numPoints) * ".txt", "w") do io
         print_timer(io, to)
     end
-    # globalDataCommon = Array(gpuGlobalDataCommon)
+    globalDataCommon = Array(gpuGlobalDataCommon)
 
     # println()
     # println(globalDataCommon[:,1])
@@ -146,16 +146,16 @@ function main()
     # end
     # close(file)
 
-    # println("Writing cuda file")
-    # file  = open("primvals_cuda" * string(numPoints) * ".txt", "w")
-    # for idx in 1:numPoints
-    #     primtowrite = globalDataCommon[31:34, idx]
-    #     for element in primtowrite
-    #         @printf(file,"%0.17f", element)
-    #         @printf(file, " ")
-    #     end
-    #     print(file, "\n")
-    # end
-    # close(file)
+    println("Writing cuda file")
+    file  = open("primvals_cuda" * string(numPoints) * ".txt", "w")
+    for idx in 1:numPoints
+        primtowrite = globalDataCommon[31:34, idx]
+        for element in primtowrite
+            @printf(file,"%0.17f", element)
+            @printf(file, " ")
+        end
+        print(file, "\n")
+    end
+    close(file)
 
 end
