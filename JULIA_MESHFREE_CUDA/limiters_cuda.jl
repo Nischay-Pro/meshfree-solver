@@ -159,9 +159,9 @@ function qtilde_to_primitive_kernel(qtilde, gpuConfigData, gpuGlobalDataCommon, 
     temp2 = temp1 - (CUDAnative.log(beta)/(gamma-1))
     rho = CUDAnative.exp(temp2)
     pr = rho*temp
-    gpuGlobalDataCommon[170, idx] = u1
-    gpuGlobalDataCommon[171, idx] = u2
-    gpuGlobalDataCommon[172, idx] = rho
-    gpuGlobalDataCommon[173, idx] = pr
+    gpuGlobalDataRest[53, idx] = u1
+    gpuGlobalDataRest[54, idx] = u2
+    gpuGlobalDataRest[55, idx] = rho
+    gpuGlobalDataRest[56, idx] = pr
     return nothing
 end

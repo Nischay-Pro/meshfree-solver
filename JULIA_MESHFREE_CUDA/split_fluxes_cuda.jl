@@ -1,9 +1,9 @@
 function flux_Gxp_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, flag)
 
-    u1 = gpuGlobalDataCommon[170, idx]
-    u2 = gpuGlobalDataCommon[171, idx]
-    rho = gpuGlobalDataCommon[172, idx]
-    pr = gpuGlobalDataCommon[173, idx]
+    u1 = gpuGlobalDataRest[53, idx]
+    u2 = gpuGlobalDataRest[54, idx]
+    rho = gpuGlobalDataRest[55, idx]
+    pr = gpuGlobalDataRest[56, idx]
 
     tx = ny
     ty = -nx
@@ -53,10 +53,10 @@ end
 
 function flux_Gxn_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, flag)
 
-    u1 = gpuGlobalDataCommon[170, idx]
-    u2 = gpuGlobalDataCommon[171, idx]
-    rho = gpuGlobalDataCommon[172, idx]
-    pr = gpuGlobalDataCommon[173, idx]
+    u1 = gpuGlobalDataRest[53, idx]
+    u2 = gpuGlobalDataRest[54, idx]
+    rho = gpuGlobalDataRest[55, idx]
+    pr = gpuGlobalDataRest[56, idx]
 
     tx = ny
     ty = -nx
@@ -104,10 +104,10 @@ function flux_Gxn_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, fl
 end
 
 function flux_Gyp_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, flag)
-    u1 = gpuGlobalDataCommon[170, idx]
-    u2 = gpuGlobalDataCommon[171, idx]
-    rho = gpuGlobalDataCommon[172, idx]
-    pr = gpuGlobalDataCommon[173, idx]
+    u1 = gpuGlobalDataRest[53, idx]
+    u2 = gpuGlobalDataRest[54, idx]
+    rho = gpuGlobalDataRest[55, idx]
+    pr = gpuGlobalDataRest[56, idx]
 
     tx = ny
     ty = -nx
@@ -154,10 +154,10 @@ function flux_Gyp_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, fl
 end
 
 function flux_Gyn_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, flag)
-    u1 = gpuGlobalDataCommon[170, idx]
-    u2 = gpuGlobalDataCommon[171, idx]
-    rho = gpuGlobalDataCommon[172, idx]
-    pr = gpuGlobalDataCommon[173, idx]
+    u1 = gpuGlobalDataRest[53, idx]
+    u2 = gpuGlobalDataRest[54, idx]
+    rho = gpuGlobalDataRest[55, idx]
+    pr = gpuGlobalDataRest[56, idx]
 
     tx = ny
     ty = -nx
@@ -213,10 +213,10 @@ function flux_Gyn_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, fl
 end
 
 function flux_Gx_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
-    u1 = gpuGlobalDataCommon[170, idx]
-    u2 = gpuGlobalDataCommon[171, idx]
-    rho = gpuGlobalDataCommon[172, idx]
-    pr = gpuGlobalDataCommon[173, idx]
+    u1 = gpuGlobalDataRest[53, idx]
+    u2 = gpuGlobalDataRest[54, idx]
+    rho = gpuGlobalDataRest[55, idx]
+    pr = gpuGlobalDataRest[56, idx]
 
     tx = ny
     ty = -nx
@@ -243,10 +243,10 @@ function flux_Gx_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
 end
 
 function flux_Gy_kernel(nx, ny,gpuGlobalDataCommon, idx, flag)
-    u1 = gpuGlobalDataCommon[170, idx]
-    u2 = gpuGlobalDataCommon[171, idx]
-    rho = gpuGlobalDataCommon[172, idx]
-    pr = gpuGlobalDataCommon[173, idx]
+    u1 = gpuGlobalDataRest[53, idx]
+    u2 = gpuGlobalDataRest[54, idx]
+    rho = gpuGlobalDataRest[55, idx]
+    pr = gpuGlobalDataRest[56, idx]
 
     tx = ny
     ty = -nx
