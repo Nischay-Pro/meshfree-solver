@@ -87,7 +87,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
         #     @cuprintf("\n %d", conn)
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[170, idx], gpuGlobalDataCommon[171, idx], gpuGlobalDataCommon[172, idx], gpuGlobalDataCommon[173, idx])
         # end
-        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataCommon, idx)
+        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
         # if idx == 3
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[170, idx], gpuGlobalDataCommon[171, idx], gpuGlobalDataCommon[172, idx], gpuGlobalDataCommon[173, idx])
         # end
@@ -95,7 +95,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
         # if idx == 3
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[170, idx], gpuGlobalDataCommon[171, idx], gpuGlobalDataCommon[172, idx], gpuGlobalDataCommon[173, idx])
         # end
-        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, idx)
+        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
         # if idx == 3
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[170, idx], gpuGlobalDataCommon[171, idx], gpuGlobalDataCommon[172, idx], gpuGlobalDataCommon[173, idx])
         # end
@@ -218,9 +218,9 @@ function wall_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
-        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataCommon, idx)
+        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
         flux_quad_GxI_kernel(nx, ny, gpuGlobalDataCommon, idx, 1)
-        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, idx)
+        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
         flux_quad_GxI_kernel(nx, ny, gpuGlobalDataCommon, idx, 2)
         # CUDAnative.synchronize()
         gpuGlobalDataCommon[162, idx] += (gpuGlobalDataCommon[158, idx] - gpuGlobalDataCommon[154, idx]) * dels_weights
@@ -340,9 +340,9 @@ function wall_dGy_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
-        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataCommon, idx)
+        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
         flux_Gyn_kernel(nx, ny, gpuGlobalDataCommon, idx, 1)
-        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, idx)
+        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
         flux_Gyn_kernel(nx, ny, gpuGlobalDataCommon, idx, 2)
         # CUDAnative.synchronize()
         gpuGlobalDataCommon[162, idx] += (gpuGlobalDataCommon[158, idx] - gpuGlobalDataCommon[154, idx]) * dels_weights
