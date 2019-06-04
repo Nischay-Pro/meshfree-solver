@@ -1,4 +1,4 @@
-function func_delta_kernel(gpuGlobalDataCommon,  gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
+function func_delta_kernel(gpuGlobalDataConn,  gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
     cfl = gpuConfigData[2]
     tx = threadIdx().x
     bx = blockIdx().x - 1
@@ -7,8 +7,8 @@ function func_delta_kernel(gpuGlobalDataCommon,  gpuGlobalDataFixedPoint, gpuGlo
     if idx > 0 && idx <= gpuGlobalDataFixedPoint[end].localID
         # TODO - Possible problem?
         min_delt = one(Float64)
-        for iter in 9:28
-            conn = Int(gpuGlobalDataCommon[iter, idx])
+        for iter in 1:20
+            conn = Int(gpuGlobalDataConn[iter, idx])
             if conn == zero(Float64)
                 break
             end
