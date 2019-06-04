@@ -1,4 +1,4 @@
-function func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
+function func_delta_kernel(gpuGlobalDataCommon,  gpuGlobalDataFixedPoint, gpuConfigData)
     cfl = gpuConfigData[2]
     tx = threadIdx().x
     bx = blockIdx().x - 1
@@ -34,7 +34,7 @@ function func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
     return nothing
 end
 
-function state_update_kernel(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr)
+function state_update_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint,  gpuConfigData, gpuSumResSqr)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x

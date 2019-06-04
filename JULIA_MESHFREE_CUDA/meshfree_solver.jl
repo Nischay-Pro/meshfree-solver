@@ -109,19 +109,19 @@ function main()
     threadsperblock = Int(getConfig()["core"]["threadsperblock"])
     blockspergrid = Int(ceil(numPoints/threadsperblock))
 
-    function test_code(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old, numPoints)
+    function test_code(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old, numPoints)
         println("Starting warmup function")
-        fpi_solver_cuda(1, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, res_old, numPoints)
+        fpi_solver_cuda(1, gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, res_old, numPoints)
         res_old = 0
         println("Starting main function")
         @timeit to "nest 1" begin
-            CuArrays.@sync begin fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput,
+            CuArrays.@sync begin fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput,
                 threadsperblock,blockspergrid, res_old, numPoints)
             end
         end
     end
 
-    test_code(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old, numPoints)
+    test_code(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old, numPoints)
 
     open("timer_cuda" * string(numPoints) * ".txt", "w") do io
         print_timer(io, to)
