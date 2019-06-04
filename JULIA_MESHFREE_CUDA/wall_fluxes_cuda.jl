@@ -22,6 +22,9 @@ function wall_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
     for i in 146:173
         gpuGlobalDataCommon[i, idx] = 0.0
     end
+    for i in 37:56
+        gpuGlobalDataRest[i, idx] = 0.0
+    end
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
@@ -166,6 +169,9 @@ function wall_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
     for i in 146:173
         gpuGlobalDataCommon[i, idx] = 0.0
     end
+    for i in 37:56
+        gpuGlobalDataRest[i, idx] = 0.0
+    end
 
     # result1,result2,result3,result4 = 0.0,0.0,0.0,0.0
 
@@ -285,6 +291,9 @@ function wall_dGy_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
 
     for i in 146:173
         gpuGlobalDataCommon[i, idx] = 0.0
+    end
+    for i in 37:56
+        gpuGlobalDataRest[i, idx] = 0.0
     end
 
     # result1,result2,result3,result4 = 0.0,0.0,0.0,0.0

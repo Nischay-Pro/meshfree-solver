@@ -23,6 +23,9 @@ function interior_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
     for i in 154:173
         gpuGlobalDataCommon[i, idx] = 0.0
     end
+    for i in 37:56
+        gpuGlobalDataRest[i, idx] = 0.0
+    end
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
@@ -124,6 +127,9 @@ function interior_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
 
     for i in 154:173
         gpuGlobalDataCommon[i, idx] = 0.0
+    end
+    for i in 37:56
+        gpuGlobalDataRest[i, idx] = 0.0
     end
 
     x_i = gpuGlobalDataFixedPoint[idx].x
@@ -235,6 +241,9 @@ function interior_dGy_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
     for i in 154:173
         gpuGlobalDataCommon[i, idx] = 0.0
     end
+    for i in 37:56
+        gpuGlobalDataRest[i, idx] = 0.0
+    end
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
@@ -341,6 +350,9 @@ function interior_dGy_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
 
     for i in 154:173
         gpuGlobalDataCommon[i, idx] = 0.0
+    end
+    for i in 37:56
+        gpuGlobalDataRest[i, idx] = 0.0
     end
 
     x_i = gpuGlobalDataFixedPoint[idx].x

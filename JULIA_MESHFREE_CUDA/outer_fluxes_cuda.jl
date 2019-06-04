@@ -23,6 +23,9 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
     for i in 146:173
         gpuGlobalDataCommon[i, idx] = 0.0
     end
+    for i in 37:56
+        gpuGlobalDataRest[i, idx] = 0.0
+    end
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
@@ -123,6 +126,9 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
     for i in 146:173
         gpuGlobalDataCommon[i, idx] = 0.0
     end
+    for i in 37:56
+        gpuGlobalDataRest[i, idx] = 0.0
+    end
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
@@ -222,6 +228,9 @@ function outer_dGy_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
 
     for i in 146:173
         gpuGlobalDataCommon[i, idx] = 0.0
+    end
+    for i in 37:56
+        gpuGlobalDataRest[i, idx] = 0.0
     end
 
     x_i = gpuGlobalDataFixedPoint[idx].x
