@@ -41,15 +41,15 @@ function flux_quad_GxI_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, id
 
         gpuGlobalDataRest[40, idx] = (rho*A2neg*(temp2 - temp3) - temp4)
     else
-        gpuGlobalDataCommon[158, idx] = (rho*A2neg*(ut*A1neg - B1))
+        gpuGlobalDataRest[41, idx] = (rho*A2neg*(ut*A1neg - B1))
 
         temp1 = pr_by_rho + ut*ut
         temp2 = temp1*A1neg-ut*B1
-        gpuGlobalDataCommon[159, idx] = (rho*A2neg*temp2)
+        gpuGlobalDataRest[42, idx] = (rho*A2neg*temp2)
 
         temp1 = ut*A1neg - B1
         temp2 = un*A2neg - B2
-        gpuGlobalDataCommon[160, idx] = (rho*temp1*temp2)
+        gpuGlobalDataRest[43, idx] = (rho*temp1*temp2)
 
         temp1 = (7.0 *pr_by_rho) + u_sqr
         temp2 = 0.5*ut*temp1*A1neg
@@ -60,7 +60,7 @@ function flux_quad_GxI_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, id
         temp1 = ut*A1neg - B1
         temp4 = 0.5*rho*un*B2*temp1
 
-        gpuGlobalDataCommon[161, idx] = (rho*A2neg*(temp2 - temp3) - temp4)
+        gpuGlobalDataRest[44, idx] = (rho*A2neg*(temp2 - temp3) - temp4)
     end
     return nothing
 end
@@ -111,15 +111,15 @@ function flux_quad_GxII_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, i
         temp4 = 0.5*rho*un*B2*temp1
         gpuGlobalDataRest[40, idx] = rho*A2neg*(temp2 + temp3) - temp4
     else
-        gpuGlobalDataCommon[158, idx] = rho * A2neg* (ut*A1pos + B1)
+        gpuGlobalDataRest[41, idx] = rho * A2neg* (ut*A1pos + B1)
         # @cuprintf("\n rho, pi, beta, ut is %f %f", rho, pr)
         temp1 = pr_by_rho + ut*ut
         temp2 = temp1*A1pos + ut*B1
-        gpuGlobalDataCommon[159, idx] = rho*A2neg*temp2
+        gpuGlobalDataRest[42, idx] = rho*A2neg*temp2
 
         temp1 = ut*A1pos + B1
         temp2 = un*A2neg - B2
-        gpuGlobalDataCommon[160, idx] = rho*temp1*temp2
+        gpuGlobalDataRest[43, idx] = rho*temp1*temp2
 
         temp1 = (7 *pr_by_rho) + u_sqr
         temp2 = 0.5*ut*temp1*A1pos
@@ -129,7 +129,7 @@ function flux_quad_GxII_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, i
 
         temp1 = ut*A1pos + B1
         temp4 = 0.5*rho*un*B2*temp1
-        gpuGlobalDataCommon[161, idx] = rho*A2neg*(temp2 + temp3) - temp4
+        gpuGlobalDataRest[44, idx] = rho*A2neg*(temp2 + temp3) - temp4
     end
     return nothing
 end
@@ -173,20 +173,20 @@ function flux_quad_GxIII_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, 
         temp4 = 0.5*rho*un*B2*temp1
         gpuGlobalDataRest[40, idx] = (rho*A2pos*(temp2 + temp3) + temp4)
     else
-        gpuGlobalDataCommon[158, idx] = rho*A2pos*(ut*A1pos + B1)
+        gpuGlobalDataRest[41, idx] = rho*A2pos*(ut*A1pos + B1)
         temp1 = pr_by_rho + ut*ut
         temp2 = temp1*A1pos + ut*B1
-        gpuGlobalDataCommon[159, idx] = (rho*A2pos*temp2)
+        gpuGlobalDataRest[42, idx] = (rho*A2pos*temp2)
         temp1 = ut*A1pos + B1
         temp2 = un*A2pos + B2
-        gpuGlobalDataCommon[160, idx] = (rho*temp1*temp2)
+        gpuGlobalDataRest[43, idx] = (rho*temp1*temp2)
         temp1 = (7*pr_by_rho) + u_sqr
         temp2 = 0.5*ut*temp1*A1pos
         temp1 = (6*pr_by_rho) + u_sqr
         temp3 = 0.5*B1*temp1
         temp1 = ut*A1pos + B1
         temp4 = 0.5*rho*un*B2*temp1
-        gpuGlobalDataCommon[161, idx] = (rho*A2pos*(temp2 + temp3) + temp4)
+        gpuGlobalDataRest[44, idx] = (rho*A2pos*(temp2 + temp3) + temp4)
     end
     return nothing
 end
@@ -234,15 +234,15 @@ function flux_quad_GxIV_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, i
         temp4 = 0.5*rho*un*B2*temp1
         gpuGlobalDataRest[40, idx] = (rho*A2pos*(temp2 - temp3) + temp4)
     else
-        gpuGlobalDataCommon[158, idx] = (rho*A2pos*(ut*A1neg - B1))
+        gpuGlobalDataRest[41, idx] = (rho*A2pos*(ut*A1neg - B1))
 
         temp1 = pr_by_rho + ut*ut
         temp2 = temp1*A1neg - ut*B1
-        gpuGlobalDataCommon[159, idx] = (rho*A2pos*temp2)
+        gpuGlobalDataRest[42, idx] = (rho*A2pos*temp2)
 
         temp1 = ut*A1neg - B1
         temp2 = un*A2pos + B2
-        gpuGlobalDataCommon[160, idx] = (rho*temp1*temp2)
+        gpuGlobalDataRest[43, idx] = (rho*temp1*temp2)
 
         temp1 = (7.0*pr_by_rho) + u_sqr
         temp2 = 0.5*ut*temp1*A1neg
@@ -252,7 +252,7 @@ function flux_quad_GxIV_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, i
 
         temp1 = ut*A1neg - B1
         temp4 = 0.5*rho*un*B2*temp1
-        gpuGlobalDataCommon[161, idx] = (rho*A2pos*(temp2 - temp3) + temp4)
+        gpuGlobalDataRest[44, idx] = (rho*A2pos*(temp2 - temp3) + temp4)
     end
     return nothing
 end

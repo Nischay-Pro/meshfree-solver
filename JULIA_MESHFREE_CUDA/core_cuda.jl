@@ -227,18 +227,18 @@ function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, 
         # @cuda dynamic=true threads=4 max_min_kernel(gpuGlobalDataCommon, idx)
         # CUDAnative.synchronize()
         for i in 1:4
-            gpuGlobalDataCommon[137+i, idx] = gpuGlobalDataRest[8+i, idx]
-            gpuGlobalDataCommon[141+i, idx] = gpuGlobalDataRest[8+i, idx]
+            gpuGlobalDataRest[20+i, idx] = gpuGlobalDataRest[8+i, idx]
+            gpuGlobalDataRest[24+i, idx] = gpuGlobalDataRest[8+i, idx]
             for iter in 9:28
                 conn = Int(gpuGlobalDataCommon[iter, idx])
                 if conn == 0.0
                     break
                 end
-                if gpuGlobalDataCommon[137+i, idx] < gpuGlobalDataRest[8+i, conn]
-                    gpuGlobalDataCommon[137+i, idx] = gpuGlobalDataRest[8+i, conn]
+                if gpuGlobalDataRest[20+i, idx] < gpuGlobalDataRest[8+i, conn]
+                    gpuGlobalDataRest[20+i, idx] = gpuGlobalDataRest[8+i, conn]
                 end
-                if gpuGlobalDataCommon[141+i, idx] > gpuGlobalDataRest[8+i, conn]
-                    gpuGlobalDataCommon[141+i, idx] = gpuGlobalDataRest[8+i, conn]
+                if gpuGlobalDataRest[24+i, idx] > gpuGlobalDataRest[8+i, conn]
+                    gpuGlobalDataRest[24+i, idx] = gpuGlobalDataRest[8+i, conn]
                 end
             end
         end
