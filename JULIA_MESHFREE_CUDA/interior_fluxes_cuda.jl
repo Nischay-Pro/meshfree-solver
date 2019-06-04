@@ -81,23 +81,23 @@ function interior_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
         qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
         flux_Gxp_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, 2)
         # CUDAnative.synchronize()
-        gpuGlobalDataCommon[162, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
-        gpuGlobalDataCommon[166, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * deln_weights
-        gpuGlobalDataCommon[163, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * dels_weights
-        gpuGlobalDataCommon[167, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * deln_weights
-        gpuGlobalDataCommon[164, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * dels_weights
-        gpuGlobalDataCommon[168, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * deln_weights
-        gpuGlobalDataCommon[165, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * dels_weights
-        gpuGlobalDataCommon[169, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * deln_weights
+        gpuGlobalDataRest[45, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
+        gpuGlobalDataRest[49, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * deln_weights
+        gpuGlobalDataRest[46, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * dels_weights
+        gpuGlobalDataRest[50, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * deln_weights
+        gpuGlobalDataRest[47, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * dels_weights
+        gpuGlobalDataRest[51, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * deln_weights
+        gpuGlobalDataRest[48, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * dels_weights
+        gpuGlobalDataRest[52, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * deln_weights
     end
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
 
-    gpuGlobalDataRest[5, idx] += (gpuGlobalDataCommon[162, idx]*sum_dely_sqr - gpuGlobalDataCommon[166, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[6, idx] += (gpuGlobalDataCommon[163, idx]*sum_dely_sqr - gpuGlobalDataCommon[167, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[7, idx] += (gpuGlobalDataCommon[164, idx]*sum_dely_sqr - gpuGlobalDataCommon[168, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[8, idx] += (gpuGlobalDataCommon[165, idx]*sum_dely_sqr - gpuGlobalDataCommon[169, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[5, idx] += (gpuGlobalDataRest[45, idx]*sum_dely_sqr - gpuGlobalDataRest[49, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[6, idx] += (gpuGlobalDataRest[46, idx]*sum_dely_sqr - gpuGlobalDataRest[50, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[7, idx] += (gpuGlobalDataRest[47, idx]*sum_dely_sqr - gpuGlobalDataRest[51, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[8, idx] += (gpuGlobalDataRest[48, idx]*sum_dely_sqr - gpuGlobalDataRest[52, idx]*sum_delx_dely)*one_by_det
     # if idx == 1
     #     @cuprintf("\n %f %f %f %f", gpuGlobalDataRest[5, idx],gpuGlobalDataRest[6, idx],gpuGlobalDataRest[7, idx],gpuGlobalDataRest[8, idx])
     # end
@@ -186,14 +186,14 @@ function interior_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
         qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
         flux_Gxn_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, 2)
         # CUDAnative.synchronize()
-        gpuGlobalDataCommon[162, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
-        gpuGlobalDataCommon[166, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * deln_weights
-        gpuGlobalDataCommon[163, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * dels_weights
-        gpuGlobalDataCommon[167, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * deln_weights
-        gpuGlobalDataCommon[164, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * dels_weights
-        gpuGlobalDataCommon[168, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * deln_weights
-        gpuGlobalDataCommon[165, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * dels_weights
-        gpuGlobalDataCommon[169, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * deln_weights
+        gpuGlobalDataRest[45, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
+        gpuGlobalDataRest[49, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * deln_weights
+        gpuGlobalDataRest[46, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * dels_weights
+        gpuGlobalDataRest[50, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * deln_weights
+        gpuGlobalDataRest[47, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * dels_weights
+        gpuGlobalDataRest[51, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * deln_weights
+        gpuGlobalDataRest[48, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * dels_weights
+        gpuGlobalDataRest[52, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * deln_weights
     end
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
@@ -204,13 +204,13 @@ function interior_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
     #     @cuprintf("\n %f", sum_dely_sqr)
     #     @cuprintf("\n %f", sum_delx_dely)
     #     @cuprintf("\n %f", det)
-    #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[162, idx],gpuGlobalDataCommon[163, idx],gpuGlobalDataCommon[164, idx],gpuGlobalDataCommon[165, idx])
-    #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[166, idx],gpuGlobalDataCommon[167, idx],gpuGlobalDataCommon[168, idx],gpuGlobalDataCommon[169, idx])
+    #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[45, idx],gpuGlobalDataRest[46, idx],gpuGlobalDataRest[47, idx],gpuGlobalDataRest[48, idx])
+    #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[49, idx],gpuGlobalDataRest[50, idx],gpuGlobalDataRest[51, idx],gpuGlobalDataRest[52, idx])
     # end
-    gpuGlobalDataRest[5, idx] += (gpuGlobalDataCommon[162, idx]*sum_dely_sqr - gpuGlobalDataCommon[166, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[6, idx] += (gpuGlobalDataCommon[163, idx]*sum_dely_sqr - gpuGlobalDataCommon[167, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[7, idx] += (gpuGlobalDataCommon[164, idx]*sum_dely_sqr - gpuGlobalDataCommon[168, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[8, idx] += (gpuGlobalDataCommon[165, idx]*sum_dely_sqr - gpuGlobalDataCommon[169, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[5, idx] += (gpuGlobalDataRest[45, idx]*sum_dely_sqr - gpuGlobalDataRest[49, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[6, idx] += (gpuGlobalDataRest[46, idx]*sum_dely_sqr - gpuGlobalDataRest[50, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[7, idx] += (gpuGlobalDataRest[47, idx]*sum_dely_sqr - gpuGlobalDataRest[51, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[8, idx] += (gpuGlobalDataRest[48, idx]*sum_dely_sqr - gpuGlobalDataRest[52, idx]*sum_delx_dely)*one_by_det
     # if idx == 1
     #     @cuprintf("\n %f %f %f %f", gpuGlobalDataRest[5, idx],gpuGlobalDataRest[6, idx],gpuGlobalDataRest[7, idx],gpuGlobalDataRest[8, idx])
     # end
@@ -299,14 +299,14 @@ function interior_dGy_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
         qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
         flux_Gyp_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, 2)
         # CUDAnative.synchronize()
-        gpuGlobalDataCommon[162, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
-        gpuGlobalDataCommon[166, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * deln_weights
-        gpuGlobalDataCommon[163, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * dels_weights
-        gpuGlobalDataCommon[167, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * deln_weights
-        gpuGlobalDataCommon[164, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * dels_weights
-        gpuGlobalDataCommon[168, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * deln_weights
-        gpuGlobalDataCommon[165, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * dels_weights
-        gpuGlobalDataCommon[169, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * deln_weights
+        gpuGlobalDataRest[45, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
+        gpuGlobalDataRest[49, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * deln_weights
+        gpuGlobalDataRest[46, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * dels_weights
+        gpuGlobalDataRest[50, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * deln_weights
+        gpuGlobalDataRest[47, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * dels_weights
+        gpuGlobalDataRest[51, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * deln_weights
+        gpuGlobalDataRest[48, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * dels_weights
+        gpuGlobalDataRest[52, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * deln_weights
         # if idx == 200
         #     @cuprintf("\n %d", conn)
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[170, idx], gpuGlobalDataCommon[171, idx], gpuGlobalDataCommon[172, idx], gpuGlobalDataCommon[173, idx])
@@ -317,10 +317,10 @@ function interior_dGy_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
-    gpuGlobalDataRest[5, idx] += (gpuGlobalDataCommon[166, idx]*sum_delx_sqr - gpuGlobalDataCommon[162, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[6, idx] += (gpuGlobalDataCommon[167, idx]*sum_delx_sqr - gpuGlobalDataCommon[163, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[7, idx] += (gpuGlobalDataCommon[168, idx]*sum_delx_sqr - gpuGlobalDataCommon[164, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[8, idx] += (gpuGlobalDataCommon[169, idx]*sum_delx_sqr - gpuGlobalDataCommon[165, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[5, idx] += (gpuGlobalDataRest[49, idx]*sum_delx_sqr - gpuGlobalDataRest[45, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[6, idx] += (gpuGlobalDataRest[50, idx]*sum_delx_sqr - gpuGlobalDataRest[46, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[7, idx] += (gpuGlobalDataRest[51, idx]*sum_delx_sqr - gpuGlobalDataRest[47, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[8, idx] += (gpuGlobalDataRest[52, idx]*sum_delx_sqr - gpuGlobalDataRest[48, idx]*sum_delx_dely)*one_by_det
     # if idx ==1
     #     @cuprintf("\n %f %f %f %f", gpuGlobalDataRest[5, idx],gpuGlobalDataRest[6, idx],gpuGlobalDataRest[7, idx],gpuGlobalDataRest[8, idx])
     # end
@@ -408,14 +408,14 @@ function interior_dGy_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
         qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
         flux_Gyn_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, 2)
         # CUDAnative.synchronize()
-        gpuGlobalDataCommon[162, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
-        gpuGlobalDataCommon[166, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * deln_weights
-        gpuGlobalDataCommon[163, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * dels_weights
-        gpuGlobalDataCommon[167, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * deln_weights
-        gpuGlobalDataCommon[164, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * dels_weights
-        gpuGlobalDataCommon[168, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * deln_weights
-        gpuGlobalDataCommon[165, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * dels_weights
-        gpuGlobalDataCommon[169, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * deln_weights
+        gpuGlobalDataRest[45, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
+        gpuGlobalDataRest[49, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * deln_weights
+        gpuGlobalDataRest[46, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * dels_weights
+        gpuGlobalDataRest[50, idx] += (gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]) * deln_weights
+        gpuGlobalDataRest[47, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * dels_weights
+        gpuGlobalDataRest[51, idx] += (gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]) * deln_weights
+        gpuGlobalDataRest[48, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * dels_weights
+        gpuGlobalDataRest[52, idx] += (gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]) * deln_weights
         # if idx == 1
         #     @cuprintf("\n %d", conn)
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[170, idx], gpuGlobalDataCommon[171, idx], gpuGlobalDataCommon[172, idx], gpuGlobalDataCommon[173, idx])
@@ -426,10 +426,10 @@ function interior_dGy_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
-    gpuGlobalDataRest[5, idx] += (gpuGlobalDataCommon[166, idx]*sum_delx_sqr - gpuGlobalDataCommon[162, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[6, idx] += (gpuGlobalDataCommon[167, idx]*sum_delx_sqr - gpuGlobalDataCommon[163, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[7, idx] += (gpuGlobalDataCommon[168, idx]*sum_delx_sqr - gpuGlobalDataCommon[164, idx]*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[8, idx] += (gpuGlobalDataCommon[169, idx]*sum_delx_sqr - gpuGlobalDataCommon[165, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[5, idx] += (gpuGlobalDataRest[49, idx]*sum_delx_sqr - gpuGlobalDataRest[45, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[6, idx] += (gpuGlobalDataRest[50, idx]*sum_delx_sqr - gpuGlobalDataRest[46, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[7, idx] += (gpuGlobalDataRest[51, idx]*sum_delx_sqr - gpuGlobalDataRest[47, idx]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[8, idx] += (gpuGlobalDataRest[52, idx]*sum_delx_sqr - gpuGlobalDataRest[48, idx]*sum_delx_dely)*one_by_det
     # if idx ==1
     #     @cuprintf("\n %f %f %f %f", gpuGlobalDataRest[5, idx],gpuGlobalDataRest[6, idx],gpuGlobalDataRest[7, idx],gpuGlobalDataRest[8, idx])
     # end
