@@ -5,7 +5,7 @@ function cal_flux_residual_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, 
 	idx = bx * bw + tx
 
 	if idx > 0 && idx <= gpuGlobalDataCommon[1,end]
-		flag1 = gpuGlobalDataCommon[6, idx]
+		flag1 = gpuGlobalDataFixedPoint[idx].flag_1
 		if flag1 == gpuConfigData[17]
 			wall_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx, gpuConfigData)
 		elseif flag1 == gpuConfigData[18]
@@ -15,7 +15,7 @@ function cal_flux_residual_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, 
 			outer_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx, gpuConfigData)
 			# sync_threads()
 		# else
-		# 	@cuprintf("Warning: There is problem with the flux flags %f \n", gpuGlobalDataCommon[6, idx])
+		# 	@cuprintf("Warning: There is problem with the flux flags %f \n", gpuGlobalDataFixedPoint[idx].flag_1)
 		end
 	end
 	# sync_threads()

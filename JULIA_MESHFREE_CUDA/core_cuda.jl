@@ -110,7 +110,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpu
         @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataCommon) #, out1, out2)
         # synchronize(str)
         # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
-        @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData)
+        @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuConfigData)
         # synchronize(str)
         # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
         @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuConfigData)
@@ -140,14 +140,10 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpu
     end
     synchronize()
     close(residue_io)
-    # println(Array(out1))
-    # @cuprintf("\n It is ss2 %lf ", gpuGlobalDataCommon[31, 3])
-    # globalDataCommon = Array(gpuGlobalDataCommon)
-    # println("Test is ", globalDataCommon[31,3])
     return nothing
 end
 
-function q_var_cuda_kernel(gpuGlobalDataCommon) #out1, out2)
+function q_var_cuda_kernel(gpuGlobalDataCommon)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -178,7 +174,7 @@ function q_var_cuda_kernel(gpuGlobalDataCommon) #out1, out2)
     return nothing
 end
 
-function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData)
+function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuConfigData)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -192,15 +188,15 @@ function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData)
     sum_dely_delq1, sum_dely_delq2,sum_dely_delq3,sum_dely_delq4 = 0.0,0.0,0.0,0.0
 
     if idx > 0 && idx <= gpuGlobalDataCommon[1,end]
-        x_i = gpuGlobalDataCommon[2, idx]
-        y_i = gpuGlobalDataCommon[3, idx]
+        x_i = gpuGlobalDataFixedPoint[idx].x
+        y_i = gpuGlobalDataFixedPoint[idx].y
         for iter in 9:28
             conn = Int(gpuGlobalDataCommon[iter, idx])
             if conn == 0.0
                 break
             end
-            x_k = gpuGlobalDataCommon[2, conn]
-            y_k = gpuGlobalDataCommon[3, conn]
+            x_k = gpuGlobalDataFixedPoint[conn].x
+            y_k = gpuGlobalDataFixedPoint[conn].y
             delx = x_k - x_i
             dely = y_k - y_i
             dist = CUDAnative.hypot(delx, dely)

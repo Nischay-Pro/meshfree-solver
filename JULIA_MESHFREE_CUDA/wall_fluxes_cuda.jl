@@ -23,10 +23,10 @@ function wall_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx, 
         gpuGlobalDataCommon[i, idx] = 0.0
     end
 
-    x_i = gpuGlobalDataCommon[2, idx]
-    y_i = gpuGlobalDataCommon[3, idx]
-    nx = gpuGlobalDataCommon[29, idx]
-    ny = gpuGlobalDataCommon[30, idx]
+    x_i = gpuGlobalDataFixedPoint[idx].x
+    y_i = gpuGlobalDataFixedPoint[idx].y
+    nx = gpuGlobalDataFixedPoint[idx].nx
+    ny = gpuGlobalDataFixedPoint[idx].ny
 
     tx = ny
     ty = -nx
@@ -36,8 +36,8 @@ function wall_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx, 
         if conn == 0
             break
         end
-        x_k = gpuGlobalDataCommon[2, conn]
-        y_k = gpuGlobalDataCommon[3, conn]
+        x_k = gpuGlobalDataFixedPoint[conn].x
+        y_k = gpuGlobalDataFixedPoint[conn].y
         delx = x_k - x_i
         dely = y_k - y_i
         dels = delx*tx + dely*ty
@@ -169,10 +169,10 @@ function wall_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx, 
 
     # result1,result2,result3,result4 = 0.0,0.0,0.0,0.0
 
-    x_i = gpuGlobalDataCommon[2, idx]
-    y_i = gpuGlobalDataCommon[3, idx]
-    nx = gpuGlobalDataCommon[29, idx]
-    ny = gpuGlobalDataCommon[30, idx]
+    x_i = gpuGlobalDataFixedPoint[idx].x
+    y_i = gpuGlobalDataFixedPoint[idx].y
+    nx = gpuGlobalDataFixedPoint[idx].nx
+    ny = gpuGlobalDataFixedPoint[idx].ny
 
     tx = ny
     ty = -nx
@@ -182,8 +182,8 @@ function wall_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx, 
         if conn == 0.0
             break
         end
-        x_k = gpuGlobalDataCommon[2, conn]
-        y_k = gpuGlobalDataCommon[3, conn]
+        x_k = gpuGlobalDataFixedPoint[conn].x
+        y_k = gpuGlobalDataFixedPoint[conn].y
         delx = x_k - x_i
         dely = y_k - y_i
         dels = delx*tx + dely*ty
@@ -289,10 +289,10 @@ function wall_dGy_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx, 
 
     # result1,result2,result3,result4 = 0.0,0.0,0.0,0.0
 
-    x_i = gpuGlobalDataCommon[2, idx]
-    y_i = gpuGlobalDataCommon[3, idx]
-    nx = gpuGlobalDataCommon[29, idx]
-    ny = gpuGlobalDataCommon[30, idx]
+    x_i = gpuGlobalDataFixedPoint[idx].x
+    y_i = gpuGlobalDataFixedPoint[idx].y
+    nx = gpuGlobalDataFixedPoint[idx].nx
+    ny = gpuGlobalDataFixedPoint[idx].ny
 
     tx = ny
     ty = -nx
@@ -303,8 +303,8 @@ function wall_dGy_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx, 
         if conn == 0.0
             break
         end
-        x_k = gpuGlobalDataCommon[2, conn]
-        y_k = gpuGlobalDataCommon[3, conn]
+        x_k = gpuGlobalDataFixedPoint[conn].x
+        y_k = gpuGlobalDataFixedPoint[conn].y
         delx = x_k - x_i
         dely = y_k - y_i
         dels = delx*tx + dely*ty
