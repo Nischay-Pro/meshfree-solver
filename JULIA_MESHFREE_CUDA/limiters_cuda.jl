@@ -9,8 +9,8 @@ function venkat_limiter_kernel_i(gpuGlobalDataCommon, gpuGlobalDataRest, idx, gp
     del_neg = 0.0
 
     for i in 1:4
-        q = gpuGlobalDataCommon[38+i, idx]
-        del_neg = gpuGlobalDataCommon[38+i, idx] - 0.5*(delx * gpuGlobalDataCommon[42+i, idx] + dely * gpuGlobalDataCommon[46+i, idx]) - q
+        q = gpuGlobalDataRest[8+i, idx]
+        del_neg = gpuGlobalDataRest[8+i, idx] - 0.5*(delx * gpuGlobalDataCommon[42+i, idx] + dely * gpuGlobalDataCommon[46+i, idx]) - q
         if abs(del_neg) <= 1e-5
             gpuGlobalDataCommon[145+i,idx] = 1.0
         elseif abs(del_neg) > 1e-5
@@ -49,8 +49,8 @@ function venkat_limiter_kernel_k(gpuGlobalDataCommon, gpuGlobalDataRest, idx, gp
     del_neg = 0.0
 
     for i in 1:4
-        q = gpuGlobalDataCommon[38+i, idx]
-        del_neg = gpuGlobalDataCommon[38+i, idx] - 0.5*(delx * gpuGlobalDataCommon[42+i, idx] + dely * gpuGlobalDataCommon[46+i, idx]) - q
+        q = gpuGlobalDataRest[8+i, idx]
+        del_neg = gpuGlobalDataRest[8+i, idx] - 0.5*(delx * gpuGlobalDataCommon[42+i, idx] + dely * gpuGlobalDataCommon[46+i, idx]) - q
         if abs(del_neg) <= 1e-5
             gpuGlobalDataCommon[149+i,trueidx] = 1.0
         elseif abs(del_neg) > 1e-5
@@ -80,10 +80,10 @@ end
 
 # function max_q_values_kernel(gpuGlobalDataCommon, idx, maxq)
 #     maxq = (
-#                 gpuGlobalDataCommon[39, idx],
-#                 gpuGlobalDataCommon[40, idx],
-#                 gpuGlobalDataCommon[41, idx],
-#                 gpuGlobalDataCommon[42, idx]
+#                 gpuGlobalDataRest[9, idx],
+#                 gpuGlobalDataRest[10, idx],
+#                 gpuGlobalDataRest[11, idx],
+#                 gpuGlobalDataRest[12, idx]
 #             )
 #     for iter in 9:28
 #         conn = Int(gpuGlobalDataCommon[iter, idx])
@@ -91,17 +91,17 @@ end
 #             break
 #         end
 #         # currq = globaldata[itm].q
-#         if maxq[1] < gpuGlobalDataCommon[39, conn]
-#             maxq = (gpuGlobalDataCommon[39, conn], maxq[2], maxq[3], maxq[4])
+#         if maxq[1] < gpuGlobalDataRest[9, conn]
+#             maxq = (gpuGlobalDataRest[9, conn], maxq[2], maxq[3], maxq[4])
 #         end
-#         if maxq[2] < gpuGlobalDataCommon[40, conn]
-#             maxq = (maxq[1], gpuGlobalDataCommon[40, conn], maxq[3], maxq[4])
+#         if maxq[2] < gpuGlobalDataRest[10, conn]
+#             maxq = (maxq[1], gpuGlobalDataRest[10, conn], maxq[3], maxq[4])
 #         end
-#         if maxq[3] < gpuGlobalDataCommon[41, conn]
-#             maxq = (maxq[1], maxq[2], gpuGlobalDataCommon[41, conn], maxq[4])
+#         if maxq[3] < gpuGlobalDataRest[11, conn]
+#             maxq = (maxq[1], maxq[2], gpuGlobalDataRest[11, conn], maxq[4])
 #         end
-#         if maxq[4] < gpuGlobalDataCommon[42, conn]
-#             maxq = (maxq[1], maxq[2], maxq[3], gpuGlobalDataCommon[42, conn])
+#         if maxq[4] < gpuGlobalDataRest[12, conn]
+#             maxq = (maxq[1], maxq[2], maxq[3], gpuGlobalDataRest[12, conn])
 #         end
 #     end
 #     return nothing
@@ -109,10 +109,10 @@ end
 
 # function min_q_values_kernel(gpuGlobalDataCommon, idx, minq)
 #     minq = (
-#                 gpuGlobalDataCommon[39, idx],
-#                 gpuGlobalDataCommon[40, idx],
-#                 gpuGlobalDataCommon[41, idx],
-#                 gpuGlobalDataCommon[42, idx]
+#                 gpuGlobalDataRest[9, idx],
+#                 gpuGlobalDataRest[10, idx],
+#                 gpuGlobalDataRest[11, idx],
+#                 gpuGlobalDataRest[12, idx]
 #             )
 #     for iter in 9:28
 #         conn = Int(gpuGlobalDataCommon[iter, idx])
@@ -120,17 +120,17 @@ end
 #             break
 #         end
 #         # currq = globaldata[itm].q
-#         if minq[1] > gpuGlobalDataCommon[39, conn]
-#             minq = (gpuGlobalDataCommon[39, conn], minq[2], minq[3], minq[4])
+#         if minq[1] > gpuGlobalDataRest[9, conn]
+#             minq = (gpuGlobalDataRest[9, conn], minq[2], minq[3], minq[4])
 #         end
-#         if minq[2] > gpuGlobalDataCommon[40, conn]
-#             minq = (minq[1], gpuGlobalDataCommon[40, conn], minq[3], minq[4])
+#         if minq[2] > gpuGlobalDataRest[10, conn]
+#             minq = (minq[1], gpuGlobalDataRest[10, conn], minq[3], minq[4])
 #         end
-#         if minq[3] > gpuGlobalDataCommon[41, conn]
-#             minq = (minq[1], minq[2], gpuGlobalDataCommon[41, conn], minq[4])
+#         if minq[3] > gpuGlobalDataRest[11, conn]
+#             minq = (minq[1], minq[2], gpuGlobalDataRest[11, conn], minq[4])
 #         end
-#         if minq[4] > gpuGlobalDataCommon[42, conn]
-#             minq = (minq[1], minq[2], minq[3], gpuGlobalDataCommon[42, conn])
+#         if minq[4] > gpuGlobalDataRest[12, conn]
+#             minq = (minq[1], minq[2], minq[3], gpuGlobalDataRest[12, conn])
 #         end
 #     end
 #     return nothing
