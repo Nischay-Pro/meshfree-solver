@@ -1,6 +1,6 @@
-function venkat_limiter_kernel_i(gpuGlobalDataCommon, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
+function venkat_limiter_kernel_i(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
     VL_CONST = gpuConfigData[8]
-    ds = gpuGlobalDataCommon[137, idx]
+    ds = gpuGlobalDataFixedPoint[idx].short_distance
     # @cuprintf("Type is %s", typeof(VL_CONST))
     epsigh = VL_CONST * ds
     power3 = 3.0
@@ -38,9 +38,9 @@ function venkat_limiter_kernel_i(gpuGlobalDataCommon, gpuGlobalDataRest, idx, gp
     return nothing
 end
 
-function venkat_limiter_kernel_k(gpuGlobalDataCommon, gpuGlobalDataRest, idx, gpuConfigData, trueidx, delx, dely)
+function venkat_limiter_kernel_k(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, trueidx, delx, dely)
     VL_CONST = gpuConfigData[8]
-    ds = gpuGlobalDataCommon[137, idx]
+    ds = gpuGlobalDataFixedPoint[idx].short_distance
     # @cuprintf("Type is %s", typeof(VL_CONST))
     epsigh = VL_CONST * ds
     power3 = 3.0

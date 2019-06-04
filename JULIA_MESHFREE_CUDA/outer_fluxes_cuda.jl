@@ -54,8 +54,8 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
         if limiter_flag == 1
-            venkat_limiter_kernel_i(gpuGlobalDataCommon, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
-            venkat_limiter_kernel_k(gpuGlobalDataCommon, gpuGlobalDataRest, conn, gpuConfigData, idx, delx, dely)
+            venkat_limiter_kernel_i(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
+            venkat_limiter_kernel_k(gpuGlobalDataFixedPoint, gpuGlobalDataRest, conn, gpuConfigData, idx, delx, dely)
             # CUDAnative.synchronize()
             qtilde_i =  (
                             gpuGlobalDataRest[9, idx] - 0.5*gpuGlobalDataRest[29, idx]*(delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx]),
@@ -155,8 +155,8 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
         if limiter_flag == 1
-            venkat_limiter_kernel_i(gpuGlobalDataCommon, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
-            venkat_limiter_kernel_k(gpuGlobalDataCommon, gpuGlobalDataRest, conn, gpuConfigData, idx, delx, dely)
+            venkat_limiter_kernel_i(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
+            venkat_limiter_kernel_k(gpuGlobalDataFixedPoint, gpuGlobalDataRest, conn, gpuConfigData, idx, delx, dely)
             # CUDAnative.synchronize()
             qtilde_i =  (
                             gpuGlobalDataRest[9, idx] - 0.5*gpuGlobalDataRest[29, idx]*(delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx]),
@@ -256,8 +256,8 @@ function outer_dGy_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
         if limiter_flag == 1
-            venkat_limiter_kernel_i(gpuGlobalDataCommon, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
-            venkat_limiter_kernel_k(gpuGlobalDataCommon, gpuGlobalDataRest, conn, gpuConfigData, idx, delx, dely)
+            venkat_limiter_kernel_i(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
+            venkat_limiter_kernel_k(gpuGlobalDataFixedPoint, gpuGlobalDataRest, conn, gpuConfigData, idx, delx, dely)
             # CUDAnative.synchronize()
             qtilde_i =  (
                             gpuGlobalDataRest[9, idx] - 0.5*gpuGlobalDataRest[29, idx]*(delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx]),
