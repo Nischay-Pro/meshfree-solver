@@ -62,21 +62,21 @@ function wall_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
             venkat_limiter_kernel_k(gpuGlobalDataCommon, conn, gpuConfigData, idx, delx, dely)
             # CUDAnative.synchronize()
             qtilde_i =  (
-                            gpuGlobalDataCommon[39, idx] - 0.5*gpuGlobalDataCommon[146,idx]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-                            gpuGlobalDataCommon[40, idx] - 0.5*gpuGlobalDataCommon[147,idx]*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-                            gpuGlobalDataCommon[41, idx] - 0.5*gpuGlobalDataCommon[148,idx]*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-                            gpuGlobalDataCommon[42, idx] - 0.5*gpuGlobalDataCommon[149,idx]*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
+                            gpuGlobalDataCommon[39, idx] - 0.5*gpuGlobalDataCommon[146, idx]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
+                            gpuGlobalDataCommon[40, idx] - 0.5*gpuGlobalDataCommon[147, idx]*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
+                            gpuGlobalDataCommon[41, idx] - 0.5*gpuGlobalDataCommon[148, idx]*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
+                            gpuGlobalDataCommon[42, idx] - 0.5*gpuGlobalDataCommon[149, idx]*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
                         )
             qtilde_k = (
                             gpuGlobalDataCommon[39, conn] - 0.5*gpuGlobalDataCommon[150,idx]*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-                            gpuGlobalDataCommon[40, conn] - 0.5*gpuGlobalDataCommon[151,idx]*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-                            gpuGlobalDataCommon[41, conn] - 0.5*gpuGlobalDataCommon[152,idx]*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-                            gpuGlobalDataCommon[42, conn] - 0.5*gpuGlobalDataCommon[153,idx]*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
+                            gpuGlobalDataCommon[40, conn] - 0.5*gpuGlobalDataCommon[151, idx]*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
+                            gpuGlobalDataCommon[41, conn] - 0.5*gpuGlobalDataCommon[152, idx]*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
+                            gpuGlobalDataCommon[42, conn] - 0.5*gpuGlobalDataCommon[153, idx]*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
                         )
         end
         # if idx == 3
         #     @cuprintf("\n %d", conn)
-        #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[146,idx], gpuGlobalDataCommon[147,idx], gpuGlobalDataCommon[148,idx], gpuGlobalDataCommon[149,idx])
+        #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[146, idx], gpuGlobalDataCommon[147, idx], gpuGlobalDataCommon[148, idx], gpuGlobalDataCommon[149, idx])
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataCommon[150,conn], gpuGlobalDataCommon[151,conn], gpuGlobalDataCommon[152,conn], gpuGlobalDataCommon[153,conn])
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", qtilde_k[1], qtilde_k[2], qtilde_k[3], qtilde_k[4])
         # end
@@ -202,16 +202,16 @@ function wall_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
             venkat_limiter_kernel_k(gpuGlobalDataCommon, conn, gpuConfigData, idx, delx, dely)
             # CUDAnative.synchronize()
             qtilde_i =  (
-                            gpuGlobalDataCommon[39, idx] - 0.5*gpuGlobalDataCommon[146,idx]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-                            gpuGlobalDataCommon[40, idx] - 0.5*gpuGlobalDataCommon[147,idx]*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-                            gpuGlobalDataCommon[41, idx] - 0.5*gpuGlobalDataCommon[148,idx]*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-                            gpuGlobalDataCommon[42, idx] - 0.5*gpuGlobalDataCommon[149,idx]*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
+                            gpuGlobalDataCommon[39, idx] - 0.5*gpuGlobalDataCommon[146, idx]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
+                            gpuGlobalDataCommon[40, idx] - 0.5*gpuGlobalDataCommon[147, idx]*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
+                            gpuGlobalDataCommon[41, idx] - 0.5*gpuGlobalDataCommon[148, idx]*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
+                            gpuGlobalDataCommon[42, idx] - 0.5*gpuGlobalDataCommon[149, idx]*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
                         )
             qtilde_k = (
                             gpuGlobalDataCommon[39, conn] - 0.5*gpuGlobalDataCommon[150,idx]*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-                            gpuGlobalDataCommon[40, conn] - 0.5*gpuGlobalDataCommon[151,idx]*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-                            gpuGlobalDataCommon[41, conn] - 0.5*gpuGlobalDataCommon[152,idx]*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-                            gpuGlobalDataCommon[42, conn] - 0.5*gpuGlobalDataCommon[153,idx]*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
+                            gpuGlobalDataCommon[40, conn] - 0.5*gpuGlobalDataCommon[151, idx]*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
+                            gpuGlobalDataCommon[41, conn] - 0.5*gpuGlobalDataCommon[152, idx]*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
+                            gpuGlobalDataCommon[42, conn] - 0.5*gpuGlobalDataCommon[153, idx]*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
                         )
         end
 
@@ -324,16 +324,16 @@ function wall_dGy_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
             venkat_limiter_kernel_k(gpuGlobalDataCommon, conn, gpuConfigData, idx, delx, dely)
             # CUDAnative.synchronize()
             qtilde_i =  (
-                            gpuGlobalDataCommon[39, idx] - 0.5*gpuGlobalDataCommon[146,idx]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-                            gpuGlobalDataCommon[40, idx] - 0.5*gpuGlobalDataCommon[147,idx]*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-                            gpuGlobalDataCommon[41, idx] - 0.5*gpuGlobalDataCommon[148,idx]*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-                            gpuGlobalDataCommon[42, idx] - 0.5*gpuGlobalDataCommon[149,idx]*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
+                            gpuGlobalDataCommon[39, idx] - 0.5*gpuGlobalDataCommon[146, idx]*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
+                            gpuGlobalDataCommon[40, idx] - 0.5*gpuGlobalDataCommon[147, idx]*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
+                            gpuGlobalDataCommon[41, idx] - 0.5*gpuGlobalDataCommon[148, idx]*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
+                            gpuGlobalDataCommon[42, idx] - 0.5*gpuGlobalDataCommon[149, idx]*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
                         )
             qtilde_k = (
                             gpuGlobalDataCommon[39, conn] - 0.5*gpuGlobalDataCommon[150,idx]*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-                            gpuGlobalDataCommon[40, conn] - 0.5*gpuGlobalDataCommon[151,idx]*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-                            gpuGlobalDataCommon[41, conn] - 0.5*gpuGlobalDataCommon[152,idx]*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-                            gpuGlobalDataCommon[42, conn] - 0.5*gpuGlobalDataCommon[153,idx]*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
+                            gpuGlobalDataCommon[40, conn] - 0.5*gpuGlobalDataCommon[151, idx]*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
+                            gpuGlobalDataCommon[41, conn] - 0.5*gpuGlobalDataCommon[152, idx]*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
+                            gpuGlobalDataCommon[42, conn] - 0.5*gpuGlobalDataCommon[153, idx]*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
                         )
         end
 
