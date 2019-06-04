@@ -1,4 +1,4 @@
-function outer_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
+function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
 
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
@@ -33,9 +33,9 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
     tx = ny
     ty = -nx
 
-    for iter in 56:75
-        conn = Int(gpuGlobalDataCommon[iter, idx])
-        if conn == 0.0
+    for iter in 25:44
+        conn = gpuGlobalDataConn[iter, idx]
+        if conn == 0
             break
         end
         x_k = gpuGlobalDataFixedPoint[conn].x
@@ -74,9 +74,9 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
-        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataRest, idx)
         flux_quad_GxIII_kernel(nx, ny, gpuGlobalDataRest, idx, 1)
-        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataRest, idx)
         flux_quad_GxIII_kernel(nx, ny, gpuGlobalDataRest, idx, 2)
         # CUDAnative.synchronize()
         gpuGlobalDataRest[45, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
@@ -99,7 +99,7 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
     return nothing
 end
 
-function outer_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
+function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
 
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
@@ -134,9 +134,9 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
     tx = ny
     ty = -nx
 
-    for iter in 76:95
-        conn = Int(gpuGlobalDataCommon[iter, idx])
-        if conn == 0.0
+    for iter in 45:64
+        conn = gpuGlobalDataConn[iter, idx]
+        if conn == 0
             break
         end
         x_k = gpuGlobalDataFixedPoint[conn].x
@@ -175,9 +175,9 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
-        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataRest, idx)
         flux_quad_GxIV_kernel(nx, ny, gpuGlobalDataRest, idx, 1)
-        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataRest, idx)
         flux_quad_GxIV_kernel(nx, ny, gpuGlobalDataRest, idx, 2)
         # CUDAnative.synchronize()
         gpuGlobalDataRest[45, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
@@ -200,7 +200,7 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
     return nothing
 end
 
-function outer_dGy_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
+function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
 
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
@@ -235,9 +235,9 @@ function outer_dGy_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
     tx = ny
     ty = -nx
 
-    for iter in 96:115
-        conn = Int(gpuGlobalDataCommon[iter, idx])
-        if conn == 0.0
+    for iter in 65:84
+        conn = gpuGlobalDataConn[iter, idx]
+        if conn == 0
             break
         end
         x_k = gpuGlobalDataFixedPoint[conn].x
@@ -276,9 +276,9 @@ function outer_dGy_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
-        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, gpuGlobalDataRest, idx)
         flux_Gyp_kernel(nx, ny, gpuGlobalDataRest, idx, 1)
-        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataCommon, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, gpuGlobalDataRest, idx)
         flux_Gyp_kernel(nx, ny, gpuGlobalDataRest, idx, 2)
         # CUDAnative.synchronize()
         gpuGlobalDataRest[45, idx] += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
