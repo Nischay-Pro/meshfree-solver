@@ -52,19 +52,6 @@ function interior_dGx_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
         sum_dely_sqr = sum_dely_sqr + deln*deln_weights
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        # qtilde_i =  (
-        #                 gpuGlobalDataCommon[39, idx] - 0.5*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-        #                 gpuGlobalDataCommon[40, idx] - 0.5*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-        #                 gpuGlobalDataCommon[41, idx] - 0.5*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-        #                 gpuGlobalDataCommon[42, idx] - 0.5*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
-        #             )
-        # qtilde_k = (
-        #                 gpuGlobalDataCommon[39, conn] - 0.5*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-        #                 gpuGlobalDataCommon[40, conn] - 0.5*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-        #                 gpuGlobalDataCommon[41, conn] - 0.5*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-        #                 gpuGlobalDataCommon[42, conn] - 0.5*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
-        #             )
-
         if limiter_flag == 1
             venkat_limiter_kernel_i(gpuGlobalDataCommon, idx, gpuConfigData, delx, dely)
             venkat_limiter_kernel_k(gpuGlobalDataCommon, conn, gpuConfigData, idx, delx, dely)
@@ -166,19 +153,6 @@ function interior_dGx_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
         sum_delx_sqr = sum_delx_sqr + dels*dels_weights
         sum_dely_sqr = sum_dely_sqr + deln*deln_weights
         sum_delx_dely = sum_delx_dely + dels*deln_weights
-
-        # qtilde_i =  (
-        #                 gpuGlobalDataCommon[39, idx] - 0.5*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-        #                 gpuGlobalDataCommon[40, idx] - 0.5*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-        #                 gpuGlobalDataCommon[41, idx] - 0.5*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-        #                 gpuGlobalDataCommon[42, idx] - 0.5*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
-        #             )
-        # qtilde_k = (
-        #                 gpuGlobalDataCommon[39, conn] - 0.5*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-        #                 gpuGlobalDataCommon[40, conn] - 0.5*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-        #                 gpuGlobalDataCommon[41, conn] - 0.5*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-        #                 gpuGlobalDataCommon[42, conn] - 0.5*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
-        #             )
 
         if limiter_flag == 1
             venkat_limiter_kernel_i(gpuGlobalDataCommon, idx, gpuConfigData, delx, dely)
@@ -290,19 +264,6 @@ function interior_dGy_pos_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
         sum_dely_sqr = sum_dely_sqr + deln*deln_weights
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        # qtilde_i =  (
-        #                 gpuGlobalDataCommon[39, idx] - 0.5*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-        #                 gpuGlobalDataCommon[40, idx] - 0.5*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-        #                 gpuGlobalDataCommon[41, idx] - 0.5*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-        #                 gpuGlobalDataCommon[42, idx] - 0.5*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
-        #             )
-        # qtilde_k = (
-        #                 gpuGlobalDataCommon[39, conn] - 0.5*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-        #                 gpuGlobalDataCommon[40, conn] - 0.5*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-        #                 gpuGlobalDataCommon[41, conn] - 0.5*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-        #                 gpuGlobalDataCommon[42, conn] - 0.5*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
-        #             )
-
         if limiter_flag == 1
             venkat_limiter_kernel_i(gpuGlobalDataCommon, idx, gpuConfigData, delx, dely)
             venkat_limiter_kernel_k(gpuGlobalDataCommon, conn, gpuConfigData, idx, delx, dely)
@@ -409,19 +370,6 @@ function interior_dGy_neg_kernel(gpuGlobalDataCommon, idx, gpuConfigData)
         sum_delx_sqr = sum_delx_sqr + dels*dels_weights
         sum_dely_sqr = sum_dely_sqr + deln*deln_weights
         sum_delx_dely = sum_delx_dely + dels*deln_weights
-
-        # qtilde_i =  (
-        #                 gpuGlobalDataCommon[39, idx] - 0.5*(delx * gpuGlobalDataCommon[43, idx] + dely * gpuGlobalDataCommon[47, idx]),
-        #                 gpuGlobalDataCommon[40, idx] - 0.5*(delx * gpuGlobalDataCommon[44, idx] + dely * gpuGlobalDataCommon[48, idx]),
-        #                 gpuGlobalDataCommon[41, idx] - 0.5*(delx * gpuGlobalDataCommon[45, idx] + dely * gpuGlobalDataCommon[49, idx]),
-        #                 gpuGlobalDataCommon[42, idx] - 0.5*(delx * gpuGlobalDataCommon[46, idx] + dely * gpuGlobalDataCommon[50, idx])
-        #             )
-        # qtilde_k = (
-        #                 gpuGlobalDataCommon[39, conn] - 0.5*(delx * gpuGlobalDataCommon[43, conn] + dely * gpuGlobalDataCommon[47, conn]),
-        #                 gpuGlobalDataCommon[40, conn] - 0.5*(delx * gpuGlobalDataCommon[44, conn] + dely * gpuGlobalDataCommon[48, conn]),
-        #                 gpuGlobalDataCommon[41, conn] - 0.5*(delx * gpuGlobalDataCommon[45, conn] + dely * gpuGlobalDataCommon[49, conn]),
-        #                 gpuGlobalDataCommon[42, conn] - 0.5*(delx * gpuGlobalDataCommon[46, conn] + dely * gpuGlobalDataCommon[50, conn])
-        #             )
 
         if limiter_flag == 1
             venkat_limiter_kernel_i(gpuGlobalDataCommon, idx, gpuConfigData, delx, dely)

@@ -92,26 +92,6 @@ function calculateConnectivity(globaldata, idx)
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 end
 
-# function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
-#     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
-#     # print(" 111\n")
-
-#     q_var_derivatives(globaldata, configData)
-
-#     cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
-
-#     func_delta(globaldata, configData)
-
-#     state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
-#     # println("")
-#     println(globaldata[3])
-# end
-
-# function tester(gpu_input, gpu_output)
-
-#     # println(temp_gpu)
-# end
-
 function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, res_old, numPoints)
 
     # dev::CuDevice=CuDevice(0)
@@ -128,19 +108,19 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr,
             println("Compiling CUDA Kernel. This might take a while...")
         end
         @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataCommon) #, out1, out2)
-        synchronize(str)
+        # synchronize(str)
         # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
         @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, gpuConfigData)
-        synchronize(str)
+        # synchronize(str)
         # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
         @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel(gpuGlobalDataCommon, gpuConfigData)
         # synchronize(str)
         # @cuprintf("\n It is %f ", gpuGlobalDataCommon[31, 3])
         @cuda blocks=blockspergrid threads=threadsperblock func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
-        synchronize(str)
+        # synchronize(str)
         # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
         @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr)
-        synchronize(str)
+        # synchronize(str)
         gpu_reduced(+, gpuSumResSqr, gpuSumResSqrOutput)
         temp_gpu = Array(gpuSumResSqrOutput)[1]
     # #     # @cuprintf("\n It is ss %lf ", gpuGlobalDataCommon[31, 3])
@@ -354,68 +334,3 @@ function gpu_reduced(op::Function, input::CuArray{T}, output::CuArray{T}) where 
     @cuda blocks=blocks threads=threads reduce_grid(op, input, output, len)
     @cuda threads=1024 reduce_grid(op, output, output, blocks)
 end
-
-# function q_var_derivatives(globaldata, configData)
-#     power::Float64 = configData["core"]["power"]
-
-#     for (idx, itm) in enumerate(globaldata)
-#         rho = itm.prim[1]
-#         u1 = itm.prim[2]
-#         u2 = itm.prim[3]
-#         pr = itm.prim[4]
-
-#         beta::Float64 = 0.5 * (rho / pr)
-#         globaldata[idx].q[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
-#         two_times_beta = 2.0 * beta
-#         # if idx == 1
-#         #     println(globaldata[idx].q[1])
-#         # end
-#         globaldata[idx].q[2] = (two_times_beta * u1)
-#         globaldata[idx].q[3] = (two_times_beta * u2)
-#         globaldata[idx].q[4] = -two_times_beta
-#         # if idx == 3
-#         #     println(globaldata[3])
-#         # end
-#     end
-
-#     for (idx,itm) in enumerate(globaldata)
-#         x_i = itm.x
-#         y_i = itm.y
-#         sum_delx_sqr = zero(Float64)
-#         sum_dely_sqr = zero(Float64)
-#         sum_delx_dely = zero(Float64)
-#         sum_delx_delq = zeros(Float64, 4)
-#         sum_dely_delq = zeros(Float64, 4)
-#         for conn in itm.conn
-#             x_k = globaldata[conn].x
-#             y_k = globaldata[conn].y
-#             delx = x_k - x_i
-#             dely = y_k - y_i
-#             dist = hypot(delx, dely)
-#             weights = dist ^ power
-#             sum_delx_sqr += ((delx * delx) * weights)
-#             sum_dely_sqr += ((dely * dely) * weights)
-#             sum_delx_dely += ((delx * dely) * weights)
-#             sum_delx_delq += (weights * delx * (globaldata[conn].q - globaldata[idx].q))
-#             sum_dely_delq += (weights * dely * (globaldata[conn].q - globaldata[idx].q))
-#         end
-#         det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
-#         one_by_det = 1.0 / det
-#         sum_delx_delq1 = sum_delx_delq * sum_dely_sqr
-#         sum_dely_delq1 = sum_dely_delq * sum_delx_dely
-#         tempsumx = one_by_det * (sum_delx_delq1 - sum_dely_delq1)
-
-#         sum_dely_delq2 = sum_dely_delq * sum_delx_sqr
-#         sum_delx_delq2 = sum_delx_delq * sum_delx_dely
-#         tempsumy = one_by_det * (sum_dely_delq2 - sum_delx_delq2)
-#         globaldata[idx].dq = [tempsumx, tempsumy]
-
-#         for i in 1:4
-#             maximum(globaldata, idx, i)
-#             minimum(globaldata, idx, i)
-#         end
-
-#     end
-
-#     # println(globaldata[3])
-# end

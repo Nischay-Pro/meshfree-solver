@@ -10,7 +10,8 @@ function main()
     # gpu_globaldata = CuArray{Point,1}(undef, getConfig()["core"]["points"])
     globaldata = Array{Point,1}(undef, numPoints)
     globalDataCommon = zeros(Float64, 173, numPoints)
-    table = Array{Int,1}(undef, numPoints)
+    globalDataFixedPoint = Array{FixedPoint,1}(undef, numPoints)
+    # table = Array{Int,1}(undef, numPoints)
     defprimal = getInitialPrimitive(configData)
     # wallpts, Interiorpts, outerpts, shapepts = 0,0,0,0
     # wallptsidx = Array{Int,1}(undef, 0)
@@ -18,7 +19,7 @@ function main()
     # outerptsidx = Array{Int,1}(undef, 0)
     # shapeptsidx = Array{Int,1}(undef, 0)
     println("Start Read")
-    readFile(file_name::String, globaldata, table, defprimal)
+    readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint)
     # file1 = open("partGridNew--160-60")
     # data1 = read(file1, String)
     # splitdata = split(data1, "\n")
@@ -34,12 +35,12 @@ function main()
 
 
     println("Start table sorting")
-    for idx in table
+    for idx in 1:numPoints
         connectivity = calculateConnectivity(globaldata, idx)
         setConnectivity(globaldata[idx], connectivity)
         smallest_dist(globaldata, idx)
         convertToArray(globalDataCommon, globaldata[idx], idx)
-        if idx % (length(table) * 0.25) == 0
+        if idx % (numPoints * 0.25) == 0
             println("Bump In Table")
         end
     end
@@ -51,8 +52,8 @@ function main()
     # gpu_globaldata[1:2000] = CuArray(globaldata[1:2000])
     # println(typeof(gpuGlobaldataDq))
     # gpuGlobaldataLocalID = CuArray(globaldataLocalID)
-    gpuSumResSqr = CuArray(zeros(Float32, numPoints))
-    gpuSumResSqrOutput = CuArray(zeros(Float32, numPoints))
+    gpuSumResSqr = cuzeros(Float32, numPoints)
+    gpuSumResSqrOutput = cuzeros(Float32, numPoints)
     println("Passing to GPU Globaldata")
     gpuGlobalDataCommon = CuArray(globalDataCommon)
     gpuConfigData = CuArray([
@@ -76,6 +77,7 @@ function main()
                             getConfig()["point"]["interior"],
                             getConfig()["point"]["outer"]
                         ])
+    gpuGlobalDataFixedPoint = CuArray(globalDataFixedPoint)
     println("GPU ConfigGlobaldata Finished")
     # gpuGlobaldataDq = CuArray(globaldataDq)
     # println()
