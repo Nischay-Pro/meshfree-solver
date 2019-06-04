@@ -92,7 +92,7 @@ function calculateConnectivity(globaldata, idx, configData)
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 end
 
-function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
+function fpi_solver_cuda(iter, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
 
     # dev::CuDevice=CuDevice(0)
     str = CuStream()

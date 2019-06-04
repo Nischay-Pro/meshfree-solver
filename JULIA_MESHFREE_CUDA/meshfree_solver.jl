@@ -9,7 +9,7 @@ function main()
     # gpuGlobaldataDq = [CuArray{CuArray{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
     # gpu_globaldata = CuArray{Point,1}(undef, getConfig()["core"]["points"])
     globaldata = Array{Point,1}(undef, numPoints)
-    globalDataCommon = zeros(Float64, 173, numPoints)
+    # globalDataCommon = zeros(Float64, 173, numPoints)
     globalDataRest = zeros(Float64, 57, numPoints)
     globalDataFixedPoint = Array{FixedPoint,1}(undef, numPoints)
     globalDataConn = zeros(Int32,104, numPoints)
@@ -42,13 +42,13 @@ function main()
         connectivity = calculateConnectivity(globaldata, idx, configData)
         setConnectivity(globaldata[idx], connectivity)
         smallest_dist(globaldata, idx)
-        convertToArray(globalDataCommon, globalDataConn, globaldata[idx], idx)
+        convertToArray(globalDataConn, globaldata[idx], idx)
         if idx % (numPoints * 0.25) == 0
             println("Bump In Table")
         end
     end
 
-    typeof(globalDataConn[1])
+    # typeof(globalDataConn[1])
     # print(globaldata[1].dq)
     # println(typeof(globaldata))
     # println(globaldata[2762])
@@ -60,7 +60,7 @@ function main()
     gpuSumResSqr = cuzeros(Float32, numPoints)
     gpuSumResSqrOutput = cuzeros(Float32, numPoints)
     println("Passing to GPU Globaldata")
-    gpuGlobalDataCommon = CuArray(globalDataCommon)
+    # gpuGlobalDataCommon = CuArray(globalDataCommon)
     gpuConfigData = CuArray([
                             getConfig()["core"]["points"],#1
                             getConfig()["core"]["cfl"],
@@ -116,19 +116,19 @@ function main()
     threadsperblock = Int(getConfig()["core"]["threadsperblock"])
     blockspergrid = Int(ceil(numPoints/threadsperblock))
 
-    function test_code(gpuGlobalDataCommon, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
+    function test_code(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
         println("Starting warmup function")
-        fpi_solver_cuda(1, gpuGlobalDataCommon, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, numPoints)
+        fpi_solver_cuda(1, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, numPoints)
         res_old = 0
         println("Starting main function")
         @timeit to "nest 1" begin
-            CuArrays.@sync begin fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataCommon, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput,
+            CuArrays.@sync begin fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput,
                 threadsperblock,blockspergrid, numPoints)
             end
         end
     end
 
-    test_code(gpuGlobalDataCommon, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
+    test_code(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
 
     open("timer_cuda" * string(numPoints) * ".txt", "w") do io
         print_timer(io, to)
