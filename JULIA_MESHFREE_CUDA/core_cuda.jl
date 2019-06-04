@@ -92,7 +92,7 @@ function calculateConnectivity(globaldata, idx, configData)
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 end
 
-function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
+function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
 
     # dev::CuDevice=CuDevice(0)
     str = CuStream()
@@ -110,7 +110,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpu
         @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest)
         # synchronize(str)
         # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
-        @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
+        @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
         # synchronize(str)
         # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
         @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
@@ -174,7 +174,7 @@ function q_var_cuda_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest)
     return nothing
 end
 
-function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
+function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -190,8 +190,8 @@ function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, 
     if idx > 0 && idx <= gpuGlobalDataFixedPoint[end].localID
         x_i = gpuGlobalDataFixedPoint[idx].x
         y_i = gpuGlobalDataFixedPoint[idx].y
-        for iter in 9:28
-            conn = Int(gpuGlobalDataCommon[iter, idx])
+        for iter in 1:20
+            conn = Int(gpuGlobalDataConn[iter, idx])
             if conn == 0.0
                 break
             end
@@ -229,8 +229,8 @@ function q_var_derivatives_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, 
         for i in 1:4
             gpuGlobalDataRest[20+i, idx] = gpuGlobalDataRest[8+i, idx]
             gpuGlobalDataRest[24+i, idx] = gpuGlobalDataRest[8+i, idx]
-            for iter in 9:28
-                conn = Int(gpuGlobalDataCommon[iter, idx])
+            for iter in 1:20
+                conn = Int(gpuGlobalDataConn[iter, idx])
                 if conn == 0.0
                     break
                 end
