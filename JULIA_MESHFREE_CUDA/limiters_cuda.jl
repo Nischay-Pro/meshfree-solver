@@ -10,7 +10,7 @@ function venkat_limiter_kernel_i(gpuGlobalDataCommon, gpuGlobalDataRest, idx, gp
 
     for i in 1:4
         q = gpuGlobalDataRest[8+i, idx]
-        del_neg = gpuGlobalDataRest[8+i, idx] - 0.5*(delx * gpuGlobalDataCommon[42+i, idx] + dely * gpuGlobalDataCommon[46+i, idx]) - q
+        del_neg = gpuGlobalDataRest[8+i, idx] - 0.5*(delx * gpuGlobalDataRest[12+i, idx] + dely * gpuGlobalDataRest[16+i, idx]) - q
         if abs(del_neg) <= 1e-5
             gpuGlobalDataCommon[145+i,idx] = 1.0
         elseif abs(del_neg) > 1e-5
@@ -50,7 +50,7 @@ function venkat_limiter_kernel_k(gpuGlobalDataCommon, gpuGlobalDataRest, idx, gp
 
     for i in 1:4
         q = gpuGlobalDataRest[8+i, idx]
-        del_neg = gpuGlobalDataRest[8+i, idx] - 0.5*(delx * gpuGlobalDataCommon[42+i, idx] + dely * gpuGlobalDataCommon[46+i, idx]) - q
+        del_neg = gpuGlobalDataRest[8+i, idx] - 0.5*(delx * gpuGlobalDataRest[12+i, idx] + dely * gpuGlobalDataRest[16+i, idx]) - q
         if abs(del_neg) <= 1e-5
             gpuGlobalDataCommon[149+i,trueidx] = 1.0
         elseif abs(del_neg) > 1e-5
