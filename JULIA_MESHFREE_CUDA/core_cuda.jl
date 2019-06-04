@@ -47,7 +47,7 @@ function calculateNormals(left, right, mx, my)
     return (nx,ny)
 end
 
-function calculateConnectivity(globaldata, idx)
+function calculateConnectivity(globaldata, idx, configData)
     ptInterest = globaldata[idx]
     currx = ptInterest.x
     curry = ptInterest.y
@@ -76,16 +76,16 @@ function calculateConnectivity(globaldata, idx)
         if dels >= 0.0
             push!(xneg_conn, itm)
         end
-        if flag == 2
+        if flag == configData["point"]["interior"]
             if deln <= 0.0
                 push!(ypos_conn, itm)
             end
             if deln >= 0.0
                 push!(yneg_conn, itm)
             end
-        elseif flag == 1
+        elseif flag == configData["point"]["wall"]
             push!(yneg_conn, itm)
-        elseif flag == 3
+        elseif flag == configData["point"]["outer"]
             push!(ypos_conn, itm)
         end
     end

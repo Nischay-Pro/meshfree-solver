@@ -1,4 +1,4 @@
-function flux_Gxp_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, flag)
+function flux_Gxp_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
 
     u1 = gpuGlobalDataRest[53, idx]
     u2 = gpuGlobalDataRest[54, idx]
@@ -51,7 +51,7 @@ function flux_Gxp_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, fl
     return nothing
 end
 
-function flux_Gxn_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, flag)
+function flux_Gxn_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
 
     u1 = gpuGlobalDataRest[53, idx]
     u2 = gpuGlobalDataRest[54, idx]
@@ -103,7 +103,7 @@ function flux_Gxn_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, fl
     return nothing
 end
 
-function flux_Gyp_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, flag)
+function flux_Gyp_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
     u1 = gpuGlobalDataRest[53, idx]
     u2 = gpuGlobalDataRest[54, idx]
     rho = gpuGlobalDataRest[55, idx]
@@ -153,7 +153,7 @@ function flux_Gyp_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, fl
     return nothing
 end
 
-function flux_Gyn_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, flag)
+function flux_Gyn_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
     u1 = gpuGlobalDataRest[53, idx]
     u2 = gpuGlobalDataRest[54, idx]
     rho = gpuGlobalDataRest[55, idx]
@@ -212,7 +212,7 @@ function flux_Gyn_kernel(nx, ny, gpuGlobalDataCommon, gpuGlobalDataRest, idx, fl
     return nothing
 end
 
-function flux_Gx_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
+function flux_Gx_kernel(nx, ny, idx, flag)
     u1 = gpuGlobalDataRest[53, idx]
     u2 = gpuGlobalDataRest[54, idx]
     rho = gpuGlobalDataRest[55, idx]
@@ -242,7 +242,7 @@ function flux_Gx_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
     return nothing
 end
 
-function flux_Gy_kernel(nx, ny,gpuGlobalDataCommon, idx, flag)
+function flux_Gy_kernel(nx, ny, idx, flag)
     u1 = gpuGlobalDataRest[53, idx]
     u2 = gpuGlobalDataRest[54, idx]
     rho = gpuGlobalDataRest[55, idx]

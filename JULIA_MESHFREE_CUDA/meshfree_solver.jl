@@ -12,6 +12,8 @@ function main()
     globalDataCommon = zeros(Float64, 173, numPoints)
     globalDataRest = zeros(Float64, 57, numPoints)
     globalDataFixedPoint = Array{FixedPoint,1}(undef, numPoints)
+    globalDataConn = zeros(Int32,104, numPoints)
+
     # table = Array{Int,1}(undef, numPoints)
     defprimal = getInitialPrimitive(configData)
     # wallpts, Interiorpts, outerpts, shapepts = 0,0,0,0
@@ -37,14 +39,16 @@ function main()
 
     println("Start table sorting")
     for idx in 1:numPoints
-        connectivity = calculateConnectivity(globaldata, idx)
+        connectivity = calculateConnectivity(globaldata, idx, configData)
         setConnectivity(globaldata[idx], connectivity)
         smallest_dist(globaldata, idx)
-        convertToArray(globalDataCommon, globaldata[idx], idx)
+        convertToArray(globalDataCommon, globalDataConn, globaldata[idx], idx)
         if idx % (numPoints * 0.25) == 0
             println("Bump In Table")
         end
     end
+
+    typeof(globalDataConn[1])
     # print(globaldata[1].dq)
     # println(typeof(globaldata))
     # println(globaldata[2762])
@@ -80,6 +84,7 @@ function main()
                         ])
     gpuGlobalDataFixedPoint = CuArray(globalDataFixedPoint)
     gpuGlobalDataRest = CuArray(globalDataRest)
+    gpuGlobalDataConn = CuArray(globalDataConn)
     println("GPU ConfigGlobaldata Finished")
     # gpuGlobaldataDq = CuArray(globaldataDq)
     # println()

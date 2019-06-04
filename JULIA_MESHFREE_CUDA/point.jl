@@ -23,7 +23,7 @@ end
 end
 
 
-function convertToArray(targetArray, originalStruct::Point, idx)
+function convertToArray(targetArray, targetArray2, originalStruct::Point, idx)
     targetArray[:, idx] =  vcat([
                                             originalStruct.localID ,
                                             originalStruct.x ,
@@ -68,6 +68,12 @@ function convertToArray(targetArray, originalStruct::Point, idx)
     targetArray[76:75+ originalStruct.xneg_nbhs, idx] = originalStruct.xneg_conn
     targetArray[96:95+ originalStruct.ypos_nbhs, idx] = originalStruct.ypos_conn
     targetArray[116:115+ originalStruct.yneg_nbhs, idx] = originalStruct.yneg_conn
+
+    targetArray2[1: originalStruct.nbhs, idx] = originalStruct.conn
+    targetArray2[25:24 + originalStruct.xpos_nbhs, idx] = originalStruct.xpos_conn
+    targetArray2[45:44 + originalStruct.xneg_nbhs, idx] = originalStruct.xneg_conn
+    targetArray2[65:64 + originalStruct.ypos_nbhs, idx] = originalStruct.ypos_conn
+    targetArray2[85:84 + originalStruct.yneg_nbhs, idx] = originalStruct.yneg_conn
     return  nothing
 end
 
