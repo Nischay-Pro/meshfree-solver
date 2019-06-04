@@ -1,4 +1,4 @@
-function outer_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx, gpuConfigData)
+function outer_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
 
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
@@ -98,7 +98,7 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx,
     return nothing
 end
 
-function outer_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx, gpuConfigData)
+function outer_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
 
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
@@ -198,7 +198,7 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx,
     return nothing
 end
 
-function outer_dGy_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, idx, gpuConfigData)
+function outer_dGy_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
 
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
