@@ -34,7 +34,7 @@ function func_delta_kernel(gpuGlobalDataCommon,  gpuGlobalDataFixedPoint, gpuGlo
     return nothing
 end
 
-function state_update_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest,  gpuConfigData, gpuSumResSqr)
+function state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest,  gpuConfigData, gpuSumResSqr)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -43,13 +43,13 @@ function state_update_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
     if idx > 0 && idx <= gpuGlobalDataFixedPoint[end].localID
         flag1 = gpuGlobalDataFixedPoint[idx].flag_1
         if flag1 == gpuConfigData[17]
-            state_update_wall_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx)
+            state_update_wall_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx)
         end
         if flag1 == gpuConfigData[18]
-            state_update_interior_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx)
+            state_update_interior_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx)
         end
         if flag1 == gpuConfigData[19]
-            state_update_outer_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, idx)
+            state_update_outer_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, idx)
         end
     end
     if flag1 != gpuConfigData[19]
@@ -59,7 +59,7 @@ function state_update_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGl
     return nothing
 end
 
-function state_update_wall_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx)
+function state_update_wall_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx)
     nx = gpuGlobalDataFixedPoint[idx].nx
     ny = gpuGlobalDataFixedPoint[idx].ny
 
@@ -112,7 +112,7 @@ function state_update_wall_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, 
     return nothing
 end
 
-function state_update_interior_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx)
+function state_update_interior_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx)
     nx = gpuGlobalDataFixedPoint[idx].nx
     ny = gpuGlobalDataFixedPoint[idx].ny
 
@@ -150,7 +150,7 @@ function state_update_interior_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoi
     return nothing
 end
 
-function state_update_outer_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, idx)
+function state_update_outer_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, idx)
     nx = gpuGlobalDataFixedPoint[idx].nx
     ny = gpuGlobalDataFixedPoint[idx].ny
     Mach::Float64 = gpuConfigData[4]

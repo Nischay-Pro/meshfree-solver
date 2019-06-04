@@ -107,7 +107,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpu
         if i == 1
             println("Compiling CUDA Kernel. This might take a while...")
         end
-        @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest)
+        @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest)
         # synchronize(str)
         # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
         @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
@@ -119,7 +119,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpu
         @cuda blocks=blockspergrid threads=threadsperblock func_delta_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
         # synchronize(str)
         # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
-        @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr)
+        @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr)
         # synchronize(str)
         gpu_reduced(+, gpuSumResSqr, gpuSumResSqrOutput)
         temp_gpu = Array(gpuSumResSqrOutput)[1]
@@ -143,7 +143,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpu
     return nothing
 end
 
-function q_var_cuda_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuGlobalDataRest)
+function q_var_cuda_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
