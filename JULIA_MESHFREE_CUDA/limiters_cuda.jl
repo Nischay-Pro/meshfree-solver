@@ -1,4 +1,4 @@
-function venkat_limiter_kernel_i(gpuGlobalDataCommon, idx, gpuConfigData, delx, dely)
+function venkat_limiter_kernel_i(gpuGlobalDataCommon, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataCommon[137, idx]
     # @cuprintf("Type is %s", typeof(VL_CONST))
@@ -38,7 +38,7 @@ function venkat_limiter_kernel_i(gpuGlobalDataCommon, idx, gpuConfigData, delx, 
     return nothing
 end
 
-function venkat_limiter_kernel_k(gpuGlobalDataCommon, idx, gpuConfigData, trueidx, delx, dely)
+function venkat_limiter_kernel_k(gpuGlobalDataCommon, gpuGlobalDataRest, idx, gpuConfigData, trueidx, delx, dely)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataCommon[137, idx]
     # @cuprintf("Type is %s", typeof(VL_CONST))
