@@ -20,9 +20,7 @@ function interior_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
 
-    for i in 154:173
-        gpuGlobalDataCommon[i, idx] = 0.0
-    end
+
     for i in 37:56
         gpuGlobalDataRest[i, idx] = 0.0
     end
@@ -125,9 +123,7 @@ function interior_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
 
-    for i in 154:173
-        gpuGlobalDataCommon[i, idx] = 0.0
-    end
+
     for i in 37:56
         gpuGlobalDataRest[i, idx] = 0.0
     end
@@ -238,9 +234,7 @@ function interior_dGy_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
 
-    for i in 154:173
-        gpuGlobalDataCommon[i, idx] = 0.0
-    end
+
     for i in 37:56
         gpuGlobalDataRest[i, idx] = 0.0
     end
@@ -348,9 +342,7 @@ function interior_dGy_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, g
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
 
-    for i in 154:173
-        gpuGlobalDataCommon[i, idx] = 0.0
-    end
+
     for i in 37:56
         gpuGlobalDataRest[i, idx] = 0.0
     end

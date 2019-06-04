@@ -20,9 +20,7 @@ function outer_dGx_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
 
-    for i in 146:173
-        gpuGlobalDataCommon[i, idx] = 0.0
-    end
+
     for i in 37:56
         gpuGlobalDataRest[i, idx] = 0.0
     end
@@ -123,9 +121,7 @@ function outer_dGx_neg_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
 
-    for i in 146:173
-        gpuGlobalDataCommon[i, idx] = 0.0
-    end
+
     for i in 37:56
         gpuGlobalDataRest[i, idx] = 0.0
     end
@@ -226,9 +222,7 @@ function outer_dGy_pos_kernel(gpuGlobalDataCommon, gpuGlobalDataFixedPoint, gpuG
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
 
-    for i in 146:173
-        gpuGlobalDataCommon[i, idx] = 0.0
-    end
+
     for i in 37:56
         gpuGlobalDataRest[i, idx] = 0.0
     end
