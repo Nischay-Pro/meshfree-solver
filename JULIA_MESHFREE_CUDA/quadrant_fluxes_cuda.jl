@@ -1,10 +1,10 @@
 
 function flux_quad_GxI_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
     # G = Array{Float64,1}(undef, 0)
-    u1 = gpuGlobalDataRest[53, idx]
-    u2 = gpuGlobalDataRest[54, idx]
-    rho = gpuGlobalDataRest[55, idx]
-    pr = gpuGlobalDataRest[56, idx]
+    u1 = gpuGlobalDataRest[45, idx]
+    u2 = gpuGlobalDataRest[46, idx]
+    rho = gpuGlobalDataRest[47, idx]
+    pr = gpuGlobalDataRest[48, idx]
 
     tx = ny
     ty = -nx
@@ -67,10 +67,10 @@ end
 
 function flux_quad_GxII_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
     # G = Array{Float64,1}(undef, 0)
-    u1 = gpuGlobalDataRest[53, idx]
-    u2 = gpuGlobalDataRest[54, idx]
-    rho = gpuGlobalDataRest[55, idx]
-    pr = gpuGlobalDataRest[56, idx]
+    u1 = gpuGlobalDataRest[45, idx]
+    u2 = gpuGlobalDataRest[46, idx]
+    rho = gpuGlobalDataRest[47, idx]
+    pr = gpuGlobalDataRest[48, idx]
 
     tx = ny
     ty = -nx
@@ -136,10 +136,10 @@ end
 
 function flux_quad_GxIII_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
     # G = Array{Float64,1}(undef, 0)
-    u1 = gpuGlobalDataRest[53, idx]
-    u2 = gpuGlobalDataRest[54, idx]
-    rho = gpuGlobalDataRest[55, idx]
-    pr = gpuGlobalDataRest[56, idx]
+    u1 = gpuGlobalDataRest[45, idx]
+    u2 = gpuGlobalDataRest[46, idx]
+    rho = gpuGlobalDataRest[47, idx]
+    pr = gpuGlobalDataRest[48, idx]
     tx = ny
     ty = -nx
 
@@ -193,10 +193,10 @@ end
 
 function flux_quad_GxIV_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
     # G = Array{Float64,1}(undef, 0)
-    u1 = gpuGlobalDataRest[53, idx]
-    u2 = gpuGlobalDataRest[54, idx]
-    rho = gpuGlobalDataRest[55, idx]
-    pr = gpuGlobalDataRest[56, idx]
+    u1 = gpuGlobalDataRest[45, idx]
+    u2 = gpuGlobalDataRest[46, idx]
+    rho = gpuGlobalDataRest[47, idx]
+    pr = gpuGlobalDataRest[48, idx]
     tx = ny
     ty = -nx
 

@@ -28,7 +28,7 @@ function func_delta_kernel(gpuGlobalDataConn,  gpuGlobalDataFixedPoint, gpuGloba
                 min_delt = delta_t
             end
         end
-        gpuGlobalDataRest[57, idx] = min_delt
+        gpuGlobalDataRest[49, idx] = min_delt
     end
     # sync_threads()
     return nothing
@@ -53,7 +53,7 @@ function state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest,  gpuCon
         end
     end
     if flag1 != gpuConfigData[19]
-        gpuSumResSqr[idx] = gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[5, idx] * gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[5, idx]
+        gpuSumResSqr[idx] = gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[5, idx] * gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[5, idx]
     end
     # sync_threads()
     return nothing
@@ -77,10 +77,10 @@ function state_update_wall_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, id
     # end
 
     temp = U1
-    U1 -= gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[5, idx]
-    U2 -= gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[6, idx]
-    U3 -= gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[7, idx]
-    U4 -= gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[8, idx]
+    U1 -= gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[5, idx]
+    U2 -= gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[6, idx]
+    U3 -= gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[7, idx]
+    U4 -= gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[8, idx]
 
     # if idx == 3
     #     @cuprintf("\n ======= ")
@@ -130,10 +130,10 @@ function state_update_interior_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest
     # res_sqr = (U1 - temp)*(U1 - temp)
     # gpuSumResSqr[idx] = res_sqr
     temp = U1
-    U1 -= gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[5, idx]
-    U2 -= gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[6, idx]
-    U3 -= gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[7, idx]
-    U4 -= gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[8, idx]
+    U1 -= gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[5, idx]
+    U2 -= gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[6, idx]
+    U3 -= gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[7, idx]
+    U4 -= gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[8, idx]
     U2_rot = U2
     U3_rot = U3
     U2 = U2_rot*ny + U3_rot*nx
@@ -206,10 +206,10 @@ function state_update_outer_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, g
     U4 = (temp1 + temp2)
 
     temp = U1
-    U1 -= gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[5, idx]
-    U2 -= gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[6, idx]
-    U3 -= gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[7, idx]
-    U4 -= gpuGlobalDataRest[57, idx] * gpuGlobalDataRest[8, idx]
+    U1 -= gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[5, idx]
+    U2 -= gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[6, idx]
+    U3 -= gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[7, idx]
+    U4 -= gpuGlobalDataRest[49, idx] * gpuGlobalDataRest[8, idx]
     U2_rot = U2
     U3_rot = U3
     U2 = U2_rot*ny + U3_rot*nx
