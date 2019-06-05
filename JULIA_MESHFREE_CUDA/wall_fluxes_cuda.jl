@@ -17,9 +17,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     sum_1, sum_2,sum_3,sum_4 = 0.0,0.0,0.0,0.0
     sum_5, sum_6,sum_7,sum_8 = 0.0,0.0,0.0,0.0
 
-    for i in 37:48
-        gpuGlobalDataRest[i, idx] = 0.0
-    end
+
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
@@ -161,9 +159,7 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     # sum_dely_delf1,sum_dely_delf2,sum_dely_delf3,sum_dely_delf4 = 0.0,0.0,0.0,0.0
 
 
-    for i in 37:48
-        gpuGlobalDataRest[i, idx] = 0.0
-    end
+
 
     # result1,result2,result3,result4 = 0.0,0.0,0.0,0.0
 
@@ -281,9 +277,7 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     # sum_dely_delf1,sum_dely_delf2,sum_dely_delf3,sum_dely_delf4 = 0.0,0.0,0.0,0.0
 
 
-    for i in 37:48
-        gpuGlobalDataRest[i, idx] = 0.0
-    end
+
 
     # result1,result2,result3,result4 = 0.0,0.0,0.0,0.0
 
