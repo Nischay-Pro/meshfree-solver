@@ -14,6 +14,10 @@ function main()
     globalDataFixedPoint = Array{FixedPoint,1}(undef, numPoints)
     globalDataConn = zeros(Int32,104, numPoints)
 
+    println(sizeof(globalDataRest))
+    println(sizeof(globalDataFixedPoint))
+    println(sizeof(globalDataConn))
+
     # table = Array{Int,1}(undef, numPoints)
     defprimal = getInitialPrimitive(configData)
     # wallpts, Interiorpts, outerpts, shapepts = 0,0,0,0

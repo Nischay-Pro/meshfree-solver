@@ -3,9 +3,6 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
 
-    sum_delx_sqr = 0.0
-    sum_dely_sqr = 0.0
-    sum_delx_dely = 0.0
     x_k = 0.0
     y_k = 0.0
     delx = 0.0
@@ -19,6 +16,8 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
+    sum_1, sum_2,sum_3,sum_4 = 0.0,0.0,0.0,0.0
+    sum_5, sum_6,sum_7,sum_8 = 0.0,0.0,0.0,0.0
 
 
     for i in 37:56
@@ -104,9 +103,6 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
 
-    sum_delx_sqr = 0.0
-    sum_dely_sqr = 0.0
-    sum_delx_dely = 0.0
     x_k = 0.0
     y_k = 0.0
     delx = 0.0
@@ -120,6 +116,8 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
+    sum_1, sum_2,sum_3,sum_4 = 0.0,0.0,0.0,0.0
+    sum_5, sum_6,sum_7,sum_8 = 0.0,0.0,0.0,0.0
 
 
     for i in 37:56
@@ -205,9 +203,6 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
 
-    sum_delx_sqr = 0.0
-    sum_dely_sqr = 0.0
-    sum_delx_dely = 0.0
     x_k = 0.0
     y_k = 0.0
     delx = 0.0
@@ -221,6 +216,8 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
+    sum_1, sum_2,sum_3,sum_4 = 0.0,0.0,0.0,0.0
+    sum_5, sum_6,sum_7,sum_8 = 0.0,0.0,0.0,0.0
 
 
     for i in 37:56

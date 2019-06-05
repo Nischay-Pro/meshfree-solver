@@ -1,10 +1,6 @@
 function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
-
-    sum_delx_sqr = 0.0
-    sum_dely_sqr = 0.0
-    sum_delx_dely = 0.0
     x_k = 0.0
     y_k = 0.0
     delx = 0.0
@@ -18,7 +14,8 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
-
+    sum_1, sum_2,sum_3,sum_4 = 0.0,0.0,0.0,0.0
+    sum_5, sum_6,sum_7,sum_8 = 0.0,0.0,0.0,0.0
 
     for i in 37:56
         gpuGlobalDataRest[i, idx] = 0.0
@@ -144,9 +141,6 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     # G_i1,G_i2,G_i3,G_i4 =  0.0,0.0,0.0,0.0
     # G_k1,G_k2,G_k3,G_k4 =  0.0,0.0,0.0,0.0
 
-    sum_delx_sqr = 0.0
-    sum_dely_sqr = 0.0
-    sum_delx_dely = 0.0
     x_k = 0.0
     y_k = 0.0
     delx = 0.0
@@ -160,6 +154,8 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
+    sum_1, sum_2,sum_3,sum_4 = 0.0,0.0,0.0,0.0
+    sum_5, sum_6,sum_7,sum_8 = 0.0,0.0,0.0,0.0
 
     # sum_delx_delf1,sum_delx_delf2,sum_delx_delf3,sum_delx_delf4 = 0.0,0.0,0.0,0.0
     # sum_dely_delf1,sum_dely_delf2,sum_dely_delf3,sum_dely_delf4 = 0.0,0.0,0.0,0.0
@@ -265,9 +261,6 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     # G_i1,G_i2,G_i3,G_i4 =  0.0,0.0,0.0,0.0
     # G_k1,G_k2,G_k3,G_k4 =  0.0,0.0,0.0,0.0
 
-    sum_delx_sqr = 0.0
-    sum_dely_sqr = 0.0
-    sum_delx_dely = 0.0
     x_k = 0.0
     y_k = 0.0
     delx = 0.0
@@ -281,6 +274,8 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
+    sum_1, sum_2,sum_3,sum_4 = 0.0,0.0,0.0,0.0
+    sum_5, sum_6,sum_7,sum_8 = 0.0,0.0,0.0,0.0
 
     # sum_delx_delf1,sum_delx_delf2,sum_delx_delf3,sum_delx_delf4 = 0.0,0.0,0.0,0.0
     # sum_dely_delf1,sum_dely_delf2,sum_dely_delf3,sum_dely_delf4 = 0.0,0.0,0.0,0.0

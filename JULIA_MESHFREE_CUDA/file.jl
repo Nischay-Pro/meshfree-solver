@@ -54,6 +54,7 @@ function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint
                                                 )
 
         if parse(Int32, itmdata[1]) == 1
+            # temp.left = 5120
             temp.left = 160
             globalDataFixedPoint[idx] = FixedPoint(parse(Int32,itmdata[1]),
                                             parse(Float64,itmdata[2]),
