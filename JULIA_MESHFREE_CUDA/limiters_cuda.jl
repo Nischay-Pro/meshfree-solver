@@ -1,6 +1,17 @@
-function venkat_limiter_kernel_i(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
+function venkat_limiter_kernel_i(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
     VL_CONST = gpuConfigData[8]
-    ds = gpuGlobalDataFixedPoint[idx].short_distance
+    ds = 1000.0
+    for iter in 1:20
+        itm = gpuGlobalDataConn[iter, idx]
+        if itm == 0.0
+            break
+        end
+        min_dist = CUDAnative.hypot(gpuGlobalDataFixedPoint[idx].x - gpuGlobalDataFixedPoint[itm].x, gpuGlobalDataFixedPoint[idx].y - gpuGlobalDataFixedPoint[itm].y)
+        if min_dist < ds
+            ds = min_dist
+        end
+    end
+    # ds = gpuGlobalDataFixedPoint[idx].short_distance
     # @cuprintf("Type is %s", typeof(VL_CONST))
     epsigh = VL_CONST * ds
     power3 = 3.0
@@ -38,9 +49,20 @@ function venkat_limiter_kernel_i(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx
     return nothing
 end
 
-function venkat_limiter_kernel_k(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, trueidx, delx, dely)
+function venkat_limiter_kernel_k(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, trueidx, delx, dely)
     VL_CONST = gpuConfigData[8]
-    ds = gpuGlobalDataFixedPoint[idx].short_distance
+    ds = 1000.0
+    for iter in 1:20
+        itm = gpuGlobalDataConn[iter, idx]
+        if itm == 0.0
+            break
+        end
+        min_dist = CUDAnative.hypot(gpuGlobalDataFixedPoint[idx].x - gpuGlobalDataFixedPoint[itm].x, gpuGlobalDataFixedPoint[idx].y - gpuGlobalDataFixedPoint[itm].y)
+        if min_dist < ds
+            ds = min_dist
+        end
+    end
+    # ds = gpuGlobalDataFixedPoint[idx].short_distance
     # @cuprintf("Type is %s", typeof(VL_CONST))
     epsigh = VL_CONST * ds
     power3 = 3.0
