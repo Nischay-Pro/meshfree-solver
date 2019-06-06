@@ -2,7 +2,7 @@
 function main()
     configData = getConfig()
     # globaldataCommon = zeros(Float64, 38, getConfig()["core"]["points"])
-    file_name = "partGridNew--160-60"
+    file_name = "nice.dat"
     numPoints = returnFileLength(file_name)
     println("Number of points ", numPoints)
     # globaldataDq = [Array{Array{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
@@ -12,7 +12,7 @@ function main()
     # globalDataCommon = zeros(Float64, 173, numPoints)
     globalDataRest = zeros(Float64, 49, numPoints)
     globalDataFixedPoint = Array{FixedPoint,1}(undef, numPoints)
-    globalDataConn = zeros(Int32, 104, numPoints)
+    globalDataConn = zeros(Int32, 55, numPoints)
 
     println(sizeof(globalDataRest))
     println(sizeof(globalDataFixedPoint))

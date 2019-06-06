@@ -1,7 +1,7 @@
 function venkat_limiter_kernel_i(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
     VL_CONST = gpuConfigData[8]
     ds = 1000.0
-    for iter in 1:20
+    for iter in 5:14
         itm = gpuGlobalDataConn[iter, idx]
         if itm == 0.0
             break
@@ -52,7 +52,7 @@ end
 function venkat_limiter_kernel_k(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, trueidx, delx, dely)
     VL_CONST = gpuConfigData[8]
     ds = 1000.0
-    for iter in 1:20
+    for iter in 5:14
         itm = gpuGlobalDataConn[iter, idx]
         if itm == 0.0
             break

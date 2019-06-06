@@ -27,7 +27,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     tx = ny
     ty = -nx
 
-    for iter in 25:44
+    for iter in 15:24
         conn = gpuGlobalDataConn[iter, idx]
         if conn == 0
             break
@@ -171,7 +171,7 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     tx = ny
     ty = -nx
 
-    for iter in 45:64
+    for iter in 25:34
         conn = gpuGlobalDataConn[iter, idx]
         if conn == 0
             break
@@ -290,7 +290,7 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     ty = -nx
 
 
-    for iter in 85:104
+    for iter in 45:54
         conn = gpuGlobalDataConn[iter, idx]
         if conn == 0
             break

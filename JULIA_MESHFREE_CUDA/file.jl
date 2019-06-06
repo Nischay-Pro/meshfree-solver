@@ -19,7 +19,7 @@ function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint
                     parse(Int8,itmdata[7]),
                     parse(Float64,itmdata[8]),
                     parse(Int8,itmdata[9]),
-                    parse.(Int, itmdata[10:end-1]),
+                    parse.(Int, itmdata[10:end]),
                     parse(Float64, itmdata[4]),
                     parse(Float64, itmdata[5]),
                     copy(defprimal),
@@ -54,8 +54,8 @@ function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint
                                                 )
 
         if parse(Int32, itmdata[1]) == 1
-            # temp.left = 5120
-            temp.left = 160
+            temp.left = 5120
+            # temp.left = 160
             globalDataFixedPoint[idx] = FixedPoint(parse(Int32,itmdata[1]),
                                             parse(Float64,itmdata[2]),
                                             parse(Float64, itmdata[3]),
@@ -69,7 +69,7 @@ function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint
                                             parse(Float64, itmdata[5]),
                                             0.0
                                                 )
-        elseif parse(Int32, itmdata[1]) == 160
+        elseif parse(Int32, itmdata[1]) == 5120
             temp.right = 1
             globalDataFixedPoint[idx] = FixedPoint(parse(Int32,itmdata[1]),
                                             parse(Float64,itmdata[2]),

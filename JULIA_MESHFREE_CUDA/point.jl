@@ -68,12 +68,15 @@ function convertToArray(targetArray2, originalStruct::Point, idx)
     # targetArray[76:75+ originalStruct.xneg_nbhs, idx] = originalStruct.xneg_conn
     # targetArray[96:95+ originalStruct.ypos_nbhs, idx] = originalStruct.ypos_conn
     # targetArray[116:115+ originalStruct.yneg_nbhs, idx] = originalStruct.yneg_conn
-
-    targetArray2[1: originalStruct.nbhs, idx] = originalStruct.conn
-    targetArray2[25:24 + originalStruct.xpos_nbhs, idx] = originalStruct.xpos_conn
-    targetArray2[45:44 + originalStruct.xneg_nbhs, idx] = originalStruct.xneg_conn
-    targetArray2[65:64 + originalStruct.ypos_nbhs, idx] = originalStruct.ypos_conn
-    targetArray2[85:84 + originalStruct.yneg_nbhs, idx] = originalStruct.yneg_conn
+    targetArray2[1] = originalStruct.xpos_nbhs
+    targetArray2[2] = originalStruct.xneg_nbhs
+    targetArray2[3] = originalStruct.ypos_nbhs
+    targetArray2[4] = originalStruct.yneg_nbhs
+    targetArray2[5:4 + originalStruct.nbhs, idx] = originalStruct.conn
+    targetArray2[15:14 + originalStruct.xpos_nbhs, idx] = originalStruct.xpos_conn
+    targetArray2[25:24 + originalStruct.xneg_nbhs, idx] = originalStruct.xneg_conn
+    targetArray2[35:34 + originalStruct.ypos_nbhs, idx] = originalStruct.ypos_conn
+    targetArray2[45:44 + originalStruct.yneg_nbhs, idx] = originalStruct.yneg_conn
     return  nothing
 end
 

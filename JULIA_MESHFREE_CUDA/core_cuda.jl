@@ -190,7 +190,7 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
     if idx > 0 && idx <= gpuGlobalDataFixedPoint[end].localID
         x_i = gpuGlobalDataFixedPoint[idx].x
         y_i = gpuGlobalDataFixedPoint[idx].y
-        for iter in 1:20
+        for iter in 5:14
             conn = gpuGlobalDataConn[iter, idx]
             if conn == 0.0
                 break
@@ -229,8 +229,8 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
         for i in 1:4
             gpuGlobalDataRest[20+i, idx] = gpuGlobalDataRest[8+i, idx]
             gpuGlobalDataRest[24+i, idx] = gpuGlobalDataRest[8+i, idx]
-            for iter in 1:20
-                conn = Int(gpuGlobalDataConn[iter, idx])
+            for iter in 5:14
+                conn = gpuGlobalDataConn[iter, idx]
                 if conn == 0.0
                     break
                 end
