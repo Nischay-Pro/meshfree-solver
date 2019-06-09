@@ -17,6 +17,8 @@ function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
 		# else
 		# 	@cuprintf("Warning: There is problem with the flux flags %f \n", gpuGlobalDataFixedPoint[idx].flag_1)
 		end
+	else
+		return nothing
 	end
 	# sync_threads()
 	return nothing

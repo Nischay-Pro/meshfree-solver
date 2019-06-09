@@ -19,7 +19,7 @@ function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint
                     parse(Int8,itmdata[7]),
                     parse(Float64,itmdata[8]),
                     parse(Int8,itmdata[9]),
-                    parse.(Int, itmdata[10:end]),
+                    parse.(Int, itmdata[10:end-1]),
                     parse(Float64, itmdata[4]),
                     parse(Float64, itmdata[5]),
                     copy(defprimal),
