@@ -1,16 +1,5 @@
 function venkat_limiter_kernel_i(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
     VL_CONST = gpuConfigData[8]
-    # ds = 1000.0
-    # for iter in 5:14
-    #     itm = gpuGlobalDataConn[iter, idx]
-    #     if itm == 0.0
-    #         break
-    #     end
-    #     min_dist = CUDAnative.hypot(gpuGlobalDataFixedPoint[idx].x - gpuGlobalDataFixedPoint[itm].x, gpuGlobalDataFixedPoint[idx].y - gpuGlobalDataFixedPoint[itm].y)
-    #     if min_dist < ds
-    #         ds = min_dist
-    #     end
-    # end
     ds = gpuGlobalDataFixedPoint[idx].short_distance
     # @cuprintf("Type is %s", typeof(VL_CONST))
     epsigh = VL_CONST * ds
@@ -51,17 +40,7 @@ end
 
 function venkat_limiter_kernel_k(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, trueidx, delx, dely)
     VL_CONST = gpuConfigData[8]
-    # ds = 1000.0
-    # for iter in 5:14
-    #     itm = gpuGlobalDataConn[iter, idx]
-    #     if itm == 0.0
-    #         break
-    #     end
-    #     min_dist = CUDAnative.hypot(gpuGlobalDataFixedPoint[idx].x - gpuGlobalDataFixedPoint[itm].x, gpuGlobalDataFixedPoint[idx].y - gpuGlobalDataFixedPoint[itm].y)
-    #     if min_dist < ds
-    #         ds = min_dist
-    #     end
-    # end
+
     ds = gpuGlobalDataFixedPoint[idx].short_distance
     # @cuprintf("Type is %s", typeof(VL_CONST))
     epsigh = VL_CONST * ds
@@ -169,15 +148,15 @@ end
     globaldata[idx].short_distance = min_dist
 end
 
-function qtilde_to_primitive_kernel(qtilde, gpuConfigData, gpuGlobalDataRest, idx)
+function qtilde_to_primitive_kernel(qtilde1, qtilde2, qtilde3, qtilde4, gpuConfigData, gpuGlobalDataRest, idx)
 
     gamma = gpuConfigData[15]
-    beta = -qtilde[4]*0.5
+    beta = -qtilde4*0.5
     temp = 0.5/beta
-    u1 = qtilde[2]*temp
-    u2 = qtilde[3]*temp
+    u1 = qtilde2*temp
+    u2 = qtilde3*temp
 
-    temp2 = qtilde[1] + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(gamma-1))
+    temp2 = qtilde1 + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(gamma-1))
     rho = CUDAnative.exp(temp2)
     pr = rho*temp
     gpuGlobalDataRest[45, idx] = u1
