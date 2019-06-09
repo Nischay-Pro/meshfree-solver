@@ -12,13 +12,13 @@
 #     return nothing
 # end
 
-function state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataConn, gpuGlobalDataRest,  gpuConfigData, gpuSumResSqr)
+function state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataConn, gpuGlobalDataRest,  gpuConfigData, gpuSumResSqr, numPoints)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
 	idx = bx * bw + tx
     max_res = zero(Float64)
-    if idx > 0 && idx <= gpuGlobalDataFixedPoint[end].localID
+    if idx > 0 && idx <= numPoints
         cfl = gpuConfigData[2]
         min_delt = one(Float64)
         for iter in 5:14
