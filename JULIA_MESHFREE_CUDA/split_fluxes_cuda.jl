@@ -1,9 +1,9 @@
-function flux_Gxp_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
+function flux_Gxp_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
 
-    u1 = gpuGlobalDataCommon[170, idx]
-    u2 = gpuGlobalDataCommon[171, idx]
-    rho = gpuGlobalDataCommon[172, idx]
-    pr = gpuGlobalDataCommon[173, idx]
+    u1 = gpuGlobalDataRest[45, idx]
+    u2 = gpuGlobalDataRest[46, idx]
+    rho = gpuGlobalDataRest[47, idx]
+    pr = gpuGlobalDataRest[48, idx]
 
     tx = ny
     ty = -nx
@@ -20,43 +20,43 @@ function flux_Gxp_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
     u_sqr = ut*ut + un*un
 
     if flag == 1
-        gpuGlobalDataCommon[154, idx]= (rho*(ut*A1pos + B1))
+        gpuGlobalDataRest[37, idx] = (rho*(ut*A1pos + B1))
 
         temp1 = pr_by_rho + ut*ut
         temp2 = temp1*A1pos + ut*B1
-        gpuGlobalDataCommon[155, idx] = (rho*temp2)
+        gpuGlobalDataRest[38, idx] = (rho*temp2)
 
         temp1 = ut*un*A1pos + un*B1
-        gpuGlobalDataCommon[156, idx] = (rho*temp1)
+        gpuGlobalDataRest[39, idx] = (rho*temp1)
 
         temp1 = (7*pr_by_rho) + u_sqr
         temp2 = 0.5*ut*temp1*A1pos
         temp1 = (6*pr_by_rho) + u_sqr
-        gpuGlobalDataCommon[157, idx] = (rho*(temp2 + 0.5*temp1*B1))
+        gpuGlobalDataRest[40, idx] = (rho*(temp2 + 0.5*temp1*B1))
     else
-        gpuGlobalDataCommon[158, idx] = (rho*(ut*A1pos + B1))
+        gpuGlobalDataRest[41, idx] = (rho*(ut*A1pos + B1))
 
         temp1 = pr_by_rho + ut*ut
         temp2 = temp1*A1pos + ut*B1
-        gpuGlobalDataCommon[159, idx] = (rho*temp2)
+        gpuGlobalDataRest[42, idx] = (rho*temp2)
 
         temp1 = ut*un*A1pos + un*B1
-        gpuGlobalDataCommon[160, idx] = (rho*temp1)
+        gpuGlobalDataRest[43, idx] = (rho*temp1)
 
         temp1 = (7*pr_by_rho) + u_sqr
         temp2 = 0.5*ut*temp1*A1pos
         temp1 = (6*pr_by_rho) + u_sqr
-        gpuGlobalDataCommon[161, idx] = (rho*(temp2 + 0.5*temp1*B1))
+        gpuGlobalDataRest[44, idx] = (rho*(temp2 + 0.5*temp1*B1))
     end
     return nothing
 end
 
-function flux_Gxn_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
+function flux_Gxn_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
 
-    u1 = gpuGlobalDataCommon[170, idx]
-    u2 = gpuGlobalDataCommon[171, idx]
-    rho = gpuGlobalDataCommon[172, idx]
-    pr = gpuGlobalDataCommon[173, idx]
+    u1 = gpuGlobalDataRest[45, idx]
+    u2 = gpuGlobalDataRest[46, idx]
+    rho = gpuGlobalDataRest[47, idx]
+    pr = gpuGlobalDataRest[48, idx]
 
     tx = ny
     ty = -nx
@@ -72,42 +72,42 @@ function flux_Gxn_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
     if flag == 1
-        gpuGlobalDataCommon[154, idx] = (rho*(ut*A1neg - B1))
+        gpuGlobalDataRest[37, idx] = (rho*(ut*A1neg - B1))
 
         temp1 = pr_by_rho + ut*ut
         temp2 = temp1*A1neg - ut*B1
-        gpuGlobalDataCommon[155, idx] = (rho*temp2)
+        gpuGlobalDataRest[38, idx] = (rho*temp2)
 
         temp1 = ut*un*A1neg - un*B1
-        gpuGlobalDataCommon[156, idx] = (rho*temp1)
+        gpuGlobalDataRest[39, idx] = (rho*temp1)
 
         temp1 = (7*pr_by_rho) + u_sqr
         temp2 = 0.5*ut*temp1*A1neg
         temp1 = (6*pr_by_rho) + u_sqr
-        gpuGlobalDataCommon[157, idx] = (rho*(temp2 - 0.5*temp1*B1))
+        gpuGlobalDataRest[40, idx] = (rho*(temp2 - 0.5*temp1*B1))
     else
-        gpuGlobalDataCommon[158, idx] = (rho*(ut*A1neg - B1))
+        gpuGlobalDataRest[41, idx] = (rho*(ut*A1neg - B1))
 
         temp1 = pr_by_rho + ut*ut
         temp2 = temp1*A1neg - ut*B1
-        gpuGlobalDataCommon[159, idx] = (rho*temp2)
+        gpuGlobalDataRest[42, idx] = (rho*temp2)
 
         temp1 = ut*un*A1neg - un*B1
-        gpuGlobalDataCommon[160, idx] = (rho*temp1)
+        gpuGlobalDataRest[43, idx] = (rho*temp1)
 
         temp1 = (7*pr_by_rho) + u_sqr
         temp2 = 0.5*ut*temp1*A1neg
         temp1 = (6*pr_by_rho) + u_sqr
-        gpuGlobalDataCommon[161, idx] = (rho*(temp2 - 0.5*temp1*B1))
+        gpuGlobalDataRest[44, idx] = (rho*(temp2 - 0.5*temp1*B1))
     end
     return nothing
 end
 
-function flux_Gyp_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
-    u1 = gpuGlobalDataCommon[170, idx]
-    u2 = gpuGlobalDataCommon[171, idx]
-    rho = gpuGlobalDataCommon[172, idx]
-    pr = gpuGlobalDataCommon[173, idx]
+function flux_Gyp_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
+    u1 = gpuGlobalDataRest[45, idx]
+    u2 = gpuGlobalDataRest[46, idx]
+    rho = gpuGlobalDataRest[47, idx]
+    pr = gpuGlobalDataRest[48, idx]
 
     tx = ny
     ty = -nx
@@ -124,40 +124,40 @@ function flux_Gyp_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
     u_sqr = ut*ut + un*un
 
     if flag == 1
-        gpuGlobalDataCommon[154, idx] = (rho*(un*A2pos + B2))
+        gpuGlobalDataRest[37, idx] = (rho*(un*A2pos + B2))
 
         temp1 = pr_by_rho + un*un
         temp2 = temp1*A2pos + un*B2
 
         temp1 = ut*un*A2pos + ut*B2
-        gpuGlobalDataCommon[155, idx] = (rho*temp1)
-        gpuGlobalDataCommon[156, idx] = (rho*temp2)
+        gpuGlobalDataRest[38, idx] = (rho*temp1)
+        gpuGlobalDataRest[39, idx] = (rho*temp2)
 
         temp1 = (7*pr_by_rho) + u_sqr
         temp2 = 0.5*un*temp1*A2pos
         temp1 = (6*pr_by_rho) + u_sqr
-        gpuGlobalDataCommon[157, idx] = (rho*(temp2 + 0.5*temp1*B2))
+        gpuGlobalDataRest[40, idx] = (rho*(temp2 + 0.5*temp1*B2))
     else
-        gpuGlobalDataCommon[158, idx] = (rho*(un*A2pos + B2))
+        gpuGlobalDataRest[41, idx] = (rho*(un*A2pos + B2))
         temp1 = pr_by_rho + un*un
         temp2 = temp1*A2pos + un*B2
 
         temp1 = ut*un*A2pos + ut*B2
-        gpuGlobalDataCommon[159, idx] = (rho*temp1)
-        gpuGlobalDataCommon[160, idx] = (rho*temp2)
+        gpuGlobalDataRest[42, idx] = (rho*temp1)
+        gpuGlobalDataRest[43, idx] = (rho*temp2)
         temp1 = (7*pr_by_rho) + u_sqr
         temp2 = 0.5*un*temp1*A2pos
         temp1 = (6*pr_by_rho) + u_sqr
-        gpuGlobalDataCommon[161, idx] = (rho*(temp2 + 0.5*temp1*B2))
+        gpuGlobalDataRest[44, idx] = (rho*(temp2 + 0.5*temp1*B2))
     end
     return nothing
 end
 
-function flux_Gyn_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
-    u1 = gpuGlobalDataCommon[170, idx]
-    u2 = gpuGlobalDataCommon[171, idx]
-    rho = gpuGlobalDataCommon[172, idx]
-    pr = gpuGlobalDataCommon[173, idx]
+function flux_Gyn_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
+    u1 = gpuGlobalDataRest[45, idx]
+    u2 = gpuGlobalDataRest[46, idx]
+    rho = gpuGlobalDataRest[47, idx]
+    pr = gpuGlobalDataRest[48, idx]
 
     tx = ny
     ty = -nx
@@ -175,48 +175,48 @@ function flux_Gyn_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
         pr_by_rho = pr/rho
         u_sqr = ut*ut + un*un
 
-        gpuGlobalDataCommon[154, idx] = (rho*(un*A2neg - B2))
+        gpuGlobalDataRest[37, idx] = (rho*(un*A2neg - B2))
 
         temp1 = pr_by_rho + un*un
         temp2 = temp1*A2neg - un*B2
 
         temp1 = ut*un*A2neg - ut*B2
-        gpuGlobalDataCommon[155, idx] = (rho*temp1)
+        gpuGlobalDataRest[38, idx] = (rho*temp1)
 
-        gpuGlobalDataCommon[156, idx] = (rho*temp2)
+        gpuGlobalDataRest[39, idx] = (rho*temp2)
 
         temp1 = (7*pr_by_rho) + u_sqr
         temp2 = 0.5*un*temp1*A2neg
         temp1 = (6*pr_by_rho) + u_sqr
-        gpuGlobalDataCommon[157, idx] = (rho*(temp2 - 0.5*temp1*B2))
+        gpuGlobalDataRest[40, idx] = (rho*(temp2 - 0.5*temp1*B2))
     else
         pr_by_rho = pr/rho
         u_sqr = ut*ut + un*un
 
-        gpuGlobalDataCommon[158, idx] = (rho*(un*A2neg - B2))
+        gpuGlobalDataRest[41, idx] = (rho*(un*A2neg - B2))
 
         temp1 = pr_by_rho + un*un
         temp2 = temp1*A2neg - un*B2
 
         temp1 = ut*un*A2neg - ut*B2
-        gpuGlobalDataCommon[159, idx] = (rho*temp1)
+        gpuGlobalDataRest[42, idx] = (rho*temp1)
 
-        gpuGlobalDataCommon[160, idx] = (rho*temp2)
+        gpuGlobalDataRest[43, idx] = (rho*temp2)
 
         temp1 = (7*pr_by_rho) + u_sqr
         temp2 = 0.5*un*temp1*A2neg
         temp1 = (6*pr_by_rho) + u_sqr
-        gpuGlobalDataCommon[161, idx] = (rho*(temp2 - 0.5*temp1*B2))
+        gpuGlobalDataRest[44, idx] = (rho*(temp2 - 0.5*temp1*B2))
     end
 
     return nothing
 end
 
-function flux_Gx_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
-    u1 = gpuGlobalDataCommon[170, idx]
-    u2 = gpuGlobalDataCommon[171, idx]
-    rho = gpuGlobalDataCommon[172, idx]
-    pr = gpuGlobalDataCommon[173, idx]
+function flux_Gx_kernel(nx, ny, idx, flag)
+    u1 = gpuGlobalDataRest[45, idx]
+    u2 = gpuGlobalDataRest[46, idx]
+    rho = gpuGlobalDataRest[47, idx]
+    pr = gpuGlobalDataRest[48, idx]
 
     tx = ny
     ty = -nx
@@ -225,28 +225,28 @@ function flux_Gx_kernel(nx, ny, gpuGlobalDataCommon, idx, flag)
     un = u1*nx + u2*ny
 
     if flag == 1
-        gpuGlobalDataCommon[154, idx] = rho*ut
-        gpuGlobalDataCommon[155, idx] = pr + rho*ut*ut
-        gpuGlobalDataCommon[156, idx] = rho*ut*un
+        gpuGlobalDataRest[37, idx] = rho*ut
+        gpuGlobalDataRest[38, idx] = pr + rho*ut*ut
+        gpuGlobalDataRest[39, idx] = rho*ut*un
         temp1 = 0.5*(ut*ut + un*un)
         rho_e = 2.5*pr + rho*temp1
-        gpuGlobalDataCommon[157, idx] = (pr + rho_e)*ut
+        gpuGlobalDataRest[40, idx] = (pr + rho_e)*ut
     else
-        gpuGlobalDataCommon[158, idx] = rho*ut
-        gpuGlobalDataCommon[159, idx] = pr + rho*ut*ut
-        gpuGlobalDataCommon[160, idx] = rho*ut*un
+        gpuGlobalDataRest[41, idx] = rho*ut
+        gpuGlobalDataRest[42, idx] = pr + rho*ut*ut
+        gpuGlobalDataRest[43, idx] = rho*ut*un
         temp1 = 0.5*(ut*ut + un*un)
         rho_e = 2.5*pr + rho*temp1
-        gpuGlobalDataCommon[161, idx] = (pr + rho_e)*ut
+        gpuGlobalDataRest[44, idx] = (pr + rho_e)*ut
     end
     return nothing
 end
 
-function flux_Gy_kernel(nx, ny,gpuGlobalDataCommon, idx, flag)
-    u1 = gpuGlobalDataCommon[170, idx]
-    u2 = gpuGlobalDataCommon[171, idx]
-    rho = gpuGlobalDataCommon[172, idx]
-    pr = gpuGlobalDataCommon[173, idx]
+function flux_Gy_kernel(nx, ny, idx, flag)
+    u1 = gpuGlobalDataRest[45, idx]
+    u2 = gpuGlobalDataRest[46, idx]
+    rho = gpuGlobalDataRest[47, idx]
+    pr = gpuGlobalDataRest[48, idx]
 
     tx = ny
     ty = -nx
@@ -255,19 +255,19 @@ function flux_Gy_kernel(nx, ny,gpuGlobalDataCommon, idx, flag)
     un = u1*nx + u2*ny
 
     if flag == 1
-        gpuGlobalDataCommon[154, idx] = rho*un
-        gpuGlobalDataCommon[155, idx] = rho*ut*un
-        gpuGlobalDataCommon[156, idx] = pr + rho*un*un
+        gpuGlobalDataRest[37, idx] = rho*un
+        gpuGlobalDataRest[38, idx] = rho*ut*un
+        gpuGlobalDataRest[39, idx] = pr + rho*un*un
         temp1 = 0.5*(ut*ut + un*un)
         rho_e = 2.5*pr + rho*temp1
-        gpuGlobalDataCommon[157, idx] = (pr + rho_e)*un
+        gpuGlobalDataRest[40, idx] = (pr + rho_e)*un
     else
-        gpuGlobalDataCommon[158, idx] = rho*un
-        gpuGlobalDataCommon[159, idx] = rho*ut*un
-        gpuGlobalDataCommon[160, idx] = pr + rho*un*un
+        gpuGlobalDataRest[41, idx] = rho*un
+        gpuGlobalDataRest[42, idx] = rho*ut*un
+        gpuGlobalDataRest[43, idx] = pr + rho*un*un
         temp1 = 0.5*(ut*ut + un*un)
         rho_e = 2.5*pr + rho*temp1
-        gpuGlobalDataCommon[161, idx] = (pr + rho_e)*un
+        gpuGlobalDataRest[44, idx] = (pr + rho_e)*un
     end
     return nothing
 end

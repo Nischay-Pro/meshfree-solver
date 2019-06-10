@@ -11,6 +11,57 @@ using CUDAnative
 using CUDAdrv
 
 const to = TimerOutput()
+
+mutable struct Point
+    localID::Int32
+    x::Float64
+    y::Float64
+    left::Int32
+    right::Int32
+    flag_1::Int8
+    flag_2::Int8
+    short_distance::Float64
+    nbhs::Int8
+    conn::Array{Int32,1}
+    nx::Float64
+    ny::Float64
+    # Size 4 (Pressure, vx, vy, density) x numberpts
+    prim::Array{Float64,1}
+    flux_res::Array{Float64,1}
+    # Size 4 (Pressure, vx, vy, density) x numberpts
+    q::Array{Float64,1}
+    # Size 2(x,y) 4(Pressure, vx, vy, density) numberpts
+    dq::Array{Array{Float64,1},1}
+    entropy::Float64
+    xpos_nbhs::Int8
+    xneg_nbhs::Int8
+    ypos_nbhs::Int8
+    yneg_nbhs::Int8
+    xpos_conn::Array{Int32,1}
+    xneg_conn::Array{Int32,1}
+    ypos_conn::Array{Int32,1}
+    yneg_conn::Array{Int32,1}
+    delta::Float64
+    max_q::Array{Float64,1}
+    min_q::Array{Float64,1}
+end
+
+struct FixedPoint
+    localID::Int32
+    x::Float64
+    y::Float64
+    left::Int32
+    right::Int32
+    flag_1::Int8
+    flag_2::Int8
+    short_distance::Float64
+    nbhs::Int8
+    nx::Float64
+    ny::Float64
+    entropy::Float64
+end
+
+
 # using PyCall
 
 # const math = PyNULL()
@@ -28,6 +79,9 @@ fpi_solver_cuda, q_var_cuda_kernel, q_var_derivatives_kernel
 
 # include("cuda_funcs.jl")
 # export reduce_warp, reduce_block, reduce_grid, gpu_reduce
+
+include("file.jl")
+export returnFileLength, readFile
 
 include("flux_residual_cuda.jl")
 export cal_flux_residual_kernel

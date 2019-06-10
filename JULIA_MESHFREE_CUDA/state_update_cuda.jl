@@ -1,25 +1,39 @@
-function func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
-    cfl = gpuConfigData[2]
+# function func_delta_kernel(gpuGlobalDataConn,  gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
+#     cfl = gpuConfigData[2]
+#     tx = threadIdx().x
+#     bx = blockIdx().x - 1
+#     bw = blockDim().x
+#     idx = bx * bw + tx
+#     if idx > 0 && idx <= gpuGlobalDataFixedPoint[end].localID
+#         # TODO - Possible problem?
+
+#     end
+#     # sync_threads()
+#     return nothing
+# end
+
+function state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataConn, gpuGlobalDataRest,  gpuConfigData, gpuSumResSqr, numPoints)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
-    idx = bx * bw + tx
-    if idx > 0 && idx <= gpuGlobalDataCommon[1,end]
-        # TODO - Possible problem?
+	idx = bx * bw + tx
+    max_res = zero(Float64)
+    if idx > 0 && idx <= numPoints
+        cfl = gpuConfigData[2]
         min_delt = one(Float64)
-        for iter in 9:28
-            conn = Int(gpuGlobalDataCommon[iter, idx])
+        for iter in 5:14
+            conn = gpuGlobalDataConn[iter, idx]
             if conn == zero(Float64)
                 break
             end
-            rho = gpuGlobalDataCommon[31, conn]
-            u1 = gpuGlobalDataCommon[32, conn]
-            u2 = gpuGlobalDataCommon[33, conn]
-            pr = gpuGlobalDataCommon[34, conn]
-            x_i = gpuGlobalDataCommon[2, idx]
-            y_i = gpuGlobalDataCommon[3, idx]
-            x_k = gpuGlobalDataCommon[2, conn]
-            y_k = gpuGlobalDataCommon[3, conn]
+            rho = gpuGlobalDataRest[1, conn]
+            u1 = gpuGlobalDataRest[2, conn]
+            u2 = gpuGlobalDataRest[3, conn]
+            pr = gpuGlobalDataRest[4, conn]
+            x_i = gpuGlobalDataFixedPoint[idx].x
+            y_i = gpuGlobalDataFixedPoint[idx].y
+            x_k = gpuGlobalDataFixedPoint[conn].x
+            y_k = gpuGlobalDataFixedPoint[conn].y
             dist = CUDAnative.hypot((x_k - x_i),(y_k - y_i))
             mod_u = CUDAnative.hypot(u1,u2)
             delta_t = dist/(mod_u + 3*CUDAnative.sqrt(pr/rho))
@@ -28,48 +42,36 @@ function func_delta_kernel(gpuGlobalDataCommon, gpuConfigData)
                 min_delt = delta_t
             end
         end
-        gpuGlobalDataCommon[136, idx] = min_delt
-    end
-    # sync_threads()
-    return nothing
-end
-
-function state_update_kernel(gpuGlobalDataCommon, gpuConfigData, gpuSumResSqr)
-    tx = threadIdx().x
-    bx = blockIdx().x - 1
-    bw = blockDim().x
-	idx = bx * bw + tx
-    max_res = zero(Float64)
-    if idx > 0 && idx <= gpuGlobalDataCommon[1,end]
-        flag1 = gpuGlobalDataCommon[6, idx]
+        # min_delt = min_delt
+        flag1 = gpuGlobalDataFixedPoint[idx].flag_1
         if flag1 == gpuConfigData[17]
-            state_update_wall_kernel(gpuGlobalDataCommon, idx)
+            state_update_wall_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, min_delt)
         end
         if flag1 == gpuConfigData[18]
-            state_update_interior_kernel(gpuGlobalDataCommon, idx)
+            state_update_interior_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, min_delt)
         end
         if flag1 == gpuConfigData[19]
-            state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx)
+            state_update_outer_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, idx, min_delt)
         end
     end
     if flag1 != gpuConfigData[19]
-        gpuSumResSqr[idx] = gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx] * gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx]
+        gpuSumResSqr[idx] = min_delt * gpuGlobalDataRest[5, idx] * min_delt * gpuGlobalDataRest[5, idx]
     end
     # sync_threads()
     return nothing
 end
 
-function state_update_wall_kernel(gpuGlobalDataCommon, idx)
-    nx = gpuGlobalDataCommon[29, idx]
-    ny = gpuGlobalDataCommon[30, idx]
+function state_update_wall_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, min_delt)
+    nx = gpuGlobalDataFixedPoint[idx].nx
+    ny = gpuGlobalDataFixedPoint[idx].ny
 
-    rho = gpuGlobalDataCommon[31, idx]
+    rho = gpuGlobalDataRest[1, idx]
     U1 = rho
-    temp1 = rho * gpuGlobalDataCommon[32, idx]
-    temp2 = rho * gpuGlobalDataCommon[33, idx]
+    temp1 = rho * gpuGlobalDataRest[2, idx]
+    temp2 = rho * gpuGlobalDataRest[3, idx]
     U2 = temp1*ny - temp2*nx
     U3 = temp1*nx + temp2*ny
-    U4 = 2.5*gpuGlobalDataCommon[34, idx] + 0.5*(temp1*temp1 + temp2*temp2)/rho
+    U4 = 2.5*gpuGlobalDataRest[4, idx] + 0.5*(temp1*temp1 + temp2*temp2)/rho
 
     # if idx == 3
     #     @cuprintf("\n ======= ")
@@ -77,10 +79,10 @@ function state_update_wall_kernel(gpuGlobalDataCommon, idx)
     # end
 
     temp = U1
-    U1 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx]
-    U2 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[36, idx]
-    U3 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[37, idx]
-    U4 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[38, idx]
+    U1 -= min_delt * gpuGlobalDataRest[5, idx]
+    U2 -= min_delt * gpuGlobalDataRest[6, idx]
+    U3 -= min_delt * gpuGlobalDataRest[7, idx]
+    U4 -= min_delt * gpuGlobalDataRest[8, idx]
 
     # if idx == 3
     #     @cuprintf("\n ======= ")
@@ -104,17 +106,55 @@ function state_update_wall_kernel(gpuGlobalDataCommon, idx)
     # end
     # sum_res_sqr = sum_res_sqr + res_sqr
 
-    gpuGlobalDataCommon[31, idx] = U1
+    gpuGlobalDataRest[1, idx] = U1
     temp = 1.0 / U1
-    gpuGlobalDataCommon[32, idx] = U2*temp
-    gpuGlobalDataCommon[33, idx] = U3*temp
-    gpuGlobalDataCommon[34, idx] = (0.4*U4) - ((0.2 * temp) * (U2 * U2 + U3 * U3))
+    gpuGlobalDataRest[2, idx] = U2*temp
+    gpuGlobalDataRest[3, idx] = U3*temp
+    gpuGlobalDataRest[4, idx] = (0.4*U4) - ((0.2 * temp) * (U2 * U2 + U3 * U3))
     return nothing
 end
 
-function state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx)
-    nx = gpuGlobalDataCommon[29, idx]
-    ny = gpuGlobalDataCommon[30, idx]
+function state_update_interior_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, min_delt)
+    nx = gpuGlobalDataFixedPoint[idx].nx
+    ny = gpuGlobalDataFixedPoint[idx].ny
+
+    rho = gpuGlobalDataRest[1, idx]
+    U1 = rho
+    temp1 = rho * gpuGlobalDataRest[2, idx]
+    temp2 = rho * gpuGlobalDataRest[3, idx]
+    U2 = temp1*ny - temp2*nx
+    U3 = temp1*nx + temp2*ny
+    U4 = 2.5*gpuGlobalDataRest[4, idx] + 0.5*(temp1*temp1 + temp2*temp2)/rho
+    # if idx == 1
+    #     @cuprintf("\n %.17f %.17f %.17f %.17f", U1, U2, U3, U4)
+    #     # @cuprintf("\n %.17f ", temp1)
+    # end
+    # res_sqr = (U1 - temp)*(U1 - temp)
+    # gpuSumResSqr[idx] = res_sqr
+    temp = U1
+    U1 -= min_delt * gpuGlobalDataRest[5, idx]
+    U2 -= min_delt * gpuGlobalDataRest[6, idx]
+    U3 -= min_delt * gpuGlobalDataRest[7, idx]
+    U4 -= min_delt * gpuGlobalDataRest[8, idx]
+    U2_rot = U2
+    U3_rot = U3
+    U2 = U2_rot*ny + U3_rot*nx
+    U3 = U3_rot*ny - U2_rot*nx
+    # if idx == 1
+    #     @cuprintf("\n %.17f %.17f %.17f %.17f", U1, U2, U3, U4)
+    #     @cuprintf("\n %.17f ", temp)
+    # end
+    gpuGlobalDataRest[1, idx] = U1
+    temp = 1.0 / U1
+    gpuGlobalDataRest[2, idx] = U2*temp
+    gpuGlobalDataRest[3, idx] = U3*temp
+    gpuGlobalDataRest[4, idx] = (0.4*U4) - ((0.2 * temp) * (U2 * U2 + U3 * U3))
+    return nothing
+end
+
+function state_update_outer_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, idx, min_delt)
+    nx = gpuGlobalDataFixedPoint[idx].nx
+    ny = gpuGlobalDataFixedPoint[idx].ny
     Mach::Float64 = gpuConfigData[4]
     rho_inf::Float64 = gpuConfigData[12]
     pr_inf::Float64 = gpuConfigData[13]
@@ -138,10 +178,10 @@ function state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx)
     B2_inf = CUDAnative.exp(-S2*S2)/(2*CUDAnative.sqrt(pi*beta))
     A2n_inf = 0.5 * (1 - CUDAnative.erf(S2))
 
-    rho = gpuGlobalDataCommon[31, idx]
-    u1 = gpuGlobalDataCommon[32, idx]
-    u2 = gpuGlobalDataCommon[33, idx]
-    pr = gpuGlobalDataCommon[34, idx]
+    rho = gpuGlobalDataRest[1, idx]
+    u1 = gpuGlobalDataRest[2, idx]
+    u2 = gpuGlobalDataRest[3, idx]
+    pr = gpuGlobalDataRest[4, idx]
 
     u1_rot = u1*tx + u2*ty
     u2_rot = u1*nx + u2*ny
@@ -168,56 +208,18 @@ function state_update_outer_kernel(gpuGlobalDataCommon, gpuConfigData, idx)
     U4 = (temp1 + temp2)
 
     temp = U1
-    U1 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx]
-    U2 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[36, idx]
-    U3 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[37, idx]
-    U4 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[38, idx]
+    U1 -= min_delt * gpuGlobalDataRest[5, idx]
+    U2 -= min_delt * gpuGlobalDataRest[6, idx]
+    U3 -= min_delt * gpuGlobalDataRest[7, idx]
+    U4 -= min_delt * gpuGlobalDataRest[8, idx]
     U2_rot = U2
     U3_rot = U3
     U2 = U2_rot*ny + U3_rot*nx
     U3 = U3_rot*ny - U2_rot*nx
-    gpuGlobalDataCommon[31, idx] = U1
+    gpuGlobalDataRest[1, idx] = U1
     temp = 1.0 / U1
-    gpuGlobalDataCommon[32, idx] = U2*temp
-    gpuGlobalDataCommon[33, idx] = U3*temp
-    gpuGlobalDataCommon[34, idx] = (0.4*U4) - ((0.2 * temp) * (U2 * U2 + U3 * U3))
-    return nothing
-end
-
-function state_update_interior_kernel(gpuGlobalDataCommon, idx)
-    nx = gpuGlobalDataCommon[29, idx]
-    ny = gpuGlobalDataCommon[30, idx]
-
-    rho = gpuGlobalDataCommon[31, idx]
-    U1 = rho
-    temp1 = rho * gpuGlobalDataCommon[32, idx]
-    temp2 = rho * gpuGlobalDataCommon[33, idx]
-    U2 = temp1*ny - temp2*nx
-    U3 = temp1*nx + temp2*ny
-    U4 = 2.5*gpuGlobalDataCommon[34, idx] + 0.5*(temp1*temp1 + temp2*temp2)/rho
-    # if idx == 1
-    #     @cuprintf("\n %.17f %.17f %.17f %.17f", U1, U2, U3, U4)
-    #     # @cuprintf("\n %.17f ", temp1)
-    # end
-    # res_sqr = (U1 - temp)*(U1 - temp)
-    # gpuSumResSqr[idx] = res_sqr
-    temp = U1
-    U1 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[35, idx]
-    U2 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[36, idx]
-    U3 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[37, idx]
-    U4 -= gpuGlobalDataCommon[136, idx] * gpuGlobalDataCommon[38, idx]
-    U2_rot = U2
-    U3_rot = U3
-    U2 = U2_rot*ny + U3_rot*nx
-    U3 = U3_rot*ny - U2_rot*nx
-    # if idx == 1
-    #     @cuprintf("\n %.17f %.17f %.17f %.17f", U1, U2, U3, U4)
-    #     @cuprintf("\n %.17f ", temp)
-    # end
-    gpuGlobalDataCommon[31, idx] = U1
-    temp = 1.0 / U1
-    gpuGlobalDataCommon[32, idx] = U2*temp
-    gpuGlobalDataCommon[33, idx] = U3*temp
-    gpuGlobalDataCommon[34, idx] = (0.4*U4) - ((0.2 * temp) * (U2 * U2 + U3 * U3))
+    gpuGlobalDataRest[2, idx] = U2*temp
+    gpuGlobalDataRest[3, idx] = U3*temp
+    gpuGlobalDataRest[4, idx] = (0.4*U4) - ((0.2 * temp) * (U2 * U2 + U3 * U3))
     return nothing
 end
