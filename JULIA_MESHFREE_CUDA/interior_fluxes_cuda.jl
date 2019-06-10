@@ -2,6 +2,7 @@
 function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
+    gamma = gpuConfigData[15]
 
     x_k = 0.0
     y_k = 0.0
@@ -68,9 +69,9 @@ function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
-        qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gpuConfigData, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gamma, gpuGlobalDataRest, idx)
         flux_Gxp_kernel(nx, ny, gpuGlobalDataRest, idx, 1)
-        qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gpuConfigData, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, gpuGlobalDataRest, idx)
         flux_Gxp_kernel(nx, ny, gpuGlobalDataRest, idx, 2)
         # CUDAnative.synchronize()
         sum_1 += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
@@ -99,6 +100,7 @@ end
 function interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
+    gamma = gpuConfigData[15]
 
     x_k = 0.0
     y_k = 0.0
@@ -165,9 +167,9 @@ function interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
-        qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gpuConfigData, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gamma, gpuGlobalDataRest, idx)
         flux_Gxn_kernel(nx, ny, gpuGlobalDataRest, idx, 1)
-        qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gpuConfigData, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, gpuGlobalDataRest, idx)
         flux_Gxn_kernel(nx, ny, gpuGlobalDataRest, idx, 2)
         # CUDAnative.synchronize()
         sum_1 += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
@@ -204,6 +206,7 @@ end
 function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
+    gamma = gpuConfigData[15]
 
     x_k = 0.0
     y_k = 0.0
@@ -273,9 +276,9 @@ function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
-        qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gpuConfigData, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gamma, gpuGlobalDataRest, idx)
         flux_Gyp_kernel(nx, ny, gpuGlobalDataRest, idx, 1)
-        qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gpuConfigData, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, gpuGlobalDataRest, idx)
         flux_Gyp_kernel(nx, ny, gpuGlobalDataRest, idx, 2)
         # CUDAnative.synchronize()
         sum_1 += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights
@@ -309,6 +312,7 @@ end
 function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
     power = gpuConfigData[6]
     limiter_flag = gpuConfigData[7]
+    gamma = gpuConfigData[15]
 
     x_k = 0.0
     y_k = 0.0
@@ -374,9 +378,9 @@ function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
-        qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gpuConfigData, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gamma, gpuGlobalDataRest, idx)
         flux_Gyn_kernel(nx, ny, gpuGlobalDataRest, idx, 1)
-        qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gpuConfigData, gpuGlobalDataRest, idx)
+        qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, gpuGlobalDataRest, idx)
         flux_Gyn_kernel(nx, ny, gpuGlobalDataRest, idx, 2)
         # CUDAnative.synchronize()
         sum_1 += (gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]) * dels_weights

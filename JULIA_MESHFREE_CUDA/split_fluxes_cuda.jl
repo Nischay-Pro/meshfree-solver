@@ -20,7 +20,7 @@ function flux_Gxp_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
     u_sqr = ut*ut + un*un
 
     if flag == 1
-        gpuGlobalDataRest[37, idx]= (rho*(ut*A1pos + B1))
+        gpuGlobalDataRest[37, idx] = (rho*(ut*A1pos + B1))
 
         temp1 = pr_by_rho + ut*ut
         temp2 = temp1*A1pos + ut*B1
