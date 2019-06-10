@@ -8,7 +8,7 @@ def venkat_limiter(qtilde, globaldata, idx, VL_CONST, phi):
     del_neg = 0
     max_q = cuda.local.array(4, dtype=numba.float64)
     min_q = cuda.local.array(4, dtype=numba.float64)
-    ds = cuda.local.array(1, dtype=numba.float64)
+    # ds = cuda.local.array(1, dtype=numba.float64)
     for i in range(4):
         q = globaldata[idx]['q'][i]
         del_neg = qtilde[i] - q
@@ -26,10 +26,10 @@ def venkat_limiter(qtilde, globaldata, idx, VL_CONST, phi):
                 del_pos = min_q[i] - q
                 # del_pos = globaldata[idx]['minq'][i] - q
 
-            ds[0] = 0
-            smallest_dist(globaldata, idx, ds)
-            # epsi = VL_CONST * globaldata[idx]['min_dist']
-            epsi = VL_CONST * ds[0]
+            # ds[0] = 0
+            # smallest_dist(globaldata, idx, ds)
+            # epsi = VL_CONST * ds[0]
+            epsi = VL_CONST * globaldata[idx]['min_dist']
             epsi = math.pow(epsi,3)
 
             num = (del_pos*del_pos) + (epsi*epsi)

@@ -37,3 +37,4 @@ test_*
 testresult*
 grid_*
 runner.sh
+counts.txt

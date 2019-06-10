@@ -1,5 +1,5 @@
 class Point:
-    def __init__(self, localID, x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, flux_res, q, dq, entropy, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta, min_dist, minq, maxq):
+    def __init__(self, localID, x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, flux_res, q, dq, entropy, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta, min_dist):
         self.localID = localID
         self.x = x
         self.y = y
@@ -29,9 +29,6 @@ class Point:
         self.yneg_conn = yneg_conn
         self.delta = delta
         self.min_dist = min_dist
-        self.minq = minq
-        self.maxq = maxq
-    
 
     def setNormals(self, n):
         self.nx = n[0]

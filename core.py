@@ -142,7 +142,7 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         pass
     singlePrecisionMode = bool(configData['core']['singlePrecision'])
     globaldata_gpu = convert.convert_globaldata_to_gpu_globaldata(globaldata, singlePrecision = singlePrecisionMode)
-    sum_res_sqr = np.zeros((len(globaldata)), dtype=np.float64)
+    sum_res_sqr = np.zeros(len(globaldata), dtype=np.float64)
     a = time.time()
     with stream.auto_synchronize():
         print("Pushing GPU Globaldata to GPU")
