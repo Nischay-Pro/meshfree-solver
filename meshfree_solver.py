@@ -44,7 +44,7 @@ def main():
         if format == 1:
             temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), 1, 1, int(itmdata[5]), int(itmdata[6]), int(itmdata[8]), list(map(int,itmdata[9:])), float(itmdata[3]), float(itmdata[4]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[7]))
         elif format == 2:
-            temp = Point(idx + 1, float(itmdata[0]), float(itmdata[1]), int(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[10]), list(map(int, itmdata[11:])), float(itmdata[6]), float(itmdata[7]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[8]))
+            temp = Point(idx + 1, float(itmdata[0]), float(itmdata[1]), int(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[10]), list(map(int, itmdata[11:])), float(itmdata[6]), float(itmdata[7]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[9]))
         else:
             temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[6]), int(itmdata[8]), list(map(int,itmdata[9:])), 1, 0, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[7]))
         globaldata.append(temp)

@@ -44,16 +44,18 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr
     bw = cuda.blockDim.x
     idx =  bx * bw + tx
 
-    U = cuda.local.array((4), numba.float64)
-    temp1 = cuda.local.array((4), numba.float64)
-    tempU = cuda.local.array((4), numba.float64)
-
-    zeros(U, U)
-    zeros(temp1, temp1)
-    zeros(tempU, tempU)
-
     if idx > 0 and idx < len(globaldata):
+
+        U = cuda.local.array((4), numba.float64)
+        temp1 = cuda.local.array((4), numba.float64)
+        tempU = cuda.local.array((4), numba.float64)
+
+        zeros(U, U)
+        zeros(temp1, temp1)
+        zeros(tempU, tempU)
+
         sum_res_sqr_gpu[idx] = 0
+        
         flag_1 = globaldata[idx]['flag_1']
         nx = globaldata[idx]['nx']
         ny = globaldata[idx]['ny']
