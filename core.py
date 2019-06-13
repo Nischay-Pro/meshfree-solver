@@ -164,7 +164,7 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
             if i == 1:
                 d = time.time()
             temp_gpu = sum_reduce(sum_res_sqr_gpu)
-            residue = math.sqrt(temp_gpu) / len(globaldata)
+            residue = math.sqrt(temp_gpu) / (len(globaldata) - 1)
             if i <= 2:
                 res_old = residue
                 residue = 0

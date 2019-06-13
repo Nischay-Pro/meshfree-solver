@@ -38,6 +38,9 @@ def main():
     # Format 1: Old Format
     # Format 2: QuadTree Format
 
+    if format == 2:
+        splitdata.pop(0)
+
     print("Converting RAW dataset to Globaldata")
     for idx, itm in enumerate(tqdm(splitdata)):
         itmdata = itm.split(" ")[:-1]
