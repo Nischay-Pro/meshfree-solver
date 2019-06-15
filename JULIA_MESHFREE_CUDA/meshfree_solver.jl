@@ -2,7 +2,7 @@
 function main()
     configData = getConfig()
     # globaldataCommon = zeros(Float64, 38, getConfig()["core"]["points"])
-    file_name = "partGridNew--160-60"
+    file_name = string(ARGS[1])
     numPoints = returnFileLength(file_name)
     println("Number of points ", numPoints)
     # globaldataDq = [Array{Array{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
@@ -26,7 +26,7 @@ function main()
     # outerptsidx = Array{Int,1}(undef, 0)
     # shapeptsidx = Array{Int,1}(undef, 0)
     println("Start Read")
-    readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint, globalDataRest)
+    readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint, globalDataRest, numPoints)
     # file1 = open("partGridNew--160-60")
     # data1 = read(file1, String)
     # splitdata = split(data1, "\n")
@@ -42,14 +42,14 @@ function main()
 
 
     println("Start table sorting")
-    for idx in 1:numPoints
+    @showprogress 2 "Computing Table" for idx in 1:numPoints
         connectivity = calculateConnectivity(globaldata, idx, configData)
         setConnectivity(globaldata[idx], connectivity)
         smallest_dist(globaldata, idx)
         convertToArray(globalDataConn, globaldata[idx], idx)
-        if idx % (numPoints * 0.25) == 0
-            println("Bump In Table")
-        end
+        # if idx % (numPoints * 0.25) == 0
+        #     println("Bump In Table")
+        # end
     end
 
     # typeof(globalDataConn[1])

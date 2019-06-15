@@ -9,6 +9,7 @@ using DelimitedFiles
 using CuArrays
 using CUDAnative
 using CUDAdrv
+using ProgressMeter
 
 const to = TimerOutput()
 

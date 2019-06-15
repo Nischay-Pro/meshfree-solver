@@ -9,7 +9,7 @@ function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, o
     data1 = read(file_name, String)
     splitdata = @view split(data1, "\n")[1:end-1]
     # print(splitdata[1:3])
-    for (idx, itm) in enumerate(splitdata)
+    @showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
         itmdata = split(itm, " ")
         globaldata[idx] = Point(parse(Int,itmdata[1]),
                     parse(Float64,itmdata[2]),
@@ -20,7 +20,7 @@ function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, o
                     parse(Int8,itmdata[7]),
                     parse(Float64,itmdata[8]),
                     parse(Int8,itmdata[9]),
-                    parse.(Int32, itmdata[10:end]),
+                    parse.(Int32, itmdata[10:end-1]),
                     parse(Float64, itmdata[4]),
                     parse(Float64, itmdata[5]),
                     copy(defprimal),
@@ -30,26 +30,26 @@ function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, o
                     Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), 0.0, zeros(Float64, 4), zeros(Float64, 4))
 
         # println(temp)
-        if idx % 100000 == 0
-            println(idx)
-        end
+        # if idx % 100000 == 0
+        #     println(idx)
+        # end
 
         if globaldata[idx].localID == 1
-            globaldata[idx].left = 5120
-            globaldata[idx].right = 2
+            globaldata[idx].left = 160
+            # globaldata[idx].right = 2
         end
 
-        if globaldata[idx].localID == 5120
-            globaldata[idx].left = 5119
+        if globaldata[idx].localID == 160
+            # globaldata[idx].left = 5119
             globaldata[idx].right = 1
         end
-        if globaldata[idx].flag_1 == 0
+        if globaldata[idx].flag_1 == 1
             wallpts += 1
             push!(wallptsidx, globaldata[idx].localID)
-        elseif globaldata[idx].flag_1 == 1
+        elseif globaldata[idx].flag_1 == 2
             Interiorpts += 1
             push!(Interiorptsidx, globaldata[idx].localID)
-        elseif globaldata[idx].flag_1 == 2
+        elseif globaldata[idx].flag_1 == 3
             outerpts += 1
             push!(outerptsidx, globaldata[idx].localID)
         end
