@@ -3,6 +3,7 @@ __precompile__()
 module main_module
 
 using Profile
+using ProgressMeter
 using Printf
 using TimerOutputs
 # using DelimitedFiles

@@ -185,6 +185,7 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
         sum_delx_sqr = 0.0
         sum_dely_sqr = 0.0
         sum_delx_dely = 0.0
+        conn = 0.0
         sum_delx_delq1, sum_delx_delq2,sum_delx_delq3,sum_delx_delq4 = 0.0,0.0,0.0,0.0
         sum_dely_delq1, sum_dely_delq2,sum_dely_delq3,sum_dely_delq4 = 0.0,0.0,0.0,0.0
         x_i = gpuGlobalDataFixedPoint[idx].x
@@ -201,24 +202,24 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
             delx = x_k - x_i
             dely = y_k - y_i
             dist = CUDAnative.hypot(delx, dely)
-            
+
             weights = CUDAnative.pow(dist, power)
             sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
             sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
             sum_delx_dely = sum_delx_dely + ((delx * dely) * weights)
-            
+
             temp = gpuGlobalDataRest[9, conn] - gpuGlobalDataRest[9, idx]
             sum_delx_delq1 += (weights * delx * temp)
             sum_dely_delq1 += (weights * dely * temp)
-            
+
             temp = gpuGlobalDataRest[10, conn] - gpuGlobalDataRest[10, idx]
             sum_delx_delq2 += (weights * delx * temp)
             sum_dely_delq2 += (weights * dely * temp)
-            
+
             temp = gpuGlobalDataRest[11, conn] - gpuGlobalDataRest[11, idx]
             sum_delx_delq3 += (weights * delx * temp)
             sum_dely_delq3 += (weights * dely * temp)
-            
+
             temp = gpuGlobalDataRest[12, conn] - gpuGlobalDataRest[12, idx]
             sum_delx_delq4 += (weights * delx * temp)
             sum_dely_delq4 += (weights * dely * temp)
@@ -243,12 +244,7 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
                 if conn == 0.0
                     break
                 end
-                if gpuGlobalDataRest[20+i, idx] < gpuGlobalDataRest[8+i, conn]
-                    gpuGlobalDataRest[20+i, idx] = gpuGlobalDataRest[8+i, conn]
-                end
-                if gpuGlobalDataRest[24+i, idx] > gpuGlobalDataRest[8+i, conn]
-                    gpuGlobalDataRest[24+i, idx] = gpuGlobalDataRest[8+i, conn]
-                end
+                update_q(gpuGlobalDataRest, idx, i, conn)
             end
         end
         gpuGlobalDataRest[5, idx] = 0.0
@@ -259,6 +255,17 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
     # sync_threads()
     return nothing
 end
+
+@inline function update_q(gpuGlobalDataRest, idx, i, conn)
+    if gpuGlobalDataRest[20+i, idx] < gpuGlobalDataRest[8+i, conn]
+        gpuGlobalDataRest[20+i, idx] = gpuGlobalDataRest[8+i, conn]
+    end
+    if gpuGlobalDataRest[24+i, idx] > gpuGlobalDataRest[8+i, conn]
+        gpuGlobalDataRest[24+i, idx] = gpuGlobalDataRest[8+i, conn]
+    end
+    return  nothing
+end
+
 
 @inline function reduce_warp(op::F, val::T)::T where {F<:Function,T}
     offset = CUDAnative.warpsize() ÷ 2

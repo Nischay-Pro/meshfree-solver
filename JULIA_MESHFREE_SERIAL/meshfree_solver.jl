@@ -3,7 +3,7 @@ function main()
     configData = getConfig()
     wallpts, Interiorpts, outerpts, shapepts = 0,0,0,0
 
-    file_name = "nice.dat"
+    file_name = string(ARGS[1])
 
     numPoints = returnFileLength(file_name)
     println(numPoints)
@@ -22,13 +22,13 @@ function main()
         wallpts, Interiorpts, outerpts, shapepts)
 
     println("Start table sorting")
-    for idx in table
+    @showprogress 2 "Computing Table" for idx in table
         connectivity = calculateConnectivity(globaldata, idx)
         setConnectivity(globaldata[idx], connectivity)
         smallest_dist(globaldata, idx)
-        if idx % (length(table) * 0.25) == 0
-            println("Bump In Table")
-        end
+        # if idx % (length(table) * 0.25) == 0
+        #     println("Bump In Table")
+        # end
     end
     # println(wallptsidx)
 

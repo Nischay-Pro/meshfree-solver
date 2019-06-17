@@ -4,11 +4,11 @@ function returnFileLength(file_name::String)
     return length(splitdata) - 1
 end
 
-function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint, globalDataRest)
+function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint, globalDataRest, numPoints)
     data1 = read(file_name, String)
     splitdata = @view split(data1, "\n")[1:end-1]
     # print(splitdata[1:3])
-    for (idx, itm) in enumerate(splitdata)
+    @showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
         itmdata = split(itm, " ")
         temp =  Point(parse(Int32,itmdata[1]),
                     parse(Float64,itmdata[2]),
@@ -54,7 +54,7 @@ function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint
                                                 )
 
         if parse(Int32, itmdata[1]) == 1
-            temp.left = 5120
+            temp.left = numPoints
             # temp.left = 160
             globalDataFixedPoint[idx] = FixedPoint(parse(Int32,itmdata[1]),
                                             parse(Float64,itmdata[2]),
@@ -69,7 +69,7 @@ function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint
                                             parse(Float64, itmdata[5]),
                                             0.0
                                                 )
-        elseif parse(Int32, itmdata[1]) == 5120
+        elseif parse(Int32, itmdata[1]) == numPoints
             temp.right = 1
             globalDataFixedPoint[idx] = FixedPoint(parse(Int32,itmdata[1]),
                                             parse(Float64,itmdata[2]),
@@ -100,9 +100,9 @@ function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint
                                                 )
         end
 
-        if idx % 100000 == 0
-            println(idx)
-        end
+        # if idx % 100000 == 0
+        #     println(idx)
+        # end
 
         globaldata[idx] = temp
         globalDataRest[1:4, idx] = copy(defprimal)

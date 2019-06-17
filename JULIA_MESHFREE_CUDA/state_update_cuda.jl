@@ -1,16 +1,16 @@
-# function func_delta_kernel(gpuGlobalDataConn,  gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
-#     cfl = gpuConfigData[2]
-#     tx = threadIdx().x
-#     bx = blockIdx().x - 1
-#     bw = blockDim().x
-#     idx = bx * bw + tx
-#     if idx > 0 && idx <= gpuGlobalDataFixedPoint[end].localID
-#         # TODO - Possible problem?
+@inline function func_delta_kernel(gpuGlobalDataConn,  gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
+    cfl = gpuConfigData[2]
+    tx = threadIdx().x
+    bx = blockIdx().x - 1
+    bw = blockDim().x
+    idx = bx * bw + tx
+    if idx > 0 && idx <= gpuGlobalDataFixedPoint[end].localID
+        # TODO - Possible problem?
 
-#     end
-#     # sync_threads()
-#     return nothing
-# end
+    end
+    # sync_threads()
+    return nothing
+end
 
 function state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataConn, gpuGlobalDataRest,  gpuConfigData, gpuSumResSqr, numPoints)
     tx = threadIdx().x
