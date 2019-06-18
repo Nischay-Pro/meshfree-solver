@@ -10,7 +10,7 @@ function main()
     # gpu_globaldata = CuArray{Point,1}(undef, getConfig()["core"]["points"])
     globaldata = Array{Point,1}(undef, numPoints)
     # globalDataCommon = zeros(Float64, 173, numPoints)
-    globalDataRest = zeros(Float64, 49, numPoints)
+    globalDataRest = zeros(Float64, 53, numPoints)
     globalDataFixedPoint = Array{FixedPoint,1}(undef, numPoints)
     globalDataConn = zeros(Int32, 55, numPoints)
 

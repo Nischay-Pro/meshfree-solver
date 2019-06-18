@@ -107,19 +107,22 @@ function fpi_solver_cuda(iter, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGl
         if i == 1
             println("Compiling CUDA Kernel. This might take a while...")
         end
-        @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints)
-        # synchronize(str)
-        # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
-        @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
-        # synchronize(str)
-        # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
-        @cuda blocks= fluxblockspergrid threads=threadsperblock cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
-        # synchronize(str)
-        # @cuprintf("\n It is %f ", gpuGlobalDataCommon[31, 3])
-        # @cuda blocks=blockspergrid threads=threadsperblock func_delta_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
-        # synchronize(str)
-        # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
-        @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataConn, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, numPoints)
+        @cuda blocks=blockspergrid threads=threadsperblock func_delta_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
+
+        for rk in 1:4
+            @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints)
+            # synchronize(str)
+            # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
+            @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
+            # synchronize(str)
+            # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
+            @cuda blocks= fluxblockspergrid threads=threadsperblock cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
+            # synchronize(str)
+            # @cuprintf("\n It is %f ", gpuGlobalDataCommon[31, 3])
+            # synchronize(str)
+            # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
+            @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataConn, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, numPoints, rk)
+        end
         # synchronize(str)
         gpu_reduced(+, gpuSumResSqr, gpuSumResSqrOutput)
         temp_gpu = Array(gpuSumResSqrOutput)[1]
@@ -136,7 +139,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGl
             end
 
         @printf(residue_io, "%d %s\n", i, residue)
-        println("Iteration Number ", i)
+        println("Iteration Number ", i, " Residue ", residue)
     end
     synchronize()
     close(residue_io)
