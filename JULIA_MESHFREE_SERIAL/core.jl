@@ -151,6 +151,10 @@ function q_var_derivatives(globaldata::Array{Point,1}, configData)
         sum_delx_dely = zero(Float64)
         sum_delx_delq = fill!(sum_delx_delq, 0.0)
         sum_dely_delq = fill!(sum_dely_delq, 0.0)
+        for i in 1:4
+            globaldata[idx].max_q[i] = globaldata[idx].q[i]
+            globaldata[idx].min_q[i] = globaldata[idx].q[i]
+        end
         for conn in itm.conn
             x_k = globaldata[conn].x
             y_k = globaldata[conn].y
@@ -163,12 +167,20 @@ function q_var_derivatives(globaldata::Array{Point,1}, configData)
             sum_delx_dely += ((delx * dely) * weights)
             sum_delx_delq += @. (weights * delx * (globaldata[conn].q - globaldata[idx].q))
             sum_dely_delq += @. (weights * dely * (globaldata[conn].q - globaldata[idx].q))
+            for i in 1:4
+                if globaldata[idx].max_q[i] < globaldata[conn].q[i]
+                    globaldata[idx].max_q[i] = globaldata[conn].q[i]
+                end
+                if globaldata[idx].min_q[i] > globaldata[conn].q[i]
+                    globaldata[idx].min_q[i] = globaldata[conn].q[i]
+                end
+            end
         end
         det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
         one_by_det = 1.0 / det
-        tempsumx = @. one_by_det * (sum_delx_delq * sum_dely_sqr - sum_dely_delq * sum_delx_dely)
-        tempsumy = @. one_by_det * (sum_dely_delq * sum_delx_sqr - sum_delx_delq * sum_delx_dely)
-        globaldata[idx].dq = [tempsumx, tempsumy]
+        globaldata[idx].dq[1] = @. one_by_det * (sum_delx_delq * sum_dely_sqr - sum_dely_delq * sum_delx_dely)
+        globaldata[idx].dq[2] = @. one_by_det * (sum_dely_delq * sum_delx_sqr - sum_delx_delq * sum_delx_dely)
+        # globaldata[idx].dq = [tempsumx, tempsumy]
     end
     # println(IOContext(stdout, :compact => false), globaldata[3].dq)
     # println(IOContext(stdout, :compact => false), globaldata[3].max_q)
