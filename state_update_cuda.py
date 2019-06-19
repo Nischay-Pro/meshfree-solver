@@ -2,7 +2,7 @@ import math
 import core
 import numba
 from numba import cuda
-from cuda_func import multiply, multiply_element_wise, add, subtract, zeros
+from cuda_func import multiply, multiply_element_wise, add, subtract, zeros, equalize
 
 @cuda.jit(inline=True)
 def func_delta_cuda_kernel(globaldata, cfl):
@@ -12,6 +12,7 @@ def func_delta_cuda_kernel(globaldata, cfl):
     idx =  bx * bw + tx
     if idx > 0 and idx < len(globaldata):
         min_delt = 1
+        equalize(globaldata[idx]['prim_old'], globaldata[idx]['prim'])
         x_i = globaldata[idx]['x']
         y_i = globaldata[idx]['y']
         for itm in globaldata[idx]['conn'][:globaldata[idx]['nbhs']]:
@@ -38,7 +39,7 @@ def func_delta_cuda_kernel(globaldata, cfl):
         globaldata[idx]['delta'] = min_delt
 
 @cuda.jit(inline=True)
-def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr_gpu, wall, interior, outer):
+def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr_gpu, wall, interior, outer, rk, eu):
     tx = cuda.threadIdx.x
     bx = cuda.blockIdx.x
     bw = cuda.blockDim.x
@@ -47,10 +48,15 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr
     if idx > 0 and idx < len(globaldata):
 
         U = cuda.local.array((4), numba.float64)
+        U_old = cuda.local.array((4), numba.float64)
         temp1 = cuda.local.array((4), numba.float64)
         tempU = cuda.local.array((4), numba.float64)
 
+        obt = 1 / 3
+        tbt = 2 / 3
+
         zeros(U, U)
+        zeros(U_old, U_old)
         zeros(temp1, temp1)
         zeros(tempU, tempU)
 
@@ -61,12 +67,29 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr
         ny = globaldata[idx]['ny']
         if flag_1 == wall:
 
-            primitive_to_conserved_cuda_kernel(globaldata, idx, nx, ny, U)
+            primitive_to_conserved_cuda_kernel(globaldata, idx, nx, ny, U, globaldata[idx]['prim'])
+            primitive_to_conserved_cuda_kernel(globaldata, idx, nx, ny, U_old, globaldata[idx]['prim_old'])
 
             temp = U[0]
 
-            multiply(globaldata[idx]['delta'], globaldata[idx]['flux_res'], temp1)
-            subtract(U, temp1, U)
+            if rk == 1 or rk == 2 or rk == 4:
+
+                multiply(0.5 * eu * globaldata[idx]['delta'], globaldata[idx]['flux_res'], temp1)
+                subtract(U, temp1, U)
+
+            elif rk == 3:
+
+                temp2 = cuda.local.array((4), numba.float64)
+                zeros(temp2, temp2)
+                
+                multiply(0.5 * globaldata[idx]['delta'], globaldata[idx]['flux_res'], temp1)
+                subtract(U, temp1, U)
+                
+                multiply(obt, U, U)
+
+                multiply(tbt, U_old, U_old)
+
+                add(U_old, U, U)
 
             U[2] = 0
 
@@ -92,12 +115,29 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr
 
         elif flag_1 == outer:
 
-            conserved_vector_Ubar_cuda_kernel(globaldata, idx, nx, ny, Mach, gamma, pr_inf, rho_inf, aoa, U)
+            conserved_vector_Ubar_cuda_kernel(globaldata, idx, nx, ny, Mach, gamma, pr_inf, rho_inf, aoa, U, globaldata[idx]['prim'])
+            conserved_vector_Ubar_cuda_kernel(globaldata, idx, nx, ny, Mach, gamma, pr_inf, rho_inf, aoa, U_old, globaldata[idx]['prim_old'])
 
             temp = U[0]
 
-            multiply(globaldata[idx]['delta'], globaldata[idx]['flux_res'], temp1)
-            subtract(U, temp1, U)
+            if rk == 1 or rk == 2 or rk == 4:
+
+                multiply(0.5 * eu * globaldata[idx]['delta'], globaldata[idx]['flux_res'], temp1)
+                subtract(U, temp1, U)
+
+            elif rk == 3:
+
+                temp2 = cuda.local.array((4), numba.float64)
+                zeros(temp2, temp2)
+                
+                multiply(0.5 * globaldata[idx]['delta'], globaldata[idx]['flux_res'], temp1)
+                subtract(U, temp1, U)
+                
+                multiply(obt, U, U)
+
+                multiply(tbt, U_old, U_old)
+
+                add(U_old, U, U)
 
             U2_rot = U[1]
             U3_rot = U[2]
@@ -118,12 +158,29 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr
 
         elif flag_1 == interior:
 
-            primitive_to_conserved_cuda_kernel(globaldata, idx, nx, ny, U)
+            primitive_to_conserved_cuda_kernel(globaldata, idx, nx, ny, U, globaldata[idx]['prim'])
+            primitive_to_conserved_cuda_kernel(globaldata, idx, nx, ny, U_old, globaldata[idx]['prim_old'])
 
             temp = U[0]
 
-            multiply(globaldata[idx]['delta'], globaldata[idx]['flux_res'], temp1)
-            subtract(U, temp1, U)
+            if rk == 1 or rk == 2 or rk == 4:
+
+                multiply(0.5 * eu * globaldata[idx]['delta'], globaldata[idx]['flux_res'], temp1)
+                subtract(U, temp1, U)
+
+            elif rk == 3:
+
+                temp2 = cuda.local.array((4), numba.float64)
+                zeros(temp2, temp2)
+                
+                multiply(0.5 * globaldata[idx]['delta'], globaldata[idx]['flux_res'], temp1)
+                subtract(U, temp1, U)
+                
+                multiply(obt, U, U)
+
+                multiply(tbt, U_old, U_old)
+
+                add(U_old, U, U)
 
             U2_rot = U[1]
             U3_rot = U[2]
@@ -144,18 +201,18 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr
             globaldata[idx]['prim'][3] = tempU[3]
 
 @cuda.jit(device=True, inline=True)
-def primitive_to_conserved_cuda_kernel(globaldata, itm, nx, ny, result):
+def primitive_to_conserved_cuda_kernel(globaldata, itm, nx, ny, result, prim):
 
     U = cuda.local.array((4), numba.float64)
 
-    rho = globaldata[itm]['prim'][0]
+    rho = prim[0]
     U[0] = (rho) 
-    temp1 = rho*globaldata[itm]['prim'][1]
-    temp2 = rho*globaldata[itm]['prim'][2]
+    temp1 = rho*prim[1]
+    temp2 = rho*prim[2]
 
     U[1] = (temp1*ny - temp2*nx)
     U[2] = (temp1*nx + temp2*ny)
-    U[3] = (2.5*globaldata[itm]['prim'][3] + 0.5*(temp1*temp1 + temp2*temp2)/rho)
+    U[3] = (2.5*prim[3] + 0.5*(temp1*temp1 + temp2*temp2)/rho)
 
     result[0] = U[0]
     result[1] = U[1]
@@ -163,7 +220,7 @@ def primitive_to_conserved_cuda_kernel(globaldata, itm, nx, ny, result):
     result[3] = U[3]
 
 @cuda.jit(device=True, inline=True)
-def conserved_vector_Ubar_cuda_kernel(globaldata, itm, nx, ny, Mach, gamma, pr_inf, rho_inf, aoa, result):
+def conserved_vector_Ubar_cuda_kernel(globaldata, itm, nx, ny, Mach, gamma, pr_inf, rho_inf, aoa, result, prim):
 
     Ubar = cuda.local.array((4), numba.float64)
 
@@ -188,10 +245,10 @@ def conserved_vector_Ubar_cuda_kernel(globaldata, itm, nx, ny, Mach, gamma, pr_i
     B2_inf = math.exp(-S2*S2)/(2*math.sqrt(math.pi*beta))
     A2n_inf = 0.5*(1-math.erf(S2))
 
-    rho = globaldata[itm]['prim'][0]
-    u1 = globaldata[itm]['prim'][1]
-    u2 = globaldata[itm]['prim'][2]
-    pr = globaldata[itm]['prim'][3]
+    rho = prim[0]
+    u1 = prim[1]
+    u2 = prim[2]
+    pr = prim[3]
 
     u1_rot = u1*tx + u2*ty
     u2_rot = u1*nx + u2*ny

@@ -14,7 +14,6 @@ def main():
     wallpts, interiorpts, outerpts = 0,0,0
     wallptsidx, interiorptsidx, outerptsidx, table = [],[],[],[]
 
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", help="Grid File Location", type=str, default="partGridNew")
     parser.add_argument("-t", "--thread", help="Thread Block Size", type=int, default=0)
@@ -92,17 +91,10 @@ def main():
             normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
             globaldata[idx].setNormals(normals)
 
-   # for idx in range(len(globaldata)):
-   #     if idx > 0:
-   #         print("{} {} {}".format(idx, globaldata[idx].nx, globaldata[idx].ny))
-
-   # exit()
-
     print("Calculating Connectivity")
     for idx in table:
         connectivity = core.calculateConnectivity(globaldata, idx, configData)
         globaldata[idx].setConnectivity(connectivity)
-        
 
     res_old = 0
 
@@ -110,13 +102,6 @@ def main():
     core.fpi_solver(config.getConfig()["core"]["max_iters"] + 1, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx, res_old)
 
     print("Done")
-    # for idx, itm in enumerate(globaldata):
-    #     if idx > 0:
-    #         primtowrite = globaldata[idx].prim
-    #         with open("primvals.txt", "a") as the_file:
-    #             for itm in primtowrite:
-    #                 the_file.write(str(itm) + " ")
-    #             the_file.write("\n")
 
 if __name__ == "__main__":
     main()

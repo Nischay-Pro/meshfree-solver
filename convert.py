@@ -2,7 +2,7 @@ import numpy as np
 import point
 from tqdm import trange
 
-def pointToNumpy(x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, flux_res, q, dq, entropy, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta, min_dist):
+def pointToNumpy(x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, prim_old, flux_res, q, dq, entropy, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta, min_dist):
     pres = np.float64
     point_dtype = np.dtype([('x', np.float64),
                             ('y', np.float64),
@@ -15,6 +15,7 @@ def pointToNumpy(x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, fl
                             ('nx', pres),
                             ('ny', pres),
                             ('prim', pres, (4,)),
+                            ('prim_old', pres, (4,)),
                             ('flux_res', pres, (4,)),
                             ('q', pres, (4,)),
                             ('dq', pres, (2, 4)),
@@ -44,6 +45,7 @@ def pointToNumpy(x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, fl
     temp['nx'] = nx
     temp['ny'] = ny
     temp['prim'] = prim
+    temp['prim_old'] = np.zeros((4,))
     temp['flux_res'] = flux_res
     temp['q'] = q
     temp['dq'] = dq
@@ -72,10 +74,8 @@ def pointToNumpy(x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, fl
     return temp
 
 
-def convert_globaldata_to_gpu_globaldata(globaldata, singlePrecision=False):
+def convert_globaldata_to_gpu_globaldata(globaldata):
     pres = np.float64
-    if singlePrecision:
-        pres = np.float32
     point_dtype = np.dtype([('x', np.float64),
                             ('y', np.float64),
                             ('left', np.int32),
@@ -87,6 +87,7 @@ def convert_globaldata_to_gpu_globaldata(globaldata, singlePrecision=False):
                             ('nx', pres),
                             ('ny', pres),
                             ('prim', pres, (4,)),
+                            ('prim_old', pres, (4,)),
                             ('flux_res', pres, (4,)),
                             ('q', pres, (4,)),
                             ('dq', pres, (2, 4)),
@@ -118,6 +119,7 @@ def convert_globaldata_to_gpu_globaldata(globaldata, singlePrecision=False):
             temp[idx]['nx'] = globaldata[idx].nx
             temp[idx]['ny'] = globaldata[idx].ny
             temp[idx]['prim'] = globaldata[idx].prim
+            temp[idx]['prim_old'] = np.zeros((4,))
             temp[idx]['flux_res'] = globaldata[idx].flux_res
             temp[idx]['q'] = globaldata[idx].q
             temp[idx]['dq'] = globaldata[idx].dq

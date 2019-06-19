@@ -141,10 +141,15 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         os.remove("residue")
     except:
         pass
-    singlePrecisionMode = bool(configData['core']['singlePrecision'])
-    globaldata_gpu = convert.convert_globaldata_to_gpu_globaldata(globaldata, singlePrecision = singlePrecisionMode)
+    globaldata_gpu = convert.convert_globaldata_to_gpu_globaldata(globaldata)
     sum_res_sqr = np.zeros(len(globaldata), dtype=np.float64)
     a = time.time()
+    if configData['core']['ssprk']:
+        rks = 5
+        eu = 1
+    else:
+        rks = 1
+        eu = 2
     with stream.auto_synchronize():
         print("Pushing GPU Globaldata to GPU")
         globaldata_gpu = cuda.to_device(globaldata_gpu, stream)
@@ -154,14 +159,15 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         blockspergrid_y = math.ceil(1)
         blockspergrid = (blockspergrid_x, blockspergrid_y)
         for i in range(1, iter):
+            state_update_cuda.func_delta_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData["core"]["cfl"]))
             if i == 1:
                 print("Compiling CUDA Kernel. This might take a while...")
                 c = time.time()
-            q_var_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu)
-            q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']))
-            flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]))
-            state_update_cuda.func_delta_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData["core"]["cfl"]))
-            state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](globaldata_gpu, float(configData["core"]["mach"]), float(configData["core"]["gamma"]), float(configData["core"]["pr_inf"]), float(configData["core"]["rho_inf"]), float(configData["core"]["aoa"]), sum_res_sqr_gpu, int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]))
+            for rk in range(1, rks):
+                q_var_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu)
+                q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']))
+                flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](globaldata_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]))
+                state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](globaldata_gpu, float(configData["core"]["mach"]), float(configData["core"]["gamma"]), float(configData["core"]["pr_inf"]), float(configData["core"]["rho_inf"]), float(configData["core"]["aoa"]), sum_res_sqr_gpu, int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]), rk, eu)
             if i == 1:
                 d = time.time()
             temp_gpu = sum_reduce(sum_res_sqr_gpu)
@@ -183,7 +189,6 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     if configData["core"]["debug"]:
-        # helper.findMaxResidue(sum_res_sqr)
         helper.printPrimitive(globaldata)
     return res_old, globaldata
         
