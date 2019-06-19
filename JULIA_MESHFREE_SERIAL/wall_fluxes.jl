@@ -58,7 +58,7 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
             qtilde_i = @. globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            qtilde_k = @. globaldata[itm].q - 0.5 * phi_k .* (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+            qtilde_k = @. globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
 
         # if idx == 3
@@ -159,7 +159,7 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
 end
 
 function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
-    
+
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
 
@@ -214,7 +214,7 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
             qtilde_i = @. globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            qtilde_k = @. globaldata[itm].q - 0.5 * phi_k .* (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+            qtilde_k = @. globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
 
         if limiter_flag == 2
@@ -253,7 +253,7 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
 end
 
 function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k)
-    
+
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
 
@@ -308,7 +308,7 @@ function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k)
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
             qtilde_i = @. globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            qtilde_k = @. globaldata[itm].q - 0.5 * phi_k .* (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+            qtilde_k = @. globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
         if limiter_flag == 2
             maxi = max_q_values(globaldata, idx)

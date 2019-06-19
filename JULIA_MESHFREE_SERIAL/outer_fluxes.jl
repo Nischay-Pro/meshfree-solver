@@ -53,7 +53,7 @@ function outer_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
             qtilde_i = @. globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            qtilde_k = @. globaldata[itm].q - 0.5 * phi_k .* (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+            qtilde_k = @. globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
         if limiter_flag == 2
             maxi = max_q_values(globaldata, idx)
@@ -145,7 +145,7 @@ function outer_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
             qtilde_i = @. globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            qtilde_k = @. globaldata[itm].q - 0.5 * phi_k .* (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+            qtilde_k = @. globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
 
         if limiter_flag == 2
@@ -235,7 +235,7 @@ function outer_dGy_pos(globaldata, idx, configData, phi_i, phi_k)
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
             qtilde_i = @. globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            qtilde_k = @. globaldata[itm].q - 0.5 * phi_k .* (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+            qtilde_k = @. globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
         if limiter_flag == 2
             maxi = max_q_values(globaldata, idx)

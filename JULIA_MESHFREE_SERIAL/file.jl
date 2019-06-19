@@ -5,7 +5,7 @@ function returnFileLength(file_name::String)
 end
 
 function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, outerptsidx, Interiorptsidx, shapeptsidx,
-        wallpts, Interiorpts, outerpts, shapepts)
+        wallpts, Interiorpts, outerpts, shapepts, numPoints)
     data1 = read(file_name, String)
     splitdata = @view split(data1, "\n")[1:end-1]
     # print(splitdata[1:3])
@@ -26,7 +26,7 @@ function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, o
                     copy(defprimal),
                     zeros(Float64, 4),
                     zeros(Float64, 4),
-                    Array{Array{Float64,1},1}(undef, 0), 0.0, 0, 0, 0, 0, Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0),
+                    Array{Array{Float64,1},1}(undef, 2), 0.0, 0, 0, 0, 0, Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0),
                     Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), 0.0, zeros(Float64, 4), zeros(Float64, 4))
 
         # println(temp)
@@ -35,11 +35,11 @@ function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, o
         # end
 
         if globaldata[idx].localID == 1
-            globaldata[idx].left = 160
+            globaldata[idx].left = numPoints
             # globaldata[idx].right = 2
         end
 
-        if globaldata[idx].localID == 160
+        if globaldata[idx].localID == numPoints
             # globaldata[idx].left = 5119
             globaldata[idx].right = 1
         end

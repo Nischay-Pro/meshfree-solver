@@ -14,10 +14,10 @@ function venkat_limiter(qtilde, globaldata, idx, configData, phi)
             phi[i] = 1.0
         elseif abs(del_neg) > 1e-5
             if del_neg > 0.0
-                maximum(globaldata, idx, i)
+                # maximum(globaldata, idx, i)
                 del_pos = globaldata[idx].max_q[i] - q
             elseif del_neg < 0.0
-                minimum(globaldata, idx, i)
+                # minimum(globaldata, idx, i)
                 del_pos = globaldata[idx].min_q[i] - q
             end
             num = (del_pos*del_pos) + (epsi*epsi)

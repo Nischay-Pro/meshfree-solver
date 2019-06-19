@@ -19,7 +19,7 @@ function main()
     println("Start Read")
     # count = 0
     readFile(file_name::String, globaldata, table, defprimal, wallptsidx, outerptsidx, Interiorptsidx, shapeptsidx,
-        wallpts, Interiorpts, outerpts, shapepts)
+        wallpts, Interiorpts, outerpts, shapepts, numPoints)
 
     println("Start table sorting")
     @showprogress 2 "Computing Table" for idx in table
