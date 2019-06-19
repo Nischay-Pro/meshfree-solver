@@ -16,7 +16,8 @@
         "clcd_flag": false,
         "format": 0,
         "singlePrecision": false,
-        "blockGridX": 64
+        "blockGridX": 64,
+        "debug": false
     },
     "point":{
         "wall": 0,

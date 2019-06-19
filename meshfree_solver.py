@@ -92,6 +92,12 @@ def main():
             normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
             globaldata[idx].setNormals(normals)
 
+   # for idx in range(len(globaldata)):
+   #     if idx > 0:
+   #         print("{} {} {}".format(idx, globaldata[idx].nx, globaldata[idx].ny))
+
+   # exit()
+
     print("Calculating Connectivity")
     for idx in table:
         connectivity = core.calculateConnectivity(globaldata, idx, configData)

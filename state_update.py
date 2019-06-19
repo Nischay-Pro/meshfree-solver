@@ -77,7 +77,7 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
     for itm in wallindices:
         nx = globaldata[itm].nx
         ny = globaldata[itm].ny
-        U = primitive_to_conserved(globaldata, itm, nx, ny)
+        U = primitive_to_conserved(globaldata[itm]['prim'], nx, ny)
         temp = U[0]
         U = np.array(U) - (globaldata[itm].delta * np.array(globaldata[itm].flux_res))
 
@@ -112,7 +112,7 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         nx = globaldata[itm].nx
         ny = globaldata[itm].ny
 
-        U = conserved_vector_Ubar(globaldata, itm, nx, ny, configData)
+        U = conserved_vector_Ubar(globaldata[itm]['prim'], nx, ny, configData)
 
         temp = U[0]
 
@@ -137,7 +137,7 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
     for itm in interiorindices:
         nx = globaldata[itm].nx
         ny = globaldata[itm].ny
-        U = primitive_to_conserved(globaldata, itm, nx, ny)
+        U = primitive_to_conserved(globaldata[itm]['prim'], nx, ny)
         temp = U[0]
 
         U = np.array(U) - globaldata[itm].delta * np.array(globaldata[itm].flux_res)
@@ -180,22 +180,22 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
 
     return globaldata, res_old
 
-def primitive_to_conserved(globaldata, itm, nx, ny):
+def primitive_to_conserved(prim, nx, ny):
 
     U = []
 
-    rho = globaldata[itm].prim[0]
+    rho = prim[0]
     U.append(rho) 
-    temp1 = rho*globaldata[itm].prim[1]
-    temp2 = rho*globaldata[itm].prim[2]
+    temp1 = rho*prim[1]
+    temp2 = rho*prim[2]
 
     U.append(temp1*ny - temp2*nx)
     U.append(temp1*nx + temp2*ny)
-    U.append(2.5*globaldata[itm].prim[3] + 0.5*(temp1*temp1 + temp2*temp2)/rho)
+    U.append(2.5*prim[3] + 0.5*(temp1*temp1 + temp2*temp2)/rho)
 
     return U
 
-def conserved_vector_Ubar(globaldata, itm, nx, ny, configData):
+def conserved_vector_Ubar(prim, nx, ny, configData):
     Mach = configData["core"]["mach"]
     gamma = configData["core"]["gamma"]
     pr_inf = configData["core"]["pr_inf"]
@@ -222,10 +222,10 @@ def conserved_vector_Ubar(globaldata, itm, nx, ny, configData):
     B2_inf = math.exp(-S2*S2)/(2*math.sqrt(math.pi*beta))
     A2n_inf = 0.5*(1-math.erf(S2))
 
-    rho = globaldata[itm].prim[0]
-    u1 = globaldata[itm].prim[1]
-    u2 = globaldata[itm].prim[2]
-    pr = globaldata[itm].prim[3]
+    rho = prim[0]
+    u1 = prim[1]
+    u2 = prim[2]
+    pr = prim[3]
 
     u1_rot = u1*tx + u2*ty
     u2_rot = u1*nx + u2*ny

@@ -15,6 +15,7 @@ from numba import vectorize, float64
 from cuda_func import add, subtract, multiply, sum_reduce, equalize
 import os
 import limiters_cuda
+import helper
 
 def getInitialPrimitive(configData):
     rho_inf = float(configData["core"]["rho_inf"])
@@ -174,11 +175,16 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
             with open('residue', 'a+') as the_file:
                 the_file.write("%s %s\n" % (i, residue))
         temp = globaldata_gpu.copy_to_host()
+        if configData["core"]["debug"]:
+            sum_res_sqr = sum_res_sqr_gpu.copy_to_host()
     b = time.time()
     with open('grid_{}.txt'.format(len(globaldata)), 'a+') as the_file:
         the_file.write("Block Dimensions: ({}, 1)\nRuntime: {}\n".format(int(configData['core']['blockGridX']), (b - a - (d - c))))
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
+    if configData["core"]["debug"]:
+        # helper.findMaxResidue(sum_res_sqr)
+        helper.printPrimitive(globaldata)
     return res_old, globaldata
         
 def q_var_derivatives(globaldata, configData):
