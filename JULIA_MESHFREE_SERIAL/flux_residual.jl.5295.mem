@@ -1,0 +1,57 @@
+        - function cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+      448 	phi_i = zeros(Float64,4)
+      448     phi_k = zeros(Float64,4)
+        0 	wallindices_flux_residual(globaldata, configData, wallindices, phi_i, phi_k)
+        0 	outerindices_flux_residual(globaldata, configData, outerindices, phi_i, phi_k)
+        0 	interiorindices_flux_residual(globaldata, configData, interiorindices, phi_i, phi_k)
+        0 	return nothing
+        - end
+        - 
+        - function wallindices_flux_residual(globaldata, configData, wallindices, phi_i, phi_k)
+        0 	for itm in wallindices
+        - 		# println(itm)
+        0 		Gxp = wall_dGx_pos(globaldata, itm, configData, phi_i, phi_k)
+        0 		Gxn = wall_dGx_neg(globaldata, itm, configData, phi_i, phi_k)
+        0 		Gyn = wall_dGy_neg(globaldata, itm, configData, phi_i, phi_k)
+    91584 		GTemp = @.((Gxp + Gxn + Gyn) * 2)
+        0 		globaldata[itm].flux_res = GTemp
+        - 		# if itm == 3
+        - 		# 	println(IOContext(stdout, :compact => false), Gxp)
+        - 		# 	println(IOContext(stdout, :compact => false), Gxp + Gxn)
+        - 		# 	println(IOContext(stdout, :compact => false), Gxp + Gxn + Gyn)
+        - 		# end
+        - 	end
+        0 	return nothing
+        - end
+        - 
+        - function outerindices_flux_residual(globaldata, configData, outerindices, phi_i, phi_k)
+        0 	for itm in outerindices
+        0 		Gxp = outer_dGx_pos(globaldata, itm, configData, phi_i, phi_k)
+        0 		Gxn = outer_dGx_neg(globaldata, itm, configData, phi_i, phi_k)
+        0 		Gyp = outer_dGy_pos(globaldata, itm, configData, phi_i, phi_k)
+    92160 		GTemp = @.(Gxp + Gxn + Gyp)
+        0 		globaldata[itm].flux_res = GTemp
+        - 	end
+        0 	return nothing
+        - end
+        - 
+        - function interiorindices_flux_residual(globaldata, configData, interiorindices, phi_i, phi_k)
+        0 	for itm in interiorindices
+        0 		Gxp = interior_dGx_pos(globaldata, itm, configData, phi_i, phi_k)
+        0 		Gxn = interior_dGx_neg(globaldata, itm, configData, phi_i, phi_k)
+        0 		Gyp = interior_dGy_pos(globaldata, itm, configData, phi_i, phi_k)
+        0 		Gyn = interior_dGy_neg(globaldata, itm, configData, phi_i, phi_k)
+        - 		# if itm == 1
+        - 		# 	println("=======")
+        - 		# 	println(IOContext(stdout, :compact => false), Gxp)
+        - 		# 	println(IOContext(stdout, :compact => false), Gxn + Gxp)
+        - 		# 	println(IOContext(stdout, :compact => false), Gxn + Gxp + Gyp)
+        - 		# 	println(IOContext(stdout, :compact => false), Gxn + Gxp + Gyp + Gyn)
+        - 		# 	println()
+        - 		# end
+  6533824 		GTemp = @.(Gxp + Gxn + Gyp + Gyn)
+        0 		globaldata[itm].flux_res = GTemp
+        - 	end
+        0 	return nothing
+        - end
+        - 

@@ -92,36 +92,40 @@ function calculateConnectivity(globaldata, idx)
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 end
 
-function fpi_solver(iter, globaldata, configData, wallindices::Array{Int32,1}, outerindices::Array{Int32,1}, interiorindices::Array{Int32,1}, res_old)
+function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # print(" 111\n")
-    if iter == 1
-        println("Starting QVar")
-    end
-    q_var_derivatives(globaldata, configData)
-    # println(IOContext(stdout, :compact => false), globaldata[3].prim)
-    if iter == 1
-        println("Starting Calflux")
-    end
-    cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
-    # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     if iter == 1
         println("Starting FuncDelta")
     end
     func_delta(globaldata, configData)
-    # println(IOContext(stdout, :compact => false), globaldata[3].prim)
-    # residue = 0
-    if iter == 1
-        println("Starting StateUpdate")
+
+    for rk in 1:4
+        if iter == 1
+            println("Starting QVar")
+        end
+        q_var_derivatives(globaldata, configData)
+        # println(IOContext(stdout, :compact => false), globaldata[3].prim)
+        if iter == 1
+            println("Starting Calflux")
+        end
+        cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+        # println(IOContext(stdout, :compact => false), globaldata[3].prim)
+        # println(IOContext(stdout, :compact => false), globaldata[3].prim)
+        # residue = 0
+        if iter == 1
+            println("Starting StateUpdate")
+        end
+        state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old, rk)
     end
-    state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old)
+    println("Iteration Number ", iter)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # residue = res_old
     return nothing
 end
 
 function q_var_derivatives(globaldata::Array{Point,1}, configData)
-    power::Float64 = configData["core"]["power"]::Float64
+    power::Float64 = configData["core"]["power"]
 
     for (idx, itm) in enumerate(globaldata)
         rho = itm.prim[1]
@@ -143,7 +147,7 @@ function q_var_derivatives(globaldata::Array{Point,1}, configData)
     # println(IOContext(stdout, :compact => false), globaldata[3].q)
     sum_delx_delq = zeros(Float64, 4)
     sum_dely_delq = zeros(Float64, 4)
-    for (idx,itm) in enumerate(globaldata)
+    for (idx, itm) in enumerate(globaldata)
         x_i = itm.x
         y_i = itm.y
         sum_delx_sqr = zero(Float64)
@@ -165,9 +169,10 @@ function q_var_derivatives(globaldata::Array{Point,1}, configData)
             sum_delx_sqr += ((delx * delx) * weights)
             sum_dely_sqr += ((dely * dely) * weights)
             sum_delx_dely += ((delx * dely) * weights)
-            sum_delx_delq += @. (weights * delx * (globaldata[conn].q - globaldata[idx].q))
-            sum_dely_delq += @. (weights * dely * (globaldata[conn].q - globaldata[idx].q))
+
             for i in 1:4
+                sum_delx_delq[i] += (weights * delx * (globaldata[conn].q[i] - globaldata[idx].q[i]))
+                sum_dely_delq[i] += (weights * dely * (globaldata[conn].q[i] - globaldata[idx].q[i]))
                 if globaldata[idx].max_q[i] < globaldata[conn].q[i]
                     globaldata[idx].max_q[i] = globaldata[conn].q[i]
                 end
@@ -187,63 +192,3 @@ function q_var_derivatives(globaldata::Array{Point,1}, configData)
     # println(IOContext(stdout, :compact => false), globaldata[3].min_q)
     return nothing
 end
-
-# function q_var_derivatives_cuda(globaldata, config)
-#     tpl = Template("""
-#             struct Point{
-#                 int localID;
-#                 double x;
-#                 double y;
-#                 int left;
-#                 int right;
-#                 int flag_1;
-#                 int flag_2;
-#                 int* nbhs;
-#                 int* conn;
-#                 float nx;
-#                 float ny;
-#                 float* prim;
-#                 float* flux_res;
-#                 float* q;
-#                 float* dq;
-#                 float* entropy;
-#                 int xpos_nbhs;
-#                 int xneg_nbhs;
-#                 int ypos_nbhs;
-#                 int yneg_nbhs;
-#                 int* xpos_conn;
-#                 int* xneg_conn;
-#                 int* ypos_conn;
-#                 int* yneg_conn;
-#                 float delta;
-#             };
-
-#             __global__ void q_var_derivatives()
-#             {
-
-#                 int i = (blockIdx.x)* blockDim.x + threadIdx.x;
-#                 int j = (blockIdx.y)* blockDim.y + threadIdx.y;
-
-#                 int width = {{ POINT_WIDTH }};
-
-#                 double r = {{ DELTA }};
-
-#                 double u1 = u_old[i + (width * j)];
-#                 double ul = u_old[(i-1) + (width * j)];
-#                 double ur = u_old[(i+1) + (width * j)];
-#                 double utop = u_old[i + (width * (j+1))];
-#                 double ubottom = u_old[i + (width * (j-1))];
-#                 double test = 0;
-
-#                 if (i > 0 && i < {{ POINT_SIZE_X }} - 1 && j > 0 && j < {{ POINT_SIZE_Y }} - 1){
-#                     test = u1 + (r * (ul + ur + utop + ubottom - (4 * u1)));
-#                     u_new[i + width * j] = test;
-#                 }
-
-
-#             }""")
-
-#     rendered_tpl = tpl.render(POINT_SIZE_X=1, POINT_SIZE_Y=2, POINT_WIDTH=3, DELTA=4)
-#     mod = SourceModule(rendered_tpl)
-#     heatCalculate = mod.get_function("heatCalculate")
-# end

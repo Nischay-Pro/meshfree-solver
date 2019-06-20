@@ -46,12 +46,12 @@ function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        qtilde_i = @. (globaldata[idx].q) - 0.5*(delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
         qtilde_k = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
+            venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
             qtilde_i = @. (globaldata[idx].q) - 0.5 * phi_i * (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
             qtilde_k = @. (globaldata[itm].q) - 0.5 * phi_k * (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
             # if idx == 1
@@ -85,8 +85,10 @@ function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
         qtilde_to_primitive(result, qtilde_k, configData)
         flux_Gxp(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
-        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
     end
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
@@ -118,7 +120,6 @@ function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
     G_k = zeros(Float64,4)
     result = zeros(Float64,4)
 
-
     for itm in globaldata[idx].xneg_conn
 
         x_k = globaldata[itm].x
@@ -141,12 +142,12 @@ function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        qtilde_i = @. (globaldata[idx].q) - 0.5*(delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
         qtilde_k = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
+            venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
             qtilde_i = @. (globaldata[idx].q) - 0.5 * phi_i * (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
             qtilde_k = @. (globaldata[itm].q) - 0.5 * phi_k * (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
         end
@@ -175,8 +176,10 @@ function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
         qtilde_to_primitive(result, qtilde_k, configData)
         flux_Gxn(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
-        sum_delx_delf = sum_delx_delf + (G_k  - G_i ) * dels_weights
-        sum_dely_delf = sum_dely_delf + (G_k  - G_i ) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
     end
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
@@ -243,12 +246,12 @@ function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        qtilde_i = @. (globaldata[idx].q) - 0.5*(delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
         qtilde_k = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
+            venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
             qtilde_i = @. (globaldata[idx].q) - 0.5 * phi_i * (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
             qtilde_k = @. (globaldata[itm].q) - 0.5 * phi_k * (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
         end
@@ -277,8 +280,10 @@ function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k)
         qtilde_to_primitive(result, qtilde_k, configData)
         flux_Gyp(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
-        sum_delx_delf = sum_delx_delf + (G_k  - G_i ) * dels_weights
-        sum_dely_delf = sum_dely_delf + (G_k  - G_i ) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
         # if idx == 200
         #     println(IOContext(stdout, :compact => false), itm)
         #     println(IOContext(stdout, :compact => false), result)
@@ -339,12 +344,12 @@ function interior_dGy_neg(globaldata, idx, configData, phi_i, phi_k)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        qtilde_i = @. (globaldata[idx].q) - 0.5*(delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
         qtilde_k = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
+            venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
             qtilde_i = @. (globaldata[idx].q) - 0.5 * phi_i * (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
             qtilde_k = @. (globaldata[itm].q) - 0.5 * phi_k * (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
         end
@@ -373,8 +378,10 @@ function interior_dGy_neg(globaldata, idx, configData, phi_i, phi_k)
         qtilde_to_primitive(result, qtilde_k, configData)
         flux_Gyn(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
-        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
         # if idx == 1
         #     println(IOContext(stdout, :compact => false), itm)
         #     println(IOContext(stdout, :compact => false), result)

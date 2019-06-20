@@ -1,5 +1,5 @@
 function venkat_limiter(qtilde, globaldata, idx, configData, phi)
-    smallest_dist(globaldata, idx)
+    # smallest_dist(globaldata, idx)
     VL_CONST = configData["core"]["vl_const"]::Float64
     ds = globaldata[idx].short_distance
     epsi = VL_CONST * ds
@@ -38,25 +38,25 @@ function venkat_limiter(qtilde, globaldata, idx, configData, phi)
     return nothing
 end
 
-@inline function maximum(globaldata, idx, i)
-    globaldata[idx].max_q[i] = copy(globaldata[idx].q[i])
-    for itm in globaldata[idx].conn
-        if globaldata[idx].max_q[i] < globaldata[itm].q[i]
-            globaldata[idx].max_q[i] = globaldata[itm].q[i]
-        end
-    end
-    return  nothing
-end
+# @inline function maximum(globaldata, idx, i)
+#     globaldata[idx].max_q[i] = copy(globaldata[idx].q[i])
+#     for itm in globaldata[idx].conn
+#         if globaldata[idx].max_q[i] < globaldata[itm].q[i]
+#             globaldata[idx].max_q[i] = globaldata[itm].q[i]
+#         end
+#     end
+#     return  nothing
+# end
 
-@inline function minimum(globaldata, idx, i)
-    globaldata[idx].min_q[i] = copy(globaldata[idx].q[i])
-    for itm in globaldata[idx].conn
-        if globaldata[idx].min_q[i] > globaldata[itm].q[i]
-            globaldata[idx].min_q[i] = globaldata[itm].q[i]
-        end
-    end
-    return nothing
-end
+# @inline function minimum(globaldata, idx, i)
+#     globaldata[idx].min_q[i] = copy(globaldata[idx].q[i])
+#     for itm in globaldata[idx].conn
+#         if globaldata[idx].min_q[i] > globaldata[itm].q[i]
+#             globaldata[idx].min_q[i] = globaldata[itm].q[i]
+#         end
+#     end
+#     return nothing
+# end
 
 @inline function smallest_dist(globaldata, idx)
     min_dist = 1000.0
