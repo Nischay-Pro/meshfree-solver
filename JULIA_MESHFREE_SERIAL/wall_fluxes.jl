@@ -136,8 +136,10 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
         #     # println(IOContext(stdout, :compact => false), dels_weights)
         #     # println(IOContext(stdout, :compact => false), deln_weights)
         # end
-        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
     end
 
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
@@ -242,8 +244,10 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
         qtilde_to_primitive(result, qtilde_k, configData)
         flux_quad_GxI(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
-        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
 
     end
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
@@ -335,8 +339,10 @@ function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k)
         qtilde_to_primitive(result, qtilde_k, configData)
         flux_Gyn(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
-        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), itm)
         #     println(IOContext(stdout, :compact => false), result)

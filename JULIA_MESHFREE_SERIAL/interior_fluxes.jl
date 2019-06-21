@@ -1,5 +1,5 @@
 
-function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
+function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -20,10 +20,9 @@ function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
     tx = ny
     ty = -nx
 
-    G_i = zeros(Float64,4)
-    G_k = zeros(Float64,4)
-    result = zeros(Float64,4)
-
+    # fill!(G_i, 0)
+    # fill!(G_k, 0)
+    # fill!(result, 0)
 
     for itm in globaldata[idx].xpos_conn
         x_k = globaldata[itm].x
@@ -46,14 +45,18 @@ function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. (globaldata[idx].q) - 0.5*(delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
-        qtilde_k = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        for i in 1:4
+            qtilde_i[i] = (globaldata[idx].q[i]) - 0.5 * (delx*(globaldata[idx].dq[1][i]) + dely*(globaldata[idx].dq[2][i]))
+            qtilde_k[i] = (globaldata[itm].q[i]) - 0.5 * (delx*(globaldata[itm].dq[1][i]) + dely*(globaldata[itm].dq[2][i]))
+        end
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
             venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
-            qtilde_i = @. (globaldata[idx].q) - 0.5 * phi_i * (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
-            qtilde_k = @. (globaldata[itm].q) - 0.5 * phi_k * (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+            for i in 1:4
+                qtilde_i[i] = (globaldata[idx].q[i]) - 0.5 * phi_i[i] * (delx*(globaldata[idx].dq[1][i]) + dely*(globaldata[idx].dq[2][i]))
+                qtilde_k[i] = (globaldata[itm].q[i]) - 0.5 * phi_k[i] * (delx*(globaldata[itm].dq[1][i]) + dely*(globaldata[itm].dq[2][i]))
+            end
             # if idx == 1
             #     print("The len is ", size(globaldata[idx].xpos_conn))
             #     print("\n *****",itm, " ", phi_i, " ",phi_k, " ", qtilde_i, " ", qtilde_k, "****")
@@ -95,7 +98,7 @@ function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
     return @. (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
 end
 
-function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
+function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -116,9 +119,9 @@ function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
     tx = ny
     ty = -nx
 
-    G_i = zeros(Float64,4)
-    G_k = zeros(Float64,4)
-    result = zeros(Float64,4)
+    # fill!(G_i, 0)
+    # fill!(G_k, 0)
+    # fill!(result, 0)
 
     for itm in globaldata[idx].xneg_conn
 
@@ -142,14 +145,18 @@ function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. (globaldata[idx].q) - 0.5*(delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
-        qtilde_k = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        for i in 1:4
+            qtilde_i[i] = (globaldata[idx].q[i]) - 0.5 * (delx*(globaldata[idx].dq[1][i]) + dely*(globaldata[idx].dq[2][i]))
+            qtilde_k[i] = (globaldata[itm].q[i]) - 0.5 * (delx*(globaldata[itm].dq[1][i]) + dely*(globaldata[itm].dq[2][i]))
+        end
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
             venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
-            qtilde_i = @. (globaldata[idx].q) - 0.5 * phi_i * (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
-            qtilde_k = @. (globaldata[itm].q) - 0.5 * phi_k * (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+            for i in 1:4
+                qtilde_i[i] = (globaldata[idx].q[i]) - 0.5 * phi_i[i] * (delx*(globaldata[idx].dq[1][i]) + dely*(globaldata[idx].dq[2][i]))
+                qtilde_k[i] = (globaldata[itm].q[i]) - 0.5 * phi_k[i] * (delx*(globaldata[itm].dq[1][i]) + dely*(globaldata[itm].dq[2][i]))
+            end
         end
         if limiter_flag == 2
             maxi = max_q_values(globaldata, idx)
@@ -198,7 +205,7 @@ function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
     return @. (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
 end
 
-function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k)
+function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -219,10 +226,9 @@ function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k)
     tx = ny
     ty = -nx
 
-    G_i = zeros(Float64,4)
-    G_k = zeros(Float64,4)
-    result = zeros(Float64,4)
-
+    # fill!(G_i, 0)
+    # fill!(G_k, 0)
+    # fill!(result, 0)
 
     for itm in globaldata[idx].ypos_conn
 
@@ -246,14 +252,18 @@ function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. (globaldata[idx].q) - 0.5*(delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
-        qtilde_k = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        for i in 1:4
+            qtilde_i[i] = (globaldata[idx].q[i]) - 0.5 * (delx*(globaldata[idx].dq[1][i]) + dely*(globaldata[idx].dq[2][i]))
+            qtilde_k[i] = (globaldata[itm].q[i]) - 0.5 * (delx*(globaldata[itm].dq[1][i]) + dely*(globaldata[itm].dq[2][i]))
+        end
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
             venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
-            qtilde_i = @. (globaldata[idx].q) - 0.5 * phi_i * (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
-            qtilde_k = @. (globaldata[itm].q) - 0.5 * phi_k * (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+            for i in 1:4
+                qtilde_i[i] = (globaldata[idx].q[i]) - 0.5 * phi_i[i] * (delx*(globaldata[idx].dq[1][i]) + dely*(globaldata[idx].dq[2][i]))
+                qtilde_k[i] = (globaldata[itm].q[i]) - 0.5 * phi_k[i] * (delx*(globaldata[itm].dq[1][i]) + dely*(globaldata[itm].dq[2][i]))
+            end
         end
         if limiter_flag == 2
             maxi = max_q_values(globaldata, idx)
@@ -297,7 +307,7 @@ function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k)
 
 end
 
-function interior_dGy_neg(globaldata, idx, configData, phi_i, phi_k)
+function interior_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -318,9 +328,9 @@ function interior_dGy_neg(globaldata, idx, configData, phi_i, phi_k)
     tx = ny
     ty = -nx
 
-    G_i = zeros(Float64,4)
-    G_k = zeros(Float64,4)
-    result = zeros(Float64,4)
+    # fill!(G_i, 0)
+    # fill!(G_k, 0)
+    # fill!(result, 0)
 
     for itm in globaldata[idx].yneg_conn
 
@@ -344,14 +354,18 @@ function interior_dGy_neg(globaldata, idx, configData, phi_i, phi_k)
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. (globaldata[idx].q) - 0.5*(delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
-        qtilde_k = @. (globaldata[itm].q) - 0.5*(delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+        for i in 1:4
+            qtilde_i[i] = (globaldata[idx].q[i]) - 0.5 * (delx*(globaldata[idx].dq[1][i]) + dely*(globaldata[idx].dq[2][i]))
+            qtilde_k[i] = (globaldata[itm].q[i]) - 0.5 * (delx*(globaldata[itm].dq[1][i]) + dely*(globaldata[itm].dq[2][i]))
+        end
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
             venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
-            qtilde_i = @. (globaldata[idx].q) - 0.5 * phi_i * (delx*(globaldata[idx].dq[1]) + dely*(globaldata[idx].dq[2]))
-            qtilde_k = @. (globaldata[itm].q) - 0.5 * phi_k * (delx*(globaldata[itm].dq[1]) + dely*(globaldata[itm].dq[2]))
+            for i in 1:4
+                qtilde_i[i] = (globaldata[idx].q[i]) - 0.5 * phi_i[i] * (delx*(globaldata[idx].dq[1][i]) + dely*(globaldata[idx].dq[2][i]))
+                qtilde_k[i] = (globaldata[itm].q[i]) - 0.5 * phi_k[i] * (delx*(globaldata[itm].dq[1][i]) + dely*(globaldata[itm].dq[2][i]))
+            end
         end
         if limiter_flag == 2
             maxi = max_q_values(globaldata, idx)

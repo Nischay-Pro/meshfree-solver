@@ -80,8 +80,10 @@ function outer_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
         qtilde_to_primitive(result, qtilde_k, configData)
         flux_quad_GxIII(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
-        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
     end
 
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
@@ -173,8 +175,10 @@ function outer_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
         qtilde_to_primitive(result, qtilde_k, configData)
         flux_quad_GxIV(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
-        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
     end
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
@@ -268,8 +272,10 @@ function outer_dGy_pos(globaldata, idx, configData, phi_i, phi_k)
         # print(" ")
         # print(G_i * dels_weights)
         # print("\n")
-        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
 
     end
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
