@@ -7,12 +7,12 @@ function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
 	if idx > 0 && idx <= numPoints
 		if idx <= numPoints
 			flag1 = gpuGlobalDataFixedPoint[idx].flag_1
-		elseif idx <= 2 * numPoints
-			flag1 = gpuGlobalDataFixedPoint[idx - numPoints].flag_1
-		elseif idx <= 3 * numPoints
-			flag1 = gpuGlobalDataFixedPoint[idx - 2 * numPoints].flag_1
-		else
-			flag1 = gpuGlobalDataFixedPoint[idx - 3 * numPoints].flag_1
+		# elseif idx <= 2 * numPoints
+		# 	flag1 = gpuGlobalDataFixedPoint[idx - numPoints].flag_1
+		# elseif idx <= 3 * numPoints
+		# 	flag1 = gpuGlobalDataFixedPoint[idx - 2 * numPoints].flag_1
+		# else
+		# 	flag1 = gpuGlobalDataFixedPoint[idx - 3 * numPoints].flag_1
 		end
 		if flag1 == gpuConfigData[17]
 			wall_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData)
