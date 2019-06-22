@@ -45,7 +45,7 @@ function main()
     @showprogress 2 "Computing Table" for idx in 1:numPoints
         connectivity = calculateConnectivity(globaldata, idx, configData)
         setConnectivity(globaldata[idx], connectivity)
-        smallest_dist(globaldata, idx)
+        # smallest_dist(globaldata, idx)
         convertToArray(globalDataConn, globaldata[idx], idx)
         # if idx % (numPoints * 0.25) == 0
         #     println("Bump In Table")

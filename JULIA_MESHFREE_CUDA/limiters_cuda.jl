@@ -137,16 +137,16 @@ end
 #     return nothing
 # end
 
-@inline function smallest_dist(globaldata, idx::Int64)
-    min_dist = 1000.0
-    for itm in globaldata[idx].conn
-        ds = hypot(globaldata[idx].x - globaldata[itm].x, globaldata[idx].y - globaldata[itm].y)
-        if ds < min_dist
-            min_dist = ds
-        end
-    end
-    globaldata[idx].short_distance = min_dist
-end
+# @inline function smallest_dist(globaldata, idx::Int64)
+#     min_dist = 1000.0
+#     for itm in globaldata[idx].conn
+#         ds = hypot(globaldata[idx].x - globaldata[itm].x, globaldata[idx].y - globaldata[itm].y)
+#         if ds < min_dist
+#             min_dist = ds
+#         end
+#     end
+#     globaldata[idx].short_distance = min_dist
+# end
 
 @inline function qtilde_to_primitive_kernel(qtilde1, qtilde2, qtilde3, qtilde4, gamma, gpuGlobalDataRest, idx)
 

@@ -112,7 +112,7 @@ include("quadrant_fluxes_cuda.jl")
 export flux_quad_GxI_kernel, flux_quad_GxII_kernel, flux_quad_GxIII_kernel, flux_quad_GxIV_kernel
 
 include("split_fluxes_cuda.jl")
-export flux_Gxp_kernel, flux_Gxn_kernel, flux_Gyp_kernel, flux_Gyn_kernel, flux_Gx_kernel, flux_Gy_kernel
+export flux_Gxp_kernel, flux_Gxn_kernel, flux_Gyp_kernel, flux_Gyn_kernel
 
 include("state_update_cuda.jl")
 export func_delta_kernel, state_update_kernel
