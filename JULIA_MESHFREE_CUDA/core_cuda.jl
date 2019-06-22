@@ -189,21 +189,24 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
         sum_dely_sqr = 0.0
         sum_delx_dely = 0.0
         conn = 0.0
-        sum_delx_delq1, sum_delx_delq2,sum_delx_delq3,sum_delx_delq4 = 0.0,0.0,0.0,0.0
-        sum_dely_delq1, sum_dely_delq2,sum_dely_delq3,sum_dely_delq4 = 0.0,0.0,0.0,0.0
+        sum_delx_delq1, sum_delx_delq2, sum_delx_delq3, sum_delx_delq4 = 0.0,0.0,0.0,0.0
+        sum_dely_delq1, sum_dely_delq2, sum_dely_delq3, sum_dely_delq4 = 0.0,0.0,0.0,0.0
         x_i = gpuGlobalDataFixedPoint[idx].x
         y_i = gpuGlobalDataFixedPoint[idx].y
         temp = 0.0
         power = gpuConfigData[6]
+
+        q1, q2, q3, q4 = gpuGlobalDataRest[9, idx], gpuGlobalDataRest[10, idx], gpuGlobalDataRest[11, idx], gpuGlobalDataRest[12, idx]
+
         for iter in 5:14
             conn = gpuGlobalDataConn[iter, idx]
             if conn == 0.0
                 break
             end
-            x_k = gpuGlobalDataFixedPoint[conn].x
-            y_k = gpuGlobalDataFixedPoint[conn].y
-            delx = x_k - x_i
-            dely = y_k - y_i
+            # x_k = gpuGlobalDataFixedPoint[conn].x
+            # y_k = gpuGlobalDataFixedPoint[conn].y
+            delx = gpuGlobalDataFixedPoint[conn].x - x_i
+            dely = gpuGlobalDataFixedPoint[conn].y - y_i
             dist = CUDAnative.hypot(delx, dely)
 
             weights = CUDAnative.pow(dist, power)
@@ -211,19 +214,19 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
             sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
             sum_delx_dely = sum_delx_dely + ((delx * dely) * weights)
 
-            temp = gpuGlobalDataRest[9, conn] - gpuGlobalDataRest[9, idx]
+            temp = gpuGlobalDataRest[9, conn] - q1
             sum_delx_delq1 += (weights * delx * temp)
             sum_dely_delq1 += (weights * dely * temp)
 
-            temp = gpuGlobalDataRest[10, conn] - gpuGlobalDataRest[10, idx]
+            temp = gpuGlobalDataRest[10, conn] - q2
             sum_delx_delq2 += (weights * delx * temp)
             sum_dely_delq2 += (weights * dely * temp)
 
-            temp = gpuGlobalDataRest[11, conn] - gpuGlobalDataRest[11, idx]
+            temp = gpuGlobalDataRest[11, conn] - q3
             sum_delx_delq3 += (weights * delx * temp)
             sum_dely_delq3 += (weights * dely * temp)
 
-            temp = gpuGlobalDataRest[12, conn] - gpuGlobalDataRest[12, idx]
+            temp = gpuGlobalDataRest[12, conn] - q4
             sum_delx_delq4 += (weights * delx * temp)
             sum_dely_delq4 += (weights * dely * temp)
         end
@@ -266,7 +269,7 @@ end
     if gpuGlobalDataRest[24+i, idx] > gpuGlobalDataRest[8+i, conn]
         gpuGlobalDataRest[24+i, idx] = gpuGlobalDataRest[8+i, conn]
     end
-    return  nothing
+    return nothing
 end
 
 

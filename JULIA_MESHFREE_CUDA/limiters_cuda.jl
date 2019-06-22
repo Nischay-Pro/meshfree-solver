@@ -40,7 +40,6 @@ end
 
 function venkat_limiter_kernel_k(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, trueidx, delx, dely)
     VL_CONST = gpuConfigData[8]
-
     ds = gpuGlobalDataFixedPoint[idx].short_distance
     # @cuprintf("Type is %s", typeof(VL_CONST))
     epsigh = VL_CONST * ds

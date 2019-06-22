@@ -29,8 +29,8 @@
             end
         end
         gpuGlobalDataRest[49, idx] = min_delt
-        gpuGlobalDataRest[50, idx] = gpuGlobalDataRest[1, idx]              
-        gpuGlobalDataRest[51, idx] = gpuGlobalDataRest[2, idx]            
+        gpuGlobalDataRest[50, idx] = gpuGlobalDataRest[1, idx]
+        gpuGlobalDataRest[51, idx] = gpuGlobalDataRest[2, idx]
         gpuGlobalDataRest[52, idx] = gpuGlobalDataRest[3, idx]
         gpuGlobalDataRest[53, idx] = gpuGlobalDataRest[4, idx]
     end
