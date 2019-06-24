@@ -147,7 +147,7 @@ end
 #     globaldata[idx].short_distance = min_dist
 # end
 
-@inline function qtilde_to_primitive_kernel(qtilde1, qtilde2, qtilde3, qtilde4, gamma, gpuGlobalDataRest, idx)
+@inline function qtilde_to_primitive_kernel(qtilde1, qtilde2, qtilde3, qtilde4, gamma, gpuGlobalDataRest, shared, idx)
 
     # gamma = gpuConfigData[15]
     beta = -qtilde4*0.5

@@ -4,7 +4,7 @@ function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
     bw = blockDim().x
 	idx = bx * bw + tx
 
-	shared = @cuDynamicSharedMem(Float64, 4 * bw)
+	shared = @cuStaticSharedMem(Float64, 512)
 	if idx > 0 && idx <= numPoints
 		if idx <= numPoints
 			flag1 = gpuGlobalDataFixedPoint[idx].flag_1

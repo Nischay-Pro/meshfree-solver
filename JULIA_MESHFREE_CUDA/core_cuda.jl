@@ -101,7 +101,9 @@ function fpi_solver_cuda(iter, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGl
     println("Blocks per grid is ")
     println(blockspergrid)
     residue_io = open("residue_cuda.txt", "a+")
-    fluxblockspergrid = 4 * blockspergrid
+    # fluxthreadsperblock = Int(max(threadsperblock / 4, 32))
+    # fluxblockspergrid = Int(ceil(numPoints/fluxthreadsperblock))
+
     # gpuGlobalDataCommon = CuArray(globalDataCommon)
     for i in 1:iter
         if i == 1
@@ -116,7 +118,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGl
             @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
             # synchronize(str)
             # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
-            @cuda blocks= fluxblockspergrid threads=threadsperblock cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
+            @cuda blocks= blockspergrid threads= threadsperblock cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
             # synchronize(str)
             # @cuprintf("\n It is %f ", gpuGlobalDataCommon[31, 3])
             # synchronize(str)

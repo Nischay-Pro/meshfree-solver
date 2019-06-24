@@ -1,4 +1,4 @@
-function flux_Gxp_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
+function flux_Gxp_kernel(nx, ny, gpuGlobalDataRest, idx, shared, flag)
 
     u1 = gpuGlobalDataRest[45, idx]
     u2 = gpuGlobalDataRest[46, idx]
@@ -51,7 +51,7 @@ function flux_Gxp_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
     return nothing
 end
 
-function flux_Gxn_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
+function flux_Gxn_kernel(nx, ny, gpuGlobalDataRest, idx, shared, flag)
 
     u1 = gpuGlobalDataRest[45, idx]
     u2 = gpuGlobalDataRest[46, idx]
@@ -103,7 +103,7 @@ function flux_Gxn_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
     return nothing
 end
 
-function flux_Gyp_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
+function flux_Gyp_kernel(nx, ny, gpuGlobalDataRest, idx, shared, flag)
     u1 = gpuGlobalDataRest[45, idx]
     u2 = gpuGlobalDataRest[46, idx]
     rho = gpuGlobalDataRest[47, idx]
@@ -153,7 +153,7 @@ function flux_Gyp_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
     return nothing
 end
 
-function flux_Gyn_kernel(nx, ny, gpuGlobalDataRest, idx, flag)
+function flux_Gyn_kernel(nx, ny, gpuGlobalDataRest, idx, shared, flag)
     u1 = gpuGlobalDataRest[45, idx]
     u2 = gpuGlobalDataRest[46, idx]
     rho = gpuGlobalDataRest[47, idx]
