@@ -1,9 +1,7 @@
 function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-
-
-    x_k = 0.0
-    y_k = 0.0
+    # x_k = 0.0
+    # y_k = 0.0
     delx = 0.0
     dely = 0.0
     dels = 0.0
@@ -20,9 +18,6 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 = 0.0,0.0,0.0,0.0
     qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4 = 0.0,0.0,0.0,0.0
 
-
-
-
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
     nx = gpuGlobalDataFixedPoint[idx].nx
@@ -36,10 +31,10 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         if conn == 0
             break
         end
-        x_k = gpuGlobalDataFixedPoint[conn].x
-        y_k = gpuGlobalDataFixedPoint[conn].y
-        delx = x_k - x_i
-        dely = y_k - y_i
+        # x_k = gpuGlobalDataFixedPoint[conn].x
+        # y_k = gpuGlobalDataFixedPoint[conn].y
+        delx = gpuGlobalDataFixedPoint[conn].x - x_i
+        dely = gpuGlobalDataFixedPoint[conn].y - y_i
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
@@ -101,10 +96,8 @@ end
 
 function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-
-
-    x_k = 0.0
-    y_k = 0.0
+    # x_k = 0.0
+    # y_k = 0.0
     delx = 0.0
     dely = 0.0
     dels = 0.0
@@ -134,10 +127,10 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         if conn == 0
             break
         end
-        x_k = gpuGlobalDataFixedPoint[conn].x
-        y_k = gpuGlobalDataFixedPoint[conn].y
-        delx = x_k - x_i
-        dely = y_k - y_i
+        # x_k = gpuGlobalDataFixedPoint[conn].x
+        # y_k = gpuGlobalDataFixedPoint[conn].y
+        delx = gpuGlobalDataFixedPoint[conn].x - x_i
+        dely = gpuGlobalDataFixedPoint[conn].y - y_i
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
@@ -199,10 +192,8 @@ end
 
 function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-
-
-    x_k = 0.0
-    y_k = 0.0
+    # x_k = 0.0
+    # y_k = 0.0
     delx = 0.0
     dely = 0.0
     dels = 0.0
@@ -220,8 +211,6 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4 = 0.0,0.0,0.0,0.0
 
 
-
-
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
     nx = gpuGlobalDataFixedPoint[idx].nx
@@ -235,10 +224,10 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         if conn == 0
             break
         end
-        x_k = gpuGlobalDataFixedPoint[conn].x
-        y_k = gpuGlobalDataFixedPoint[conn].y
-        delx = x_k - x_i
-        dely = y_k - y_i
+        # x_k = gpuGlobalDataFixedPoint[conn].x
+        # y_k = gpuGlobalDataFixedPoint[conn].y
+        delx = gpuGlobalDataFixedPoint[conn].x - x_i
+        dely = gpuGlobalDataFixedPoint[conn].y - y_i
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)

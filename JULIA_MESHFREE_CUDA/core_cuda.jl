@@ -23,6 +23,23 @@ function getInitialPrimitive2(configData)
     return finaldata
 end
 
+function placeNormals(globaldata, idx, configData, interior, wall, outer)
+    flag = globaldata[idx].flag_1
+    if flag == wall || flag == outer
+        currpt = getxy(globaldata[idx])
+        leftpt = globaldata[idx].left
+        leftpt = getxy(globaldata[leftpt])
+        rightpt = globaldata[idx].right
+        rightpt = getxy(globaldata[rightpt])
+        normals = calculateNormals(leftpt, rightpt, currpt[1], currpt[2])
+        setNormals(globaldata[idx], normals)
+    elseif flag == interior
+        setNormals(globaldata[idx], (1,0))
+    else
+        @warn "Illegal Point Type"
+    end
+end
+
 function calculateNormals(left, right, mx, my)
     lx = left[1]
     ly = left[2]
@@ -61,6 +78,10 @@ function calculateConnectivity(globaldata, idx, configData)
     tx = ny
     ty = -nx
 
+    interior = configData["point"]["interior"]
+    wall = configData["point"]["wall"]
+    outer = configData["point"]["outer"]
+
     for itm in ptInterest.conn
         itmx = globaldata[itm].x
         itmy = globaldata[itm].y
@@ -76,16 +97,16 @@ function calculateConnectivity(globaldata, idx, configData)
         if dels >= 0.0
             push!(xneg_conn, itm)
         end
-        if flag == configData["point"]["interior"]
+        if flag == interior
             if deln <= 0.0
                 push!(ypos_conn, itm)
             end
             if deln >= 0.0
                 push!(yneg_conn, itm)
             end
-        elseif flag == configData["point"]["wall"]
+        elseif flag == wall
             push!(yneg_conn, itm)
-        elseif flag == configData["point"]["outer"]
+        elseif flag == outer
             push!(ypos_conn, itm)
         end
     end
@@ -125,7 +146,7 @@ function fpi_solver_cuda(iter, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGl
             # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
             @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataConn, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, numPoints, rk)
         end
-        # synchronize(str)
+        synchronize(str)
         gpu_reduced(+, gpuSumResSqr, gpuSumResSqrOutput)
         temp_gpu = Array(gpuSumResSqrOutput)[1]
     # #     # @cuprintf("\n It is ss %lf ", gpuGlobalDataCommon[31, 3])

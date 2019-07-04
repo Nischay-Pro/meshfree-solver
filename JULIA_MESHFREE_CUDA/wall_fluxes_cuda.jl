@@ -1,7 +1,7 @@
 function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-    x_k = 0.0
-    y_k = 0.0
+    # x_k = 0.0
+    # y_k = 0.0
     delx = 0.0
     dely = 0.0
     dels = 0.0
@@ -31,10 +31,10 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         if conn == 0
             break
         end
-        x_k = gpuGlobalDataFixedPoint[conn].x
-        y_k = gpuGlobalDataFixedPoint[conn].y
-        delx = x_k - x_i
-        dely = y_k - y_i
+        # x_k = gpuGlobalDataFixedPoint[conn].x
+        # y_k = gpuGlobalDataFixedPoint[conn].y
+        delx = gpuGlobalDataFixedPoint[conn].x - x_i
+        dely = gpuGlobalDataFixedPoint[conn].y - y_i
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
@@ -139,8 +139,8 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     # G_i1,G_i2,G_i3,G_i4 =  0.0,0.0,0.0,0.0
     # G_k1,G_k2,G_k3,G_k4 =  0.0,0.0,0.0,0.0
 
-    x_k = 0.0
-    y_k = 0.0
+    # x_k = 0.0
+    # y_k = 0.0
     delx = 0.0
     dely = 0.0
     dels = 0.0
@@ -178,10 +178,10 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         if conn == 0
             break
         end
-        x_k = gpuGlobalDataFixedPoint[conn].x
-        y_k = gpuGlobalDataFixedPoint[conn].y
-        delx = x_k - x_i
-        dely = y_k - y_i
+        # x_k = gpuGlobalDataFixedPoint[conn].x
+        # y_k = gpuGlobalDataFixedPoint[conn].y
+        delx = gpuGlobalDataFixedPoint[conn].x - x_i
+        dely = gpuGlobalDataFixedPoint[conn].y - y_i
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
@@ -260,8 +260,8 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     # G_i1,G_i2,G_i3,G_i4 =  0.0,0.0,0.0,0.0
     # G_k1,G_k2,G_k3,G_k4 =  0.0,0.0,0.0,0.0
 
-    x_k = 0.0
-    y_k = 0.0
+    # x_k = 0.0
+    # y_k = 0.0
     delx = 0.0
     dely = 0.0
     dels = 0.0
@@ -292,10 +292,10 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         if conn == 0
             break
         end
-        x_k = gpuGlobalDataFixedPoint[conn].x
-        y_k = gpuGlobalDataFixedPoint[conn].y
-        delx = x_k - x_i
-        dely = y_k - y_i
+        # x_k = gpuGlobalDataFixedPoint[conn].x
+        # y_k = gpuGlobalDataFixedPoint[conn].y
+        delx = gpuGlobalDataFixedPoint[conn].x - x_i
+        dely = gpuGlobalDataFixedPoint[conn].y - y_i
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)

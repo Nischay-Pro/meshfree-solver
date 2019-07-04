@@ -37,19 +37,25 @@ function main()
     println("Passing to CPU Globaldata")
     # count = 0
 
-
+    format = configData["format"]["type"]
     # print(wallptsidx)
 
+    if format == 1
+        interior = configData["point"]["interior"]
+        wall = configData["point"]["wall"]
+        outer = configData["point"]["outer"]
+        @showprogress 2 "Computing Connectivity" for idx in 1:numPoints
+            placeNormals(globaldata, idx, configData, interior, wall, outer)
+        end
+    end
 
     println("Start table sorting")
-    @showprogress 2 "Computing Table" for idx in 1:numPoints
+    @showprogress 3 "Computing Table" for idx in 1:numPoints
         connectivity = calculateConnectivity(globaldata, idx, configData)
         setConnectivity(globaldata[idx], connectivity)
         # smallest_dist(globaldata, idx)
         convertToArray(globalDataConn, globaldata[idx], idx)
-        # if idx % (numPoints * 0.25) == 0
-        #     println("Bump In Table")
-        # end
+
     end
 
     # typeof(globalDataConn[1])
@@ -118,6 +124,7 @@ function main()
     # gpu_output = CuArray(output)
 
     threadsperblock = Int(getConfig()["core"]["threadsperblock"])
+    threadsperblock = parse(Int , ARGS[2])
     blockspergrid = Int(ceil(numPoints/threadsperblock))
 
     function test_code(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
@@ -134,7 +141,7 @@ function main()
 
     test_code(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
 
-    open("results/timer_cuda" * string(numPoints) * "_" * string(threadsperblock) * ".txt", "w") do io
+    open("results/timer_cuda" * string(numPoints) * "_" * string(threadsperblock) *".txt", "w") do io
         print_timer(io, to)
     end
     globalDataPrim = Array(gpuGlobalDataRest)
