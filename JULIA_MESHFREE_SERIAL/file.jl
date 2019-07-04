@@ -27,7 +27,7 @@ function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, o
                     zeros(Float64, 4),
                     zeros(Float64, 4),
                     Array{Array{Float64,1},1}(undef, 2), 0.0, 0, 0, 0, 0, Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0),
-                    Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), 0.0, zeros(Float64, 4), zeros(Float64, 4))
+                    Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), 0.0, zeros(Float64, 4), zeros(Float64, 4), zeros(Float64, 4))
 
         # println(temp)
         # if idx % 100000 == 0

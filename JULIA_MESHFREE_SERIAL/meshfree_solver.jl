@@ -25,7 +25,7 @@ function main()
     @showprogress 2 "Computing Table" for idx in table
         connectivity = calculateConnectivity(globaldata, idx)
         setConnectivity(globaldata[idx], connectivity)
-        smallest_dist(globaldata, idx)
+        # smallest_dist(globaldata, idx)
         # if idx % (length(table) * 0.25) == 0
         #     println("Bump In Table")
         # end
@@ -46,6 +46,7 @@ function main()
         println("Starting warmup function")
         fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
         res_old[1] = 0.0
+        # Profile.clear_malloc_data()
         # @trace(fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old), maxdepth = 3)
         # res_old[1] = 0.0
         # fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)

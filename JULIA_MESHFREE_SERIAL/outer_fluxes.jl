@@ -1,7 +1,7 @@
 function outer_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
 
-    power::Float64 = configData["core"]["power"]::Float64
-    limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
+    power::Float64 = configData["core"]["power"]
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -51,7 +51,7 @@ function outer_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
+            venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
             qtilde_i = @. globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             qtilde_k = @. globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
@@ -80,8 +80,10 @@ function outer_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
         qtilde_to_primitive(result, qtilde_k, configData)
         flux_quad_GxIII(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
-        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
     end
 
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
@@ -143,7 +145,7 @@ function outer_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
+            venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
             qtilde_i = @. globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             qtilde_k = @. globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
@@ -173,8 +175,10 @@ function outer_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
         qtilde_to_primitive(result, qtilde_k, configData)
         flux_quad_GxIV(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
-        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
     end
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
@@ -233,7 +237,7 @@ function outer_dGy_pos(globaldata, idx, configData, phi_i, phi_k)
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_k)
+            venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
             qtilde_i = @. globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             qtilde_k = @. globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
@@ -268,8 +272,10 @@ function outer_dGy_pos(globaldata, idx, configData, phi_i, phi_k)
         # print(" ")
         # print(G_i * dels_weights)
         # print("\n")
-        sum_delx_delf = @. sum_delx_delf + (G_k - G_i) * dels_weights
-        sum_dely_delf = @. sum_dely_delf + (G_k - G_i) * deln_weights
+        for i in 1:4
+            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
+            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+        end
 
     end
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely

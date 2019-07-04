@@ -43,6 +43,7 @@ mutable struct Point
     delta::Float64
     max_q::Array{Float64,1}
     min_q::Array{Float64,1}
+    prim_old::Array{Float64,1}
 end
 
 # using PyCall
