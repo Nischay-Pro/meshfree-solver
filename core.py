@@ -1,12 +1,11 @@
 import config
-import math
 import operator
 import flux_residual
 import state_update
 import objective_function
 import numpy as np
-import sys
-import time
+import sys, time, os, math
+
 def getInitialPrimitive(configData):
     rho_inf = float(configData["core"]["rho_inf"])
     mach = float(configData["core"]["mach"])
@@ -103,12 +102,20 @@ def calculateConnectivity(globaldata, idx, configData):
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 
 def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
+    try:
+        os.remove("residue")
+    except:
+        pass
+    a = time.time()
     for i in range(1, iter):
         globaldata = q_var_derivatives(globaldata, configData)
         globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
         globaldata = state_update.func_delta(globaldata, configData)
         globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, i, res_old)
-        objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
+        # objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
+    b = time.time()
+    with open('grid_{}.txt'.format(len(globaldata)), 'a+') as the_file:
+        the_file.write("Runtime: {}\nIterations: {}\n".format((b - a), iter))
     return res_old, globaldata    
 
 def q_var_derivatives(globaldata, configData):

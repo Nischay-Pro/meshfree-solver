@@ -136,7 +136,7 @@ def state_update(globaldata, wallindices, outerindices, interiorindices, configD
         residue = math.log10(res_new/res_old)
 
     with open('residue', 'a') as the_file:
-        the_file.write("%i %f" % (iter, residue))
+        the_file.write("{} {}\n".format(iter, residue))
     
     print("Iteration Number: ", iter)
     print("Residue: ", residue)

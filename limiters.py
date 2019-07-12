@@ -1,5 +1,7 @@
 import math
+from numba import njit, jit
 
+# @jit
 def venkat_limiter(qtilde, globaldata, idx, configData):
     VL_CONST = configData["core"]["vl_const"]
     phi = []
@@ -37,7 +39,7 @@ def venkat_limiter(qtilde, globaldata, idx, configData):
     return phi
 
 
-
+@njit(parallel=True)
 def maximum(globaldata, idx, i):
     maxval = globaldata[idx].q[i]
     for itm in globaldata[idx].conn:
@@ -45,7 +47,7 @@ def maximum(globaldata, idx, i):
             maxval = globaldata[itm].q[i]
     return maxval
 
-
+@njit(parallel=True)
 def minimum(globaldata, idx, i):
     minval = globaldata[idx].q[i]
     for itm in globaldata[idx].conn:
@@ -53,6 +55,7 @@ def minimum(globaldata, idx, i):
             minval = globaldata[itm].q[i]
     return minval
 
+@njit(parallel=True)
 def smallest_dist(globaldata, idx):
     min_dist = 10000
 
