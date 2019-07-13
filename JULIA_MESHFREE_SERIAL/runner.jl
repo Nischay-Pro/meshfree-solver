@@ -1,5 +1,5 @@
-push!(LOAD_PATH, "/home/kumar/Julia/meshfree-solver_main/JULIA_MESHFREE_SERIAL");
-println("\n===\n");
+push!(LOAD_PATH, pwd());
+println("=== Compiling. ===\n");
 using main_module;
-println("\n===\n");
+println("=== Compilation done. ===\n");
 main()
