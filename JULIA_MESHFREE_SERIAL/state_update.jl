@@ -23,7 +23,7 @@ function func_delta(globaldata, configData)
     return nothing
 end
 
-function state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old, rk)
+function state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old, rk, numPoints)
     max_res = zero(Float64)
     sum_res_sqr = zeros(Float64, 1)
     U = zeros(Float64, 4)
@@ -65,9 +65,9 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
     else
         residue = log10(res_new/res_old[1])
     end
-    open("residue.txt", "a+") do residue_io
-        @printf(residue_io, "%d %s\n", iter, residue)
-    end
+    # open("residue_" * string(numPoints) * ".txt", "a+") do residue_io
+    #     @printf(residue_io, "%d %s\n", iter, residue)
+    # end
 
     # res_old = 0
 

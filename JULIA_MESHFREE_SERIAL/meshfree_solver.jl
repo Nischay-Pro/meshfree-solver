@@ -35,16 +35,16 @@ function main()
     # println(typeof(globaldata))
 
     println(Int(getConfig()["core"]["max_iters"]) + 1)
-    function run_code(globaldata, configData, wallptsidx::Array{Int32,1}, outerptsidx::Array{Int32,1}, Interiorptsidx::Array{Int32,1}, res_old)
+    function run_code(globaldata, configData, wallptsidx::Array{Int32,1}, outerptsidx::Array{Int32,1}, Interiorptsidx::Array{Int32,1}, res_old, numPoints)
         for i in 1:(Int(getConfig()["core"]["max_iters"]))
-            fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+            fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old, numPoints)
         end
     end
 
     res_old = zeros(Float64, 1)
-    function test_code(globaldata, configData, wallptsidx::Array{Int32,1}, outerptsidx::Array{Int32,1}, Interiorptsidx::Array{Int32,1}, res_old)
+    function test_code(globaldata, configData, wallptsidx::Array{Int32,1}, outerptsidx::Array{Int32,1}, Interiorptsidx::Array{Int32,1}, res_old, numPoints)
         println("Starting warmup function")
-        fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+        fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old, numPoints)
         res_old[1] = 0.0
         # Profile.clear_malloc_data()
         # @trace(fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old), maxdepth = 3)
@@ -55,14 +55,14 @@ function main()
         # res_old[1] = 0.0
         println("Starting main function")
         @timeit to "nest 4" begin
-            run_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+            run_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old, numPoints)
         end
     end
 
 
-    test_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+    test_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old, numPoints)
     # # println(to)
-    open("timer" * string(numPoints) * ".txt", "w") do io
+    open("results/timer" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) *".txt", "w") do io
         print_timer(io, to)
     end
 
@@ -89,7 +89,7 @@ function main()
     # println(IOContext(stdout, :compact => false), globaldata[100].ypos_conn)
     # println(IOContext(stdout, :compact => false), globaldata[100].yneg_conn)
     # println(globaldata[1])
-    file  = open("primvals" * string(numPoints) * ".txt", "w")
+    file  = open("results/primvals" * string(numPoints) * ".txt", "w")
     for (idx, itm) in enumerate(globaldata)
         primtowrite = globaldata[idx].prim
         for element in primtowrite

@@ -92,7 +92,7 @@ function calculateConnectivity(globaldata, idx)
     return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
 end
 
-function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old)
+function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old, numPoints)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # print(" 111\n")
     if iter == 1
@@ -116,7 +116,7 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
         if iter == 1
             println("Starting StateUpdate")
         end
-        state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old, rk)
+        state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old, rk, numPoints)
     end
     println("Iteration Number ", iter)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)

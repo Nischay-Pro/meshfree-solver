@@ -34,7 +34,7 @@ function placeNormals(globaldata, idx, configData, interior, wall, outer)
         normals = calculateNormals(leftpt, rightpt, currpt[1], currpt[2])
         setNormals(globaldata[idx], normals)
     elseif flag == interior
-        setNormals(globaldata[idx], (1,0))
+        setNormals(globaldata[idx], (0,1))
     else
         @warn "Illegal Point Type"
     end
