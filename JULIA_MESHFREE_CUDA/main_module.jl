@@ -10,6 +10,7 @@ using CuArrays
 using CUDAnative
 using CUDAdrv
 using ProgressMeter
+using StaticArrays
 
 const to = TimerOutput()
 
