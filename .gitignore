@@ -32,3 +32,4 @@ mfpre_back/*
 */point-input
 results/*
 test*
+*.nsight-cuprof-report

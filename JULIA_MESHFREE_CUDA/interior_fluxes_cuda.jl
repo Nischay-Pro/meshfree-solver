@@ -1,24 +1,11 @@
 
 function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-
-    x_k = 0.0
-    y_k = 0.0
-    delx = 0.0
-    dely = 0.0
-    dels = 0.0
-    deln = 0.0
-    dist = 0.0
-    weights = 0.0
-    dels_weights = 0.0
-    deln_weights = 0.0
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
     sum_1, sum_2, sum_3, sum_4 = 0.0,0.0,0.0,0.0
     sum_5, sum_6, sum_7, sum_8 = 0.0,0.0,0.0,0.0
-    qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 = 0.0,0.0,0.0,0.0
-    qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4 = 0.0,0.0,0.0,0.0
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
@@ -101,24 +88,12 @@ end
 
 function interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-
-    x_k = 0.0
-    y_k = 0.0
-    delx = 0.0
-    dely = 0.0
-    dels = 0.0
-    deln = 0.0
-    dist = 0.0
-    weights = 0.0
-    dels_weights = 0.0
-    deln_weights = 0.0
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
     sum_1, sum_2, sum_3, sum_4 = 0.0,0.0,0.0,0.0
     sum_5, sum_6, sum_7, sum_8 = 0.0,0.0,0.0,0.0
-    qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 = 0.0,0.0,0.0,0.0
-    qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4 = 0.0,0.0,0.0,0.0
+
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
@@ -209,23 +184,11 @@ end
 
 function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-    x_k = 0.0
-    y_k = 0.0
-    delx = 0.0
-    dely = 0.0
-    dels = 0.0
-    deln = 0.0
-    dist = 0.0
-    weights = 0.0
-    dels_weights = 0.0
-    deln_weights = 0.0
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
     sum_1, sum_2, sum_3, sum_4 = 0.0,0.0,0.0,0.0
     sum_5, sum_6, sum_7, sum_8 = 0.0,0.0,0.0,0.0
-    qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 = 0.0,0.0,0.0,0.0
-    qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4 = 0.0,0.0,0.0,0.0
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
@@ -313,24 +276,11 @@ end
 
 function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-
-    x_k = 0.0
-    y_k = 0.0
-    delx = 0.0
-    dely = 0.0
-    dels = 0.0
-    deln = 0.0
-    dist = 0.0
-    weights = 0.0
-    dels_weights = 0.0
-    deln_weights = 0.0
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
     sum_1, sum_2, sum_3, sum_4 = 0.0,0.0,0.0,0.0
     sum_5, sum_6, sum_7, sum_8 = 0.0,0.0,0.0,0.0
-    qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 = 0.0,0.0,0.0,0.0
-    qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4 = 0.0,0.0,0.0,0.0
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y

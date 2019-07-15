@@ -1,22 +1,10 @@
 function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-    # x_k = 0.0
-    # y_k = 0.0
-    delx = 0.0
-    dely = 0.0
-    dels = 0.0
-    deln = 0.0
-    dist = 0.0
-    weights = 0.0
-    dels_weights = 0.0
-    deln_weights = 0.0
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
     sum_1, sum_2, sum_3, sum_4 = 0.0,0.0,0.0,0.0
     sum_5, sum_6, sum_7, sum_8 = 0.0,0.0,0.0,0.0
-    qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 = 0.0,0.0,0.0,0.0
-    qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4 = 0.0,0.0,0.0,0.0
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
@@ -133,37 +121,12 @@ end
 
 function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-
-    # phi_i1,phi_i2,phi_i3,phi_i4 =  0.0,0.0,0.0,0.0
-    # phi_k1,phi_k2,phi_k3,phi_k4 =  0.0,0.0,0.0,0.0
-    # G_i1,G_i2,G_i3,G_i4 =  0.0,0.0,0.0,0.0
-    # G_k1,G_k2,G_k3,G_k4 =  0.0,0.0,0.0,0.0
-
-    # x_k = 0.0
-    # y_k = 0.0
-    delx = 0.0
-    dely = 0.0
-    dels = 0.0
-    deln = 0.0
-    dist = 0.0
-    weights = 0.0
-    dels_weights = 0.0
-    deln_weights = 0.0
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
     sum_1, sum_2, sum_3, sum_4 = 0.0,0.0,0.0,0.0
     sum_5, sum_6, sum_7, sum_8 = 0.0,0.0,0.0,0.0
-    qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 = 0.0,0.0,0.0,0.0
-    qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4 = 0.0,0.0,0.0,0.0
 
-    # sum_delx_delf1,sum_delx_delf2,sum_delx_delf3,sum_delx_delf4 = 0.0,0.0,0.0,0.0
-    # sum_dely_delf1,sum_dely_delf2,sum_dely_delf3,sum_dely_delf4 = 0.0,0.0,0.0,0.0
-
-
-
-
-    # result1,result2,result3,result4 = 0.0,0.0,0.0,0.0
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
@@ -253,30 +216,12 @@ end
 
 function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-
-
-    # phi_i1,phi_i2,phi_i3,phi_i4 =  0.0,0.0,0.0,0.0
-    # phi_k1,phi_k2,phi_k3,phi_k4 =  0.0,0.0,0.0,0.0
-    # G_i1,G_i2,G_i3,G_i4 =  0.0,0.0,0.0,0.0
-    # G_k1,G_k2,G_k3,G_k4 =  0.0,0.0,0.0,0.0
-
-    # x_k = 0.0
-    # y_k = 0.0
-    delx = 0.0
-    dely = 0.0
-    dels = 0.0
-    deln = 0.0
-    dist = 0.0
-    weights = 0.0
-    dels_weights = 0.0
-    deln_weights = 0.0
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
     sum_1, sum_2, sum_3, sum_4 = 0.0,0.0,0.0,0.0
     sum_5, sum_6, sum_7, sum_8 = 0.0,0.0,0.0,0.0
-    qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 = 0.0,0.0,0.0,0.0
-    qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4 = 0.0,0.0,0.0,0.0
+
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
