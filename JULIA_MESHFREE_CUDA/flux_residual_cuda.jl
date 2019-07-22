@@ -3,11 +3,30 @@ function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
     bx = blockIdx().x - 1
     bw = blockDim().x
 	idx = bx * bw + tx
+	temp = @SVector zeros(4)
 
 	shared = @cuStaticSharedMem(Float64, 512)
 	if idx > 0 && idx <= numPoints
 		if idx <= numPoints
 			flag1 = gpuGlobalDataFixedPoint[idx].flag_1
+
+		gpuGlobalDataRest[5, idx] = 0.0
+		gpuGlobalDataRest[6, idx] = 0.0
+		gpuGlobalDataRest[7, idx] = 0.0
+		gpuGlobalDataRest[8, idx] = 0.0
+
+		for i in 1:4
+            gpuGlobalDataRest[20+i, idx] = gpuGlobalDataRest[8+i, idx]
+            gpuGlobalDataRest[24+i, idx] = gpuGlobalDataRest[8+i, idx]
+            for iter in 5:14
+                conn = gpuGlobalDataConn[iter, idx]
+                if conn == 0.0
+                    break
+                end
+                update_q(gpuGlobalDataRest, idx, i, conn)
+            end
+		end
+
 		# elseif idx <= 2 * numPoints
 		# 	flag1 = gpuGlobalDataFixedPoint[idx - numPoints].flag_1
 		# elseif idx <= 3 * numPoints

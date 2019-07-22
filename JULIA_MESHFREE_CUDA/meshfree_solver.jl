@@ -46,6 +46,7 @@ function main()
         outer = configData["point"]["outer"]
         @showprogress 2 "Computing Connectivity" for idx in 1:numPoints
             placeNormals(globaldata, idx, configData, interior, wall, outer)
+            convertToFixedArray(globalDataFixedPoint, globaldata[idx], idx, numPoints)
         end
     end
 
@@ -54,10 +55,13 @@ function main()
         connectivity = calculateConnectivity(globaldata, idx, configData)
         setConnectivity(globaldata[idx], connectivity)
         # smallest_dist(globaldata, idx)
-        convertToArray(globalDataConn, globaldata[idx], idx)
+        convertToNeighbourArray(globalDataConn, globaldata[idx], idx)
 
     end
 
+
+
+    # return
     # typeof(globalDataConn[1])
     # print(globaldata[1].dq)
     # println(typeof(globaldata))

@@ -10,18 +10,19 @@ function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint
     # print(splitdata[1:3])
     @showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
         itmdata = split(itm, " ")
-        temp =  Point(parse(Int32,itmdata[1]),
-                    parse(Float64,itmdata[2]),
-                    parse(Float64, itmdata[3]),
-                    parse(Int32,itmdata[1]) - 1,
-                    parse(Int32,itmdata[1]) + 1,
+        # println(itmdata)
+        temp =  Point(idx,
+                    parse(Float64,itmdata[1]),
+                    parse(Float64, itmdata[2]),
+                    parse(Int, itmdata[3]),
+                    parse(Int, itmdata[4]),
+                    parse(Int8,itmdata[5]),
                     parse(Int8,itmdata[6]),
-                    parse(Int8,itmdata[7]),
-                    parse(Float64,itmdata[8]),
-                    parse(Int8,itmdata[9]),
-                    parse.(Int, itmdata[10:end-1]),
-                    parse(Float64, itmdata[4]),
-                    parse(Float64, itmdata[5]),
+                    parse(Float64,itmdata[7]),
+                    parse(Int8,itmdata[8]),
+                    parse.(Int, itmdata[9:end-1]),
+                    0.0,
+                    0.0,
                     copy(defprimal),
                     zeros(Float64, 4),
                     zeros(Float64, 4),
@@ -38,67 +39,6 @@ function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint
                     0.0,
                     zeros(Float64, 4),
                     zeros(Float64, 4))
-
-        globalDataFixedPoint[idx] = FixedPoint(parse(Int32,itmdata[1]),
-                                            parse(Float64,itmdata[2]),
-                                            parse(Float64, itmdata[3]),
-                                            parse(Int32,itmdata[1]) - 1,
-                                            parse(Int32,itmdata[1]) + 1,
-                                            parse(Int8,itmdata[6]),
-                                            parse(Int8,itmdata[7]),
-                                            parse(Float64,itmdata[8]),
-                                            parse(Int8,itmdata[9]),
-                                            parse(Float64, itmdata[4]),
-                                            parse(Float64, itmdata[5]),
-                                            0.0
-                                                )
-
-        if parse(Int32, itmdata[1]) == 1
-            temp.left = numPoints
-            # temp.left = 160
-            globalDataFixedPoint[idx] = FixedPoint(parse(Int32,itmdata[1]),
-                                            parse(Float64,itmdata[2]),
-                                            parse(Float64, itmdata[3]),
-                                            temp.left,
-                                            parse(Int32,itmdata[1]) + 1,
-                                            parse(Int8,itmdata[6]),
-                                            parse(Int8,itmdata[7]),
-                                            parse(Float64,itmdata[8]),
-                                            parse(Int8,itmdata[9]),
-                                            parse(Float64, itmdata[4]),
-                                            parse(Float64, itmdata[5]),
-                                            0.0
-                                                )
-        elseif parse(Int32, itmdata[1]) == numPoints
-            temp.right = 1
-            globalDataFixedPoint[idx] = FixedPoint(parse(Int32,itmdata[1]),
-                                            parse(Float64,itmdata[2]),
-                                            parse(Float64, itmdata[3]),
-                                            parse(Int32,itmdata[1]) - 1,
-                                            temp.right,
-                                            parse(Int8,itmdata[6]),
-                                            parse(Int8,itmdata[7]),
-                                            parse(Float64,itmdata[8]),
-                                            parse(Int8,itmdata[9]),
-                                            parse(Float64, itmdata[4]),
-                                            parse(Float64, itmdata[5]),
-                                            0.0
-                                                )
-        else
-            globalDataFixedPoint[idx] = FixedPoint(parse(Int32,itmdata[1]),
-                                            parse(Float64,itmdata[2]),
-                                            parse(Float64, itmdata[3]),
-                                            parse(Int32,itmdata[1]) - 1,
-                                            parse(Int32,itmdata[1]) + 1,
-                                            parse(Int8,itmdata[6]),
-                                            parse(Int8,itmdata[7]),
-                                            parse(Float64,itmdata[8]),
-                                            parse(Int8,itmdata[9]),
-                                            parse(Float64, itmdata[4]),
-                                            parse(Float64, itmdata[5]),
-                                            0.0
-                                                )
-        end
 
         # if idx % 100000 == 0
         #     println(idx)
