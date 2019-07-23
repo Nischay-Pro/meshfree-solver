@@ -1,11 +1,11 @@
 
 # point = Point(locaslID, x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, flux_res, q, dq, entropy, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta)
 
-# function setNormals(self::Point, n)
-#     self.nx = n[1]
-#     self.ny = n[2]
-#     return nothing
-# end
+function setNormals(self::Point, n)
+    self.nx = n[1]
+    self.ny = n[2]
+    return nothing
+end
 
 function getxy(self)
     return (self.x, self.y)

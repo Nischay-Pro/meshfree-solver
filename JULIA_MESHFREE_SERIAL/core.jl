@@ -23,6 +23,23 @@ function getInitialPrimitive2(configData)
     return finaldata
 end
 
+function placeNormals(globaldata, idx, configData, interior, wall, outer)
+    flag = globaldata[idx].flag_1
+    if flag == wall || flag == outer
+        currpt = getxy(globaldata[idx])
+        leftpt = globaldata[idx].left
+        leftpt = getxy(globaldata[leftpt])
+        rightpt = globaldata[idx].right
+        rightpt = getxy(globaldata[rightpt])
+        normals = calculateNormals(leftpt, rightpt, currpt[1], currpt[2])
+        setNormals(globaldata[idx], normals)
+    elseif flag == interior
+        setNormals(globaldata[idx], (0,1))
+    else
+        @warn "Illegal Point Type"
+    end
+end
+
 function calculateNormals(left, right, mx, my)
     lx = left[1]
     ly = left[2]
@@ -76,16 +93,16 @@ function calculateConnectivity(globaldata, idx)
         if dels >= 0.0
             push!(xneg_conn, itm)
         end
-        if flag == 2
+        if flag == 1
             if deln <= 0.0
                 push!(ypos_conn, itm)
             end
             if deln >= 0.0
                 push!(yneg_conn, itm)
             end
-        elseif flag == 1
+        elseif flag == 0
             push!(yneg_conn, itm)
-        elseif flag == 3
+        elseif flag == 2
             push!(ypos_conn, itm)
         end
     end
@@ -101,24 +118,24 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
     func_delta(globaldata, configData)
 
     for rk in 1:4
-        if iter == 1
-            println("Starting QVar")
-        end
+        # if iter == 1
+            # println("Starting QVar")
+        # end
         q_var_derivatives(globaldata, configData)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
-        if iter == 1
-            println("Starting Calflux")
-        end
+        # if iter == 1
+            # println("Starting Calflux")
+        # end
         cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
         # residue = 0
-        if iter == 1
-            println("Starting StateUpdate")
-        end
+        # if iter == 1
+            # println("Starting StateUpdate")
+        # end
         state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old, rk, numPoints)
     end
-    println("Iteration Number ", iter)
+    println("Iteration Number ", iter, " ")
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # residue = res_old
     return nothing
