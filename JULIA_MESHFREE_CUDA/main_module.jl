@@ -2,15 +2,15 @@ __precompile__()
 
 module main_module
 
+using CuArrays
+using CUDAdrv
+using CUDAnative
+using DelimitedFiles
 using JSON
 using Printf
-using TimerOutputs
-using DelimitedFiles
-using CuArrays
-using CUDAnative
-using CUDAdrv
 using ProgressMeter
 using StaticArrays
+using TimerOutputs
 
 const to = TimerOutput()
 
@@ -62,7 +62,6 @@ struct FixedPoint
     ny::Float64
     entropy::Float64
 end
-
 
 # using PyCall
 

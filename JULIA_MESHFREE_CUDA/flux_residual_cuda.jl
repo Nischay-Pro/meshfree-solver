@@ -3,7 +3,6 @@ function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
     bx = blockIdx().x - 1
     bw = blockDim().x
 	idx = bx * bw + tx
-	temp = @SVector zeros(4)
 
 	shared = @cuStaticSharedMem(Float64, 512)
 	if idx > 0 && idx <= numPoints

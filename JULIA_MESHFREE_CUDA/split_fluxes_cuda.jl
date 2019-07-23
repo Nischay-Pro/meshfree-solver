@@ -1,4 +1,5 @@
-function flux_Gxp_kernel(nx, ny, gpuGlobalDataRest, idx, shared, flag)
+function flux_Gxp_kernel(nx, ny, gpuGlobalDataRest, idx, shared, flag, op, thread_idx)
+    thread_idx = (Int(threadIdx().x) - 1) * 4
 
     u1 = gpuGlobalDataRest[45, idx]
     u2 = gpuGlobalDataRest[46, idx]
@@ -19,7 +20,21 @@ function flux_Gxp_kernel(nx, ny, gpuGlobalDataRest, idx, shared, flag)
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
 
+    shared[thread_idx + 1] = op((rho*(ut*A1pos + B1)), shared[thread_idx + 1])
+    temp1 = pr_by_rho + ut*ut
+    temp2 = temp1*A1pos + ut*B1
+    shared[thread_idx + 2] = op((rho*temp2), shared[thread_idx + 2])
+    temp1 = ut*un*A1pos + un*B1
+    shared[thread_idx + 3] = op((rho*temp1), shared[thread_idx + 3])
+
+    temp1 = (7*pr_by_rho) + u_sqr
+    temp2 = 0.5*ut*temp1*A1pos
+    temp1 = (6*pr_by_rho) + u_sqr
+    shared[thread_idx + 4] = op((rho*(temp2 + 0.5*temp1*B1)), shared[thread_idx + 4])
+
     if flag == 1
+
+        # shared[tx * 4 + 1] = (rho*(ut*A1pos + B1))
         gpuGlobalDataRest[37, idx] = (rho*(ut*A1pos + B1))
 
         temp1 = pr_by_rho + ut*ut
@@ -32,6 +47,7 @@ function flux_Gxp_kernel(nx, ny, gpuGlobalDataRest, idx, shared, flag)
         temp1 = (7*pr_by_rho) + u_sqr
         temp2 = 0.5*ut*temp1*A1pos
         temp1 = (6*pr_by_rho) + u_sqr
+
         gpuGlobalDataRest[40, idx] = (rho*(temp2 + 0.5*temp1*B1))
     else
         gpuGlobalDataRest[41, idx] = (rho*(ut*A1pos + B1))
