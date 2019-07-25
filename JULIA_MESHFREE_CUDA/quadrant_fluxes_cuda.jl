@@ -1,4 +1,4 @@
-function flux_quad_GxI_kernel(nx, ny, gpuGlobalDataRest, idx, shared, flag)
+function flux_quad_GxI_kernel(nx, ny, gpuGlobalDataRest, idx, shared, op, thread_idx)
     u1 = gpuGlobalDataRest[45, idx]
     u2 = gpuGlobalDataRest[46, idx]
     rho = gpuGlobalDataRest[47, idx]
@@ -15,51 +15,28 @@ function flux_quad_GxI_kernel(nx, ny, gpuGlobalDataRest, idx, shared, flag)
     B2 = 0.5*CUDAnative.exp(-S2*S2)/CUDAnative.sqrt(Float64(pi)*beta)
     A1neg = 0.5*(1.0 - CUDAnative.erf(S1))
     A2neg = 0.5*(1.0 - CUDAnative.erf(S2))
+
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
-    if flag == 1
-        gpuGlobalDataRest[37, idx] = (rho*A2neg*(ut*A1neg - B1))
+    shared[thread_idx + 1] = op((rho*A2neg*(ut*A1neg - B1)), shared[thread_idx + 1])
 
-        temp1 = pr_by_rho + ut*ut
-        temp2 = temp1*A1neg-ut*B1
-        gpuGlobalDataRest[38, idx] = (rho*A2neg*temp2)
+    temp1 = pr_by_rho + ut*ut
+    temp2 = temp1*A1neg-ut*B1
+    shared[thread_idx + 2] = op((rho*A2neg*temp2), shared[thread_idx + 2])
 
-        temp1 = ut*A1neg - B1
-        temp2 = un*A2neg - B2
-        gpuGlobalDataRest[39, idx] = (rho*temp1*temp2)
+    temp1 = ut*A1neg - B1
+    temp2 = un*A2neg - B2
+    shared[thread_idx + 3] = op((rho*temp1*temp2), shared[thread_idx + 3])
 
-        temp1 = (7.0 *pr_by_rho) + u_sqr
-        temp2 = 0.5*ut*temp1*A1neg
+    temp1 = (7.0 *pr_by_rho) + u_sqr
+    temp2 = 0.5*ut*temp1*A1neg
 
-        temp1 = (6.0 *pr_by_rho) + u_sqr
-        temp3 = 0.5*B1*temp1
+    temp1 = (6.0 *pr_by_rho) + u_sqr
+    temp3 = 0.5*B1*temp1
+    temp1 = ut*A1neg - B1
+    temp4 = 0.5*rho*un*B2*temp1
 
-        temp1 = ut*A1neg - B1
-        temp4 = 0.5*rho*un*B2*temp1
-
-        gpuGlobalDataRest[40, idx] = (rho*A2neg*(temp2 - temp3) - temp4)
-    else
-        gpuGlobalDataRest[41, idx] = (rho*A2neg*(ut*A1neg - B1))
-
-        temp1 = pr_by_rho + ut*ut
-        temp2 = temp1*A1neg-ut*B1
-        gpuGlobalDataRest[42, idx] = (rho*A2neg*temp2)
-
-        temp1 = ut*A1neg - B1
-        temp2 = un*A2neg - B2
-        gpuGlobalDataRest[43, idx] = (rho*temp1*temp2)
-
-        temp1 = (7.0 *pr_by_rho) + u_sqr
-        temp2 = 0.5*ut*temp1*A1neg
-
-        temp1 = (6.0 *pr_by_rho) + u_sqr
-        temp3 = 0.5*B1*temp1
-
-        temp1 = ut*A1neg - B1
-        temp4 = 0.5*rho*un*B2*temp1
-
-        gpuGlobalDataRest[44, idx] = (rho*A2neg*(temp2 - temp3) - temp4)
-    end
+    shared[thread_idx + 4] = op((rho*A2neg*(temp2 - temp3) - temp4), shared[thread_idx + 4])
     return nothing
 end
 
