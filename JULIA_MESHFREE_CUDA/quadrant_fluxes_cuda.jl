@@ -1,5 +1,4 @@
 function flux_quad_GxI_kernel(nx, ny, gpuGlobalDataRest, idx, shared, flag)
-    # G = Array{Float64,1}(undef, 0)
     u1 = gpuGlobalDataRest[45, idx]
     u2 = gpuGlobalDataRest[46, idx]
     rho = gpuGlobalDataRest[47, idx]

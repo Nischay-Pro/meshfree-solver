@@ -17,7 +17,7 @@ function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
 
     tx = ny
     ty = -nx
-    
+
     for iter in 15:24
         conn = gpuGlobalDataConn[iter, idx]
         if conn == 0
@@ -205,7 +205,7 @@ function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         for shared_iter in 1:4
             shared[thread_idx + shared_iter] = 0.0
         end
-        
+
         x_k = gpuGlobalDataFixedPoint[conn].x
         y_k = gpuGlobalDataFixedPoint[conn].y
         delx = x_k - x_i
@@ -270,11 +270,13 @@ end
 
 function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
+    thread_idx = (Int(threadIdx().x) - 1) * 4
+
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
     sum_delx_dely = 0.0
-    sum_1, sum_2, sum_3, sum_4 = 0.0,0.0,0.0,0.0
-    sum_5, sum_6, sum_7, sum_8 = 0.0,0.0,0.0,0.0
+    sum_delx_delf = SVector{4,Float64}(0, 0, 0, 0)
+    sum_dely_delf = SVector{4,Float64}(0, 0, 0, 0)
 
     x_i = gpuGlobalDataFixedPoint[idx].x
     y_i = gpuGlobalDataFixedPoint[idx].y
@@ -288,6 +290,9 @@ function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         conn = gpuGlobalDataConn[iter, idx]
         if conn == 0
             break
+        end
+        for shared_iter in 1:4
+            shared[thread_idx + shared_iter] = 0.0
         end
         x_k = gpuGlobalDataFixedPoint[conn].x
         y_k = gpuGlobalDataFixedPoint[conn].y
@@ -323,22 +328,13 @@ function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         #     @cuprintf("\n Havent written the code - die \n")
         # end
         qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gamma, gpuGlobalDataRest, shared, idx)
-        flux_Gyn_kernel(nx, ny, gpuGlobalDataRest, idx, shared, 1)
+        flux_Gyn_kernel(nx, ny, gpuGlobalDataRest, idx, shared, +, thread_idx)
         qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, gpuGlobalDataRest, shared, idx)
-        flux_Gyn_kernel(nx, ny, gpuGlobalDataRest, idx, shared, 2)
+        flux_Gyn_kernel(nx, ny, gpuGlobalDataRest, idx, shared, -, thread_idx)
         # CUDAnative.synchronize()
-        temp = gpuGlobalDataRest[41, idx] - gpuGlobalDataRest[37, idx]
-        sum_1 += (temp) * dels_weights
-        sum_5 += (temp) * deln_weights
-        temp = gpuGlobalDataRest[42, idx] - gpuGlobalDataRest[38, idx]
-        sum_2 += (temp) * dels_weights
-        sum_6 += (temp) * deln_weights
-        temp = gpuGlobalDataRest[43, idx] - gpuGlobalDataRest[39, idx]
-        sum_3 += (temp) * dels_weights
-        sum_7 += (temp) * deln_weights
-        temp = gpuGlobalDataRest[44, idx] - gpuGlobalDataRest[40, idx]
-        sum_4 += (temp) * dels_weights
-        sum_8 += (temp) * deln_weights
+        temp_var = @SVector [shared[thread_idx + i] for i = 1:4]
+        sum_delx_delf += temp_var * dels_weights
+        sum_dely_delf += temp_var * deln_weights
         # if idx == 1
         #     @cuprintf("\n %d", conn)
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[45, idx], gpuGlobalDataRest[46, idx], gpuGlobalDataRest[47, idx], gpuGlobalDataRest[48, idx])
@@ -349,10 +345,10 @@ function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
-    gpuGlobalDataRest[5, idx] += (sum_5*sum_delx_sqr - sum_1*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[6, idx] += (sum_6*sum_delx_sqr - sum_2*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[7, idx] += (sum_7*sum_delx_sqr - sum_3*sum_delx_dely)*one_by_det
-    gpuGlobalDataRest[8, idx] += (sum_8*sum_delx_sqr - sum_4*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[5, idx] += (sum_dely_delf[1]*sum_delx_sqr - sum_delx_delf[1]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[6, idx] += (sum_dely_delf[2]*sum_delx_sqr - sum_delx_delf[2]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[7, idx] += (sum_dely_delf[3]*sum_delx_sqr - sum_delx_delf[3]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[8, idx] += (sum_dely_delf[4]*sum_delx_sqr - sum_delx_delf[4]*sum_delx_dely)*one_by_det
     # if idx ==1
     #     @cuprintf("\n %f %f %f %f", gpuGlobalDataRest[5, idx],gpuGlobalDataRest[6, idx],gpuGlobalDataRest[7, idx],gpuGlobalDataRest[8, idx])
     # end
