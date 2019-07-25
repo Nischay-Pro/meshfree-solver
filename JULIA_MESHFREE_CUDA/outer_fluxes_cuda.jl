@@ -59,11 +59,11 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
             @cuprintf("\n Havent written the code - die \n")
         end
         qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gamma, gpuGlobalDataRest, shared, idx)
-        flux_quad_GxIII_kernel(nx, ny, gpuGlobalDataRest, idx, shared, 1)
+        flux_quad_GxIII_kernel(nx, ny, gpuGlobalDataRest, idx, shared, +, thread_idx)
         qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, gpuGlobalDataRest, shared, idx)
-        flux_quad_GxIII_kernel(nx, ny, gpuGlobalDataRest, idx, shared, 2)
+        flux_quad_GxIII_kernel(nx, ny, gpuGlobalDataRest, idx, shared, -, thread_idx)
         # CUDAnative.synchronize()
-        temp_var = @SVector [gpuGlobalDataRest[40+i, idx] - gpuGlobalDataRest[36+i, idx] for i = 1:4]
+        temp_var = @SVector [shared[thread_idx + i] for i = 1:4]
         sum_delx_delf += temp_var * dels_weights
         sum_dely_delf += temp_var * deln_weights
     end
@@ -139,11 +139,11 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
             @cuprintf("\n Havent written the code - die \n")
         end
         qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gamma, gpuGlobalDataRest, shared, idx)
-        flux_quad_GxIV_kernel(nx, ny, gpuGlobalDataRest, idx, shared, 1)
+        flux_quad_GxIV_kernel(nx, ny, gpuGlobalDataRest, idx, shared, +, thread_idx)
         qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, gpuGlobalDataRest, shared, idx)
-        flux_quad_GxIV_kernel(nx, ny, gpuGlobalDataRest, idx, shared, 2)
+        flux_quad_GxIV_kernel(nx, ny, gpuGlobalDataRest, idx, shared, -, thread_idx)
         # CUDAnative.synchronize()
-        temp_var = @SVector [gpuGlobalDataRest[40+i, idx] - gpuGlobalDataRest[36+i, idx] for i = 1:4]
+        temp_var = @SVector [shared[thread_idx + i] for i = 1:4]
         sum_delx_delf += temp_var * dels_weights
         sum_dely_delf += temp_var * deln_weights
     end
