@@ -1,6 +1,6 @@
 function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-    thread_idx = (Int(threadIdx().x) - 1) * 4
+    thread_idx = (Int(threadIdx().x) - 1) * 8
 
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
@@ -21,9 +21,7 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         if conn == 0
             break
         end
-        for shared_iter in 1:4
-            shared[thread_idx + shared_iter] = 0.0
-        end
+
         # x_k = gpuGlobalDataFixedPoint[conn].x
         # y_k = gpuGlobalDataFixedPoint[conn].y
         delx = gpuGlobalDataFixedPoint[conn].x - x_i
@@ -40,12 +38,12 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
         if limiter_flag == 1
-            venkat_limiter_kernel_i(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
+            venkat_limiter_kernel_i(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
             qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 =
-                gpuGlobalDataRest[9, idx] - 0.5*gpuGlobalDataRest[29, idx]*(delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx]),
-                gpuGlobalDataRest[10, idx] - 0.5*gpuGlobalDataRest[30, idx]*(delx * gpuGlobalDataRest[14, idx] + dely * gpuGlobalDataRest[18, idx]),
-                gpuGlobalDataRest[11, idx] - 0.5*gpuGlobalDataRest[31, idx]*(delx * gpuGlobalDataRest[15, idx] + dely * gpuGlobalDataRest[19, idx]),
-                gpuGlobalDataRest[12, idx] - 0.5*gpuGlobalDataRest[32, idx]*(delx * gpuGlobalDataRest[16, idx] + dely * gpuGlobalDataRest[20, idx])
+                gpuGlobalDataRest[9, idx] - 0.5*shared[thread_idx + 1]*(delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx]),
+                gpuGlobalDataRest[10, idx] - 0.5*shared[thread_idx + 2]*(delx * gpuGlobalDataRest[14, idx] + dely * gpuGlobalDataRest[18, idx]),
+                gpuGlobalDataRest[11, idx] - 0.5*shared[thread_idx + 3]*(delx * gpuGlobalDataRest[15, idx] + dely * gpuGlobalDataRest[19, idx]),
+                gpuGlobalDataRest[12, idx] - 0.5*shared[thread_idx + 4]*(delx * gpuGlobalDataRest[16, idx] + dely * gpuGlobalDataRest[20, idx])
             venkat_limiter_kernel_k(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, conn, gpuConfigData, idx, delx, dely)
             qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4 =
                 gpuGlobalDataRest[9, conn] - 0.5*gpuGlobalDataRest[33, idx]*(delx * gpuGlobalDataRest[13, conn] + dely * gpuGlobalDataRest[17, conn]),
@@ -57,6 +55,10 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
+        for shared_iter in 1:4
+            shared[thread_idx + shared_iter] = 0.0
+        end
+
         qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gamma, gpuGlobalDataRest, shared, idx)
         flux_quad_GxIII_kernel(nx, ny, gpuGlobalDataRest, idx, shared, +, thread_idx)
         qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, gpuGlobalDataRest, shared, idx)
@@ -79,7 +81,7 @@ end
 
 function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-    thread_idx = (Int(threadIdx().x) - 1) * 4
+    thread_idx = (Int(threadIdx().x) - 1) * 8
 
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
@@ -100,9 +102,7 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         if conn == 0
             break
         end
-        for shared_iter in 1:4
-            shared[thread_idx + shared_iter] = 0.0
-        end
+
         # x_k = gpuGlobalDataFixedPoint[conn].x
         # y_k = gpuGlobalDataFixedPoint[conn].y
         delx = gpuGlobalDataFixedPoint[conn].x - x_i
@@ -119,12 +119,12 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
         if limiter_flag == 1
-            venkat_limiter_kernel_i(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
+            venkat_limiter_kernel_i(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
             qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 =
-                gpuGlobalDataRest[9, idx] - 0.5*gpuGlobalDataRest[29, idx]*(delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx]),
-                gpuGlobalDataRest[10, idx] - 0.5*gpuGlobalDataRest[30, idx]*(delx * gpuGlobalDataRest[14, idx] + dely * gpuGlobalDataRest[18, idx]),
-                gpuGlobalDataRest[11, idx] - 0.5*gpuGlobalDataRest[31, idx]*(delx * gpuGlobalDataRest[15, idx] + dely * gpuGlobalDataRest[19, idx]),
-                gpuGlobalDataRest[12, idx] - 0.5*gpuGlobalDataRest[32, idx]*(delx * gpuGlobalDataRest[16, idx] + dely * gpuGlobalDataRest[20, idx])
+                gpuGlobalDataRest[9, idx] - 0.5*shared[thread_idx + 1]*(delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx]),
+                gpuGlobalDataRest[10, idx] - 0.5*shared[thread_idx + 2]*(delx * gpuGlobalDataRest[14, idx] + dely * gpuGlobalDataRest[18, idx]),
+                gpuGlobalDataRest[11, idx] - 0.5*shared[thread_idx + 3]*(delx * gpuGlobalDataRest[15, idx] + dely * gpuGlobalDataRest[19, idx]),
+                gpuGlobalDataRest[12, idx] - 0.5*shared[thread_idx + 4]*(delx * gpuGlobalDataRest[16, idx] + dely * gpuGlobalDataRest[20, idx])
             venkat_limiter_kernel_k(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, conn, gpuConfigData, idx, delx, dely)
             qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4 =
                 gpuGlobalDataRest[9, conn] - 0.5*gpuGlobalDataRest[33, idx]*(delx * gpuGlobalDataRest[13, conn] + dely * gpuGlobalDataRest[17, conn]),
@@ -136,6 +136,10 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
+        for shared_iter in 1:4
+            shared[thread_idx + shared_iter] = 0.0
+        end
+
         qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gamma, gpuGlobalDataRest, shared, idx)
         flux_quad_GxIV_kernel(nx, ny, gpuGlobalDataRest, idx, shared, +, thread_idx)
         qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, gpuGlobalDataRest, shared, idx)
@@ -158,7 +162,7 @@ end
 
 function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 
-    thread_idx = (Int(threadIdx().x) - 1) * 4
+    thread_idx = (Int(threadIdx().x) - 1) * 8
 
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
@@ -179,9 +183,7 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         if conn == 0
             break
         end
-        for shared_iter in 1:4
-            shared[thread_idx + shared_iter] = 0.0
-        end
+
         # x_k = gpuGlobalDataFixedPoint[conn].x
         # y_k = gpuGlobalDataFixedPoint[conn].y
         delx = gpuGlobalDataFixedPoint[conn].x - x_i
@@ -198,12 +200,12 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
         if limiter_flag == 1
-            venkat_limiter_kernel_i(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
+            venkat_limiter_kernel_i(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
             qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 =
-                gpuGlobalDataRest[9, idx] - 0.5*gpuGlobalDataRest[29, idx]*(delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx]),
-                gpuGlobalDataRest[10, idx] - 0.5*gpuGlobalDataRest[30, idx]*(delx * gpuGlobalDataRest[14, idx] + dely * gpuGlobalDataRest[18, idx]),
-                gpuGlobalDataRest[11, idx] - 0.5*gpuGlobalDataRest[31, idx]*(delx * gpuGlobalDataRest[15, idx] + dely * gpuGlobalDataRest[19, idx]),
-                gpuGlobalDataRest[12, idx] - 0.5*gpuGlobalDataRest[32, idx]*(delx * gpuGlobalDataRest[16, idx] + dely * gpuGlobalDataRest[20, idx])
+                gpuGlobalDataRest[9, idx] - 0.5*shared[thread_idx + 1]*(delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx]),
+                gpuGlobalDataRest[10, idx] - 0.5*shared[thread_idx + 2]*(delx * gpuGlobalDataRest[14, idx] + dely * gpuGlobalDataRest[18, idx]),
+                gpuGlobalDataRest[11, idx] - 0.5*shared[thread_idx + 3]*(delx * gpuGlobalDataRest[15, idx] + dely * gpuGlobalDataRest[19, idx]),
+                gpuGlobalDataRest[12, idx] - 0.5*shared[thread_idx + 4]*(delx * gpuGlobalDataRest[16, idx] + dely * gpuGlobalDataRest[20, idx])
             venkat_limiter_kernel_k(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, conn, gpuConfigData, idx, delx, dely)
             qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4 =
                 gpuGlobalDataRest[9, conn] - 0.5*gpuGlobalDataRest[33, idx]*(delx * gpuGlobalDataRest[13, conn] + dely * gpuGlobalDataRest[17, conn]),
@@ -215,6 +217,10 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
+        for shared_iter in 1:4
+            shared[thread_idx + shared_iter] = 0.0
+        end
+
         qtilde_to_primitive_kernel(qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4, gamma, gpuGlobalDataRest, shared, idx)
         flux_Gyp_kernel(nx, ny, gpuGlobalDataRest, idx, shared, +, thread_idx)
         qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, gpuGlobalDataRest, shared, idx)

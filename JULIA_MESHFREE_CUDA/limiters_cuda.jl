@@ -1,4 +1,4 @@
-function venkat_limiter_kernel_i(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
+function venkat_limiter_kernel_i(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataFixedPoint[idx].short_distance
     # @cuprintf("Type is %s", typeof(VL_CONST))
@@ -12,7 +12,7 @@ function venkat_limiter_kernel_i(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         q = gpuGlobalDataRest[8+i, idx]
         del_neg = gpuGlobalDataRest[8+i, idx] - 0.5*(delx * gpuGlobalDataRest[12+i, idx] + dely * gpuGlobalDataRest[16+i, idx]) - q
         if abs(del_neg) <= 1e-5
-            gpuGlobalDataRest[28+i,idx] = 1.0
+            shared[thread_idx + i] = 1.0
         elseif abs(del_neg) > 1e-5
             if del_neg > 0.0
                 # maximum(globaldata, idx, i, max_q)
@@ -32,7 +32,7 @@ function venkat_limiter_kernel_i(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
             if temp > 1.0
                 temp = 1.0
             end
-            gpuGlobalDataRest[28+i,idx] = temp
+            shared[thread_idx + i] = temp
         end
     end
     return nothing
