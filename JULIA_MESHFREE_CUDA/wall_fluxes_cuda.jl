@@ -1,4 +1,4 @@
-function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared, flux_shared)
+function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, shared, flux_shared)
 
     thread_idx = (Int(threadIdx().x) - 1) * 8
 
@@ -15,7 +15,8 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
 
     tx = ny
     ty = -nx
-
+    power = gpuConfigData[6]
+    gamma = gpuConfigData[15]
     for iter in 15:24
         conn = gpuGlobalDataConn[iter, idx]
         if conn == 0
@@ -43,7 +44,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         # end
 
 
-        if limiter_flag == 1
+        # if limiter_flag == 1
             venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
             qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 =
                 gpuGlobalDataRest[9, idx] - 0.5*shared[thread_idx + 1]*(delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx]),
@@ -56,11 +57,9 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
                 gpuGlobalDataRest[10, conn] - 0.5*shared[thread_idx + 2]*(delx * gpuGlobalDataRest[14, conn] + dely * gpuGlobalDataRest[18, conn]),
                 gpuGlobalDataRest[11, conn] - 0.5*shared[thread_idx + 3]*(delx * gpuGlobalDataRest[15, conn] + dely * gpuGlobalDataRest[19, conn]),
                 gpuGlobalDataRest[12, conn] - 0.5*shared[thread_idx + 4]*(delx * gpuGlobalDataRest[16, conn] + dely * gpuGlobalDataRest[20, conn])
-        end
+        # end
 
-        if limiter_flag == 2
-            @cuprintf("\n Havent written the code - die \n")
-        end
+
         # if idx == 3
         #     @cuprintf("\n %d", conn)
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[45, idx], gpuGlobalDataRest[46, idx], gpuGlobalDataRest[47, idx], gpuGlobalDataRest[48, idx])
@@ -111,7 +110,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     return nothing
 end
 
-function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared, flux_shared)
+function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, shared, flux_shared)
 
     thread_idx = (Int(threadIdx().x) - 1) * 8
 
@@ -128,7 +127,8 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
 
     tx = ny
     ty = -nx
-
+    power = gpuConfigData[6]
+    gamma = gpuConfigData[15]
     for iter in 25:34
         conn = gpuGlobalDataConn[iter, idx]
         if conn == 0
@@ -150,7 +150,7 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         sum_dely_sqr += deln*deln_weights
         sum_delx_dely += dels*deln_weights
 
-        if limiter_flag == 1
+        # if limiter_flag == 1
             venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
             qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 =
                 gpuGlobalDataRest[9, idx] - 0.5*shared[thread_idx + 1]*(delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx]),
@@ -163,11 +163,9 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
                 gpuGlobalDataRest[10, conn] - 0.5*shared[thread_idx + 2]*(delx * gpuGlobalDataRest[14, conn] + dely * gpuGlobalDataRest[18, conn]),
                 gpuGlobalDataRest[11, conn] - 0.5*shared[thread_idx + 3]*(delx * gpuGlobalDataRest[15, conn] + dely * gpuGlobalDataRest[19, conn]),
                 gpuGlobalDataRest[12, conn] - 0.5*shared[thread_idx + 4]*(delx * gpuGlobalDataRest[16, conn] + dely * gpuGlobalDataRest[20, conn])
-        end
+        # end
 
-        if limiter_flag == 2
-            @cuprintf("\n Havent written the code - die \n")
-        end
+
         for shared_iter in 1:4
             shared[thread_idx + shared_iter] = 0.0
         end
@@ -202,7 +200,7 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     return nothing
 end
 
-function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared, flux_shared)
+function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, shared, flux_shared)
 
     thread_idx = (Int(threadIdx().x) - 1) * 8
 
@@ -221,6 +219,8 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     tx = ny
     ty = -nx
 
+    power = gpuConfigData[6]
+    gamma = gpuConfigData[15]
 
     for iter in 45:54
         conn = gpuGlobalDataConn[iter, idx]
@@ -243,7 +243,7 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         sum_dely_sqr += deln*deln_weights
         sum_delx_dely += dels*deln_weights
 
-        if limiter_flag == 1
+        # if limiter_flag == 1
             venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
             qtilde_i1, qtilde_i2, qtilde_i3, qtilde_i4 =
                 gpuGlobalDataRest[9, idx] - 0.5*shared[thread_idx + 1]*(delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx]),
@@ -256,11 +256,9 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
                 gpuGlobalDataRest[10, conn] - 0.5*shared[thread_idx + 2]*(delx * gpuGlobalDataRest[14, conn] + dely * gpuGlobalDataRest[18, conn]),
                 gpuGlobalDataRest[11, conn] - 0.5*shared[thread_idx + 3]*(delx * gpuGlobalDataRest[15, conn] + dely * gpuGlobalDataRest[19, conn]),
                 gpuGlobalDataRest[12, conn] - 0.5*shared[thread_idx + 4]*(delx * gpuGlobalDataRest[16, conn] + dely * gpuGlobalDataRest[20, conn])
-        end
+        # end
 
-        if limiter_flag == 2
-            @cuprintf("\n Havent written the code - die \n")
-        end
+
         for shared_iter in 1:4
             shared[thread_idx + shared_iter] = 0.0
         end

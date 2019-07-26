@@ -96,9 +96,6 @@ export venkat_limiter_kernel_i, venkat_limiter_kernel_k, qtilde_to_primitive_ker
 include("meshfree_solver.jl")
 export main
 
-include("objective_function.jl")
-export calculateTheta, compute_cl_cd_cm
-
 include("objective_function_cuda.jl")
 export compute_cl_cd_cm_kernel, calculateTheta
 
