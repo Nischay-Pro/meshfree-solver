@@ -1,6 +1,5 @@
 function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
 	idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
-
 	shared = @cuStaticSharedMem(Float64, 1024)
 	if idx > 0 && idx <= numPoints
 		if idx <= numPoints

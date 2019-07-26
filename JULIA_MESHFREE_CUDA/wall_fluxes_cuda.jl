@@ -57,12 +57,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
                 gpuGlobalDataRest[11, conn] - 0.5*shared[thread_idx + 3]*(delx * gpuGlobalDataRest[15, conn] + dely * gpuGlobalDataRest[19, conn]),
                 gpuGlobalDataRest[12, conn] - 0.5*shared[thread_idx + 4]*(delx * gpuGlobalDataRest[16, conn] + dely * gpuGlobalDataRest[20, conn])
         end
-        # if idx == 3
-        #     @cuprintf("\n %d", conn)
-        #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[29, idx], gpuGlobalDataRest[30, idx], gpuGlobalDataRest[31, idx], gpuGlobalDataRest[32, idx])
-        #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[33,conn], gpuGlobalDataRest[34,conn], gpuGlobalDataRest[35,conn], gpuGlobalDataRest[36,conn])
-        #     @cuprintf("\n %.17f %.17f %.17f %.17f", qtilde_k[1], qtilde_k[2], qtilde_k[3], qtilde_k[4])
-        # end
+
         if limiter_flag == 2
             @cuprintf("\n Havent written the code - die \n")
         end
