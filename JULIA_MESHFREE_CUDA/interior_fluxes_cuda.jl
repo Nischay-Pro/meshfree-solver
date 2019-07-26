@@ -33,9 +33,9 @@ function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         dels_weights = dels*weights
         deln_weights = deln*weights
 
-        sum_delx_sqr = sum_delx_sqr + dels*dels_weights
-        sum_dely_sqr = sum_dely_sqr + deln*deln_weights
-        sum_delx_dely = sum_delx_dely + dels*deln_weights
+        sum_delx_sqr += dels*dels_weights
+        sum_dely_sqr += deln*deln_weights
+        sum_delx_dely += dels*deln_weights
 
         # if limiter_flag == 1
             venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
@@ -117,9 +117,9 @@ function interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         dels_weights = dels*weights
         deln_weights = deln*weights
 
-        sum_delx_sqr = sum_delx_sqr + dels*dels_weights
-        sum_dely_sqr = sum_dely_sqr + deln*deln_weights
-        sum_delx_dely = sum_delx_dely + dels*deln_weights
+        sum_delx_sqr += dels*dels_weights
+        sum_dely_sqr += deln*deln_weights
+        sum_delx_dely += dels*deln_weights
 
         # if limiter_flag == 1
             venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
@@ -207,9 +207,9 @@ function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         dels_weights = dels*weights
         deln_weights = deln*weights
 
-        sum_delx_sqr = sum_delx_sqr + dels*dels_weights
-        sum_dely_sqr = sum_dely_sqr + deln*deln_weights
-        sum_delx_dely = sum_delx_dely + dels*deln_weights
+        sum_delx_sqr += dels*dels_weights
+        sum_dely_sqr += deln*deln_weights
+        sum_delx_dely += dels*deln_weights
 
         # if limiter_flag == 1
             venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
@@ -289,9 +289,9 @@ function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         dels_weights = dels*weights
         deln_weights = deln*weights
 
-        sum_delx_sqr = sum_delx_sqr + dels*dels_weights
-        sum_dely_sqr = sum_dely_sqr + deln*deln_weights
-        sum_delx_dely = sum_delx_dely + dels*deln_weights
+        sum_delx_sqr += dels*dels_weights
+        sum_dely_sqr += deln*deln_weights
+        sum_delx_dely += dels*deln_weights
 
         # if limiter_flag == 1
             venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
@@ -336,3 +336,6 @@ function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
     # end
     return nothing
 end
+
+# function iteration_calc(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared, flux_shared.
+#                         thread_idx, sum_de)

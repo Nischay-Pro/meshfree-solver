@@ -33,9 +33,9 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         dels_weights = dels*weights
         deln_weights = deln*weights
 
-        sum_delx_sqr = sum_delx_sqr + dels*dels_weights
-        sum_dely_sqr = sum_dely_sqr + deln*deln_weights
-        sum_delx_dely = sum_delx_dely + dels*deln_weights
+        sum_delx_sqr += dels*dels_weights
+        sum_dely_sqr += deln*deln_weights
+        sum_delx_dely += dels*deln_weights
 
         # if idx == 3
         #     @cuprintf("\n %d", conn)
@@ -146,9 +146,9 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         dels_weights = dels*weights
         deln_weights = deln*weights
 
-        sum_delx_sqr = sum_delx_sqr + dels*dels_weights
-        sum_dely_sqr = sum_dely_sqr + deln*deln_weights
-        sum_delx_dely = sum_delx_dely + dels*deln_weights
+        sum_delx_sqr += dels*dels_weights
+        sum_dely_sqr += deln*deln_weights
+        sum_delx_dely += dels*deln_weights
 
         if limiter_flag == 1
             venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
@@ -239,9 +239,9 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         dels_weights = dels*weights
         deln_weights = deln*weights
 
-        sum_delx_sqr = sum_delx_sqr + dels*dels_weights
-        sum_dely_sqr = sum_dely_sqr + deln*deln_weights
-        sum_delx_dely = sum_delx_dely + dels*deln_weights
+        sum_delx_sqr += dels*dels_weights
+        sum_dely_sqr += deln*deln_weights
+        sum_delx_dely += dels*deln_weights
 
         if limiter_flag == 1
             venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
