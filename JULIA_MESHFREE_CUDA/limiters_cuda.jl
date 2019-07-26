@@ -1,4 +1,4 @@
-function venkat_limiter_kernel_i(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
+function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
     VL_CONST = gpuConfigData[8]
     ds = gpuGlobalDataFixedPoint[idx].short_distance
     # @cuprintf("Type is %s", typeof(VL_CONST))
