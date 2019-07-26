@@ -1,8 +1,8 @@
-function flux_quad_GxI_kernel(nx, ny, gpuGlobalDataRest, idx, shared, op, thread_idx)
-    u1 = gpuGlobalDataRest[45, idx]
-    u2 = gpuGlobalDataRest[46, idx]
-    rho = gpuGlobalDataRest[47, idx]
-    pr = gpuGlobalDataRest[48, idx]
+function flux_quad_GxI_kernel(nx, ny, idx, shared, op, thread_idx)
+    u1 = shared[thread_idx + 5]
+    u2 = shared[thread_idx + 6]
+    rho = shared[thread_idx + 7]
+    pr = shared[thread_idx + 8]
 
     tx = ny
     ty = -nx
@@ -40,11 +40,11 @@ function flux_quad_GxI_kernel(nx, ny, gpuGlobalDataRest, idx, shared, op, thread
     return nothing
 end
 
-function flux_quad_GxII_kernel(nx, ny, gpuGlobalDataRest, idx, shared, op, thread_idx)
-    u1 = gpuGlobalDataRest[45, idx]
-    u2 = gpuGlobalDataRest[46, idx]
-    rho = gpuGlobalDataRest[47, idx]
-    pr = gpuGlobalDataRest[48, idx]
+function flux_quad_GxII_kernel(nx, ny, idx, shared, op, thread_idx)
+    u1 = shared[thread_idx + 5]
+    u2 = shared[thread_idx + 6]
+    rho = shared[thread_idx + 7]
+    pr = shared[thread_idx + 8]
 
     tx = ny
     ty = -nx
@@ -85,12 +85,12 @@ function flux_quad_GxII_kernel(nx, ny, gpuGlobalDataRest, idx, shared, op, threa
     return nothing
 end
 
-function flux_quad_GxIII_kernel(nx, ny, gpuGlobalDataRest, idx, shared, op, thread_idx)
+function flux_quad_GxIII_kernel(nx, ny, idx, shared, op, thread_idx)
     # G = Array{Float64,1}(undef, 0)
-    u1 = gpuGlobalDataRest[45, idx]
-    u2 = gpuGlobalDataRest[46, idx]
-    rho = gpuGlobalDataRest[47, idx]
-    pr = gpuGlobalDataRest[48, idx]
+    u1 = shared[thread_idx + 5]
+    u2 = shared[thread_idx + 6]
+    rho = shared[thread_idx + 7]
+    pr = shared[thread_idx + 8]
     tx = ny
     ty = -nx
 
@@ -128,12 +128,12 @@ function flux_quad_GxIII_kernel(nx, ny, gpuGlobalDataRest, idx, shared, op, thre
     return nothing
 end
 
-function flux_quad_GxIV_kernel(nx, ny, gpuGlobalDataRest, idx, shared, op, thread_idx)
+function flux_quad_GxIV_kernel(nx, ny, idx, shared, op, thread_idx)
     # G = Array{Float64,1}(undef, 0)
-    u1 = gpuGlobalDataRest[45, idx]
-    u2 = gpuGlobalDataRest[46, idx]
-    rho = gpuGlobalDataRest[47, idx]
-    pr = gpuGlobalDataRest[48, idx]
+    u1 = shared[thread_idx + 5]
+    u2 = shared[thread_idx + 6]
+    rho = shared[thread_idx + 7]
+    pr = shared[thread_idx + 8]
     tx = ny
     ty = -nx
 

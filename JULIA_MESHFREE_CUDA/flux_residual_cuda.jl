@@ -1,8 +1,5 @@
 function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
-	tx = threadIdx().x
-    bx = blockIdx().x - 1
-    bw = blockDim().x
-	idx = bx * bw + tx
+	idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
 
 	shared = @cuStaticSharedMem(Float64, 1024)
 	if idx > 0 && idx <= numPoints
@@ -55,10 +52,6 @@ function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
 end
 
 @inline function wall_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
-	# gpuGlobalDataRest[5, idx] = 0.0
-	# gpuGlobalDataRest[6, idx] = 0.0
-	# gpuGlobalDataRest[7, idx] = 0.0
-	# gpuGlobalDataRest[8, idx] = 0.0
 	wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 	# sync_threads()
 	wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
@@ -68,10 +61,7 @@ end
 end
 
 @inline function interior_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
-	# gpuGlobalDataRest[5, idx] = 0.0
-	# gpuGlobalDataRest[6, idx] = 0.0
-	# gpuGlobalDataRest[7, idx] = 0.0
-	# gpuGlobalDataRest[8, idx] = 0.0
+
 	interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 	# sync_threads()
 	interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
@@ -83,10 +73,6 @@ end
 end
 
 @inline function outer_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
-	# gpuGlobalDataRest[5, idx] = 0.0
-	# gpuGlobalDataRest[6, idx] = 0.0
-	# gpuGlobalDataRest[7, idx] = 0.0
-	# gpuGlobalDataRest[8, idx] = 0.0
 	outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
 	# sync_threads()
 	outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, power, limiter_flag, gamma, shared)
