@@ -7,7 +7,7 @@ def compute_cl_cd_cm(globaldata, configData, wallindices):
     rho_inf = configData["core"]["rho_inf"]
     Mach = configData["core"]["mach"]
     pr_inf = configData["core"]["pr_inf"]
-    shapes = configData["core"]["shapes"]
+    shapes = getGeometryCount(globaldata)
     theta = core.calculateTheta(configData)
 
     temp = 0.5*rho_inf*Mach*Mach
@@ -20,7 +20,7 @@ def compute_cl_cd_cm(globaldata, configData, wallindices):
     Cd = [0 for i in range(shapes)]
     Cm = [0 for i in range(shapes)]
 
-    with open('cp_file', 'a') as the_file:
+    with open('cp_file', 'w+') as the_file:
 
         for itm in wallindices:
             left = globaldata[itm].left
@@ -44,12 +44,11 @@ def compute_cl_cd_cm(globaldata, configData, wallindices):
             nx = globaldata[itm].nx
             ny = globaldata[itm].ny
 
-            cp = globaldata[itm].prim[2] - pr_inf
+            cp = globaldata[itm].prim[3] - pr_inf
             cp = -cp/temp
 
             flag_2 = globaldata[itm].flag_2 - 1
-
-            the_file.write(("%i %f %f\n") % (flag_2, mx, cp))
+            the_file.write("{} {} {}\n".format(flag_2, mx, cp))
 
             H[flag_2] += cp * nx * ds
             V[flag_2] += cp * ny * ds
@@ -66,3 +65,10 @@ def compute_cl_cd_cm(globaldata, configData, wallindices):
     if configData["core"]["clcd_flag"]:
         print("Cl:",Cl)
         print("Cd:",Cd)
+
+def getGeometryCount(globaldata):
+    maxFlag = 0
+    for itm in globaldata[1:]:
+        if maxFlag < itm.flag_2:
+            maxFlag = itm.flag_2
+    return maxFlag

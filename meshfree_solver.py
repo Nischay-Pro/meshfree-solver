@@ -4,6 +4,7 @@ import config
 import argparse
 from progress import printProgressBar
 from tqdm import tqdm
+import output
 
 def main():
 
@@ -98,7 +99,10 @@ def main():
     res_old = 0
 
     print("Starting FPI Solver")
-    core.fpi_solver(config.getConfig()["core"]["max_iters"] + 1, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx, res_old)
+    _, globaldata = core.fpi_solver(config.getConfig()["core"]["max_iters"] + 1, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx, res_old)
+
+    if configData["core"]["output"] and not configData["core"]["debug"]:
+        output.generateOutput(globaldata)
 
     print("Done")
 

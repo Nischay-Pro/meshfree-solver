@@ -186,6 +186,8 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
     b = time.time()
     with open('grid_{}.txt'.format(len(globaldata)), 'a+') as the_file:
         the_file.write("Block Dimensions: ({}, 1)\nRuntime: {}\n".format(int(configData['core']['blockGridX']), (b - a - (d - c))))
+    if configData["core"]["profile"]:
+        exit()
     globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
     objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     if configData["core"]["debug"]:

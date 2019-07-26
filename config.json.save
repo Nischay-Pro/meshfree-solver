@@ -1,8 +1,8 @@
 {
     "core": {
         "cfl": 0.3,
-        "max_iters": 30000,
-        "mach": 0.85,
+        "max_iters": 300,
+        "mach": 1.2,
         "aoa": 0,
         "power": 0,
         "limiter_flag": 1,
@@ -11,7 +11,7 @@
         "pr_inf": 0.7142857142857143,
         "gamma": 1.4,
         "clcd_flag": false,
-        "format": 2,
+        "format": 0,
         "blockGridX": 32,
         "ssprk": true,
         "profile": true,
