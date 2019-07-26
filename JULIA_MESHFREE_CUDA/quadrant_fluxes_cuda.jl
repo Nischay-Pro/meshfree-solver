@@ -4,10 +4,9 @@ function flux_quad_GxI_kernel(nx, ny, idx, shared, op, thread_idx)
     rho = shared[thread_idx + 7]
     pr = shared[thread_idx + 8]
 
-    tx = ny
-    ty = -nx
-    ut = u1*tx + u2*ty
+    ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
+
     beta = 0.5*rho/pr
     S1 = ut*CUDAnative.sqrt(beta)
     S2 = un*CUDAnative.sqrt(beta)
@@ -46,9 +45,7 @@ function flux_quad_GxII_kernel(nx, ny, idx, shared, op, thread_idx)
     rho = shared[thread_idx + 7]
     pr = shared[thread_idx + 8]
 
-    tx = ny
-    ty = -nx
-    ut = u1*tx + u2*ty
+    ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
@@ -86,15 +83,12 @@ function flux_quad_GxII_kernel(nx, ny, idx, shared, op, thread_idx)
 end
 
 function flux_quad_GxIII_kernel(nx, ny, idx, shared, op, thread_idx)
-    # G = Array{Float64,1}(undef, 0)
+
     u1 = shared[thread_idx + 5]
     u2 = shared[thread_idx + 6]
     rho = shared[thread_idx + 7]
     pr = shared[thread_idx + 8]
-    tx = ny
-    ty = -nx
-
-    ut = u1*tx + u2*ty
+    ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
@@ -129,15 +123,12 @@ function flux_quad_GxIII_kernel(nx, ny, idx, shared, op, thread_idx)
 end
 
 function flux_quad_GxIV_kernel(nx, ny, idx, shared, op, thread_idx)
-    # G = Array{Float64,1}(undef, 0)
+
     u1 = shared[thread_idx + 5]
     u2 = shared[thread_idx + 6]
     rho = shared[thread_idx + 7]
     pr = shared[thread_idx + 8]
-    tx = ny
-    ty = -nx
-
-    ut = u1*tx + u2*ty
+    ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr

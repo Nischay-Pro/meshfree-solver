@@ -105,8 +105,8 @@ end
 #     globaldata[idx].short_distance = min_dist
 # end
 
-@inline function qtilde_to_primitive_kernel(qtilde1, qtilde2, qtilde3, qtilde4, gamma, shared, idx, thread_idx)
-
+@inline function qtilde_to_primitive_kernel(qtilde1, qtilde2, qtilde3, qtilde4, gamma, shared, thread_idx)
+    idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     # gamma = gpuConfigData[15]
     beta = -qtilde4*0.5
     temp = 0.5/beta
@@ -115,10 +115,9 @@ end
 
     temp2 = qtilde1 + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(gamma-1))
     rho = CUDAnative.exp(temp2)
-    pr = rho*temp
     shared[thread_idx + 5] = u1
     shared[thread_idx + 6] = u2
     shared[thread_idx + 7] = rho
-    shared[thread_idx + 8] = pr
+    shared[thread_idx + 8] = rho*temp
     return nothing
 end

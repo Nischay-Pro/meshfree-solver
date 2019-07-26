@@ -4,10 +4,7 @@ function flux_Gxp_kernel(nx, ny, idx, shared, op, thread_idx)
     rho = shared[thread_idx + 7]
     pr = shared[thread_idx + 8]
 
-    tx = ny
-    ty = -nx
-
-    ut = u1*tx + u2*ty
+    ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
@@ -40,10 +37,7 @@ function flux_Gxn_kernel(nx, ny, idx, shared, op, thread_idx)
     rho = shared[thread_idx + 7]
     pr = shared[thread_idx + 8]
 
-    tx = ny
-    ty = -nx
-
-    ut = u1*tx + u2*ty
+    ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
@@ -73,10 +67,7 @@ function flux_Gyp_kernel(nx, ny, idx, shared, op, thread_idx)
     rho = shared[thread_idx + 7]
     pr = shared[thread_idx + 8]
 
-    tx = ny
-    ty = -nx
-
-    ut = u1*tx + u2*ty
+    ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
@@ -108,10 +99,7 @@ function flux_Gyn_kernel(nx, ny, idx, shared, op, thread_idx)
     rho = shared[thread_idx + 7]
     pr = shared[thread_idx + 8]
 
-    tx = ny
-    ty = -nx
-
-    ut = u1*tx + u2*ty
+    ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
