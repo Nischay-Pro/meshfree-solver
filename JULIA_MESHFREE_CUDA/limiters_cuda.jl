@@ -1,10 +1,8 @@
 function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
     VL_CONST = gpuConfigData[8]
-    ds = gpuGlobalDataFixedPoint[idx].short_distance
     # @cuprintf("Type is %s", typeof(VL_CONST))
-    epsigh = VL_CONST * ds
-    power3 = 3.0
-    epsi = CUDAnative.pow(epsigh, power3)
+    epsigh = VL_CONST * gpuGlobalDataFixedPoint[idx].short_distance
+    epsi = CUDAnative.pow(epsigh, 3.0)
     del_pos = 0.0
     del_neg = 0.0
 

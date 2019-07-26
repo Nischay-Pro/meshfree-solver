@@ -1,5 +1,5 @@
-function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, shared, flux_shared)
-
+function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared)
+    idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     thread_idx = (Int(threadIdx().x) - 1) * 8
 
     sum_delx_sqr = 0.0
@@ -54,9 +54,6 @@ function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
                 gpuGlobalDataRest[12, conn] - 0.5*shared[thread_idx + 4]*(delx * gpuGlobalDataRest[16, conn] + dely * gpuGlobalDataRest[20, conn])
         # end
 
-        # if limiter_flag == 2
-        #     @cuprintf("\n Havent written the code - die \n")
-        # end
         for shared_iter in 1:4
             shared[thread_idx + shared_iter] = 0.0
         end
@@ -68,7 +65,7 @@ function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
 
 
         # CUDAnative.synchronize()
-        temp_var = @SVector [shared[thread_idx + i] for i = 1:4]
+        temp_var = @SVector [shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4]]
         sum_delx_delf += temp_var * dels_weights
         sum_dely_delf += temp_var * deln_weights
     end
@@ -86,8 +83,8 @@ function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
     return nothing
 end
 
-function interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, shared, flux_shared)
-
+function interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared)
+    idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     thread_idx = (Int(threadIdx().x) - 1) * 8
 
     sum_delx_sqr = 0.0
@@ -151,7 +148,7 @@ function interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, shared, idx, thread_idx)
         flux_Gxn_kernel(nx, ny, idx, shared, -, thread_idx)
         # CUDAnative.synchronize()
-        temp_var = @SVector [shared[thread_idx + i] for i = 1:4]
+        temp_var = @SVector [shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] ]
         sum_delx_delf += temp_var * dels_weights
         sum_dely_delf += temp_var * deln_weights
     end
@@ -177,8 +174,8 @@ function interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
     return nothing
 end
 
-function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, shared, flux_shared)
-
+function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared)
+    idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     thread_idx = (Int(threadIdx().x) - 1) * 8
 
     sum_delx_sqr = 0.0
@@ -243,7 +240,7 @@ function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, shared, idx, thread_idx)
         flux_Gyp_kernel(nx, ny, idx, shared, -, thread_idx)
         # CUDAnative.synchronize()
-        temp_var = @SVector [shared[thread_idx + i] for i = 1:4]
+        temp_var = @SVector [shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] ]
         sum_delx_delf += temp_var * dels_weights
         sum_dely_delf += temp_var * deln_weights
 
@@ -261,8 +258,8 @@ function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
     return nothing
 end
 
-function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, shared, flux_shared)
-
+function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared)
+    idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     thread_idx = (Int(threadIdx().x) - 1) * 8
 
     sum_delx_sqr = 0.0
@@ -326,7 +323,7 @@ function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         qtilde_to_primitive_kernel(qtilde_k1, qtilde_k2, qtilde_k3, qtilde_k4, gamma, shared, idx, thread_idx)
         flux_Gyn_kernel(nx, ny, idx, shared, -, thread_idx)
         # CUDAnative.synchronize()
-        temp_var = @SVector [shared[thread_idx + i] for i = 1:4]
+        temp_var = @SVector [shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] ]
         sum_delx_delf += temp_var * dels_weights
         sum_dely_delf += temp_var * deln_weights
 
