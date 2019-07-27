@@ -214,7 +214,7 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
         x_i = gpuGlobalDataFixedPoint[idx].x
         y_i = gpuGlobalDataFixedPoint[idx].y
         temp = 0.0
-        power = gpuConfigData[6]
+        # power = gpuConfigData[6]
 
         q1, q2, q3, q4 = gpuGlobalDataRest[9, idx], gpuGlobalDataRest[10, idx], gpuGlobalDataRest[11, idx], gpuGlobalDataRest[12, idx]
 
@@ -228,7 +228,10 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
             dely = gpuGlobalDataFixedPoint[conn].y - y_i
             dist = CUDAnative.hypot(delx, dely)
 
-            weights = CUDAnative.pow(dist, power)
+            # weights = CUDAnative.pow(dist, power)
+        weights = 1.0
+
+
             sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
             sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
             sum_delx_dely = sum_delx_dely + ((delx * dely) * weights)

@@ -19,7 +19,7 @@ function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
 
 
     # limiter_flag = gpuConfigData[7]
-    power = gpuConfigData[6]
+    # power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
     for iter in 15:24
         conn = gpuGlobalDataConn[iter, idx]
@@ -32,7 +32,10 @@ function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, power)
+        # weights = CUDAnative.pow(dist, power)
+        weights = 1.0
+
+
         dels_weights = dels*weights
         deln_weights = deln*weights
 
@@ -98,7 +101,7 @@ function interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
     ny = gpuGlobalDataFixedPoint[idx].ny
 
 
-    power = gpuConfigData[6]
+    # power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
     for iter in 25:34
         conn = gpuGlobalDataConn[iter, idx]
@@ -111,7 +114,10 @@ function interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, power)
+        # weights = CUDAnative.pow(dist, power)
+        weights = 1.0
+
+
         dels_weights = dels*weights
         deln_weights = deln*weights
 
@@ -186,7 +192,7 @@ function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
     ny = gpuGlobalDataFixedPoint[idx].ny
 
 
-    power = gpuConfigData[6]
+    # power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
 
     for iter in 35:44
@@ -200,7 +206,10 @@ function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, power)
+        # weights = CUDAnative.pow(dist, power)
+        weights = 1.0
+
+
         dels_weights = dels*weights
         deln_weights = deln*weights
 
@@ -267,7 +276,7 @@ function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
     ny = gpuGlobalDataFixedPoint[idx].ny
 
 
-    power = gpuConfigData[6]
+    # power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
 
     for iter in 45:54
@@ -281,7 +290,10 @@ function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, power)
+        # weights = CUDAnative.pow(dist, power)
+        weights = 1.0
+
+
         dels_weights = dels*weights
         deln_weights = deln*weights
 

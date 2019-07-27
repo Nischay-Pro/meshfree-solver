@@ -2,7 +2,7 @@ function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, 
     VL_CONST = gpuConfigData[8]
     # @cuprintf("Type is %s", typeof(VL_CONST))
     epsigh = VL_CONST * gpuGlobalDataFixedPoint[idx].short_distance
-    epsi = CUDAnative.pow(epsigh, 3.0)
+    epsi = epsigh*epsigh*epsigh
     del_pos = 0.0
     del_neg = 0.0
 
