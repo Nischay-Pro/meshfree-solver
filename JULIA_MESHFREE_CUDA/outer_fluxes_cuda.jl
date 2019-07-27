@@ -31,8 +31,8 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        # weights = CUDAnative.pow(dist, power)
-        weights = 1.0
+        weights = CUDAnative.pow(dist, gpuConfigData[6])
+        # weights = 1.0
 
 
         dels_weights = dels*weights
@@ -113,8 +113,8 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        # weights = CUDAnative.pow(dist, power)
-        weights = 1.0
+        weights = CUDAnative.pow(dist, gpuConfigData[6])
+        # weights = 1.0
 
 
         dels_weights = dels*weights
@@ -194,8 +194,8 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        # weights = CUDAnative.pow(dist, power)
-        weights = 1.0
+        weights = CUDAnative.pow(dist, gpuConfigData[6])
+        # weights = 1.0
 
 
         dels_weights = dels*weights

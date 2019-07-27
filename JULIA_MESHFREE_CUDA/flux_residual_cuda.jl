@@ -4,40 +4,33 @@ function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
 	shared = @cuStaticSharedMem(Float64, 1024)
 	flux_shared = @cuStaticSharedMem(Float64, 512)
 	if idx > 0 && idx <= numPoints
-		if idx <= numPoints
-			flag1 = gpuGlobalDataFixedPoint[idx].flag_1
 
-		for i in 1:4
-			flux_shared[thread_idx + i] = 0.0
-            gpuGlobalDataRest[20+i, idx] = gpuGlobalDataRest[8+i, idx]
-            gpuGlobalDataRest[24+i, idx] = gpuGlobalDataRest[8+i, idx]
-            for iter in 5:14
-                conn = gpuGlobalDataConn[iter, idx]
-                if conn == 0.0
-                    break
-                end
-                update_q(gpuGlobalDataRest, idx, i, conn)
+		flux_shared[thread_idx + 1], flux_shared[thread_idx + 2], flux_shared[thread_idx + 3], flux_shared[thread_idx + 4] = 0.0, 0.0, 0.0, 0.0
+
+		gpuGlobalDataRest[21, idx], gpuGlobalDataRest[22, idx], gpuGlobalDataRest[23, idx], gpuGlobalDataRest[24, idx] = gpuGlobalDataRest[9, idx],
+			gpuGlobalDataRest[10, idx],gpuGlobalDataRest[11, idx],gpuGlobalDataRest[12, idx]
+		gpuGlobalDataRest[25, idx], gpuGlobalDataRest[26, idx], gpuGlobalDataRest[27, idx], gpuGlobalDataRest[28, idx] = gpuGlobalDataRest[9, idx],
+			gpuGlobalDataRest[10, idx],gpuGlobalDataRest[11, idx],gpuGlobalDataRest[12, idx]
+
+        for iter in 5:14
+            conn = gpuGlobalDataConn[iter, idx]
+            if conn == 0.0
+                break
             end
-		end
+			update_q(gpuGlobalDataRest, idx, 1, conn)
+			update_q(gpuGlobalDataRest, idx, 2, conn)
+			update_q(gpuGlobalDataRest, idx, 3, conn)
+			update_q(gpuGlobalDataRest, idx, 4, conn)
+        end
 
-		# elseif idx <= 2 * numPoints
-		# 	flag1 = gpuGlobalDataFixedPoint[idx - numPoints].flag_1
-		# elseif idx <= 3 * numPoints
-		# 	flag1 = gpuGlobalDataFixedPoint[idx - 2 * numPoints].flag_1
-		# else
-		# 	flag1 = gpuGlobalDataFixedPoint[idx - 3 * numPoints].flag_1
-		end
 
-		if flag1 == gpuConfigData[17]
+		if gpuGlobalDataFixedPoint[idx].flag_1 == gpuConfigData[17]
 			wall_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared)
-		elseif flag1 == gpuConfigData[18]
+		elseif gpuGlobalDataFixedPoint[idx].flag_1 == gpuConfigData[18]
 			interior_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared)
 			# sync_threads()
-		elseif flag1 == gpuConfigData[19]
+		elseif gpuGlobalDataFixedPoint[idx].flag_1 == gpuConfigData[19]
 			outer_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared)
-			# sync_threads()
-		# else
-		# 	@cuprintf("Warning: There is problem with the flux flags %f \n", gpuGlobalDataFixedPoint[idx].flag_1)
 		end
 	else
 		return nothing

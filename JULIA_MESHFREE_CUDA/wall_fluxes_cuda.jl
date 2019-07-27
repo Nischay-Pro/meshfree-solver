@@ -31,8 +31,8 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        # weights = CUDAnative.pow(dist, power)
-        weights = 1.0
+        weights = CUDAnative.pow(dist, gpuConfigData[6])
+        # weights = 1.0
 
 
         dels_weights = dels*weights
@@ -62,35 +62,17 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         # end
 
 
-        # if idx == 3
-        #     @cuprintf("\n %d", conn)
-        #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[45, idx], gpuGlobalDataRest[46, idx], gpuGlobalDataRest[47, idx], gpuGlobalDataRest[48, idx])
-        # end
         shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] = 0.0, 0.0, 0.0, 0.0
 
         qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, shared, thread_idx)
-        # if idx == 3
-        #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[45, idx], gpuGlobalDataRest[46, idx], gpuGlobalDataRest[47, idx], gpuGlobalDataRest[48, idx])
-        # end
         flux_quad_GxII_kernel(nx, ny, idx, shared, +, thread_idx)
-        # if idx == 3
-        #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[45, idx], gpuGlobalDataRest[46, idx], gpuGlobalDataRest[47, idx], gpuGlobalDataRest[48, idx])
-        # end
         qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, shared, thread_idx)
-        # if idx == 3
-        #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[45, idx], gpuGlobalDataRest[46, idx], gpuGlobalDataRest[47, idx], gpuGlobalDataRest[48, idx])
-        # end
         flux_quad_GxII_kernel(nx, ny, idx, shared, -, thread_idx)
-        # CUDAnative.synchronize()
+
         temp_var = @SVector [shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] ]
         sum_delx_delf += temp_var * dels_weights
         sum_dely_delf += temp_var * deln_weights
-        # if idx == 3
-        #     @cuprintf("\n %d", conn)
-        #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[45, idx], gpuGlobalDataRest[46, idx], gpuGlobalDataRest[47, idx], gpuGlobalDataRest[48, idx])
-        #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[37, idx], gpuGlobalDataRest[38, idx], gpuGlobalDataRest[39, idx], gpuGlobalDataRest[40, idx])
-        #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[41, idx], gpuGlobalDataRest[42, idx], gpuGlobalDataRest[43, idx], gpuGlobalDataRest[44, idx])
-        # end
+
     end
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
@@ -143,8 +125,8 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        # weights = CUDAnative.pow(dist, power)
-        weights = 1.0
+        weights = CUDAnative.pow(dist, gpuConfigData[6])
+        # weights = 1.0
 
 
         dels_weights = dels*weights
@@ -236,8 +218,8 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        # weights = CUDAnative.pow(dist, power)
-        weights = 1.0
+        weights = CUDAnative.pow(dist, gpuConfigData[6])
+        # weights = 1.0
 
 
         dels_weights = dels*weights
