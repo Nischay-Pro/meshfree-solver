@@ -54,9 +54,7 @@ function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
                 gpuGlobalDataRest[12, conn] - 0.5*shared[thread_idx + 4]*(delx * gpuGlobalDataRest[16, conn] + dely * gpuGlobalDataRest[20, conn])]
         # end
 
-        for shared_iter in 1:4
-            shared[thread_idx + shared_iter] = 0.0
-        end
+        shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] = 0.0, 0.0, 0.0, 0.0
 
         qtilde_to_primitive_kernel(qtilde_i, gamma, shared, thread_idx)
         flux_Gxp_kernel(nx, ny, idx, shared, +, thread_idx)
@@ -139,9 +137,7 @@ function interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         # if limiter_flag == 2
         #     @cuprintf("\n Havent written the code - die \n")
         # end
-        for shared_iter in 1:4
-            shared[thread_idx + shared_iter] = 0.0
-        end
+        shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] = 0.0, 0.0, 0.0, 0.0
 
         qtilde_to_primitive_kernel(qtilde_i, gamma, shared, thread_idx)
         flux_Gxn_kernel(nx, ny, idx, shared, +, thread_idx)
@@ -231,9 +227,7 @@ function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         # if limiter_flag == 2
         #     @cuprintf("\n Havent written the code - die \n")
         # end
-        for shared_iter in 1:4
-            shared[thread_idx + shared_iter] = 0.0
-        end
+        shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] = 0.0, 0.0, 0.0, 0.0
 
         qtilde_to_primitive_kernel(qtilde_i, gamma, shared, thread_idx)
         flux_Gyp_kernel(nx, ny, idx, shared, +, thread_idx)
@@ -314,9 +308,7 @@ function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
         # if limiter_flag == 2
         #     @cuprintf("\n Havent written the code - die \n")
         # end
-        for shared_iter in 1:4
-            shared[thread_idx + shared_iter] = 0.0
-        end
+        shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] = 0.0, 0.0, 0.0, 0.0
 
         qtilde_to_primitive_kernel(qtilde_i, gamma, shared, thread_idx)
         flux_Gyn_kernel(nx, ny, idx, shared, +, thread_idx)

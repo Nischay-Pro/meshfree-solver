@@ -36,6 +36,25 @@ function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, 
     return nothing
 end
 
+
+@inline function qtilde_to_primitive_kernel(qtilde, gamma, shared, thread_idx)
+    idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
+    # gamma = gpuConfigData[15]
+    beta = -qtilde[4]*0.5
+    temp = 0.5/beta
+    u1 = qtilde[2]*temp
+    u2 = qtilde[3]*temp
+
+    temp2 = qtilde[1] + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(gamma-1))
+    rho = CUDAnative.exp(temp2)
+    shared[thread_idx + 5] = u1
+    shared[thread_idx + 6] = u2
+    shared[thread_idx + 7] = rho
+    shared[thread_idx + 8] = rho*temp
+    return nothing
+end
+
+
 # function max_q_values_kernel(gpuGlobalDataCommon, idx, maxq)
 #     maxq = (
 #                 gpuGlobalDataRest[9, idx],
@@ -104,20 +123,3 @@ end
 #     end
 #     globaldata[idx].short_distance = min_dist
 # end
-
-@inline function qtilde_to_primitive_kernel(qtilde, gamma, shared, thread_idx)
-    idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
-    # gamma = gpuConfigData[15]
-    beta = -qtilde[4]*0.5
-    temp = 0.5/beta
-    u1 = qtilde[2]*temp
-    u2 = qtilde[3]*temp
-
-    temp2 = qtilde[1] + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(gamma-1))
-    rho = CUDAnative.exp(temp2)
-    shared[thread_idx + 5] = u1
-    shared[thread_idx + 6] = u2
-    shared[thread_idx + 7] = rho
-    shared[thread_idx + 8] = rho*temp
-    return nothing
-end

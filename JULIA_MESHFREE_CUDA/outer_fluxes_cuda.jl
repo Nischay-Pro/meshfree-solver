@@ -54,9 +54,7 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         # end
 
 
-        for shared_iter in 1:4
-            shared[thread_idx + shared_iter] = 0.0
-        end
+        shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] = 0.0, 0.0, 0.0, 0.0
 
         qtilde_to_primitive_kernel(qtilde_i, gamma, shared, thread_idx)
         flux_quad_GxIII_kernel(nx, ny, idx, shared, +, thread_idx)
@@ -136,9 +134,7 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         # end
 
 
-        for shared_iter in 1:4
-            shared[thread_idx + shared_iter] = 0.0
-        end
+        shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] = 0.0, 0.0, 0.0, 0.0
 
         qtilde_to_primitive_kernel(qtilde_i, gamma, shared, thread_idx)
         flux_quad_GxIV_kernel(nx, ny, idx, shared, +, thread_idx)
@@ -217,9 +213,7 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         # end
 
 
-        for shared_iter in 1:4
-            shared[thread_idx + shared_iter] = 0.0
-        end
+        shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] = 0.0, 0.0, 0.0, 0.0
 
         qtilde_to_primitive_kernel(qtilde_i, gamma, shared, thread_idx)
         flux_Gyp_kernel(nx, ny, idx, shared, +, thread_idx)
