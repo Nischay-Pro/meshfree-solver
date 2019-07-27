@@ -1,6 +1,6 @@
 function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared)
     idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
-    thread_idx = (Int(threadIdx().x) - 1) * 8
+    thread_idx = (threadIdx().x - 1) * 8
 
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
@@ -15,10 +15,9 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     nx = gpuGlobalDataFixedPoint[idx].nx
     ny = gpuGlobalDataFixedPoint[idx].ny
 
-    tx = ny
-    ty = -nx
+
     power = gpuConfigData[6]
-    gamma = gpuConfigData[15]
+    # gamma = gpuConfigData[15]
     for iter in 15:24
         conn = gpuGlobalDataConn[iter, idx]
         if conn == 0
@@ -29,7 +28,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         # y_k = gpuGlobalDataFixedPoint[conn].y
         delx = gpuGlobalDataFixedPoint[conn].x - x_i
         dely = gpuGlobalDataFixedPoint[conn].y - y_i
-        dels = delx*tx + dely*ty
+        dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
         weights = CUDAnative.pow(dist, power)
@@ -66,7 +65,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         # end
         shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] = 0.0, 0.0, 0.0, 0.0
 
-        qtilde_to_primitive_kernel(qtilde_i, gamma, shared, thread_idx)
+        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, shared, thread_idx)
         # if idx == 3
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[45, idx], gpuGlobalDataRest[46, idx], gpuGlobalDataRest[47, idx], gpuGlobalDataRest[48, idx])
         # end
@@ -74,7 +73,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         # if idx == 3
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[45, idx], gpuGlobalDataRest[46, idx], gpuGlobalDataRest[47, idx], gpuGlobalDataRest[48, idx])
         # end
-        qtilde_to_primitive_kernel(qtilde_k, gamma, shared, thread_idx)
+        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, shared, thread_idx)
         # if idx == 3
         #     @cuprintf("\n %.17f %.17f %.17f %.17f", gpuGlobalDataRest[45, idx], gpuGlobalDataRest[46, idx], gpuGlobalDataRest[47, idx], gpuGlobalDataRest[48, idx])
         # end
@@ -110,7 +109,7 @@ end
 
 function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared)
     idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
-    thread_idx = (Int(threadIdx().x) - 1) * 8
+    thread_idx = (threadIdx().x - 1) * 8
 
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
@@ -125,10 +124,9 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     nx = gpuGlobalDataFixedPoint[idx].nx
     ny = gpuGlobalDataFixedPoint[idx].ny
 
-    tx = ny
-    ty = -nx
+
     power = gpuConfigData[6]
-    gamma = gpuConfigData[15]
+    # gamma = gpuConfigData[15]
     for iter in 25:34
         conn = gpuGlobalDataConn[iter, idx]
         if conn == 0
@@ -139,7 +137,7 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         # y_k = gpuGlobalDataFixedPoint[conn].y
         delx = gpuGlobalDataFixedPoint[conn].x - x_i
         dely = gpuGlobalDataFixedPoint[conn].y - y_i
-        dels = delx*tx + dely*ty
+        dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
         weights = CUDAnative.pow(dist, power)
@@ -166,9 +164,9 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
 
         shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] = 0.0, 0.0, 0.0, 0.0
 
-        qtilde_to_primitive_kernel(qtilde_i, gamma, shared, thread_idx)
+        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, shared, thread_idx)
         flux_quad_GxI_kernel(nx, ny, idx, shared, +, thread_idx)
-        qtilde_to_primitive_kernel(qtilde_k, gamma, shared, thread_idx)
+        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, shared, thread_idx)
         flux_quad_GxI_kernel(nx, ny, idx, shared, -, thread_idx)
         # CUDAnative.synchronize()
         temp_var = @SVector [shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4]]
@@ -198,7 +196,7 @@ end
 
 function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared)
     idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
-    thread_idx = (Int(threadIdx().x) - 1) * 8
+    thread_idx = (threadIdx().x - 1) * 8
 
     sum_delx_sqr = 0.0
     sum_dely_sqr = 0.0
@@ -214,11 +212,10 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     nx = gpuGlobalDataFixedPoint[idx].nx
     ny = gpuGlobalDataFixedPoint[idx].ny
 
-    tx = ny
-    ty = -nx
+
 
     power = gpuConfigData[6]
-    gamma = gpuConfigData[15]
+    # gamma = gpuConfigData[15]
 
     for iter in 45:54
         conn = gpuGlobalDataConn[iter, idx]
@@ -230,7 +227,7 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         # y_k = gpuGlobalDataFixedPoint[conn].y
         delx = gpuGlobalDataFixedPoint[conn].x - x_i
         dely = gpuGlobalDataFixedPoint[conn].y - y_i
-        dels = delx*tx + dely*ty
+        dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
         weights = CUDAnative.pow(dist, power)
@@ -257,9 +254,9 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
 
         shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4] = 0.0, 0.0, 0.0, 0.0
 
-        qtilde_to_primitive_kernel(qtilde_i, gamma, shared, thread_idx)
+        qtilde_to_primitive_kernel(qtilde_i, gpuConfigData, shared, thread_idx)
         flux_Gyn_kernel(nx, ny, idx, shared, +, thread_idx)
-        qtilde_to_primitive_kernel(qtilde_k, gamma, shared, thread_idx)
+        qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, shared, thread_idx)
         flux_Gyn_kernel(nx, ny, idx, shared, -, thread_idx)
         # CUDAnative.synchronize()
         temp_var = @SVector [shared[thread_idx + 1], shared[thread_idx + 2], shared[thread_idx + 3], shared[thread_idx + 4]]
