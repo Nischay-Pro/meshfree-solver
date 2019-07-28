@@ -1,4 +1,4 @@
-function flux_quad_GxI_kernel(nx, ny, idx, shared, op, thread_idx)
+function flux_quad_GxI_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     u1 = shared[thread_idx + 5]
     u2 = shared[thread_idx + 6]
     rho = shared[thread_idx + 7]
@@ -8,10 +8,12 @@ function flux_quad_GxI_kernel(nx, ny, idx, shared, op, thread_idx)
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
-    S1 = ut*CUDAnative.sqrt(beta)
-    S2 = un*CUDAnative.sqrt(beta)
-    B1 = 0.5*CUDAnative.exp(-S1*S1)/CUDAnative.sqrt(Float64(pi)*beta)
-    B2 = 0.5*CUDAnative.exp(-S2*S2)/CUDAnative.sqrt(Float64(pi)*beta)
+    sqrt_beta = CUDAnative.sqrt(beta)
+    S1 = ut*sqrt_beta
+    S2 = un*sqrt_beta
+    sqrt_pi_beta = CUDAnative.sqrt(pi*beta)
+    B1 = 0.5*CUDAnative.exp(-S1*S1)/sqrt_pi_beta
+    B2 = 0.5*CUDAnative.exp(-S2*S2)/sqrt_pi_beta
     A1neg = 0.5*(1.0 - CUDAnative.erf(S1))
     A2neg = 0.5*(1.0 - CUDAnative.erf(S2))
 
@@ -40,7 +42,7 @@ function flux_quad_GxI_kernel(nx, ny, idx, shared, op, thread_idx)
     return nothing
 end
 
-function flux_quad_GxII_kernel(nx, ny, idx, shared, op, thread_idx)
+function flux_quad_GxII_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     u1 = shared[thread_idx + 5]
     u2 = shared[thread_idx + 6]
     rho = shared[thread_idx + 7]
@@ -51,10 +53,12 @@ function flux_quad_GxII_kernel(nx, ny, idx, shared, op, thread_idx)
 
     beta = 0.5*rho/pr
 
-    S1 = ut*CUDAnative.sqrt(beta)
-    S2 = un*CUDAnative.sqrt(beta)
-    B1 = 0.5*CUDAnative.exp(-S1*S1)/CUDAnative.sqrt(pi*beta)
-    B2 = 0.5*CUDAnative.exp(-S2*S2)/CUDAnative.sqrt(pi*beta)
+    sqrt_beta = CUDAnative.sqrt(beta)
+    S1 = ut*sqrt_beta
+    S2 = un*sqrt_beta
+    sqrt_pi_beta = CUDAnative.sqrt(pi*beta)
+    B1 = 0.5*CUDAnative.exp(-S1*S1)/sqrt_pi_beta
+    B2 = 0.5*CUDAnative.exp(-S2*S2)/sqrt_pi_beta
     A1pos = 0.5*(1.0 + CUDAnative.erf(S1))
     A2neg = 0.5*(1.0 - CUDAnative.erf(S2))
 
@@ -84,7 +88,7 @@ function flux_quad_GxII_kernel(nx, ny, idx, shared, op, thread_idx)
     return nothing
 end
 
-function flux_quad_GxIII_kernel(nx, ny, idx, shared, op, thread_idx)
+function flux_quad_GxIII_kernel(nx, ny, idx, shared, op::Function, thread_idx)
 
     u1 = shared[thread_idx + 5]
     u2 = shared[thread_idx + 6]
@@ -94,10 +98,12 @@ function flux_quad_GxIII_kernel(nx, ny, idx, shared, op, thread_idx)
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
-    S1 = ut*CUDAnative.sqrt(beta)
-    S2 = un*CUDAnative.sqrt(beta)
-    B1 = 0.5*CUDAnative.exp(-S1*S1)/CUDAnative.sqrt(pi*beta)
-    B2 = 0.5*CUDAnative.exp(-S2*S2)/CUDAnative.sqrt(pi*beta)
+    sqrt_beta = CUDAnative.sqrt(beta)
+    S1 = ut*sqrt_beta
+    S2 = un*sqrt_beta
+    sqrt_pi_beta = CUDAnative.sqrt(pi*beta)
+    B1 = 0.5*CUDAnative.exp(-S1*S1)/sqrt_pi_beta
+    B2 = 0.5*CUDAnative.exp(-S2*S2)/sqrt_pi_beta
     A1pos = 0.5*(1.0 + CUDAnative.erf(S1))
     A2pos = 0.5*(1.0 + CUDAnative.erf(S2))
 
@@ -125,7 +131,7 @@ function flux_quad_GxIII_kernel(nx, ny, idx, shared, op, thread_idx)
     return nothing
 end
 
-function flux_quad_GxIV_kernel(nx, ny, idx, shared, op, thread_idx)
+function flux_quad_GxIV_kernel(nx, ny, idx, shared, op::Function, thread_idx)
 
     u1 = shared[thread_idx + 5]
     u2 = shared[thread_idx + 6]
@@ -135,10 +141,13 @@ function flux_quad_GxIV_kernel(nx, ny, idx, shared, op, thread_idx)
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
-    S1 = ut*CUDAnative.sqrt(beta)
-    S2 = un*CUDAnative.sqrt(beta)
-    B1 = 0.5*CUDAnative.exp(-S1*S1)/CUDAnative.sqrt(pi*beta)
-    B2 = 0.5*CUDAnative.exp(-S2*S2)/CUDAnative.sqrt(pi*beta)
+
+    sqrt_beta = CUDAnative.sqrt(beta)
+    S1 = ut*sqrt_beta
+    S2 = un*sqrt_beta
+    sqrt_pi_beta = CUDAnative.sqrt(pi*beta)
+    B1 = 0.5*CUDAnative.exp(-S1*S1)/sqrt_pi_beta
+    B2 = 0.5*CUDAnative.exp(-S2*S2)/sqrt_pi_beta
     A1neg = 0.5*(1.0 - CUDAnative.erf(S1))
     A2pos = 0.5*(1.0 + CUDAnative.erf(S2))
 

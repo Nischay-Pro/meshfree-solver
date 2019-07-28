@@ -226,10 +226,10 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
 
             delx = gpuGlobalDataFixedPoint[conn].x - x_i
             dely = gpuGlobalDataFixedPoint[conn].y - y_i
-            dist = CUDAnative.hypot(delx, dely)
+            # dist = CUDAnative.hypot(delx, dely)
 
-            weights = CUDAnative.pow(dist, gpuConfigData[6])
-            # weights = 1.0
+            # weights = CUDAnative.pow(dist, gpuConfigData[6])
+            weights = 1.0
 
 
             sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)

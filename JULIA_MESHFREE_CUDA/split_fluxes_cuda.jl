@@ -1,4 +1,4 @@
-function flux_Gxp_kernel(nx, ny, idx, shared, op, thread_idx)
+function flux_Gxp_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     u1 = shared[thread_idx + 5]
     u2 = shared[thread_idx + 6]
     rho = shared[thread_idx + 7]
@@ -31,7 +31,7 @@ function flux_Gxp_kernel(nx, ny, idx, shared, op, thread_idx)
     return nothing
 end
 
-function flux_Gxn_kernel(nx, ny, idx, shared, op, thread_idx)
+function flux_Gxn_kernel(nx, ny, idx, shared, op::Function, thread_idx)
 
     u1 = shared[thread_idx + 5]
     u2 = shared[thread_idx + 6]
@@ -63,7 +63,7 @@ function flux_Gxn_kernel(nx, ny, idx, shared, op, thread_idx)
     return nothing
 end
 
-function flux_Gyp_kernel(nx, ny, idx, shared, op, thread_idx)
+function flux_Gyp_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     u1 = shared[thread_idx + 5]
     u2 = shared[thread_idx + 6]
     rho = shared[thread_idx + 7]
@@ -96,7 +96,7 @@ function flux_Gyp_kernel(nx, ny, idx, shared, op, thread_idx)
     return nothing
 end
 
-function flux_Gyn_kernel(nx, ny, idx, shared, op, thread_idx)
+function flux_Gyn_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     u1 = shared[thread_idx + 5]
     u2 = shared[thread_idx + 6]
     rho = shared[thread_idx + 7]

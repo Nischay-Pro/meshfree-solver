@@ -38,7 +38,6 @@ end
 
 
 @inline function qtilde_to_primitive_kernel(qtilde, gpuConfigData, shared, thread_idx)
-    idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     # # gamma = gpuConfigData[15]
     beta = -qtilde[4]*0.5
     temp = 0.5/beta

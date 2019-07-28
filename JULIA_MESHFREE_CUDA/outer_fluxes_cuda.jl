@@ -30,9 +30,9 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         dely = gpuGlobalDataFixedPoint[conn].y - y_i
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
-        dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, gpuConfigData[6])
-        # weights = 1.0
+        # dist = CUDAnative.hypot(dels, deln)
+        # weights = CUDAnative.pow(dist, gpuConfigData[6])
+        weights = 1.0
 
 
         dels_weights = dels*weights
@@ -71,10 +71,10 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
 
-    flux_shared[thread_idx + 1] += (sum_delx_delf[1]*sum_dely_sqr - sum_dely_delf[1]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + 2] += (sum_delx_delf[2]*sum_dely_sqr - sum_dely_delf[2]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + 3] += (sum_delx_delf[3]*sum_dely_sqr - sum_dely_delf[3]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + 4] += (sum_delx_delf[4]*sum_dely_sqr - sum_dely_delf[4]*sum_delx_dely)*one_by_det
+    flux_shared[threadIdx().x] += (sum_delx_delf[1]*sum_dely_sqr - sum_dely_delf[1]*sum_delx_dely)*one_by_det
+    flux_shared[threadIdx().x + blockDim().x] += (sum_delx_delf[2]*sum_dely_sqr - sum_dely_delf[2]*sum_delx_dely)*one_by_det
+    flux_shared[threadIdx().x + blockDim().x * UInt32(2)] += (sum_delx_delf[3]*sum_dely_sqr - sum_dely_delf[3]*sum_delx_dely)*one_by_det
+    flux_shared[threadIdx().x + blockDim().x * UInt32(3)] += (sum_delx_delf[4]*sum_dely_sqr - sum_dely_delf[4]*sum_delx_dely)*one_by_det
     return nothing
 end
 
@@ -112,9 +112,9 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         dely = gpuGlobalDataFixedPoint[conn].y - y_i
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
-        dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, gpuConfigData[6])
-        # weights = 1.0
+        # dist = CUDAnative.hypot(dels, deln)
+        # weights = CUDAnative.pow(dist, gpuConfigData[6])
+        weights = 1.0
 
 
         dels_weights = dels*weights
@@ -153,10 +153,10 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
 
-    flux_shared[thread_idx + 1] += (sum_delx_delf[1]*sum_dely_sqr - sum_dely_delf[1]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + 2] += (sum_delx_delf[2]*sum_dely_sqr - sum_dely_delf[2]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + 3] += (sum_delx_delf[3]*sum_dely_sqr - sum_dely_delf[3]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + 4] += (sum_delx_delf[4]*sum_dely_sqr - sum_dely_delf[4]*sum_delx_dely)*one_by_det
+    flux_shared[threadIdx().x] += (sum_delx_delf[1]*sum_dely_sqr - sum_dely_delf[1]*sum_delx_dely)*one_by_det
+    flux_shared[threadIdx().x + blockDim().x] += (sum_delx_delf[2]*sum_dely_sqr - sum_dely_delf[2]*sum_delx_dely)*one_by_det
+    flux_shared[threadIdx().x + blockDim().x * UInt32(2)] += (sum_delx_delf[3]*sum_dely_sqr - sum_dely_delf[3]*sum_delx_dely)*one_by_det
+    flux_shared[threadIdx().x + blockDim().x * UInt32(3)] += (sum_delx_delf[4]*sum_dely_sqr - sum_dely_delf[4]*sum_delx_dely)*one_by_det
     return nothing
 end
 
@@ -193,9 +193,9 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
         dely = gpuGlobalDataFixedPoint[conn].y - y_i
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
-        dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, gpuConfigData[6])
-        # weights = 1.0
+        # dist = CUDAnative.hypot(dels, deln)
+        # weights = CUDAnative.pow(dist, gpuConfigData[6])
+        weights = 1.0
 
 
         dels_weights = dels*weights
@@ -234,9 +234,9 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
 
-    flux_shared[thread_idx + 1] += (sum_dely_delf[1]*sum_delx_sqr - sum_delx_delf[1]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + 2] += (sum_dely_delf[2]*sum_delx_sqr - sum_delx_delf[2]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + 3] += (sum_dely_delf[3]*sum_delx_sqr - sum_delx_delf[3]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + 4] += (sum_dely_delf[4]*sum_delx_sqr - sum_delx_delf[4]*sum_delx_dely)*one_by_det
+    flux_shared[threadIdx().x] += (sum_dely_delf[1]*sum_delx_sqr - sum_delx_delf[1]*sum_delx_dely)*one_by_det
+    flux_shared[threadIdx().x + blockDim().x] += (sum_dely_delf[2]*sum_delx_sqr - sum_delx_delf[2]*sum_delx_dely)*one_by_det
+    flux_shared[threadIdx().x + blockDim().x * UInt32(2)] += (sum_dely_delf[3]*sum_delx_sqr - sum_delx_delf[3]*sum_delx_dely)*one_by_det
+    flux_shared[threadIdx().x + blockDim().x * UInt32(3)] += (sum_dely_delf[4]*sum_delx_sqr - sum_delx_delf[4]*sum_delx_dely)*one_by_det
     return nothing
 end
