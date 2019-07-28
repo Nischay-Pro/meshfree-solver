@@ -1,12 +1,14 @@
 function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
 	idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
+	thread_idx = threadIdx().x
+	block_dim = blockDim().x
 	# thread_idx = (threadIdx().x - UInt32(1)) * UInt32(8)
 	shared = @cuStaticSharedMem(Float64, 1024)
 	flux_shared = @cuStaticSharedMem(Float64, 512)
 	if idx > 0 && idx <= numPoints
 
-		flux_shared[threadIdx().x], flux_shared[threadIdx().x + blockDim().x], flux_shared[threadIdx().x + blockDim().x * UInt32(2)],
-			flux_shared[threadIdx().x + blockDim().x * UInt32(3)] = 0.0, 0.0, 0.0, 0.0
+		flux_shared[thread_idx], flux_shared[thread_idx + block_dim], flux_shared[thread_idx + block_dim * 2],
+			flux_shared[thread_idx + block_dim * 3] = 0.0, 0.0, 0.0, 0.0
 
 		gpuGlobalDataRest[21, idx], gpuGlobalDataRest[22, idx], gpuGlobalDataRest[23, idx], gpuGlobalDataRest[24, idx] = gpuGlobalDataRest[9, idx],
 			gpuGlobalDataRest[10, idx],gpuGlobalDataRest[11, idx],gpuGlobalDataRest[12, idx]
@@ -36,10 +38,10 @@ function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
 		return nothing
 	end
 
-	gpuGlobalDataRest[5, idx] = flux_shared[threadIdx().x]
-	gpuGlobalDataRest[6, idx] = flux_shared[threadIdx().x + blockDim().x]
-	gpuGlobalDataRest[7, idx] = flux_shared[threadIdx().x + blockDim().x * UInt32(2)]
-	gpuGlobalDataRest[8, idx] = flux_shared[threadIdx().x + blockDim().x * UInt32(3)]
+	gpuGlobalDataRest[5, idx] = flux_shared[thread_idx]
+	gpuGlobalDataRest[6, idx] = flux_shared[thread_idx + block_dim]
+	gpuGlobalDataRest[7, idx] = flux_shared[thread_idx + block_dim * 2]
+	gpuGlobalDataRest[8, idx] = flux_shared[thread_idx + block_dim * 3]
 	# sync_threads()
 	return nothing
 end

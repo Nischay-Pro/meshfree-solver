@@ -1,8 +1,8 @@
-function flux_quad_GxI_kernel(nx, ny, idx, shared, op::Function, thread_idx)
-    u1 = shared[thread_idx + 5]
-    u2 = shared[thread_idx + 6]
-    rho = shared[thread_idx + 7]
-    pr = shared[thread_idx + 8]
+function flux_quad_GxI_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_dim)
+    u1 = shared[thread_idx + block_dim * 4]
+    u2 = shared[thread_idx + block_dim * 5]
+    rho = shared[thread_idx + block_dim * 6]
+    pr = shared[thread_idx + block_dim * 7]
 
     ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
@@ -20,15 +20,15 @@ function flux_quad_GxI_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     pr_by_rho = pr/rho
     u_sqr = ut*ut
     u_sqr+= un*un
-    shared[thread_idx + 1] = op((rho*A2neg*(ut*A1neg - B1)), shared[thread_idx + 1])
+    shared[thread_idx] = op((rho*A2neg*(ut*A1neg - B1)), shared[thread_idx])
 
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1neg-ut*B1
-    shared[thread_idx + 2] = op((rho*A2neg*temp2), shared[thread_idx + 2])
+    shared[thread_idx + block_dim] = op((rho*A2neg*temp2), shared[thread_idx + block_dim])
 
     temp1 = ut*A1neg - B1
     temp2 = un*A2neg - B2
-    shared[thread_idx + 3] = op((rho*temp1*temp2), shared[thread_idx + 3])
+    shared[thread_idx + block_dim * 2] = op((rho*temp1*temp2), shared[thread_idx + block_dim * 2])
 
     temp1 = (7.0 *pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1neg
@@ -38,15 +38,15 @@ function flux_quad_GxI_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     temp1 = ut*A1neg - B1
     temp4 = 0.5*rho*un*B2*temp1
 
-    shared[thread_idx + 4] = op((rho*A2neg*(temp2 - temp3) - temp4), shared[thread_idx + 4])
+    shared[thread_idx + block_dim * 3] = op((rho*A2neg*(temp2 - temp3) - temp4), shared[thread_idx + block_dim * 3])
     return nothing
 end
 
-function flux_quad_GxII_kernel(nx, ny, idx, shared, op::Function, thread_idx)
-    u1 = shared[thread_idx + 5]
-    u2 = shared[thread_idx + 6]
-    rho = shared[thread_idx + 7]
-    pr = shared[thread_idx + 8]
+function flux_quad_GxII_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_dim)
+    u1 = shared[thread_idx + block_dim * 4]
+    u2 = shared[thread_idx + block_dim * 5]
+    rho = shared[thread_idx + block_dim * 6]
+    pr = shared[thread_idx + block_dim * 7]
 
     ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
@@ -65,15 +65,15 @@ function flux_quad_GxII_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     pr_by_rho = pr/rho
     u_sqr = ut*ut
     u_sqr+= un*un
-    shared[thread_idx + 1] = op(rho * A2neg* (ut*A1pos + B1), shared[thread_idx + 1])
+    shared[thread_idx] = op(rho * A2neg* (ut*A1pos + B1), shared[thread_idx])
 
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1pos + ut*B1
-    shared[thread_idx + 2] = op((rho*A2neg*temp2), shared[thread_idx + 2])
+    shared[thread_idx + block_dim] = op((rho*A2neg*temp2), shared[thread_idx + block_dim])
 
     temp1 = ut*A1pos + B1
     temp2 = un*A2neg - B2
-    shared[thread_idx + 3] = op((rho*temp1*temp2), shared[thread_idx + 3])
+    shared[thread_idx + block_dim * 2] = op((rho*temp1*temp2), shared[thread_idx + block_dim * 2])
 
     temp1 = (7 *pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1pos
@@ -84,16 +84,16 @@ function flux_quad_GxII_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     temp1 = ut*A1pos + B1
     temp4 = 0.5*rho*un*B2*temp1
 
-    shared[thread_idx + 4] = op((rho*A2neg*(temp2 + temp3) - temp4), shared[thread_idx + 4])
+    shared[thread_idx + block_dim * 3] = op((rho*A2neg*(temp2 + temp3) - temp4), shared[thread_idx + block_dim * 3])
     return nothing
 end
 
-function flux_quad_GxIII_kernel(nx, ny, idx, shared, op::Function, thread_idx)
+function flux_quad_GxIII_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_dim)
 
-    u1 = shared[thread_idx + 5]
-    u2 = shared[thread_idx + 6]
-    rho = shared[thread_idx + 7]
-    pr = shared[thread_idx + 8]
+    u1 = shared[thread_idx + block_dim * 4]
+    u2 = shared[thread_idx + block_dim * 5]
+    rho = shared[thread_idx + block_dim * 6]
+    pr = shared[thread_idx + block_dim * 7]
     ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
@@ -110,15 +110,15 @@ function flux_quad_GxIII_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     pr_by_rho = pr/rho
     u_sqr = ut*ut
     u_sqr+= un*un
-    shared[thread_idx + 1] = op(rho*A2pos*(ut*A1pos + B1), shared[thread_idx + 1])
+    shared[thread_idx] = op(rho*A2pos*(ut*A1pos + B1), shared[thread_idx])
 
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1pos + ut*B1
-    shared[thread_idx + 2] = op((rho*A2pos*temp2), shared[thread_idx + 2])
+    shared[thread_idx + block_dim] = op((rho*A2pos*temp2), shared[thread_idx + block_dim])
 
     temp1 = ut*A1pos + B1
     temp2 = un*A2pos + B2
-    shared[thread_idx + 3] = op((rho*temp1*temp2), shared[thread_idx + 3])
+    shared[thread_idx + block_dim * 2] = op((rho*temp1*temp2), shared[thread_idx + block_dim * 2])
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1pos
@@ -127,16 +127,16 @@ function flux_quad_GxIII_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     temp1 = ut*A1pos + B1
     temp4 = 0.5*rho*un*B2*temp1
 
-    shared[thread_idx + 4] = op((rho*A2pos*(temp2 + temp3) + temp4), shared[thread_idx + 4])
+    shared[thread_idx + block_dim * 3] = op((rho*A2pos*(temp2 + temp3) + temp4), shared[thread_idx + block_dim * 3])
     return nothing
 end
 
-function flux_quad_GxIV_kernel(nx, ny, idx, shared, op::Function, thread_idx)
+function flux_quad_GxIV_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_dim)
 
-    u1 = shared[thread_idx + 5]
-    u2 = shared[thread_idx + 6]
-    rho = shared[thread_idx + 7]
-    pr = shared[thread_idx + 8]
+    u1 = shared[thread_idx + block_dim * 4]
+    u2 = shared[thread_idx + block_dim * 5]
+    rho = shared[thread_idx + block_dim * 6]
+    pr = shared[thread_idx + block_dim * 7]
     ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
@@ -155,15 +155,15 @@ function flux_quad_GxIV_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     u_sqr = ut*ut
     u_sqr+= un*un
 
-    shared[thread_idx + 1] = op((rho*A2pos*(ut*A1neg - B1)), shared[thread_idx + 1])
+    shared[thread_idx] = op((rho*A2pos*(ut*A1neg - B1)), shared[thread_idx])
 
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1neg - ut*B1
-    shared[thread_idx + 2] = op((rho*A2pos*temp2), shared[thread_idx + 2])
+    shared[thread_idx + block_dim] = op((rho*A2pos*temp2), shared[thread_idx + block_dim])
 
     temp1 = ut*A1neg - B1
     temp2 = un*A2pos + B2
-    shared[thread_idx + 3] = op((rho*temp1*temp2), shared[thread_idx + 3])
+    shared[thread_idx + block_dim * 2] = op((rho*temp1*temp2), shared[thread_idx + block_dim * 2])
 
     temp1 = (7.0*pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1neg
@@ -174,7 +174,7 @@ function flux_quad_GxIV_kernel(nx, ny, idx, shared, op::Function, thread_idx)
     temp1 = ut*A1neg - B1
     temp4 = 0.5*rho*un*B2*temp1
 
-    shared[thread_idx + 4] = op((rho*A2pos*(temp2 - temp3) + temp4), shared[thread_idx + 4])
+    shared[thread_idx + block_dim * 3] = op((rho*A2pos*(temp2 - temp3) + temp4), shared[thread_idx + block_dim * 3])
     return nothing
 end
 

@@ -1,4 +1,4 @@
-function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx)
+function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx, block_dim)
     VL_CONST = gpuConfigData[8]
     # @cuprintf("Type is %s", typeof(VL_CONST))
     epsigh = VL_CONST * gpuGlobalDataFixedPoint[idx].short_distance
@@ -10,7 +10,7 @@ function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, 
         q = gpuGlobalDataRest[8+i, idx]
         del_neg = gpuGlobalDataRest[8+i, idx] - 0.5*(delx * gpuGlobalDataRest[12+i, idx] + dely * gpuGlobalDataRest[16+i, idx]) - q
         if abs(del_neg) <= 1e-5
-            shared[thread_idx + i] = 1.0
+            shared[thread_idx + block_dim * (i-1)] = 1.0
         elseif abs(del_neg) > 1e-5
             if del_neg > 0.0
                 # maximum(globaldata, idx, i, max_q)
@@ -30,14 +30,14 @@ function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, 
             if temp > 1.0
                 temp = 1.0
             end
-            shared[thread_idx + i] = temp
+            shared[thread_idx + block_dim * (i-1)] = temp
         end
     end
     return nothing
 end
 
 
-@inline function qtilde_to_primitive_kernel(qtilde, gpuConfigData, shared, thread_idx)
+@inline function qtilde_to_primitive_kernel(qtilde, gpuConfigData, shared, thread_idx, block_dim)
     # # gamma = gpuConfigData[15]
     beta = -qtilde[4]*0.5
     temp = 0.5/beta
@@ -45,11 +45,11 @@ end
     u2 = qtilde[3]*temp
 
     temp2 = qtilde[1] + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(gpuConfigData[15]-1))
-    rho = CUDAnative.exp(temp2)
-    shared[thread_idx + 5] = u1
-    shared[thread_idx + 6] = u2
-    shared[thread_idx + 7] = rho
-    shared[thread_idx + 8] = rho*temp
+    # rho = CUDAnative.exp(temp2)
+    shared[thread_idx + block_dim * 4] = u1
+    shared[thread_idx + block_dim * 5] = u2
+    shared[thread_idx + block_dim * 6] = CUDAnative.exp(temp2)
+    shared[thread_idx + block_dim * 7] = shared[thread_idx + block_dim * 6]*temp
     return nothing
 end
 
