@@ -201,10 +201,7 @@ end
 end
 
 function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
-    tx = threadIdx().x
-    bx = blockIdx().x - 1
-    bw = blockDim().x
-    idx = bx * bw + tx
+    idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     # itm = CuArray(Float64, 145)
 
     if idx > 0 && idx <= numPoints
@@ -217,7 +214,7 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
         x_i = gpuGlobalDataFixedPoint[idx].x
         y_i = gpuGlobalDataFixedPoint[idx].y
         temp = 0.0
-        power = gpuConfigData[6]
+        # power = gpuConfigData[6]
 
         q1, q2, q3, q4 = gpuGlobalDataRest[9, idx], gpuGlobalDataRest[10, idx], gpuGlobalDataRest[11, idx], gpuGlobalDataRest[12, idx]
 
@@ -226,13 +223,15 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
             if conn == 0.0
                 break
             end
-            # x_k = gpuGlobalDataFixedPoint[conn].x
-            # y_k = gpuGlobalDataFixedPoint[conn].y
+
             delx = gpuGlobalDataFixedPoint[conn].x - x_i
             dely = gpuGlobalDataFixedPoint[conn].y - y_i
-            dist = CUDAnative.hypot(delx, dely)
+            # dist = CUDAnative.hypot(delx, dely)
 
-            weights = CUDAnative.pow(dist, power)
+            # weights = CUDAnative.pow(dist, gpuConfigData[6])
+            weights = 1.0
+
+
             sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
             sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
             sum_delx_dely = sum_delx_dely + ((delx * dely) * weights)
@@ -265,21 +264,6 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
         gpuGlobalDataRest[20, idx] = one_by_det * (sum_dely_delq4 * sum_delx_sqr - sum_delx_delq4 * sum_delx_dely)
         # @cuda dynamic=true threads=4 max_min_kernel(gpuGlobalDataCommon, idx)
         # CUDAnative.synchronize()
-        for i in 1:4
-            gpuGlobalDataRest[20+i, idx] = gpuGlobalDataRest[8+i, idx]
-            gpuGlobalDataRest[24+i, idx] = gpuGlobalDataRest[8+i, idx]
-            for iter in 5:14
-                conn = gpuGlobalDataConn[iter, idx]
-                if conn == 0.0
-                    break
-                end
-                update_q(gpuGlobalDataRest, idx, i, conn)
-            end
-        end
-        gpuGlobalDataRest[5, idx] = 0.0
-	    gpuGlobalDataRest[6, idx] = 0.0
-	    gpuGlobalDataRest[7, idx] = 0.0
-	    gpuGlobalDataRest[8, idx] = 0.0
     end
     # sync_threads()
     return nothing

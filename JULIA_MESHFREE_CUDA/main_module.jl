@@ -2,14 +2,15 @@ __precompile__()
 
 module main_module
 
+using CuArrays
+using CUDAdrv
+using CUDAnative
+using DelimitedFiles
 using JSON
 using Printf
-using TimerOutputs
-using DelimitedFiles
-using CuArrays
-using CUDAnative
-using CUDAdrv
 using ProgressMeter
+using StaticArrays
+using TimerOutputs
 
 const to = TimerOutput()
 
@@ -62,7 +63,6 @@ struct FixedPoint
     entropy::Float64
 end
 
-
 # using PyCall
 
 # const math = PyNULL()
@@ -95,9 +95,6 @@ export venkat_limiter_kernel_i, venkat_limiter_kernel_k, qtilde_to_primitive_ker
 
 include("meshfree_solver.jl")
 export main
-
-include("objective_function.jl")
-export calculateTheta, compute_cl_cd_cm
 
 include("objective_function_cuda.jl")
 export compute_cl_cd_cm_kernel, calculateTheta

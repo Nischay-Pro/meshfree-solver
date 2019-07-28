@@ -1,24 +1,16 @@
-function venkat_limiter_kernel_i(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely)
+function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx, block_dim)
     VL_CONST = gpuConfigData[8]
-    ds = gpuGlobalDataFixedPoint[idx].short_distance
     # @cuprintf("Type is %s", typeof(VL_CONST))
-    epsigh = VL_CONST * ds
-    power3 = 3.0
-    epsi = CUDAnative.pow(epsigh, power3)
-    del_pos = 0.0
-    del_neg = 0.0
+    epsigh = VL_CONST * gpuGlobalDataFixedPoint[idx].short_distance
+    epsi = epsigh*epsigh*epsigh
 
     for i in 1:4
         q = gpuGlobalDataRest[8+i, idx]
         del_neg = gpuGlobalDataRest[8+i, idx] - 0.5*(delx * gpuGlobalDataRest[12+i, idx] + dely * gpuGlobalDataRest[16+i, idx]) - q
-        if abs(del_neg) <= 1e-5
-            gpuGlobalDataRest[28+i,idx] = 1.0
-        elseif abs(del_neg) > 1e-5
-            if del_neg > 0.0
-                # maximum(globaldata, idx, i, max_q)
-                del_pos = gpuGlobalDataRest[20+i, idx] - q
-            elseif del_neg < 0.0
-                # minimum(globaldata, idx, i, min_q)
+        shared[thread_idx + block_dim * (i-1)] = 1
+        if abs(del_neg) > 1e-5
+            del_pos = gpuGlobalDataRest[20+i, idx] - q
+            if del_neg < 0
                 del_pos = gpuGlobalDataRest[24+i, idx] - q
             end
             num = (del_pos*del_pos) + (epsi*epsi)
@@ -29,54 +21,32 @@ function venkat_limiter_kernel_i(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
             den = den*del_neg
 
             temp = num/den
-            if temp > 1.0
-                temp = 1.0
+            if temp > 1
+                temp = 1
             end
-            gpuGlobalDataRest[28+i,idx] = temp
+            shared[thread_idx + block_dim * (i-1)] = temp
         end
     end
     return nothing
 end
 
-function venkat_limiter_kernel_k(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, trueidx, delx, dely)
-    VL_CONST = gpuConfigData[8]
-    ds = gpuGlobalDataFixedPoint[idx].short_distance
-    # @cuprintf("Type is %s", typeof(VL_CONST))
-    epsigh = VL_CONST * ds
-    power3 = 3.0
-    epsi = CUDAnative.pow(epsigh, power3)
-    del_pos = 0.0
-    del_neg = 0.0
 
-    for i in 1:4
-        q = gpuGlobalDataRest[8+i, idx]
-        del_neg = gpuGlobalDataRest[8+i, idx] - 0.5*(delx * gpuGlobalDataRest[12+i, idx] + dely * gpuGlobalDataRest[16+i, idx]) - q
-        if abs(del_neg) <= 1e-5
-            gpuGlobalDataRest[32+i,trueidx] = 1.0
-        elseif abs(del_neg) > 1e-5
-            if del_neg > 0.0
-                # maximum(globaldata, idx, i, max_q)
-                del_pos = gpuGlobalDataRest[20+i, idx] - q
-            elseif del_neg < 0.0
-                # minimum(globaldata, idx, i, min_q)
-                del_pos = gpuGlobalDataRest[24+i, idx] - q
-            end
-            num = (del_pos*del_pos) + (epsi*epsi)
-            num = (num*del_neg) + 2 * (del_neg*del_neg*del_pos)
+@inline function qtilde_to_primitive_kernel(qtilde, gpuConfigData, shared, thread_idx, block_dim)
+    # # gamma = gpuConfigData[15]
+    beta = -qtilde[4]*0.5
+    temp = 0.5/beta
+    u1 = qtilde[2]*temp
+    u2 = qtilde[3]*temp
 
-            den = (del_pos*del_pos) + (2 *del_neg*del_neg)
-            den = den + (del_neg*del_pos) + (epsi*epsi)
-            den = den*del_neg
-
-            temp = num/den
-            if temp > 1.0
-                temp = 1.0
-            end
-            gpuGlobalDataRest[32+i,trueidx] = temp
-        end
-    end
+    temp2 = qtilde[1] + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(gpuConfigData[15]-1))
+    # rho = CUDAnative.exp(temp2)
+    shared[thread_idx + block_dim * 4] = u1
+    shared[thread_idx + block_dim * 5] = u2
+    shared[thread_idx + block_dim * 6] = CUDAnative.exp(temp2)
+    shared[thread_idx + block_dim * 7] = shared[thread_idx + block_dim * 6]*temp
     return nothing
 end
+
 
 # function max_q_values_kernel(gpuGlobalDataCommon, idx, maxq)
 #     maxq = (
@@ -146,21 +116,3 @@ end
 #     end
 #     globaldata[idx].short_distance = min_dist
 # end
-
-@inline function qtilde_to_primitive_kernel(qtilde1, qtilde2, qtilde3, qtilde4, gamma, gpuGlobalDataRest, shared, idx)
-
-    # gamma = gpuConfigData[15]
-    beta = -qtilde4*0.5
-    temp = 0.5/beta
-    u1 = qtilde2*temp
-    u2 = qtilde3*temp
-
-    temp2 = qtilde1 + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(gamma-1))
-    rho = CUDAnative.exp(temp2)
-    pr = rho*temp
-    gpuGlobalDataRest[45, idx] = u1
-    gpuGlobalDataRest[46, idx] = u2
-    gpuGlobalDataRest[47, idx] = rho
-    gpuGlobalDataRest[48, idx] = pr
-    return nothing
-end

@@ -10,7 +10,7 @@ function main()
     # gpu_globaldata = CuArray{Point,1}(undef, getConfig()["core"]["points"])
     globaldata = Array{Point,1}(undef, numPoints)
     # globalDataCommon = zeros(Float64, 173, numPoints)
-    globalDataRest = zeros(Float64, 53, numPoints)
+    globalDataRest = zeros(Float64, 33, numPoints)
     globalDataFixedPoint = Array{FixedPoint,1}(undef, numPoints)
     globalDataConn = zeros(Int32, 55, numPoints)
 
@@ -46,6 +46,7 @@ function main()
         outer = configData["point"]["outer"]
         @showprogress 2 "Computing Connectivity" for idx in 1:numPoints
             placeNormals(globaldata, idx, configData, interior, wall, outer)
+            convertToFixedArray(globalDataFixedPoint, globaldata[idx], idx, numPoints)
         end
     end
 
@@ -54,10 +55,13 @@ function main()
         connectivity = calculateConnectivity(globaldata, idx, configData)
         setConnectivity(globaldata[idx], connectivity)
         # smallest_dist(globaldata, idx)
-        convertToArray(globalDataConn, globaldata[idx], idx)
+        convertToNeighbourArray(globalDataConn, globaldata[idx], idx)
 
     end
 
+
+
+    # return
     # typeof(globalDataConn[1])
     # print(globaldata[1].dq)
     # println(typeof(globaldata))
@@ -67,8 +71,8 @@ function main()
     # gpu_globaldata[1:2000] = CuArray(globaldata[1:2000])
     # println(typeof(gpuGlobaldataDq))
     # gpuGlobaldataLocalID = CuArray(globaldataLocalID)
-    gpuSumResSqr = cuzeros(Float32, numPoints)
-    gpuSumResSqrOutput = cuzeros(Float32, numPoints)
+    gpuSumResSqr = CuArrays.zeros(Float32, numPoints)
+    gpuSumResSqrOutput = CuArrays.zeros(Float32, numPoints)
     println("Passing to GPU Globaldata")
     # gpuGlobalDataCommon = CuArray(globalDataCommon)
     gpuConfigData = CuArray([

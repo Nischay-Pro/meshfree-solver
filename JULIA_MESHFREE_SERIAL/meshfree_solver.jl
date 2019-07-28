@@ -21,8 +21,18 @@ function main()
     readFile(file_name::String, globaldata, table, defprimal, wallptsidx, outerptsidx, Interiorptsidx, shapeptsidx,
         wallpts, Interiorpts, outerpts, shapepts, numPoints)
 
+    format = configData["format"]["type"]
+    if format == 1
+        interior = configData["point"]["interior"]
+        wall = configData["point"]["wall"]
+        outer = configData["point"]["outer"]
+        @showprogress 2 "Computing Connectivity" for idx in 1:numPoints
+            placeNormals(globaldata, idx, configData, interior, wall, outer)
+        end
+    end
+
     println("Start table sorting")
-    @showprogress 2 "Computing Table" for idx in table
+    @showprogress 3 "Computing Table" for idx in table
         connectivity = calculateConnectivity(globaldata, idx)
         setConnectivity(globaldata[idx], connectivity)
         # smallest_dist(globaldata, idx)
@@ -32,7 +42,8 @@ function main()
     end
     # println(wallptsidx)
 
-    # println(typeof(globaldata))
+    # println(globaldata[3])
+    # return
 
     println(Int(getConfig()["core"]["max_iters"]) + 1)
     function run_code(globaldata, configData, wallptsidx::Array{Int32,1}, outerptsidx::Array{Int32,1}, Interiorptsidx::Array{Int32,1}, res_old, numPoints)

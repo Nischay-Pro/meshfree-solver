@@ -55,7 +55,7 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
         state_update_interior(globaldata, itm, max_res, sum_res_sqr, U, Uold, rk)
     end
     # println(sum_res_sqr[1])
-    # println(length(globaldata))
+    # println("The length is ", length(globaldata))
     res_new = sqrt(sum_res_sqr[1])/ length(globaldata)
     residue = 0
     # println(res_old)
@@ -65,6 +65,9 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
     else
         residue = log10(res_new/res_old[1])
     end
+    # if rk == 4
+    #     print(" ", residue, " ")
+    # end
     # open("residue_" * string(numPoints) * ".txt", "a+") do residue_io
     #     @printf(residue_io, "%d %s\n", iter, residue)
     # end
