@@ -14,8 +14,7 @@ function flux_Gxp_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_di
     A1pos = 0.5*(1 + CUDAnative.erf(S1))
 
     pr_by_rho = pr/rho
-    u_sqr = ut*ut
-    u_sqr+= un*un
+    u_sqr = ut*ut + un*un
 
     shared[thread_idx] = op((rho*(ut*A1pos + B1)), shared[thread_idx])
     temp1 = pr_by_rho + ut*ut
@@ -48,8 +47,7 @@ function flux_Gxn_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_di
     A1neg = 0.5*(1 - CUDAnative.erf(S1))
 
     pr_by_rho = pr/rho
-    u_sqr = ut*ut
-    u_sqr+= un*un
+    u_sqr = ut*ut + un*un
     shared[thread_idx] = op((rho*(ut*A1neg - B1)), shared[thread_idx])
 
     temp1 = pr_by_rho + ut*ut
@@ -79,8 +77,7 @@ function flux_Gyp_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_di
     A2pos = 0.5*(1 + CUDAnative.erf(S2))
 
     pr_by_rho = pr/rho
-    u_sqr = ut*ut
-    u_sqr+= un*un
+    u_sqr = ut*ut + un*un
 
     shared[thread_idx] = op((rho*(un*A2pos + B2)), shared[thread_idx])
     temp1 = pr_by_rho + un*un
@@ -112,8 +109,7 @@ function flux_Gyn_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_di
     A2neg = 0.5*(1 - CUDAnative.erf(S2))
 
     pr_by_rho = pr/rho
-    u_sqr = ut*ut
-    u_sqr+= un*un
+    u_sqr = ut*ut + un*un
 
     shared[thread_idx] = op((rho*(un*A2neg - B2)), shared[thread_idx])
     temp1 = pr_by_rho + un*un
