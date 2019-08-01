@@ -10,23 +10,6 @@ function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
 		flux_shared[thread_idx], flux_shared[thread_idx + block_dim], flux_shared[thread_idx + block_dim * 2],
 			flux_shared[thread_idx + block_dim * 3] = 0.0, 0.0, 0.0, 0.0
 
-		gpuGlobalDataRest[21, idx], gpuGlobalDataRest[22, idx], gpuGlobalDataRest[23, idx], gpuGlobalDataRest[24, idx] = gpuGlobalDataRest[9, idx],
-			gpuGlobalDataRest[10, idx],gpuGlobalDataRest[11, idx],gpuGlobalDataRest[12, idx]
-		gpuGlobalDataRest[25, idx], gpuGlobalDataRest[26, idx], gpuGlobalDataRest[27, idx], gpuGlobalDataRest[28, idx] = gpuGlobalDataRest[9, idx],
-			gpuGlobalDataRest[10, idx],gpuGlobalDataRest[11, idx],gpuGlobalDataRest[12, idx]
-
-        for iter in 5:14
-            conn = gpuGlobalDataConn[iter, idx]
-            if conn == 0.0
-                break
-            end
-			update_q(gpuGlobalDataRest, idx, 1, conn)
-			update_q(gpuGlobalDataRest, idx, 2, conn)
-			update_q(gpuGlobalDataRest, idx, 3, conn)
-			update_q(gpuGlobalDataRest, idx, 4, conn)
-        end
-
-
 		if gpuGlobalDataFixedPoint[idx].flag_1 == gpuConfigData[17]
 			wall_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared)
 		elseif gpuGlobalDataFixedPoint[idx].flag_1 == gpuConfigData[18]

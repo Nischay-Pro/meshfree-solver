@@ -218,6 +218,11 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
 
         q1, q2, q3, q4 = gpuGlobalDataRest[9, idx], gpuGlobalDataRest[10, idx], gpuGlobalDataRest[11, idx], gpuGlobalDataRest[12, idx]
 
+        gpuGlobalDataRest[21, idx], gpuGlobalDataRest[22, idx], gpuGlobalDataRest[23, idx], gpuGlobalDataRest[24, idx] = gpuGlobalDataRest[9, idx],
+			gpuGlobalDataRest[10, idx],gpuGlobalDataRest[11, idx],gpuGlobalDataRest[12, idx]
+		gpuGlobalDataRest[25, idx], gpuGlobalDataRest[26, idx], gpuGlobalDataRest[27, idx], gpuGlobalDataRest[28, idx] = gpuGlobalDataRest[9, idx],
+			gpuGlobalDataRest[10, idx],gpuGlobalDataRest[11, idx],gpuGlobalDataRest[12, idx]
+
         for iter in 5:14
             conn = gpuGlobalDataConn[iter, idx]
             if conn == 0.0
@@ -230,7 +235,6 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
 
             # weights = CUDAnative.pow(dist, gpuConfigData[6])
             weights = 1.0
-
 
             sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
             sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
@@ -251,6 +255,11 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
             temp = gpuGlobalDataRest[12, conn] - q4
             sum_delx_delq4 += (weights * delx * temp)
             sum_dely_delq4 += (weights * dely * temp)
+
+            update_q(gpuGlobalDataRest, idx, 1, conn)
+			update_q(gpuGlobalDataRest, idx, 2, conn)
+			update_q(gpuGlobalDataRest, idx, 3, conn)
+			update_q(gpuGlobalDataRest, idx, 4, conn)
         end
         det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
         one_by_det = 1.0 / det
