@@ -1,6 +1,6 @@
 import SpecialFunctions
 function func_delta(globaldata, configData)
-    cfl = configData["core"]["cfl"]::Float64
+    cfl::Float64 = configData["core"]["cfl"]
     for (idx, store) in enumerate(globaldata)
         # TODO - Possible problem?
         min_delt = one(Float64)

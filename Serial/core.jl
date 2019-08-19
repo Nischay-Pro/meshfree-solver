@@ -1,9 +1,9 @@
 function getInitialPrimitive(configData)
-    rho_inf = configData["core"]["rho_inf"]::Float64
-    mach = configData["core"]["mach"]::Float64
+    rho_inf::Float64 = configData["core"]["rho_inf"]
+    mach::Float64 = configData["core"]["mach"]
     machcos::Float64 = mach * cos(calculateTheta(configData))
     machsin::Float64 = mach * sin(calculateTheta(configData))
-    pr_inf = configData["core"]["pr_inf"]::Float64
+    pr_inf::Float64 = configData["core"]["pr_inf"]
     primal = [rho_inf, machcos, machsin, pr_inf]
     return primal
 end
