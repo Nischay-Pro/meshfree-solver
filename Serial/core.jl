@@ -128,6 +128,8 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
 	Gxn = zeros(Float64, 4)
 	Gyp = zeros(Float64, 4)
 	Gyn = zeros(Float64, 4)
+    sum_delx_delf = zeros(Float64, 4)
+    sum_dely_delf = zeros(Float64, 4)
 
     for rk in 1:4
         # if iter == 1
@@ -138,7 +140,8 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
         # if iter == 1
             # println("Starting Calflux")
         # end
-        cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
+        cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+            result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
         # residue = 0

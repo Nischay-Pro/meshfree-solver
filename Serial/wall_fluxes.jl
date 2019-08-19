@@ -1,4 +1,4 @@
-function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, Gxp)
+function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, Gxp)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -7,8 +7,8 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    sum_delx_delf = zeros(Float64, 4)
-    sum_dely_delf = zeros(Float64, 4)
+    fill!(sum_delx_delf, 0.0)
+    fill!(sum_dely_delf, 0.0)
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -46,8 +46,8 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         sum_dely_sqr = sum_dely_sqr + deln*deln_weights
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        qtilde_i = @. globaldata[idx].q - 0.5*(delx * globaldata[idx].dq[1] + dely * globaldata[idx].dq[2])
-        qtilde_k = @. globaldata[itm].q - 0.5*(delx * globaldata[itm].dq[1] + dely * globaldata[itm].dq[2])
+        @. qtilde_i = globaldata[idx].q - 0.5*(delx * globaldata[idx].dq[1] + dely * globaldata[idx].dq[2])
+        @. qtilde_k = globaldata[itm].q - 0.5*(delx * globaldata[itm].dq[1] + dely * globaldata[itm].dq[2])
 
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), itm)
@@ -161,7 +161,7 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
     return nothing
 end
 
-function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, Gxn)
+function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, Gxn)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -170,8 +170,8 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    sum_delx_delf = zeros(Float64, 4)
-    sum_dely_delf = zeros(Float64, 4)
+    fill!(sum_delx_delf, 0.0)
+    fill!(sum_dely_delf, 0.0)
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -258,7 +258,7 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
     return nothing
 end
 
-function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, Gyn)
+function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, Gyn)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -267,8 +267,8 @@ function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    sum_delx_delf = zeros(Float64, 4)
-    sum_dely_delf = zeros(Float64, 4)
+    fill!(sum_delx_delf, 0.0)
+    fill!(sum_dely_delf, 0.0)
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
