@@ -34,15 +34,15 @@ function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, o
         #     println(idx)
         # end
 
-        if globaldata[idx].localID == 1
-            globaldata[idx].left = numPoints
-            # globaldata[idx].right = 2
-        end
+        # if globaldata[idx].localID == 1
+        #     globaldata[idx].left = numPoints
+        #     # globaldata[idx].right = 2
+        # end
 
-        if globaldata[idx].localID == numPoints
+        # if globaldata[idx].localID == numPoints
             # globaldata[idx].left = 5119
-            globaldata[idx].right = 1
-        end
+            # globaldata[idx].right = 1
+        # end
         if globaldata[idx].flag_1 == 0
             wallpts += 1
             push!(wallptsidx, globaldata[idx].localID)

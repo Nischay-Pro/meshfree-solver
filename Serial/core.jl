@@ -1,9 +1,9 @@
 function getInitialPrimitive(configData)
-    rho_inf = configData["core"]["rho_inf"]::Float64
-    mach = configData["core"]["mach"]::Float64
+    rho_inf::Float64 = configData["core"]["rho_inf"]
+    mach::Float64 = configData["core"]["mach"]
     machcos::Float64 = mach * cos(calculateTheta(configData))
     machsin::Float64 = mach * sin(calculateTheta(configData))
-    pr_inf = configData["core"]["pr_inf"]::Float64
+    pr_inf::Float64 = configData["core"]["pr_inf"]
     primal = [rho_inf, machcos, machsin, pr_inf]
     return primal
 end
@@ -117,6 +117,20 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
     end
     func_delta(globaldata, configData)
 
+    phi_i = zeros(Float64,4)
+	phi_k = zeros(Float64,4)
+	G_i = zeros(Float64,4)
+    G_k = zeros(Float64,4)
+	result = zeros(Float64,4)
+	qtilde_i = zeros(Float64,4)
+	qtilde_k = zeros(Float64,4)
+	Gxp = zeros(Float64, 4)
+	Gxn = zeros(Float64, 4)
+	Gyp = zeros(Float64, 4)
+	Gyn = zeros(Float64, 4)
+    sum_delx_delf = zeros(Float64, 4)
+    sum_dely_delf = zeros(Float64, 4)
+
     for rk in 1:4
         # if iter == 1
             # println("Starting QVar")
@@ -126,7 +140,8 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
         # if iter == 1
             # println("Starting Calflux")
         # end
-        cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+        cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+            result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
         # residue = 0
@@ -170,8 +185,8 @@ function q_var_derivatives(globaldata::Array{Point,1}, configData)
         sum_delx_sqr = zero(Float64)
         sum_dely_sqr = zero(Float64)
         sum_delx_dely = zero(Float64)
-        sum_delx_delq = fill!(sum_delx_delq, 0.0)
-        sum_dely_delq = fill!(sum_dely_delq, 0.0)
+        fill!(sum_delx_delq, 0.0)
+        fill!(sum_dely_delq, 0.0)
         for i in 1:4
             globaldata[idx].max_q[i] = globaldata[idx].q[i]
             globaldata[idx].min_q[i] = globaldata[idx].q[i]

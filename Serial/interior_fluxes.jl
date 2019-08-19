@@ -1,5 +1,4 @@
-
-function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
+function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, Gxp)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -8,8 +7,8 @@ function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    sum_delx_delf = zeros(Float64,4)
-    sum_dely_delf = zeros(Float64,4)
+    fill!(sum_delx_delf,0.0)
+    fill!(sum_dely_delf, 0.0)
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -93,12 +92,13 @@ function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
             sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
         end
     end
-    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
-    return @. (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
+    @. Gxp = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
+    return nothing
 end
 
-function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
+function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, Gxn)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -107,8 +107,8 @@ function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    sum_delx_delf = zeros(Float64,4)
-    sum_dely_delf = zeros(Float64,4)
+    fill!(sum_delx_delf,0.0)
+    fill!(sum_dely_delf, 0.0)
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -188,7 +188,7 @@ function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
             sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
         end
     end
-    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
     # if idx == 1
     #     println(IOContext(stdout, :compact => false), "===Gyn===")
@@ -202,10 +202,11 @@ function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
     #     # println(IOContext(stdout, :compact => false), G)
     #     println()
     # end
-    return @. (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
+    @. Gxn = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
+    return nothing
 end
 
-function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
+function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, Gyp)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -214,8 +215,8 @@ function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    sum_delx_delf = zeros(Float64,4)
-    sum_dely_delf = zeros(Float64,4)
+    fill!(sum_delx_delf,0.0)
+    fill!(sum_dely_delf, 0.0)
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -301,13 +302,13 @@ function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
         #     println(IOContext(stdout, :compact => false), G_k)
         # end
     end
-    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
-    return @. (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
-
+    @. Gyp = (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
+    return nothing
 end
 
-function interior_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
+function interior_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, Gyn)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -316,8 +317,8 @@ function interior_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    sum_delx_delf = zeros(Float64,4)
-    sum_dely_delf = zeros(Float64,4)
+    fill!(sum_delx_delf,0.0)
+    fill!(sum_dely_delf, 0.0)
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -403,7 +404,8 @@ function interior_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
         #     println(IOContext(stdout, :compact => false), G_k)
         # end
     end
-    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
-    return @. (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
+    @. Gyn = (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
+    return nothing
 end

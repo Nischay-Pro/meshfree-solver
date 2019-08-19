@@ -18,8 +18,7 @@ function flux_quad_GxI_kernel(nx, ny, idx, shared, op::Function, thread_idx, blo
     A2neg = 0.5*(1.0 - CUDAnative.erf(S2))
 
     pr_by_rho = pr/rho
-    u_sqr = ut*ut
-    u_sqr+= un*un
+    u_sqr = ut*ut + un*un
     shared[thread_idx] = op((rho*A2neg*(ut*A1neg - B1)), shared[thread_idx])
 
     temp1 = pr_by_rho + ut*ut
@@ -63,8 +62,7 @@ function flux_quad_GxII_kernel(nx, ny, idx, shared, op::Function, thread_idx, bl
     A2neg = 0.5*(1.0 - CUDAnative.erf(S2))
 
     pr_by_rho = pr/rho
-    u_sqr = ut*ut
-    u_sqr+= un*un
+    u_sqr = ut*ut + un*un
     shared[thread_idx] = op(rho * A2neg* (ut*A1pos + B1), shared[thread_idx])
 
     temp1 = pr_by_rho + ut*ut
@@ -108,8 +106,7 @@ function flux_quad_GxIII_kernel(nx, ny, idx, shared, op::Function, thread_idx, b
     A2pos = 0.5*(1.0 + CUDAnative.erf(S2))
 
     pr_by_rho = pr/rho
-    u_sqr = ut*ut
-    u_sqr+= un*un
+    u_sqr = ut*ut + un*un
     shared[thread_idx] = op(rho*A2pos*(ut*A1pos + B1), shared[thread_idx])
 
     temp1 = pr_by_rho + ut*ut
@@ -152,8 +149,7 @@ function flux_quad_GxIV_kernel(nx, ny, idx, shared, op::Function, thread_idx, bl
     A2pos = 0.5*(1.0 + CUDAnative.erf(S2))
 
     pr_by_rho = pr/rho
-    u_sqr = ut*ut
-    u_sqr+= un*un
+    u_sqr = ut*ut + un*un
 
     shared[thread_idx] = op((rho*A2pos*(ut*A1neg - B1)), shared[thread_idx])
 

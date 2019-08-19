@@ -7,35 +7,34 @@ function venkat_limiter(qtilde, globaldata, idx, configData, phi)
     # phi = zeros(Float64, 4)
     del_pos = zero(Float64)
     del_neg = zero(Float64)
-    for i in 1:4
-        q = copy(globaldata[idx].q[i])
-        del_neg = qtilde[i] - q
-        if abs(del_neg) <= 1e-5
-            phi[i] = 1.0
-        elseif abs(del_neg) > 1e-5
-            if del_neg > 0.0
-                # maximum(globaldata, idx, i)
-                del_pos = globaldata[idx].max_q[i] - q
-            elseif del_neg < 0.0
-                # minimum(globaldata, idx, i)
-                del_pos = globaldata[idx].min_q[i] - q
-            end
-            num = (del_pos*del_pos) + (epsi*epsi)
-            num = (num*del_neg) + 2 * (del_neg*del_neg*del_pos)
+    @. phi = VLBroadcaster.(globaldata[idx].q, qtilde, globaldata[idx].max_q, globaldata[idx].min_q, phi, epsi, del_pos, del_neg)
+    return nothing
+end
 
-            den = (del_pos*del_pos) + (2 *del_neg*del_neg)
-            den = den + (del_neg*del_pos) + (epsi*epsi)
-            den = den*del_neg
-
-            temp = num/den
-            if temp < 1.0
-                phi[i] = temp
-            else
-                phi[i] = 1.0
-            end
+function VLBroadcaster(q, qtilde, max_q, min_q, phi, epsi, del_pos, del_neg)
+    del_neg = qtilde - q
+    phi = 1.0
+    if abs(del_neg) > 1e-5
+        if del_neg > 0.0
+            # maximum(globaldata, idx, i)
+            del_pos = max_q - q
+        elseif del_neg < 0.0
+            # minimum(globaldata, idx, i)
+            del_pos = min_q - q
+        end
+        num = (del_pos*del_pos) + (epsi*epsi)
+        num = (num*del_neg) + 2 * (del_neg*del_neg*del_pos)
+        den = (del_pos*del_pos) + (2 *del_neg*del_neg)
+        den = den + (del_neg*del_pos) + (epsi*epsi)
+        den = den*del_neg
+        temp = num/den
+        if temp < 1.0
+            phi = temp
+        else
+            phi = 1.0
         end
     end
-    return nothing
+    return phi
 end
 
 # @inline function maximum(globaldata, idx, i)
@@ -111,5 +110,5 @@ end
     result[2] = u2
     result[3] = rho
     result[4] = pr
-    return  nothing
+    return nothing
 end
