@@ -1,22 +1,12 @@
-function cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
-	phi_i = zeros(Float64,4)
-	phi_k = zeros(Float64,4)
-	G_i = zeros(Float64,4)
-    G_k = zeros(Float64,4)
-	result = zeros(Float64,4)
-	qtilde_i = zeros(Float64,4)
-	qtilde_k = zeros(Float64,4)
-	wallindices_flux_residual(globaldata, configData, wallindices, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
-	outerindices_flux_residual(globaldata, configData, outerindices, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
-	interiorindices_flux_residual(globaldata, configData, interiorindices, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
+function cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
+	
+	wallindices_flux_residual(globaldata, configData, wallindices, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
+	outerindices_flux_residual(globaldata, configData, outerindices, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
+	interiorindices_flux_residual(globaldata, configData, interiorindices, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
 	return nothing
 end
 
-function wallindices_flux_residual(globaldata, configData, wallindices, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
-	Gxp = zeros(Float64, 4)
-	Gxn = zeros(Float64, 4)
-	Gyn = zeros(Float64, 4)
-
+function wallindices_flux_residual(globaldata, configData, wallindices, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
 	for itm in wallindices
 		# println(itm)
 		wall_dGx_pos(globaldata, itm, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, Gxp)
@@ -33,10 +23,7 @@ function wallindices_flux_residual(globaldata, configData, wallindices, phi_i, p
 	return nothing
 end
 
-function outerindices_flux_residual(globaldata, configData, outerindices, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
-	Gxp = zeros(Float64, 4)
-	Gxn = zeros(Float64, 4)
-	Gyp = zeros(Float64, 4)
+function outerindices_flux_residual(globaldata, configData, outerindices, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
 	for itm in outerindices
 		Gxp .= outer_dGx_pos(globaldata, itm, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
 		Gxn .= outer_dGx_neg(globaldata, itm, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
@@ -47,11 +34,7 @@ function outerindices_flux_residual(globaldata, configData, outerindices, phi_i,
 	return nothing
 end
 
-function interiorindices_flux_residual(globaldata, configData, interiorindices, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
-	Gxp = zeros(Float64, 4)
-	Gxn = zeros(Float64, 4)
-	Gyp = zeros(Float64, 4)
-	Gyn = zeros(Float64, 4)
+function interiorindices_flux_residual(globaldata, configData, interiorindices, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
 	for itm in interiorindices
 		interior_dGx_pos(globaldata, itm, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, Gxp)
 		interior_dGx_neg(globaldata, itm, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, Gxn)

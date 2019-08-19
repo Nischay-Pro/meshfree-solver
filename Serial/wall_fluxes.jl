@@ -142,7 +142,7 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         end
     end
 
-    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
     @. Gxp = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
     # if idx == 3
@@ -251,7 +251,7 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         end
 
     end
-    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
     @. Gxn = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
     # return G
@@ -353,7 +353,7 @@ function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         # end
     end
 
-    det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
     @. Gyn = (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
     # if idx == 3

@@ -7,7 +7,7 @@ function venkat_limiter(qtilde, globaldata, idx, configData, phi)
     # phi = zeros(Float64, 4)
     del_pos = zero(Float64)
     del_neg = zero(Float64)
-    phi .= VLBroadcaster.(globaldata[idx].q, qtilde, globaldata[idx].max_q, globaldata[idx].min_q, phi, epsi, del_pos, del_neg)
+    @. phi = VLBroadcaster.(globaldata[idx].q, qtilde, globaldata[idx].max_q, globaldata[idx].min_q, phi, epsi, del_pos, del_neg)
     return nothing
 end
 

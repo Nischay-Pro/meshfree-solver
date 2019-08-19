@@ -117,6 +117,18 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
     end
     func_delta(globaldata, configData)
 
+    phi_i = zeros(Float64,4)
+	phi_k = zeros(Float64,4)
+	G_i = zeros(Float64,4)
+    G_k = zeros(Float64,4)
+	result = zeros(Float64,4)
+	qtilde_i = zeros(Float64,4)
+	qtilde_k = zeros(Float64,4)
+	Gxp = zeros(Float64, 4)
+	Gxn = zeros(Float64, 4)
+	Gyp = zeros(Float64, 4)
+	Gyn = zeros(Float64, 4)
+
     for rk in 1:4
         # if iter == 1
             # println("Starting QVar")
@@ -126,7 +138,7 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
         # if iter == 1
             # println("Starting Calflux")
         # end
-        cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+        cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
         # residue = 0
