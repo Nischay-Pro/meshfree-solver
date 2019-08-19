@@ -170,8 +170,8 @@ function q_var_derivatives(globaldata::Array{Point,1}, configData)
         sum_delx_sqr = zero(Float64)
         sum_dely_sqr = zero(Float64)
         sum_delx_dely = zero(Float64)
-        sum_delx_delq = fill!(sum_delx_delq, 0.0)
-        sum_dely_delq = fill!(sum_dely_delq, 0.0)
+        fill!(sum_delx_delq, 0.0)
+        fill!(sum_dely_delq, 0.0)
         for i in 1:4
             globaldata[idx].max_q[i] = globaldata[idx].q[i]
             globaldata[idx].min_q[i] = globaldata[idx].q[i]

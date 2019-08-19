@@ -1,4 +1,4 @@
-function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
+function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, Gxp)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -144,7 +144,7 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
 
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
-    G = @. (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
+    Gxp .= @. (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
     # if idx == 3
     #     println(IOContext(stdout, :compact => false), "===Gx===")
     #     # println(IOContext(stdout, :compact => false), sum_delx_sqr)
@@ -157,10 +157,11 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k)
     #     println(IOContext(stdout, :compact => false), G)
     #     println()
     # end
-    return G
+    # return G
+    return nothing
 end
 
-function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
+function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, Gxn)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -252,11 +253,12 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k)
     end
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
-    G = @. (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
-    return G
+    Gxn .= @. (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
+    # return G
+    return nothing
 end
 
-function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k)
+function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k, Gyn)
 
     power::Float64 = configData["core"]["power"]::Float64
     limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
@@ -353,7 +355,7 @@ function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k)
 
     det = @. sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
-    G = @. (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
+    Gyn .= @. (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
     # if idx == 3
     #     println(IOContext(stdout, :compact => false), "===Gx===")
     #     println(IOContext(stdout, :compact => false), sum_delx_delf)
@@ -361,5 +363,5 @@ function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k)
     #     # println(IOContext(stdout, :compact => false), G)
     #     # println()
     # end
-    return G
+    return nothing
 end
