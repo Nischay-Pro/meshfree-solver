@@ -1,6 +1,6 @@
-function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx, block_dim) 
+function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx, block_dim)
     # @cuprintf("Type is %s", typeof(VL_CONST))
-    epsigh = gpuConfigData[8] * gpuGlobalDataFixedPoint[idx].short_distance
+    epsigh = ldg(gpuConfigData, 8) * gpuGlobalDataFixedPoint[idx].short_distance
     epsi = epsigh*epsigh*epsigh
 
     # shared[thread_idx], shared[thread_idx + block_dim * 1], shared[thread_idx + block_dim * 2], shared[thread_idx + block_dim * 3] = 1,1,1,1
@@ -39,7 +39,7 @@ end
     u1 = qtilde[2]*temp
     u2 = qtilde[3]*temp
 
-    temp2 = qtilde[1] + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(gpuConfigData[15]-1))
+    temp2 = qtilde[1] + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(ldg(gpuConfigData, 15)-1))
     # rho = CUDAnative.exp(temp2)
     shared[thread_idx + block_dim * 4] = u1
     shared[thread_idx + block_dim * 5] = u2

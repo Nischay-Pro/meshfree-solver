@@ -219,8 +219,50 @@ function q_var_derivatives(globaldata::Array{Point,1}, configData)
         globaldata[idx].dq[2] = @. one_by_det * (sum_dely_delq * sum_delx_sqr - sum_delx_delq * sum_delx_dely)
         # globaldata[idx].dq = [tempsumx, tempsumy]
     end
+    q_var_derivatives_innerloop(globaldata, power)
+    q_var_derivatives_innerloop(globaldata, power)
     # println(IOContext(stdout, :compact => false), globaldata[3].dq)
     # println(IOContext(stdout, :compact => false), globaldata[3].max_q)
     # println(IOContext(stdout, :compact => false), globaldata[3].min_q)
+    return nothing
+end
+
+function q_var_derivatives_innerloop(globaldata::Array{Point,1}, power)
+    sum_delx_delq = zeros(Float64, 4)
+    sum_dely_delq = zeros(Float64, 4)
+    qi_tilde = zeros(Float64, 4)
+    qk_tilde = zeros(Float64, 4)
+    for (idx, itm) in enumerate(globaldata)
+        x_i = itm.x
+        y_i = itm.y
+        sum_delx_sqr = zero(Float64)
+        sum_dely_sqr = zero(Float64)
+        sum_delx_dely = zero(Float64)
+        fill!(sum_delx_delq, 0.0)
+        fill!(sum_dely_delq, 0.0)
+        for conn in itm.conn
+            x_k = globaldata[conn].x
+            y_k = globaldata[conn].y
+            delx = x_k - x_i
+            dely = y_k - y_i
+            dist = hypot(delx, dely)
+            weights = dist ^ power
+            sum_delx_sqr += ((delx * delx) * weights)
+            sum_dely_sqr += ((dely * dely) * weights)
+            sum_delx_dely += ((delx * dely) * weights)
+
+            for i in 1:4
+                qi_tilde[i] = globaldata[idx].q[i] - 0.5 * (delx * globaldata[idx].dq[1][i] + dely * globaldata[idx].dq[2][i])
+                qk_tilde[i] = globaldata[conn].q[i] - 0.5 * (delx * globaldata[conn].dq[1][i] + dely * globaldata[conn].dq[2][i])
+
+                sum_delx_delq[i] += (weights * delx * (qk_tilde[i] - qi_tilde[i]))
+                sum_dely_delq[i] += (weights * dely * (qk_tilde[i] - qi_tilde[i]))
+            end
+        end
+        det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
+        one_by_det = 1.0 / det
+        globaldata[idx].dq[1] = @. one_by_det * (sum_delx_delq * sum_dely_sqr - sum_dely_delq * sum_delx_dely)
+        globaldata[idx].dq[2] = @. one_by_det * (sum_dely_delq * sum_delx_sqr - sum_delx_delq * sum_delx_dely)
+    end
     return nothing
 end

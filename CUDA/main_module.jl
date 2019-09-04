@@ -91,7 +91,7 @@ include("interior_fluxes_cuda.jl")
 export interior_dGx_pos_kernel, interior_dGx_neg_kernel, interior_dGy_pos_kernel, interior_dGy_neg_kernel
 
 include("limiters_cuda.jl")
-export venkat_limiter_kernel_i, venkat_limiter_kernel_k, qtilde_to_primitive_kernel
+export qtilde_to_primitive_kernel
 
 include("meshfree_solver.jl")
 export main
@@ -103,7 +103,7 @@ include("outer_fluxes_cuda.jl")
 export outer_dGx_pos_kernel, outer_dGx_neg_kernel, outer_dGy_pos_kernel
 
 include("point.jl")
-export Point, setNormals, getxy, setConnectivity, convertToArray
+export Point, setNormals, getxy, setConnectivity
 
 include("quadrant_fluxes_cuda.jl")
 export flux_quad_GxI_kernel, flux_quad_GxII_kernel, flux_quad_GxIII_kernel, flux_quad_GxIV_kernel

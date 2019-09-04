@@ -4,7 +4,7 @@ function returnFileLength(file_name::String)
     return length(splitdata) - 1
 end
 
-function readFile(file_name::String, globaldata, defprimal, globalDataFixedPoint, globalDataRest, numPoints)
+function readFile(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
     data1 = read(file_name, String)
     splitdata = @view split(data1, "\n")[1:end-1]
     # print(splitdata[1:3])

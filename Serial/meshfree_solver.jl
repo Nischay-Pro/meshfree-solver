@@ -77,7 +77,7 @@ function main()
         print_timer(io, to)
     end
 
-    # compute_cl_cd_cm(globaldata, configData, shapeptsidx)
+    compute_cl_cd_cm(globaldata, configData, shapeptsidx)
 
     # println(IOContext(stdout, :compact => false), globaldata[1].q)
     # println(IOContext(stdout, :compact => false), globaldata[1].dq)
@@ -100,7 +100,7 @@ function main()
     # println(IOContext(stdout, :compact => false), globaldata[100].ypos_conn)
     # println(IOContext(stdout, :compact => false), globaldata[100].yneg_conn)
     # println(globaldata[1])
-    file  = open("results/primvals" * string(numPoints) * ".txt", "w")
+    file  = open("results/primvals" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
     for (idx, itm) in enumerate(globaldata)
         primtowrite = globaldata[idx].prim
         for element in primtowrite
