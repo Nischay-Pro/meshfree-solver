@@ -274,6 +274,81 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
         # @cuda dynamic=true threads=4 max_min_kernel(gpuGlobalDataCommon, idx)
         # CUDAnative.synchronize()
     end
+    q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints)
+    q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints)
+    # sync_threads()
+    return nothing
+end
+
+function q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints)
+    idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
+    # itm = CuArray(Float64, 145)
+
+    if idx > 0 && idx <= numPoints
+        sum_delx_sqr = 0.0
+        sum_dely_sqr = 0.0
+        sum_delx_dely = 0.0
+        conn = 0.0
+        sum_delx_delq1, sum_delx_delq2, sum_delx_delq3, sum_delx_delq4 = 0.0,0.0,0.0,0.0
+        sum_dely_delq1, sum_dely_delq2, sum_dely_delq3, sum_dely_delq4 = 0.0,0.0,0.0,0.0
+        x_i = gpuGlobalDataFixedPoint[idx].x
+        y_i = gpuGlobalDataFixedPoint[idx].y
+        temp1 = 0.0
+        temp2 = 0.0
+        # power = gpuConfigData[6]
+
+        q1, q2, q3, q4 = gpuGlobalDataRest[9, idx], gpuGlobalDataRest[10, idx], gpuGlobalDataRest[11, idx], gpuGlobalDataRest[12, idx]
+
+        for iter in 5:14
+            conn = gpuGlobalDataConn[iter, idx]
+            if conn == 0.0
+                break
+            end
+
+            delx = gpuGlobalDataFixedPoint[conn].x - x_i
+            dely = gpuGlobalDataFixedPoint[conn].y - y_i
+            # dist = CUDAnative.hypot(delx, dely)
+            # weights = CUDAnative.pow(dist, gpuConfigData[6])
+            weights = 1.0
+
+            sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
+            sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
+            sum_delx_dely = sum_delx_dely + ((delx * dely) * weights)
+
+            temp1 = q1 - 0.5 * (delx * gpuGlobalDataRest[13, idx] + dely * gpuGlobalDataRest[17, idx])
+            temp2 = gpuGlobalDataRest[9, conn] - 0.5 * (delx * gpuGlobalDataRest[13, conn] + dely * gpuGlobalDataRest[17, conn])
+            sum_delx_delq1 += (weights * delx * (temp2 - temp1))
+            sum_dely_delq1 += (weights * dely * (temp2 - temp1))
+
+            temp1 = q2 - 0.5 * (delx * gpuGlobalDataRest[14, idx] + dely * gpuGlobalDataRest[18, idx])
+            temp2 = gpuGlobalDataRest[10, conn] - 0.5 * (delx * gpuGlobalDataRest[14, conn] + dely * gpuGlobalDataRest[18, conn])
+            sum_delx_delq2 += (weights * delx * (temp2 - temp1))
+            sum_dely_delq2 += (weights * dely * (temp2 - temp1))
+
+            temp1 = q3 - 0.5 * (delx * gpuGlobalDataRest[15, idx] + dely * gpuGlobalDataRest[19, idx])
+            temp2 = gpuGlobalDataRest[11, conn] - 0.5 * (delx * gpuGlobalDataRest[15, conn] + dely * gpuGlobalDataRest[19, conn])
+            sum_delx_delq3 += (weights * delx * (temp2 - temp1))
+            sum_dely_delq3 += (weights * dely * (temp2 - temp1))
+
+            temp1 = q4 - 0.5 * (delx * gpuGlobalDataRest[16, idx] + dely * gpuGlobalDataRest[20, idx])
+            temp2 = gpuGlobalDataRest[12, conn] - 0.5 * (delx * gpuGlobalDataRest[16, conn] + dely * gpuGlobalDataRest[20, conn])
+            sum_delx_delq4 += (weights * delx * (temp2 - temp1))
+            sum_dely_delq4 += (weights * dely * (temp2 - temp1))
+
+        end
+        det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
+        one_by_det = 1.0 / det
+        gpuGlobalDataRest[13, idx] = one_by_det * (sum_delx_delq1 * sum_dely_sqr - sum_dely_delq1 * sum_delx_dely)
+        gpuGlobalDataRest[14, idx] = one_by_det * (sum_delx_delq2 * sum_dely_sqr - sum_dely_delq2 * sum_delx_dely)
+        gpuGlobalDataRest[15, idx] = one_by_det * (sum_delx_delq3 * sum_dely_sqr - sum_dely_delq3 * sum_delx_dely)
+        gpuGlobalDataRest[16, idx] = one_by_det * (sum_delx_delq4 * sum_dely_sqr - sum_dely_delq4 * sum_delx_dely)
+        gpuGlobalDataRest[17, idx] = one_by_det * (sum_dely_delq1 * sum_delx_sqr - sum_delx_delq1 * sum_delx_dely)
+        gpuGlobalDataRest[18, idx] = one_by_det * (sum_dely_delq2 * sum_delx_sqr - sum_delx_delq2 * sum_delx_dely)
+        gpuGlobalDataRest[19, idx] = one_by_det * (sum_dely_delq3 * sum_delx_sqr - sum_delx_delq3 * sum_delx_dely)
+        gpuGlobalDataRest[20, idx] = one_by_det * (sum_dely_delq4 * sum_delx_sqr - sum_delx_delq4 * sum_delx_dely)
+        # @cuda dynamic=true threads=4 max_min_kernel(gpuGlobalDataCommon, idx)
+        # CUDAnative.synchronize()
+    end
     # sync_threads()
     return nothing
 end

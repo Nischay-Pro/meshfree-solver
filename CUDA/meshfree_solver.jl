@@ -171,7 +171,7 @@ function main()
     # close(file)
 
     println("Writing cuda file")
-    file  = open("results/primvals_cuda" * string(numPoints) * ".txt", "w")
+    file  = open("results/primvals_cuda" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
     for idx in 1:numPoints
         primtowrite = globalDataPrim[1:4, idx]
         for element in primtowrite
