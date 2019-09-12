@@ -145,7 +145,7 @@ function main()
 
     test_code(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
 
-    open("results/timer_cuda" * string(numPoints) * "_" * string(threadsperblock) *".txt", "w") do io
+    open("results/timer_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w") do io
         print_timer(io, to)
     end
     globalDataPrim = Array(gpuGlobalDataRest)
@@ -171,7 +171,7 @@ function main()
     # close(file)
 
     println("Writing cuda file")
-    file  = open("results/primvals_cuda" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
+    file  = open("results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
     for idx in 1:numPoints
         primtowrite = globalDataPrim[1:4, idx]
         for element in primtowrite

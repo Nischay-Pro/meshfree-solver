@@ -65,9 +65,10 @@ function state_update(globaldata, wallindices, outerindices, interiorindices, co
     else
         residue = log10(res_new/res_old[1])
     end
-    # if rk == 4
-    #     print(" ", residue, " ")
-    # end
+    # println(residue)
+    if rk == 4
+        print(" ", residue, " ")
+    end
     # open("residue_" * string(numPoints) * ".txt", "a+") do residue_io
     #     @printf(residue_io, "%d %s\n", iter, residue)
     # end
