@@ -33,3 +33,4 @@ mfpre_back/*
 results/*
 test*
 *.nsight-cuprof-report
+*.pdf
