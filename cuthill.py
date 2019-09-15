@@ -48,12 +48,7 @@ def main():
                     line = line.replace("\n","")
                     clean_line = line.split(" ")
                     clean_line.pop(-1)
-                    temp = []
-                    for idx, itm in enumerate(clean_line):
-                        if idx > 10:
-                            itm = int(itm)
-                        temp.append(itm)
-                    data.append(temp)
+                    data.append(clean_line)
                     connectivity_set = list(map(int, clean_line[11:]))
                     connectivity_set = list(zip_with_scalar(connectivity_set, row))
                     G.add_edges_from(connectivity_set)
@@ -68,13 +63,23 @@ def main():
     else:
         exit()
     print("Converting Data Type")
-    renumbering_matrix = list(zip(range(1, file_length + 1), result))
+    if args.legacy == 1:
+        renumbering_matrix = list(zip(range(1, file_length + 1), result))
+    else:
+        renumbering_matrix = list(zip(range(1, file_length), result))
     for item in tqdm(data):
-        temp = [result[itm - 1] if isinstance(itm, int) else itm for itm in item]
+        flag = int(item[4])
+        if flag == 0 or flag == 2:
+            temp = [result[int(itm) - 1] if (idx == 2 or idx == 3 or idx > 10) else itm for idx, itm in enumerate(item)]
+        else:
+            temp = [result[int(itm) - 1] if (idx > 10) else itm for idx, itm in enumerate(item)]
         data_new.append(temp)
     renumbering_matrix = sorted(renumbering_matrix, key=lambda tup: tup[1])
     with open(args.output, "w+") as fileobject:
-        fileobject.write("{}\n".format(file_length - 1))
+        if args.legacy == 1:
+            fileobject.write("{}\n".format(file_length))
+        else:
+            fileobject.write("{}\n".format(file_length - 1))
         for itm in renumbering_matrix:
             idx = itm[0]
             temp = data_new[idx - 1]
