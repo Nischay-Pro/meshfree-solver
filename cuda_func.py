@@ -33,7 +33,7 @@ def equalize(x, y):
         x[i] = y[i]
 
 @cuda.jit(device=True, inline=True)
-def qtilde_to_primitive_cuda(qtilde, gamma, result):
+def qtilde_to_primitive_cuda(qtilde, gamma, shared):
 
     q1 = qtilde[0]
     q2 = qtilde[1]
@@ -52,10 +52,10 @@ def qtilde_to_primitive_cuda(qtilde, gamma, result):
     rho = math.exp(temp2)
     pr = rho*temp
 
-    result[0] = u1
-    result[1] = u2
-    result[2] = rho
-    result[3] = pr
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 4] = u1
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 5] = u2
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 6] = rho
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 7] = pr
 
 @cuda.reduce
 def sum_reduce(a, b):

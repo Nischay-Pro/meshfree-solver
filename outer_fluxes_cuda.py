@@ -7,7 +7,7 @@ from numba import cuda
 from cuda_func import add, zeros, multiply, qtilde_to_primitive_cuda, subtract, multiply_element_wise
 
 @cuda.jit(device=True, inline=True)
-def outer_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
+def outer_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared):
 
     sum_delx_sqr = 0
     sum_dely_sqr = 0
@@ -25,7 +25,6 @@ def outer_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
     temp1 = cuda.local.array((4), numba.float64)
     temp2 = cuda.local.array((4), numba.float64)
 
-    result = cuda.local.array((4), numba.float64)
     G_i = cuda.local.array((4), numba.float64)
     G_k = cuda.local.array((4), numba.float64)
 
@@ -121,15 +120,13 @@ def outer_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
 
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
-        zeros(result, result)
+        qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
 
-        qtilde_to_primitive_cuda(qtilde_i, gamma, result)
+        quadrant_fluxes_cuda.flux_quad_GxIII(nx, ny, shared, G_i)
 
-        quadrant_fluxes_cuda.flux_quad_GxIII(nx, ny, result[0], result[1], result[2], result[3], G_i)
+        qtilde_to_primitive_cuda(qtilde_k, gamma, shared)
 
-        qtilde_to_primitive_cuda(qtilde_k, gamma, result)
-
-        quadrant_fluxes_cuda.flux_quad_GxIII(nx, ny, result[0], result[1], result[2], result[3], G_k)
+        quadrant_fluxes_cuda.flux_quad_GxIII(nx, ny, shared, G_k)
 
         zeros(temp1, temp1)
         subtract(G_k, G_i, temp1)
@@ -157,7 +154,7 @@ def outer_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
     store[cuda.threadIdx.x + cuda.blockDim.x * 3] += one_by_det * temp1[3]
 
 @cuda.jit(device=True, inline=True)
-def outer_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
+def outer_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared):
 
     sum_delx_sqr = 0
     sum_dely_sqr = 0
@@ -175,7 +172,6 @@ def outer_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
     temp1 = cuda.local.array((4), numba.float64)
     temp2 = cuda.local.array((4), numba.float64)
 
-    result = cuda.local.array((4), numba.float64)
     G_i = cuda.local.array((4), numba.float64)
     G_k = cuda.local.array((4), numba.float64)
 
@@ -271,15 +267,13 @@ def outer_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
 
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
-        zeros(result, result)
+        qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
 
-        qtilde_to_primitive_cuda(qtilde_i, gamma, result)
+        quadrant_fluxes_cuda.flux_quad_GxIV(nx, ny, shared, G_i)
 
-        quadrant_fluxes_cuda.flux_quad_GxIV(nx, ny, result[0], result[1], result[2], result[3], G_i)
+        qtilde_to_primitive_cuda(qtilde_k, gamma, shared)
 
-        qtilde_to_primitive_cuda(qtilde_k, gamma, result)
-
-        quadrant_fluxes_cuda.flux_quad_GxIV(nx, ny, result[0], result[1], result[2], result[3], G_k)
+        quadrant_fluxes_cuda.flux_quad_GxIV(nx, ny, shared, G_k)
 
         zeros(temp1, temp1)
         subtract(G_k, G_i, temp1)
@@ -307,7 +301,7 @@ def outer_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
     store[cuda.threadIdx.x + cuda.blockDim.x * 3] += one_by_det * temp1[3]
 
 @cuda.jit(device=True, inline=True)
-def outer_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
+def outer_dGy_pos(globaldata, idx, power, vl_const, gamma, store, shared):
  
     sum_delx_sqr = 0
     sum_dely_sqr = 0
@@ -325,7 +319,6 @@ def outer_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
     temp1 = cuda.local.array((4), numba.float64)
     temp2 = cuda.local.array((4), numba.float64)
 
-    result = cuda.local.array((4), numba.float64)
     G_i = cuda.local.array((4), numba.float64)
     G_k = cuda.local.array((4), numba.float64)
 
@@ -419,15 +412,13 @@ def outer_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
 
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
-        zeros(result, result)
+        qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
 
-        qtilde_to_primitive_cuda(qtilde_i, gamma, result)
+        split_fluxes_cuda.flux_Gyp(nx, ny, shared, G_i)
 
-        split_fluxes_cuda.flux_Gyp(nx, ny, result[0], result[1], result[2], result[3], G_i)
+        qtilde_to_primitive_cuda(qtilde_k, gamma, shared)
 
-        qtilde_to_primitive_cuda(qtilde_k, gamma, result)
-
-        split_fluxes_cuda.flux_Gyp(nx, ny, result[0], result[1], result[2], result[3], G_k)
+        split_fluxes_cuda.flux_Gyp(nx, ny, shared, G_k)
 
         zeros(temp1, temp1)
         subtract(G_k, G_i, temp1)

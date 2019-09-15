@@ -3,12 +3,14 @@ from numba import cuda
 import numba
 
 @cuda.jit(device=True, inline=True)
-def flux_Gxp(nx, ny, u1, u2, rho, pr, Gxp):
+def flux_Gxp(nx, ny, shared, Gxp):
 
-    tx = ny
-    ty = -nx
+    u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
+    u2 = shared[cuda.threadIdx.x + cuda.blockDim.x * 5]
+    rho = shared[cuda.threadIdx.x + cuda.blockDim.x * 6]
+    pr = shared[cuda.threadIdx.x + cuda.blockDim.x * 7]
 
-    ut = u1*tx + u2*ty
+    ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
@@ -34,12 +36,14 @@ def flux_Gxp(nx, ny, u1, u2, rho, pr, Gxp):
     Gxp[3] = (rho*(temp2 + 0.5*temp1*B1))
 
 @cuda.jit(device=True, inline=True)
-def flux_Gxn(nx, ny, u1, u2, rho, pr, Gxn):
+def flux_Gxn(nx, ny, shared, Gxn):
 
-    tx = ny
-    ty = -nx
+    u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
+    u2 = shared[cuda.threadIdx.x + cuda.blockDim.x * 5]
+    rho = shared[cuda.threadIdx.x + cuda.blockDim.x * 6]
+    pr = shared[cuda.threadIdx.x + cuda.blockDim.x * 7]
 
-    ut = u1*tx + u2*ty
+    ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
@@ -66,12 +70,14 @@ def flux_Gxn(nx, ny, u1, u2, rho, pr, Gxn):
     Gxn[3] = (rho*(temp2 - 0.5*temp1*B1))
 
 @cuda.jit(device=True, inline=True)
-def flux_Gyp(nx, ny, u1, u2, rho, pr, Gyp):
+def flux_Gyp(nx, ny, shared, Gyp):
 
-    tx = ny
-    ty = -nx
+    u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
+    u2 = shared[cuda.threadIdx.x + cuda.blockDim.x * 5]
+    rho = shared[cuda.threadIdx.x + cuda.blockDim.x * 6]
+    pr = shared[cuda.threadIdx.x + cuda.blockDim.x * 7]
 
-    ut = u1*tx + u2*ty
+    ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
@@ -99,12 +105,14 @@ def flux_Gyp(nx, ny, u1, u2, rho, pr, Gyp):
     Gyp[3] = (rho*(temp2 + 0.5*temp1*B2))
 
 @cuda.jit(device=True, inline=True)
-def flux_Gyn(nx, ny, u1, u2, rho, pr, Gyn):
+def flux_Gyn(nx, ny, shared, Gyn):
 
-    tx = ny
-    ty = -nx
-
-    ut = u1*tx + u2*ty
+    u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
+    u2 = shared[cuda.threadIdx.x + cuda.blockDim.x * 5]
+    rho = shared[cuda.threadIdx.x + cuda.blockDim.x * 6]
+    pr = shared[cuda.threadIdx.x + cuda.blockDim.x * 7]
+    
+    ut = u1*ny - u2*nx
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr

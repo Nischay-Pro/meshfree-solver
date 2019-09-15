@@ -5,8 +5,9 @@ def flux_quad_GxI(nx, ny, u1, u2, rho, pr):
 
     tx = ny
     ty = -nx
-    ut = u1*tx + u2*ty
+    ut = u1*nx + u2*ny
     un = u1*nx + u2*ny
+    
     beta = 0.5*rho/pr
     S1 = ut*math.sqrt(beta)
     S2 = un*math.sqrt(beta)
