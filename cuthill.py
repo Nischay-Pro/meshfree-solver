@@ -84,7 +84,7 @@ def main():
             idx = itm[0]
             temp = data_new[idx - 1]
             temp = " ".join(list(map(str, temp)))
-            fileobject.write(temp + "\n")
+            fileobject.write(temp + " \n")
     print("Done")
 
     # print(renumbering_matrix)
