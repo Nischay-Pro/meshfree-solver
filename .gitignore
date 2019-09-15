@@ -34,3 +34,4 @@ results/*
 test*
 *.nsight-cuprof-report
 *.pdf
+testfile
