@@ -49,3 +49,6 @@ class Point:
 
         self.yneg_conn = conn[3]
         self.yneg_nbhs = len(conn[3])
+
+    def checkConnectivity(self):
+        return not self.nbhs == len(self.conn)

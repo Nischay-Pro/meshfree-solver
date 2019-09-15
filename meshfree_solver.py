@@ -72,6 +72,11 @@ def main():
                 outerptsidx.append(idx + 1)
         table.append(idx + 1)
 
+    for idx, itm in enumerate(globaldata):
+        if idx > 0:
+            if itm.checkConnectivity():
+                print(idx + 1)
+
     if format == 0 or format == 2:
         for idx in wallptsidx:
             currpt = globaldata[idx].getxy()

@@ -50,86 +50,44 @@ def cal_flux_residual_cuda_kernel(globaldata, power, vl_const, gamma, wall, inte
 	bx = cuda.blockIdx.x
 	bw = cuda.blockDim.x
 	idx =  bx * bw + tx
+
 	if idx > 0 and idx < len(globaldata):
+
+		flux_shared = cuda.shared.array(shape = (256), dtype=numba.float64)
+		zeros(flux_shared, flux_shared)
+
 		itm = globaldata[idx]
 		flag_1 = itm['flag_1']
 		if flag_1 == wall:
 
-			Gxp = cuda.local.array((4), dtype=numba.float64)
-			Gxn = cuda.local.array((4), dtype=numba.float64)
-			Gyn = cuda.local.array((4), dtype=numba.float64)
-			GTemp = cuda.local.array((4), dtype=numba.float64)
+			wall_fluxes_cuda.wall_dGx_pos(globaldata, idx, power, vl_const, gamma, flux_shared)
+			wall_fluxes_cuda.wall_dGx_neg(globaldata, idx, power, vl_const, gamma, flux_shared)
+			wall_fluxes_cuda.wall_dGy_neg(globaldata, idx, power, vl_const, gamma, flux_shared)
 
-			zeros(Gxp, Gxp)
-			zeros(Gxn, Gxn)
-			zeros(Gyn, Gyn)
-			zeros(GTemp, GTemp)
-
-			wall_fluxes_cuda.wall_dGx_pos(globaldata, idx, power, vl_const, gamma, Gxp)
-			wall_fluxes_cuda.wall_dGx_neg(globaldata, idx, power, vl_const, gamma, Gxn)
-			wall_fluxes_cuda.wall_dGy_neg(globaldata, idx, power, vl_const, gamma, Gyn)
-
-			add(Gxp, GTemp, GTemp)
-			add(Gxn, GTemp, GTemp)
-			add(Gyn, GTemp, GTemp)
-
-			multiply(2, GTemp, GTemp)
-
-			globaldata[idx]['flux_res'][0] = GTemp[0]
-			globaldata[idx]['flux_res'][1] = GTemp[1]
-			globaldata[idx]['flux_res'][2] = GTemp[2]
-			globaldata[idx]['flux_res'][3] = GTemp[3]
+			globaldata[idx]['flux_res'][0] = flux_shared[cuda.threadIdx.x]
+			globaldata[idx]['flux_res'][1] = flux_shared[cuda.threadIdx.x + cuda.blockDim.x]
+			globaldata[idx]['flux_res'][2] = flux_shared[cuda.threadIdx.x + cuda.blockDim.x * 2]
+			globaldata[idx]['flux_res'][3] = flux_shared[cuda.threadIdx.x + cuda.blockDim.x * 3]
 
 		elif flag_1 == interior:
 
-			Gxp = cuda.local.array((4), dtype=numba.float64)
-			Gxn = cuda.local.array((4), dtype=numba.float64)
-			Gyp = cuda.local.array((4), dtype=numba.float64)
-			Gyn = cuda.local.array((4), dtype=numba.float64)
-			GTemp = cuda.local.array((4), dtype=numba.float64)
+			interior_fluxes_cuda.interior_dGx_pos(globaldata, idx, power, vl_const, gamma, flux_shared)
+			interior_fluxes_cuda.interior_dGx_neg(globaldata, idx, power, vl_const, gamma, flux_shared)
+			interior_fluxes_cuda.interior_dGy_pos(globaldata, idx, power, vl_const, gamma, flux_shared)
+			interior_fluxes_cuda.interior_dGy_neg(globaldata, idx, power, vl_const, gamma, flux_shared)
 
-			zeros(Gxp, Gxp)
-			zeros(Gxn, Gxn)
-			zeros(Gyn, Gyn)
-			zeros(Gyp, Gyp)
-			zeros(GTemp, GTemp)
-
-			interior_fluxes_cuda.interior_dGx_pos(globaldata, idx, power, vl_const, gamma, Gxp)
-			interior_fluxes_cuda.interior_dGx_neg(globaldata, idx, power, vl_const, gamma, Gxn)
-			interior_fluxes_cuda.interior_dGy_pos(globaldata, idx, power, vl_const, gamma, Gyp)
-			interior_fluxes_cuda.interior_dGy_neg(globaldata, idx, power, vl_const, gamma, Gyn)
-
-			add(Gxp, GTemp, GTemp)
-			add(Gxn, GTemp, GTemp)
-			add(Gyp, GTemp, GTemp)
-			add(Gyn, GTemp, GTemp)
-
-			globaldata[idx]['flux_res'][0] = GTemp[0]
-			globaldata[idx]['flux_res'][1] = GTemp[1]
-			globaldata[idx]['flux_res'][2] = GTemp[2]
-			globaldata[idx]['flux_res'][3] = GTemp[3]
+			globaldata[idx]['flux_res'][0] = flux_shared[cuda.threadIdx.x]
+			globaldata[idx]['flux_res'][1] = flux_shared[cuda.threadIdx.x + cuda.blockDim.x]
+			globaldata[idx]['flux_res'][2] = flux_shared[cuda.threadIdx.x + cuda.blockDim.x * 2]
+			globaldata[idx]['flux_res'][3] = flux_shared[cuda.threadIdx.x + cuda.blockDim.x * 3]
 
 		elif flag_1 == outer:
 
-			Gxp = cuda.local.array((4), dtype=numba.float64)
-			Gxn = cuda.local.array((4), dtype=numba.float64)
-			Gyp = cuda.local.array((4), dtype=numba.float64)
-			GTemp = cuda.local.array((4), dtype=numba.float64)
+			outer_fluxes_cuda.outer_dGx_pos(globaldata, idx, power, vl_const, gamma, flux_shared)
+			outer_fluxes_cuda.outer_dGx_neg(globaldata, idx, power, vl_const, gamma, flux_shared)
+			outer_fluxes_cuda.outer_dGy_pos(globaldata, idx, power, vl_const, gamma, flux_shared)
 
-			zeros(Gxp, Gxp)
-			zeros(Gxn, Gxn)
-			zeros(Gyp, Gyp)
-			zeros(GTemp, GTemp)
-
-			outer_fluxes_cuda.outer_dGx_pos(globaldata, idx, power, vl_const, gamma, Gxp)
-			outer_fluxes_cuda.outer_dGx_neg(globaldata, idx, power, vl_const, gamma, Gxn)
-			outer_fluxes_cuda.outer_dGy_pos(globaldata, idx, power, vl_const, gamma, Gyp)
-
-			add(Gxp, GTemp, GTemp)
-			add(Gxn, GTemp, GTemp)
-			add(Gyp, GTemp, GTemp)
-
-			globaldata[idx]['flux_res'][0] = GTemp[0]
-			globaldata[idx]['flux_res'][1] = GTemp[1]
-			globaldata[idx]['flux_res'][2] = GTemp[2]
-			globaldata[idx]['flux_res'][3] = GTemp[3]
+			globaldata[idx]['flux_res'][0] = flux_shared[cuda.threadIdx.x]
+			globaldata[idx]['flux_res'][1] = flux_shared[cuda.threadIdx.x + cuda.blockDim.x]
+			globaldata[idx]['flux_res'][2] = flux_shared[cuda.threadIdx.x + cuda.blockDim.x * 2]
+			globaldata[idx]['flux_res'][3] = flux_shared[cuda.threadIdx.x + cuda.blockDim.x * 3]

@@ -144,7 +144,6 @@ def outer_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
 
-    zeros(store, store)
     zeros(temp1, temp1)
 
     multiply(sum_dely_sqr, sum_delx_delf, sum_delx_delf)
@@ -152,7 +151,10 @@ def outer_dGx_pos(globaldata, idx, power, vl_const, gamma, store):
 
     subtract(sum_delx_delf, sum_dely_delf, temp1)
 
-    multiply(one_by_det, temp1, store)
+    store[cuda.threadIdx.x] += one_by_det * temp1[0]
+    store[cuda.threadIdx.x + cuda.blockDim.x] += one_by_det * temp1[1]
+    store[cuda.threadIdx.x + cuda.blockDim.x * 2] += one_by_det * temp1[2]
+    store[cuda.threadIdx.x + cuda.blockDim.x * 3] += one_by_det * temp1[3]
 
 @cuda.jit(device=True, inline=True)
 def outer_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
@@ -292,7 +294,6 @@ def outer_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
 
-    zeros(store, store)
     zeros(temp1, temp1)
 
     multiply(sum_dely_sqr, sum_delx_delf, sum_delx_delf)
@@ -300,8 +301,10 @@ def outer_dGx_neg(globaldata, idx, power, vl_const, gamma, store):
 
     subtract(sum_delx_delf, sum_dely_delf, temp1)
 
-    multiply(one_by_det, temp1, store)
-
+    store[cuda.threadIdx.x] += one_by_det * temp1[0]
+    store[cuda.threadIdx.x + cuda.blockDim.x] += one_by_det * temp1[1]
+    store[cuda.threadIdx.x + cuda.blockDim.x * 2] += one_by_det * temp1[2]
+    store[cuda.threadIdx.x + cuda.blockDim.x * 3] += one_by_det * temp1[3]
 
 @cuda.jit(device=True, inline=True)
 def outer_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
@@ -325,8 +328,6 @@ def outer_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
     result = cuda.local.array((4), numba.float64)
     G_i = cuda.local.array((4), numba.float64)
     G_k = cuda.local.array((4), numba.float64)
-
-
 
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
@@ -441,7 +442,6 @@ def outer_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
 
-    zeros(store, store)
     zeros(temp1, temp1)
 
     multiply(sum_delx_dely, sum_delx_delf, sum_delx_delf)
@@ -449,4 +449,7 @@ def outer_dGy_pos(globaldata, idx, power, vl_const, gamma, store):
 
     subtract(sum_dely_delf, sum_delx_delf, temp1)
 
-    multiply(one_by_det, temp1, store)
+    store[cuda.threadIdx.x] += one_by_det * temp1[0]
+    store[cuda.threadIdx.x + cuda.blockDim.x] += one_by_det * temp1[1]
+    store[cuda.threadIdx.x + cuda.blockDim.x * 2] += one_by_det * temp1[2]
+    store[cuda.threadIdx.x + cuda.blockDim.x * 3] += one_by_det * temp1[3]
