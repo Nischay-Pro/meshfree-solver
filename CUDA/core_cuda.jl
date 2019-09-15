@@ -274,8 +274,8 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
         # @cuda dynamic=true threads=4 max_min_kernel(gpuGlobalDataCommon, idx)
         # CUDAnative.synchronize()
     end
-    q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints)
-    q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints)
+    #q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints)
+    #q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints)
     # sync_threads()
     return nothing
 end

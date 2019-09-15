@@ -1,0 +1,25 @@
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 0.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 1.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 0.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 1.
+======== Warning: Metric "ecc_throughput" cannot be found on device 0.
+======== Warning: Metric "ecc_throughput" cannot be found on device 1.
+======== Warning: Metric "ecc_transactions" cannot be found on device 0.
+======== Warning: Metric "ecc_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 0.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 0.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 1.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 0.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 0.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 1.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 0.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 1.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 0.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 1.
+======== Warning: Metric "atomic_throughput" cannot be found on device 0.
+======== Warning: Metric "atomic_throughput" cannot be found on device 1.
+==56936== NVPROF is profiling process 56936, command: /home/meshfree/julia-1.2.0/bin/julia --check-bounds=no -O3 runner.jl /home/meshfree/grids/legacy/level-3/partGrid 64
+==56936== Error: File already exists: /tmp/testfile
+==56936== Use "-f" to overwrite existing file
