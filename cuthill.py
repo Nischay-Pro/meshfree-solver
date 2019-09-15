@@ -50,11 +50,11 @@ def main():
                     clean_line.pop(-1)
                     temp = []
                     for idx, itm in enumerate(clean_line):
-                        if idx > 7:
+                        if idx > 10:
                             itm = int(itm)
                         temp.append(itm)
                     data.append(temp)
-                    connectivity_set = list(map(int, clean_line[8:]))
+                    connectivity_set = list(map(int, clean_line[11:]))
                     connectivity_set = list(zip_with_scalar(connectivity_set, row))
                     G.add_edges_from(connectivity_set)
     
