@@ -70,7 +70,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         qtilde_to_primitive_kernel(qtilde_k, gpuConfigData, shared, thread_idx, block_dim)
         flux_quad_GxII_kernel(nx, ny, idx, shared, -, thread_idx, block_dim)
 
-        temp_var = @SVector [shared[thread_idx], shared[thread_idx + block_dim], shared[thread_idx + block_dim * 2], shared[thread_idx + block_dim * 3] ]
+        temp_var = @SVector [shared[thread_idx], shared[thread_idx + block_dim], shared[thread_idx + block_dim * 2], shared[thread_idx + block_dim * 3]]
         sum_delx_delf += temp_var * dels_weights
         sum_dely_delf += temp_var * deln_weights
 

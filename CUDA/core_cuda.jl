@@ -241,25 +241,25 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
             sum_delx_dely = sum_delx_dely + ((delx * dely) * weights)
 
             temp = gpuGlobalDataRest[9, conn] - q1
+            update_q(gpuGlobalDataRest, idx, 1, gpuGlobalDataRest[9, conn])
             sum_delx_delq1 += (weights * delx * temp)
             sum_dely_delq1 += (weights * dely * temp)
 
             temp = gpuGlobalDataRest[10, conn] - q2
+            update_q(gpuGlobalDataRest, idx, 2, gpuGlobalDataRest[10, conn])
             sum_delx_delq2 += (weights * delx * temp)
             sum_dely_delq2 += (weights * dely * temp)
 
             temp = gpuGlobalDataRest[11, conn] - q3
+            update_q(gpuGlobalDataRest, idx, 3, gpuGlobalDataRest[11, conn])
             sum_delx_delq3 += (weights * delx * temp)
             sum_dely_delq3 += (weights * dely * temp)
 
             temp = gpuGlobalDataRest[12, conn] - q4
+            update_q(gpuGlobalDataRest, idx, 4, gpuGlobalDataRest[12, conn])
             sum_delx_delq4 += (weights * delx * temp)
             sum_dely_delq4 += (weights * dely * temp)
 
-            update_q(gpuGlobalDataRest, idx, 1, conn)
-			update_q(gpuGlobalDataRest, idx, 2, conn)
-			update_q(gpuGlobalDataRest, idx, 3, conn)
-			update_q(gpuGlobalDataRest, idx, 4, conn)
         end
         det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
         one_by_det = 1.0 / det
@@ -353,12 +353,12 @@ function q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFix
     return nothing
 end
 
-@inline function update_q(gpuGlobalDataRest, idx, i, conn)
-    if gpuGlobalDataRest[20+i, idx] < gpuGlobalDataRest[8+i, conn]
-        gpuGlobalDataRest[20+i, idx] = gpuGlobalDataRest[8+i, conn]
+@inline function update_q(gpuGlobalDataRest, idx, i, conn_store)
+    if gpuGlobalDataRest[20+i, idx] < conn_store
+        gpuGlobalDataRest[20+i, idx] = conn_store
     end
-    if gpuGlobalDataRest[24+i, idx] > gpuGlobalDataRest[8+i, conn]
-        gpuGlobalDataRest[24+i, idx] = gpuGlobalDataRest[8+i, conn]
+    if gpuGlobalDataRest[24+i, idx] > conn_store
+        gpuGlobalDataRest[24+i, idx] = conn_store
     end
     return nothing
 end

@@ -57,9 +57,9 @@ end
         if flag1 == gpuConfigData[19]
             state_update_outer_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, idx, min_delt, rk)
         end
-    end
-    if flag1 != gpuConfigData[19]
-        gpuSumResSqr[idx] = min_delt * gpuGlobalDataRest[5, idx] * min_delt * gpuGlobalDataRest[5, idx]
+        if flag1 != gpuConfigData[19]
+            gpuSumResSqr[idx] = min_delt * gpuGlobalDataRest[5, idx] * min_delt * gpuGlobalDataRest[5, idx]
+        end
     end
     # sync_threads()
     return nothing

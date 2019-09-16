@@ -3,7 +3,7 @@ function main()
     configData = getConfig()
     # globaldataCommon = zeros(Float64, 38, getConfig()["core"]["points"])
     file_name = string(ARGS[1])
-    numPoints = returnFileLength(file_name) - 1
+    numPoints = returnFileLength(file_name)
     println("Number of points ", numPoints)
     # globaldataDq = [Array{Array{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
     # gpuGlobaldataDq = [CuArray{CuArray{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
@@ -26,7 +26,7 @@ function main()
     # outerptsidx = Array{Int,1}(undef, 0)
     # shapeptsidx = Array{Int,1}(undef, 0)
     println("Start Read")
-    readFileExtra(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
+    readFileExtra2(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
     # file1 = open("partGridNew--160-60")
     # data1 = read(file1, String)
     # splitdata = split(data1, "\n")
@@ -170,16 +170,16 @@ function main()
     # end
     # close(file)
 
-    #println("Writing cuda file")
-    #file  = open("results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
-    #for idx in 1:numPoints
-    #    primtowrite = globalDataPrim[1:4, idx]
-    #    for element in primtowrite
-    #        @printf(file,"%0.17f", element)
-    #        @printf(file, " ")
-    #    end
-    #    print(file, "\n")
-    #end
-    #close(file)
+    println("Writing cuda file")
+    file  = open("results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
+    for idx in 1:numPoints
+       primtowrite = globalDataPrim[1:4, idx]
+       for element in primtowrite
+           @printf(file,"%0.17f", element)
+           @printf(file, " ")
+       end
+       print(file, "\n")
+    end
+    close(file)
 
 end
