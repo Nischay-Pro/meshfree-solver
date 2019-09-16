@@ -4,7 +4,8 @@ import split_fluxes_cuda
 import quadrant_fluxes_cuda
 import numba
 from numba import cuda
-from cuda_func import add, zeros, multiply, qtilde_to_primitive_cuda, subtract, multiply_element_wise
+from cuda_func import add, zeros, multiply, qtilde_to_primitive_cuda, subtract, multiply_element_wise_shared
+from operator import add as addop, sub as subop
 
 @cuda.jit(device=True, inline=True)
 def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared):
@@ -19,14 +20,8 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared):
     qtilde_i = cuda.local.array((4), numba.float64)
     qtilde_k = cuda.local.array((4), numba.float64)
 
-    phi_i = cuda.local.array((4), numba.float64)
-    phi_k = cuda.local.array((4), numba.float64)
-
     temp1 = cuda.local.array((4), numba.float64)
     temp2 = cuda.local.array((4), numba.float64)
-
-    G_i = cuda.local.array((4), numba.float64)
-    G_k = cuda.local.array((4), numba.float64)
 
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
@@ -85,12 +80,7 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared):
         multiply(0.5, temp1, temp1)
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
-        zeros(phi_i, phi_i)
-        zeros(phi_k, phi_k)
-
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i)
-
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k)
+        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, shared)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
@@ -98,41 +88,47 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared):
         multiply(delx, globaldata[idx]['dq'][0], temp1)
         multiply(dely, globaldata[idx]['dq'][1], temp2)
 
-        multiply(0.5, phi_i, phi_i)
-
         add(temp1, temp2, temp1)
-        multiply_element_wise(temp1, phi_i, temp1)
+        multiply_element_wise_shared(temp1, shared, temp1)
 
         subtract(globaldata[idx]['q'], temp1, qtilde_i)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
 
+        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, shared)
+
         multiply(delx, globaldata[itm]['dq'][0], temp1)
         multiply(dely, globaldata[itm]['dq'][1], temp2)
 
-        multiply(0.5, phi_k, phi_k)
-
         add(temp1, temp2, temp1)
-        multiply_element_wise(temp1, phi_k, temp1)
+        multiply_element_wise_shared(temp1, shared, temp1)
 
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
         qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
 
-        split_fluxes_cuda.flux_Gxp(nx, ny, shared, G_i)
+        shared[cuda.threadIdx.x], shared[cuda.threadIdx.x + cuda.blockDim.x], shared[cuda.threadIdx.x + cuda.blockDim.x * 2], shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
+
+        split_fluxes_cuda.flux_Gxp(nx, ny, shared, addop)
 
         qtilde_to_primitive_cuda(qtilde_k, gamma, shared)
 
-        split_fluxes_cuda.flux_Gxp(nx, ny, shared, G_k)
+        split_fluxes_cuda.flux_Gxp(nx, ny, shared, subop)
 
-        zeros(temp1, temp1)
-        subtract(G_k, G_i, temp1)
+        temp1[0] = shared[cuda.threadIdx.x]
+        temp1[1] = shared[cuda.threadIdx.x + cuda.blockDim.x]
+        temp1[2] = shared[cuda.threadIdx.x + cuda.blockDim.x * 2]
+        temp1[3] = shared[cuda.threadIdx.x + cuda.blockDim.x * 3]
+
         multiply(dels_weights, temp1, temp1)
         add(sum_delx_delf, temp1, sum_delx_delf)
 
-        zeros(temp2, temp2)
-        subtract(G_k, G_i, temp2)
+        temp2[0] = shared[cuda.threadIdx.x]
+        temp2[1] = shared[cuda.threadIdx.x + cuda.blockDim.x]
+        temp2[2] = shared[cuda.threadIdx.x + cuda.blockDim.x * 2]
+        temp2[3] = shared[cuda.threadIdx.x + cuda.blockDim.x * 3]
+
         multiply(deln_weights, temp2, temp2)
         add(sum_dely_delf, temp2, sum_dely_delf)
 
@@ -164,14 +160,8 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared):
     qtilde_i = cuda.local.array((4), numba.float64)
     qtilde_k = cuda.local.array((4), numba.float64)
 
-    phi_i = cuda.local.array((4), numba.float64)
-    phi_k = cuda.local.array((4), numba.float64)
-
     temp1 = cuda.local.array((4), numba.float64)
     temp2 = cuda.local.array((4), numba.float64)
-
-    G_i = cuda.local.array((4), numba.float64)
-    G_k = cuda.local.array((4), numba.float64)
 
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
@@ -230,12 +220,7 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared):
         multiply(0.5, temp1, temp1)
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
-        zeros(phi_i, phi_i)
-        zeros(phi_k, phi_k)
-
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i)
-
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k)
+        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, shared)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
@@ -243,41 +228,47 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared):
         multiply(delx, globaldata[idx]['dq'][0], temp1)
         multiply(dely, globaldata[idx]['dq'][1], temp2)
 
-        multiply(0.5, phi_i, phi_i)
-
         add(temp1, temp2, temp1)
-        multiply_element_wise(temp1, phi_i, temp1)
+        multiply_element_wise_shared(temp1, shared, temp1)
 
         subtract(globaldata[idx]['q'], temp1, qtilde_i)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
 
+        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, shared)
+
         multiply(delx, globaldata[itm]['dq'][0], temp1)
         multiply(dely, globaldata[itm]['dq'][1], temp2)
 
-        multiply(0.5, phi_k, phi_k)
-
         add(temp1, temp2, temp1)
-        multiply_element_wise(temp1, phi_k, temp1)
+        multiply_element_wise_shared(temp1, shared, temp1)
 
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
         qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
 
-        split_fluxes_cuda.flux_Gxn(nx, ny, shared, G_i)
+        shared[cuda.threadIdx.x], shared[cuda.threadIdx.x + cuda.blockDim.x], shared[cuda.threadIdx.x + cuda.blockDim.x * 2], shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
+
+        split_fluxes_cuda.flux_Gxn(nx, ny, shared, addop)
 
         qtilde_to_primitive_cuda(qtilde_k, gamma, shared)
 
-        split_fluxes_cuda.flux_Gxn(nx, ny, shared, G_k)
+        split_fluxes_cuda.flux_Gxn(nx, ny, shared, subop)
 
-        zeros(temp1, temp1)
-        subtract(G_k, G_i, temp1)
+        temp1[0] = shared[cuda.threadIdx.x]
+        temp1[1] = shared[cuda.threadIdx.x + cuda.blockDim.x]
+        temp1[2] = shared[cuda.threadIdx.x + cuda.blockDim.x * 2]
+        temp1[3] = shared[cuda.threadIdx.x + cuda.blockDim.x * 3]
+
         multiply(dels_weights, temp1, temp1)
         add(sum_delx_delf, temp1, sum_delx_delf)
 
-        zeros(temp2, temp2)
-        subtract(G_k, G_i, temp2)
+        temp2[0] = shared[cuda.threadIdx.x]
+        temp2[1] = shared[cuda.threadIdx.x + cuda.blockDim.x]
+        temp2[2] = shared[cuda.threadIdx.x + cuda.blockDim.x * 2]
+        temp2[3] = shared[cuda.threadIdx.x + cuda.blockDim.x * 3]
+
         multiply(deln_weights, temp2, temp2)
         add(sum_dely_delf, temp2, sum_dely_delf)
 
@@ -309,14 +300,8 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store, shared):
     qtilde_i = cuda.local.array((4), numba.float64)
     qtilde_k = cuda.local.array((4), numba.float64)
 
-    phi_i = cuda.local.array((4), numba.float64)
-    phi_k = cuda.local.array((4), numba.float64)
-
     temp1 = cuda.local.array((4), numba.float64)
     temp2 = cuda.local.array((4), numba.float64)
-
-    G_i = cuda.local.array((4), numba.float64)
-    G_k = cuda.local.array((4), numba.float64)
 
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
@@ -375,12 +360,7 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store, shared):
         multiply(0.5, temp1, temp1)
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
-        zeros(phi_i, phi_i)
-        zeros(phi_k, phi_k)
-
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i)
-
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k)
+        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, shared)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
@@ -388,41 +368,47 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store, shared):
         multiply(delx, globaldata[idx]['dq'][0], temp1)
         multiply(dely, globaldata[idx]['dq'][1], temp2)
 
-        multiply(0.5, phi_i, phi_i)
-
         add(temp1, temp2, temp1)
-        multiply_element_wise(temp1, phi_i, temp1)
+        multiply_element_wise_shared(temp1, shared, temp1)
 
         subtract(globaldata[idx]['q'], temp1, qtilde_i)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
 
+        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, shared)
+
         multiply(delx, globaldata[itm]['dq'][0], temp1)
         multiply(dely, globaldata[itm]['dq'][1], temp2)
 
-        multiply(0.5, phi_k, phi_k)
-
         add(temp1, temp2, temp1)
-        multiply_element_wise(temp1, phi_k, temp1)
+        multiply_element_wise_shared(temp1, shared, temp1)
 
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
         qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
 
-        split_fluxes_cuda.flux_Gyp(nx, ny, shared, G_i)
+        shared[cuda.threadIdx.x], shared[cuda.threadIdx.x + cuda.blockDim.x], shared[cuda.threadIdx.x + cuda.blockDim.x * 2], shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
+
+        split_fluxes_cuda.flux_Gyp(nx, ny, shared, addop)
 
         qtilde_to_primitive_cuda(qtilde_k, gamma, shared)
 
-        split_fluxes_cuda.flux_Gyp(nx, ny, shared, G_k)
+        split_fluxes_cuda.flux_Gyp(nx, ny, shared, subop)
 
-        zeros(temp1, temp1)
-        subtract(G_k, G_i, temp1)
+        temp1[0] = shared[cuda.threadIdx.x]
+        temp1[1] = shared[cuda.threadIdx.x + cuda.blockDim.x]
+        temp1[2] = shared[cuda.threadIdx.x + cuda.blockDim.x * 2]
+        temp1[3] = shared[cuda.threadIdx.x + cuda.blockDim.x * 3]
+
         multiply(dels_weights, temp1, temp1)
         add(sum_delx_delf, temp1, sum_delx_delf)
 
-        zeros(temp2, temp2)
-        subtract(G_k, G_i, temp2)
+        temp2[0] = shared[cuda.threadIdx.x]
+        temp2[1] = shared[cuda.threadIdx.x + cuda.blockDim.x]
+        temp2[2] = shared[cuda.threadIdx.x + cuda.blockDim.x * 2]
+        temp2[3] = shared[cuda.threadIdx.x + cuda.blockDim.x * 3]
+
         multiply(deln_weights, temp2, temp2)
         add(sum_dely_delf, temp2, sum_dely_delf)
 
@@ -454,14 +440,8 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store, shared):
     qtilde_i = cuda.local.array((4), numba.float64)
     qtilde_k = cuda.local.array((4), numba.float64)
 
-    phi_i = cuda.local.array((4), numba.float64)
-    phi_k = cuda.local.array((4), numba.float64)
-
     temp1 = cuda.local.array((4), numba.float64)
     temp2 = cuda.local.array((4), numba.float64)
-
-    G_i = cuda.local.array((4), numba.float64)
-    G_k = cuda.local.array((4), numba.float64)
 
     zeros(sum_delx_delf, sum_delx_delf)
     zeros(sum_dely_delf, sum_dely_delf)
@@ -520,12 +500,7 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store, shared):
         multiply(0.5, temp1, temp1)
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
-        zeros(phi_i, phi_i)
-        zeros(phi_k, phi_k)
-
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, phi_i)
-
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, phi_k)
+        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, shared)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
@@ -533,41 +508,47 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store, shared):
         multiply(delx, globaldata[idx]['dq'][0], temp1)
         multiply(dely, globaldata[idx]['dq'][1], temp2)
 
-        multiply(0.5, phi_i, phi_i)
-
         add(temp1, temp2, temp1)
-        multiply_element_wise(temp1, phi_i, temp1)
+        multiply_element_wise_shared(temp1, shared, temp1)
 
         subtract(globaldata[idx]['q'], temp1, qtilde_i)
 
         zeros(temp1, temp1)
         zeros(temp2, temp2)
 
+        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, shared)
+
         multiply(delx, globaldata[itm]['dq'][0], temp1)
         multiply(dely, globaldata[itm]['dq'][1], temp2)
 
-        multiply(0.5, phi_k, phi_k)
-
         add(temp1, temp2, temp1)
-        multiply_element_wise(temp1, phi_k, temp1)
+        multiply_element_wise_shared(temp1, shared, temp1)
 
         subtract(globaldata[itm]['q'], temp1, qtilde_k)
 
         qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
 
-        split_fluxes_cuda.flux_Gyn(nx, ny, shared, G_i)
+        shared[cuda.threadIdx.x], shared[cuda.threadIdx.x + cuda.blockDim.x], shared[cuda.threadIdx.x + cuda.blockDim.x * 2], shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
+
+        split_fluxes_cuda.flux_Gyn(nx, ny, shared, addop)
 
         qtilde_to_primitive_cuda(qtilde_k, gamma, shared)
 
-        split_fluxes_cuda.flux_Gyn(nx, ny, shared, G_k)
+        split_fluxes_cuda.flux_Gyn(nx, ny, shared, subop)
 
-        zeros(temp1, temp1)
-        subtract(G_k, G_i, temp1)
+        temp1[0] = shared[cuda.threadIdx.x]
+        temp1[1] = shared[cuda.threadIdx.x + cuda.blockDim.x]
+        temp1[2] = shared[cuda.threadIdx.x + cuda.blockDim.x * 2]
+        temp1[3] = shared[cuda.threadIdx.x + cuda.blockDim.x * 3]
+
         multiply(dels_weights, temp1, temp1)
         add(sum_delx_delf, temp1, sum_delx_delf)
 
-        zeros(temp2, temp2)
-        subtract(G_k, G_i, temp2)
+        temp2[0] = shared[cuda.threadIdx.x]
+        temp2[1] = shared[cuda.threadIdx.x + cuda.blockDim.x]
+        temp2[2] = shared[cuda.threadIdx.x + cuda.blockDim.x * 2]
+        temp2[3] = shared[cuda.threadIdx.x + cuda.blockDim.x * 3]
+
         multiply(deln_weights, temp2, temp2)
         add(sum_dely_delf, temp2, sum_dely_delf)
 

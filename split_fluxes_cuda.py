@@ -3,7 +3,7 @@ from numba import cuda
 import numba
 
 @cuda.jit(device=True, inline=True)
-def flux_Gxp(nx, ny, shared, Gxp):
+def flux_Gxp(nx, ny, shared, op):
 
     u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
     u2 = shared[cuda.threadIdx.x + cuda.blockDim.x * 5]
@@ -21,22 +21,22 @@ def flux_Gxp(nx, ny, shared, Gxp):
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
 
-    Gxp[0] = (rho*(ut*A1pos + B1))
+    shared[cuda.threadIdx.x] = op((rho*(ut*A1pos + B1)), shared[cuda.threadIdx.x])
         
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1pos + ut*B1
-    Gxp[1] = (rho*temp2)
+    shared[cuda.threadIdx.x + cuda.blockDim.x] = op((rho*temp2), shared[cuda.threadIdx.x + cuda.blockDim.x])
 
     temp1 = ut*un*A1pos + un*B1
-    Gxp[2] = (rho*temp1)
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 2] = op((rho*temp1), shared[cuda.threadIdx.x + cuda.blockDim.x * 2])
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1pos 
     temp1 = (6*pr_by_rho) + u_sqr
-    Gxp[3] = (rho*(temp2 + 0.5*temp1*B1))
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = op((rho*(temp2 + 0.5*temp1*B1)), shared[cuda.threadIdx.x + cuda.blockDim.x * 3])
 
 @cuda.jit(device=True, inline=True)
-def flux_Gxn(nx, ny, shared, Gxn):
+def flux_Gxn(nx, ny, shared, op):
 
     u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
     u2 = shared[cuda.threadIdx.x + cuda.blockDim.x * 5]
@@ -55,22 +55,22 @@ def flux_Gxn(nx, ny, shared, Gxn):
     u_sqr = ut*ut + un*un
 
 
-    Gxn[0] = (rho*(ut*A1neg - B1))
+    shared[cuda.threadIdx.x] = op((rho*(ut*A1neg - B1)), shared[cuda.threadIdx.x])
 
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1neg - ut*B1
-    Gxn[1] = (rho*temp2)
+    shared[cuda.threadIdx.x + cuda.blockDim.x] = op((rho*temp2), shared[cuda.threadIdx.x + cuda.blockDim.x])
 
     temp1 = ut*un*A1neg - un*B1
-    Gxn[2] = (rho*temp1)
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 2] = op((rho*temp1), shared[cuda.threadIdx.x + cuda.blockDim.x * 2])
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1neg 
     temp1 = (6*pr_by_rho) + u_sqr
-    Gxn[3] = (rho*(temp2 - 0.5*temp1*B1))
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = op((rho*(temp2 - 0.5*temp1*B1)), shared[cuda.threadIdx.x + cuda.blockDim.x * 3])
 
 @cuda.jit(device=True, inline=True)
-def flux_Gyp(nx, ny, shared, Gyp):
+def flux_Gyp(nx, ny, shared, op):
 
     u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
     u2 = shared[cuda.threadIdx.x + cuda.blockDim.x * 5]
@@ -89,23 +89,23 @@ def flux_Gyp(nx, ny, shared, Gyp):
     u_sqr = ut*ut + un*un
 
 
-    Gyp[0] = (rho*(un*A2pos + B2))
+    shared[cuda.threadIdx.x] = op((rho*(un*A2pos + B2)), shared[cuda.threadIdx.x])
 
     temp1 = pr_by_rho + un*un
     temp2 = temp1*A2pos + un*B2
 
     temp1 = ut*un*A2pos + ut*B2
-    Gyp[1] = (rho*temp1)
+    shared[cuda.threadIdx.x + cuda.blockDim.x] = op((rho*temp1), shared[cuda.threadIdx.x + cuda.blockDim.x])
 
-    Gyp[2] = (rho*temp2)
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 2] = op((rho*temp2), shared[cuda.threadIdx.x + cuda.blockDim.x * 2])
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*un*temp1*A2pos 
     temp1 = (6*pr_by_rho) + u_sqr
-    Gyp[3] = (rho*(temp2 + 0.5*temp1*B2))
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = op((rho*(temp2 + 0.5*temp1*B2)), shared[cuda.threadIdx.x + cuda.blockDim.x * 3])
 
 @cuda.jit(device=True, inline=True)
-def flux_Gyn(nx, ny, shared, Gyn):
+def flux_Gyn(nx, ny, shared, op):
 
     u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
     u2 = shared[cuda.threadIdx.x + cuda.blockDim.x * 5]
@@ -123,20 +123,20 @@ def flux_Gyn(nx, ny, shared, Gyn):
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
 
-    Gyn[0] = (rho*(un*A2neg - B2))
+    shared[cuda.threadIdx.x] = op((rho*(un*A2neg - B2)), shared[cuda.threadIdx.x])
     
     temp1 = pr_by_rho + un*un
     temp2 = temp1*A2neg - un*B2
-
+ 
     temp1 = ut*un*A2neg - ut*B2
-    Gyn[1] = (rho*temp1)
+    shared[cuda.threadIdx.x + cuda.blockDim.x] = op((rho*temp1), shared[cuda.threadIdx.x + cuda.blockDim.x])
 
-    Gyn[2] = (rho*temp2)
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 2] = op((rho*temp2), shared[cuda.threadIdx.x + cuda.blockDim.x * 2])
 
     temp1 = (7*pr_by_rho) + u_sqr
     temp2 = 0.5*un*temp1*A2neg 
     temp1 = (6*pr_by_rho) + u_sqr
-    Gyn[3] = (rho*(temp2 - 0.5*temp1*B2))
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = op((rho*(temp2 - 0.5*temp1*B2)), shared[cuda.threadIdx.x + cuda.blockDim.x * 3])
 
 # @cuda.jit(device=True, inline=True)
 # def flux_Gx(Gx, nx, ny, u1, u2, rho, pr, Gx):

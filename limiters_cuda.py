@@ -13,7 +13,7 @@ def venkat_limiter(qtilde, globaldata, idx, VL_CONST, phi):
         q = globaldata[idx]['q'][i]
         del_neg = qtilde[i] - q
         if math.fabs(del_neg) <= 1e-5:
-            phi[i] = 1
+            phi[cuda.threadIdx.x + cuda.blockDim.x * i] = 0.5
         elif math.fabs(del_neg) > 1e-5:
             if del_neg > 0:
                 max_q[i] = 0
@@ -42,9 +42,9 @@ def venkat_limiter(qtilde, globaldata, idx, VL_CONST, phi):
             temp = num/den
 
             if temp < 1:
-                phi[i] = temp
+                phi[cuda.threadIdx.x + cuda.blockDim.x * i] = temp * 0.5
             else:
-                phi[i] = 1
+                phi[cuda.threadIdx.x + cuda.blockDim.x * i] = 0.5
 
 @cuda.jit(device=True, inline=True)
 def maximum(globaldata, idx, i, maxval):

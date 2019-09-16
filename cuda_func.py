@@ -18,6 +18,11 @@ def multiply_element_wise(x, y, store):
         store[i] = x[i] * y[i]
 
 @cuda.jit(device=True, inline=True)
+def multiply_element_wise_shared(x, y, store):
+    for i in range(len(x)):
+        store[i] = x[i] * y[cuda.threadIdx.x + cuda.blockDim.x * i]
+
+@cuda.jit(device=True, inline=True)
 def add(x, y, store):
     for i in range(len(x)):
         store[i] = x[i] + y[i]
