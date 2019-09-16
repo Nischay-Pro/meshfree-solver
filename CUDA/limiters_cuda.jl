@@ -48,6 +48,54 @@ end
     return nothing
 end
 
+function venkat_limiter_kernel_qtilde(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, qtilde_shared, thread_idx, block_dim)
+    # @cuprintf("Type is %s", typeof(VL_CONST))
+    epsigh = ldg(gpuConfigData, 8) * gpuGlobalDataFixedPoint[idx].short_distance
+    epsi = epsigh*epsigh*epsigh
+
+    # shared[thread_idx], shared[thread_idx + block_dim * 1], shared[thread_idx + block_dim * 2], shared[thread_idx + block_dim * 3] = 1,1,1,1
+
+    for i in 0:3
+        qtilde_shared[thread_idx + block_dim * i] = 1.0
+        q = gpuGlobalDataRest[9+i, idx]
+        del_neg = gpuGlobalDataRest[9+i, idx] - 0.5*(delx * gpuGlobalDataRest[13+i, idx] + dely * gpuGlobalDataRest[17+i, idx]) - q
+        if abs(del_neg) > 1e-5
+            del_pos = gpuGlobalDataRest[21+i, idx] - q
+            if del_neg < 0
+                del_pos = gpuGlobalDataRest[25+i, idx] - q
+            end
+            num = (del_pos*del_pos) + (epsi*epsi)
+            num = (num*del_neg) + 2 * (del_neg*del_neg*del_pos)
+
+            den = (del_pos*del_pos) + (2 *del_neg*del_neg)
+            den += (del_neg*del_pos) + (epsi*epsi)
+            den *= del_neg
+
+            temp = num/den
+            if temp > 1
+                temp = 1
+            end
+            qtilde_shared[thread_idx + block_dim * i] = temp
+        end
+    end
+    # return nothing
+    for i in 0:3
+        qtilde_shared[thread_idx + block_dim * i] = gpuGlobalDataRest[9+i, idx] - 0.5*qtilde_shared[thread_idx + block_dim * i]*(delx * gpuGlobalDataRest[13+i, idx] + dely * gpuGlobalDataRest[17+i, idx])
+    end
+    beta = -qtilde_shared[thread_idx + block_dim * 3]*0.5
+    temp = 0.5/beta
+    u1 = qtilde_shared[thread_idx + block_dim * 1]*temp
+    u2 = qtilde_shared[thread_idx + block_dim * 2]*temp
+
+    temp2 = qtilde_shared[thread_idx] + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(ldg(gpuConfigData, 15)-1))
+    # rho = CUDAnative.exp(temp2)
+    shared[thread_idx + block_dim * 4] = u1
+    shared[thread_idx + block_dim * 5] = u2
+    shared[thread_idx + block_dim * 6] = CUDAnative.exp(temp2)
+    shared[thread_idx + block_dim * 7] = shared[thread_idx + block_dim * 6]*temp
+    return nothing
+end
+
 
 # function max_q_values_kernel(gpuGlobalDataCommon, idx, maxq)
 #     maxq = (
