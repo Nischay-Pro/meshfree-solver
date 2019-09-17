@@ -3,6 +3,7 @@ function cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
 	thread_idx = threadIdx().x
 	block_dim = blockDim().x
 	# thread_idx = (threadIdx().x - UInt32(1)) * UInt32(8)
+	# temp_sharedmem = @cuStaticSharedMem(Float64, 128)
 	shared = @cuStaticSharedMem(Float64, 1024)
 	flux_shared = @cuStaticSharedMem(Float64, 512)
 	qtilde_shared = @cuStaticSharedMem(Float64, 512)

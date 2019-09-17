@@ -218,10 +218,8 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
 
         q1, q2, q3, q4 = gpuGlobalDataRest[9, idx], gpuGlobalDataRest[10, idx], gpuGlobalDataRest[11, idx], gpuGlobalDataRest[12, idx]
 
-        gpuGlobalDataRest[21, idx], gpuGlobalDataRest[22, idx], gpuGlobalDataRest[23, idx], gpuGlobalDataRest[24, idx] = gpuGlobalDataRest[9, idx],
-			gpuGlobalDataRest[10, idx],gpuGlobalDataRest[11, idx],gpuGlobalDataRest[12, idx]
-		gpuGlobalDataRest[25, idx], gpuGlobalDataRest[26, idx], gpuGlobalDataRest[27, idx], gpuGlobalDataRest[28, idx] = gpuGlobalDataRest[9, idx],
-			gpuGlobalDataRest[10, idx],gpuGlobalDataRest[11, idx],gpuGlobalDataRest[12, idx]
+        gpuGlobalDataRest[21, idx], gpuGlobalDataRest[22, idx], gpuGlobalDataRest[23, idx], gpuGlobalDataRest[24, idx] = q1,q2,q3,q4
+		gpuGlobalDataRest[25, idx], gpuGlobalDataRest[26, idx], gpuGlobalDataRest[27, idx], gpuGlobalDataRest[28, idx] = q1,q2,q3,q4
 
         for iter in 5:14
             conn = gpuGlobalDataConn[iter, idx]
@@ -231,10 +229,10 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gp
 
             delx = gpuGlobalDataFixedPoint[conn].x - x_i
             dely = gpuGlobalDataFixedPoint[conn].y - y_i
-            # dist = CUDAnative.hypot(delx, dely)
+            dist = CUDAnative.hypot(delx, dely)
 
-            # weights = CUDAnative.pow(dist, gpuConfigData[6])
-            weights = 1.0
+            weights = CUDAnative.pow(dist, gpuConfigData[6])
+            # weights = 1.0
 
             sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
             sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
@@ -307,9 +305,9 @@ function q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFix
 
             delx = gpuGlobalDataFixedPoint[conn].x - x_i
             dely = gpuGlobalDataFixedPoint[conn].y - y_i
-            # dist = CUDAnative.hypot(delx, dely)
-            # weights = CUDAnative.pow(dist, gpuConfigData[6])
-            weights = 1.0
+            dist = CUDAnative.hypot(delx, dely)
+            weights = CUDAnative.pow(dist, gpuConfigData[6])
+            # weights = 1.0
 
             sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
             sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
@@ -353,7 +351,7 @@ function q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFix
     return nothing
 end
 
-@inline function update_q(gpuGlobalDataRest, idx, i, conn_store)
+function update_q(gpuGlobalDataRest, idx, i, conn_store)
     if gpuGlobalDataRest[20+i, idx] < conn_store
         gpuGlobalDataRest[20+i, idx] = conn_store
     end
