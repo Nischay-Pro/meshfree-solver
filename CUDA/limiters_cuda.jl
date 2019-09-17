@@ -1,6 +1,8 @@
 
-function venkat_limiter_kernel_qtilde(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, qtilde_shared, thread_idx, block_dim)
+function venkat_limiter_kernel_qtilde(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, qtilde_shared)
     # @cuprintf("Type is %s", typeof(VL_CONST))
+    thread_idx = threadIdx().x
+    block_dim = blockDim().x
     epsigh = ldg(gpuConfigData, 8) * gpuGlobalDataFixedPoint[idx].short_distance
     epsi = epsigh*epsigh*epsigh
 
@@ -48,7 +50,7 @@ function venkat_limiter_kernel_qtilde(gpuGlobalDataFixedPoint, gpuGlobalDataRest
     return nothing
 end
 
-# function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, thread_idx, block_dim)
+# function venkat_limiter_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared)
 #     # @cuprintf("Type is %s", typeof(VL_CONST))
 #     epsigh = ldg(gpuConfigData, 8) * gpuGlobalDataFixedPoint[idx].short_distance
 #     epsi = epsigh*epsigh*epsigh
@@ -82,7 +84,7 @@ end
 # end
 
 
-# @inline function qtilde_to_primitive_kernel(qtilde, gpuConfigData, shared, thread_idx, block_dim)
+# @inline function qtilde_to_primitive_kernel(qtilde, gpuConfigData, shared)
 #     # # gamma = gpuConfigData[15]
 #     beta = -qtilde[4]*0.5
 #     temp = 0.5/beta

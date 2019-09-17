@@ -1,5 +1,7 @@
-function flux_Gxp_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_dim)
+function flux_Gxp_kernel(nx, ny, idx, shared, op::Function)
 
+    thread_idx = threadIdx().x
+    block_dim = blockDim().x
     u1 = shared[thread_idx + block_dim * 4]
     u2 = shared[thread_idx + block_dim * 5]
     rho = shared[thread_idx + block_dim * 6]
@@ -31,8 +33,10 @@ function flux_Gxp_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_di
     return nothing
 end
 
-function flux_Gxn_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_dim)
+function flux_Gxn_kernel(nx, ny, idx, shared, op::Function)
 
+    thread_idx = threadIdx().x
+    block_dim = blockDim().x
     u1 = shared[thread_idx + block_dim * 4]
     u2 = shared[thread_idx + block_dim * 5]
     rho = shared[thread_idx + block_dim * 6]
@@ -62,7 +66,10 @@ function flux_Gxn_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_di
     return nothing
 end
 
-function flux_Gyp_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_dim)
+function flux_Gyp_kernel(nx, ny, idx, shared, op::Function)
+
+    thread_idx = threadIdx().x
+    block_dim = blockDim().x
     u1 = shared[thread_idx + block_dim * 4]
     u2 = shared[thread_idx + block_dim * 5]
     rho = shared[thread_idx + block_dim * 6]
@@ -94,7 +101,10 @@ function flux_Gyp_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_di
     return nothing
 end
 
-function flux_Gyn_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_dim)
+function flux_Gyn_kernel(nx, ny, idx, shared, op::Function)
+
+    thread_idx = threadIdx().x
+    block_dim = blockDim().x
     u1 = shared[thread_idx + block_dim * 4]
     u2 = shared[thread_idx + block_dim * 5]
     rho = shared[thread_idx + block_dim * 6]

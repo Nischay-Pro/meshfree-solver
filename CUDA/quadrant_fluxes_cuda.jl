@@ -1,4 +1,7 @@
-function flux_quad_GxI_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_dim)
+function flux_quad_GxI_kernel(nx, ny, idx, shared, op::Function)
+
+    thread_idx = threadIdx().x
+    block_dim = blockDim().x
     u1 = shared[thread_idx + block_dim * 4]
     u2 = shared[thread_idx + block_dim * 5]
     rho = shared[thread_idx + block_dim * 6]
@@ -41,7 +44,10 @@ function flux_quad_GxI_kernel(nx, ny, idx, shared, op::Function, thread_idx, blo
     return nothing
 end
 
-function flux_quad_GxII_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_dim)
+function flux_quad_GxII_kernel(nx, ny, idx, shared, op::Function)
+
+    thread_idx = threadIdx().x
+    block_dim = blockDim().x
     u1 = shared[thread_idx + block_dim * 4]
     u2 = shared[thread_idx + block_dim * 5]
     rho = shared[thread_idx + block_dim * 6]
@@ -86,8 +92,10 @@ function flux_quad_GxII_kernel(nx, ny, idx, shared, op::Function, thread_idx, bl
     return nothing
 end
 
-function flux_quad_GxIII_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_dim)
+function flux_quad_GxIII_kernel(nx, ny, idx, shared, op::Function)
 
+    thread_idx = threadIdx().x
+    block_dim = blockDim().x
     u1 = shared[thread_idx + block_dim * 4]
     u2 = shared[thread_idx + block_dim * 5]
     rho = shared[thread_idx + block_dim * 6]
@@ -128,8 +136,10 @@ function flux_quad_GxIII_kernel(nx, ny, idx, shared, op::Function, thread_idx, b
     return nothing
 end
 
-function flux_quad_GxIV_kernel(nx, ny, idx, shared, op::Function, thread_idx, block_dim)
+function flux_quad_GxIV_kernel(nx, ny, idx, shared, op::Function)
 
+    thread_idx = threadIdx().x
+    block_dim = blockDim().x
     u1 = shared[thread_idx + block_dim * 4]
     u2 = shared[thread_idx + block_dim * 5]
     rho = shared[thread_idx + block_dim * 6]
