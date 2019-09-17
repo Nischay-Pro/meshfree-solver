@@ -2,7 +2,7 @@ import math
 from numba import cuda
 import numba
 
-@cuda.jit(device=True, inline=True)
+@cuda.jit(device=True)
 def flux_quad_GxI(nx, ny, shared, op):
 
     u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
@@ -42,7 +42,7 @@ def flux_quad_GxI(nx, ny, shared, op):
         
     shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = op((rho*A2neg*(temp2 - temp3) - temp4), shared[cuda.threadIdx.x + cuda.blockDim.x * 3])
 
-@cuda.jit(device=True, inline=True)
+@cuda.jit(device=True)
 def flux_quad_GxII(nx, ny, shared, op):
 
     u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
@@ -85,7 +85,7 @@ def flux_quad_GxII(nx, ny, shared, op):
 
     shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = op((rho*A2neg*(temp2 + temp3) - temp4), shared[cuda.threadIdx.x + cuda.blockDim.x * 3])
 
-@cuda.jit(device=True, inline=True)
+@cuda.jit(device=True)
 def flux_quad_GxIII(nx, ny, shared, op):
 
     u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
@@ -129,7 +129,7 @@ def flux_quad_GxIII(nx, ny, shared, op):
 
     shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = op((rho*A2pos*(temp2 + temp3) + temp4), shared[cuda.threadIdx.x + cuda.blockDim.x * 3])
 
-@cuda.jit(device=True, inline=True)
+@cuda.jit(device=True)
 def flux_quad_GxIV(nx, ny, shared, op):
 
     u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]

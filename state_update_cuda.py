@@ -200,7 +200,7 @@ def state_update_cuda(globaldata, Mach, gamma, pr_inf, rho_inf, aoa, sum_res_sqr
             globaldata[idx]['prim'][2] = tempU[2]
             globaldata[idx]['prim'][3] = tempU[3]
 
-@cuda.jit(device=True, inline=True)
+@cuda.jit(device=True)
 def primitive_to_conserved_cuda_kernel(globaldata, itm, nx, ny, result, prim):
 
     U = cuda.local.array((4), numba.float64)
@@ -219,7 +219,7 @@ def primitive_to_conserved_cuda_kernel(globaldata, itm, nx, ny, result, prim):
     result[2] = U[2]
     result[3] = U[3]
 
-@cuda.jit(device=True, inline=True)
+@cuda.jit(device=True)
 def conserved_vector_Ubar_cuda_kernel(globaldata, itm, nx, ny, Mach, gamma, pr_inf, rho_inf, aoa, result, prim):
 
     Ubar = cuda.local.array((4), numba.float64)
