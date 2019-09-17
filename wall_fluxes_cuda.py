@@ -9,7 +9,7 @@ from operator import add as addop, sub as subop
 
 
 @cuda.jit(device=True)
-def wall_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared, temp1, temp2, sum_delx_delf, sum_dely_delf):
+def wall_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf):
 
     sum_delx_sqr = 0
     sum_dely_sqr = 0
@@ -57,42 +57,18 @@ def wall_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared, temp1, 
         zeros(qtilde_k, qtilde_k)
 
         for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = delx * globaldata[idx]['dq'][0][i]
-            temp2[cuda.threadIdx.x + cuda.blockDim.x * i] = dely * globaldata[idx]['dq'][1][i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = 0.5 * (temp1[cuda.threadIdx.x + cuda.blockDim.x * i] + temp2[cuda.threadIdx.x + cuda.blockDim.x * i])
-            qtilde_i[i] = globaldata[idx]['q'][i] - temp1[cuda.threadIdx.x + cuda.blockDim.x * i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = delx * globaldata[itm]['dq'][0][i]
-            temp2[cuda.threadIdx.x + cuda.blockDim.x * i] = dely * globaldata[itm]['dq'][1][i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = 0.5 * (temp1[cuda.threadIdx.x + cuda.blockDim.x * i] + temp2[cuda.threadIdx.x + cuda.blockDim.x * i])
-            qtilde_k[i] = globaldata[itm]['q'][i] - temp1[cuda.threadIdx.x + cuda.blockDim.x * i]
+            qtilde_i[i] = globaldata[idx]['q'][i] - (0.5 * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
+            qtilde_k[i] = globaldata[itm]['q'][i] - (0.5 * (delx * globaldata[itm]['dq'][0][i] + dely * globaldata[itm]['dq'][1][i]))
 
         limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, shared)
 
         for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = delx * globaldata[idx]['dq'][0][i]
-            temp2[cuda.threadIdx.x + cuda.blockDim.x * i] = dely * globaldata[idx]['dq'][1][i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = temp1[cuda.threadIdx.x + cuda.blockDim.x * i] + temp2[cuda.threadIdx.x + cuda.blockDim.x * i]
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = temp1[cuda.threadIdx.x + cuda.blockDim.x * i] * shared[cuda.threadIdx.x + cuda.blockDim.x * i]
-            qtilde_i[i] = globaldata[idx]['q'][i] - temp1[cuda.threadIdx.x + cuda.blockDim.x * i]
+            qtilde_i[i] = globaldata[idx]['q'][i] - (shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
 
         limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, shared)
 
         for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = delx * globaldata[itm]['dq'][0][i]
-            temp2[cuda.threadIdx.x + cuda.blockDim.x * i] = dely * globaldata[itm]['dq'][1][i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = temp1[cuda.threadIdx.x + cuda.blockDim.x * i] + temp2[cuda.threadIdx.x + cuda.blockDim.x * i]
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = temp1[cuda.threadIdx.x + cuda.blockDim.x * i] * shared[cuda.threadIdx.x + cuda.blockDim.x * i]
-            qtilde_k[i] = globaldata[itm]['q'][i] - temp1[cuda.threadIdx.x + cuda.blockDim.x * i]
+            qtilde_k[i] = globaldata[itm]['q'][i] - (shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[itm]['dq'][0][i] + dely * globaldata[itm]['dq'][1][i]))
 
         qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
 
@@ -119,7 +95,7 @@ def wall_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared, temp1, 
         store[cuda.threadIdx.x + cuda.blockDim.x * i] += 2 * one_by_det * (sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
 
 @cuda.jit(device=True)
-def wall_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared, temp1, temp2, sum_delx_delf, sum_dely_delf):
+def wall_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf):
 
     sum_delx_sqr = 0
     sum_dely_sqr = 0
@@ -167,42 +143,18 @@ def wall_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared, temp1, 
         zeros(qtilde_k, qtilde_k)
 
         for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = delx * globaldata[idx]['dq'][0][i]
-            temp2[cuda.threadIdx.x + cuda.blockDim.x * i] = dely * globaldata[idx]['dq'][1][i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = 0.5 * (temp1[cuda.threadIdx.x + cuda.blockDim.x * i] + temp2[cuda.threadIdx.x + cuda.blockDim.x * i])
-            qtilde_i[i] = globaldata[idx]['q'][i] - temp1[cuda.threadIdx.x + cuda.blockDim.x * i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = delx * globaldata[itm]['dq'][0][i]
-            temp2[cuda.threadIdx.x + cuda.blockDim.x * i] = dely * globaldata[itm]['dq'][1][i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = 0.5 * (temp1[cuda.threadIdx.x + cuda.blockDim.x * i] + temp2[cuda.threadIdx.x + cuda.blockDim.x * i])
-            qtilde_k[i] = globaldata[itm]['q'][i] - temp1[cuda.threadIdx.x + cuda.blockDim.x * i]
+            qtilde_i[i] = globaldata[idx]['q'][i] - (0.5 * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
+            qtilde_k[i] = globaldata[itm]['q'][i] - (0.5 * (delx * globaldata[itm]['dq'][0][i] + dely * globaldata[itm]['dq'][1][i]))
 
         limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, shared)
 
         for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = delx * globaldata[idx]['dq'][0][i]
-            temp2[cuda.threadIdx.x + cuda.blockDim.x * i] = dely * globaldata[idx]['dq'][1][i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = temp1[cuda.threadIdx.x + cuda.blockDim.x * i] + temp2[cuda.threadIdx.x + cuda.blockDim.x * i]
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = temp1[cuda.threadIdx.x + cuda.blockDim.x * i] * shared[cuda.threadIdx.x + cuda.blockDim.x * i]
-            qtilde_i[i] = globaldata[idx]['q'][i] - temp1[cuda.threadIdx.x + cuda.blockDim.x * i]
+            qtilde_i[i] = globaldata[idx]['q'][i] - (shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
 
         limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, shared)
 
         for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = delx * globaldata[itm]['dq'][0][i]
-            temp2[cuda.threadIdx.x + cuda.blockDim.x * i] = dely * globaldata[itm]['dq'][1][i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = temp1[cuda.threadIdx.x + cuda.blockDim.x * i] + temp2[cuda.threadIdx.x + cuda.blockDim.x * i]
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = temp1[cuda.threadIdx.x + cuda.blockDim.x * i] * shared[cuda.threadIdx.x + cuda.blockDim.x * i]
-            qtilde_k[i] = globaldata[itm]['q'][i] - temp1[cuda.threadIdx.x + cuda.blockDim.x * i]
+            qtilde_k[i] = globaldata[itm]['q'][i] - (shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[itm]['dq'][0][i] + dely * globaldata[itm]['dq'][1][i]))
 
         qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
 
@@ -229,7 +181,7 @@ def wall_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared, temp1, 
         store[cuda.threadIdx.x + cuda.blockDim.x * i] += 2 * one_by_det * (sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
 
 @cuda.jit(device=True)
-def wall_dGy_neg(globaldata, idx, power, vl_const, gamma, store, shared, temp1, temp2, sum_delx_delf, sum_dely_delf):
+def wall_dGy_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf):
 
     sum_delx_sqr = 0
     sum_dely_sqr = 0
@@ -277,42 +229,18 @@ def wall_dGy_neg(globaldata, idx, power, vl_const, gamma, store, shared, temp1, 
         zeros(qtilde_k, qtilde_k)
 
         for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = delx * globaldata[idx]['dq'][0][i]
-            temp2[cuda.threadIdx.x + cuda.blockDim.x * i] = dely * globaldata[idx]['dq'][1][i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = 0.5 * (temp1[cuda.threadIdx.x + cuda.blockDim.x * i] + temp2[cuda.threadIdx.x + cuda.blockDim.x * i])
-            qtilde_i[i] = globaldata[idx]['q'][i] - temp1[cuda.threadIdx.x + cuda.blockDim.x * i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = delx * globaldata[itm]['dq'][0][i]
-            temp2[cuda.threadIdx.x + cuda.blockDim.x * i] = dely * globaldata[itm]['dq'][1][i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = 0.5 * (temp1[cuda.threadIdx.x + cuda.blockDim.x * i] + temp2[cuda.threadIdx.x + cuda.blockDim.x * i])
-            qtilde_k[i] = globaldata[itm]['q'][i] - temp1[cuda.threadIdx.x + cuda.blockDim.x * i]
+            qtilde_i[i] = globaldata[idx]['q'][i] - (0.5 * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
+            qtilde_k[i] = globaldata[itm]['q'][i] - (0.5 * (delx * globaldata[itm]['dq'][0][i] + dely * globaldata[itm]['dq'][1][i]))
 
         limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, shared)
 
         for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = delx * globaldata[idx]['dq'][0][i]
-            temp2[cuda.threadIdx.x + cuda.blockDim.x * i] = dely * globaldata[idx]['dq'][1][i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = temp1[cuda.threadIdx.x + cuda.blockDim.x * i] + temp2[cuda.threadIdx.x + cuda.blockDim.x * i]
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = temp1[cuda.threadIdx.x + cuda.blockDim.x * i] * shared[cuda.threadIdx.x + cuda.blockDim.x * i]
-            qtilde_i[i] = globaldata[idx]['q'][i] - temp1[cuda.threadIdx.x + cuda.blockDim.x * i]
+            qtilde_i[i] = globaldata[idx]['q'][i] - (shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
 
         limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, shared)
 
         for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = delx * globaldata[itm]['dq'][0][i]
-            temp2[cuda.threadIdx.x + cuda.blockDim.x * i] = dely * globaldata[itm]['dq'][1][i]
-
-        for i in range(4):
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = temp1[cuda.threadIdx.x + cuda.blockDim.x * i] + temp2[cuda.threadIdx.x + cuda.blockDim.x * i]
-            temp1[cuda.threadIdx.x + cuda.blockDim.x * i] = temp1[cuda.threadIdx.x + cuda.blockDim.x * i] * shared[cuda.threadIdx.x + cuda.blockDim.x * i]
-            qtilde_k[i] = globaldata[itm]['q'][i] - temp1[cuda.threadIdx.x + cuda.blockDim.x * i]
+            qtilde_k[i] = globaldata[itm]['q'][i] - (shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[itm]['dq'][0][i] + dely * globaldata[itm]['dq'][1][i]))
 
         qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
 
