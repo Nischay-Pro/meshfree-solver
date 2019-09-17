@@ -69,10 +69,10 @@ function convertToFixedArray(targetArray1, originalStruct::Point, idx, numPoints
 end
 
 function convertToNeighbourArray(targetArray2, originalStruct::Point, idx)
-    targetArray2[1] = originalStruct.xpos_nbhs
-    targetArray2[2] = originalStruct.xneg_nbhs
-    targetArray2[3] = originalStruct.ypos_nbhs
-    targetArray2[4] = originalStruct.yneg_nbhs
+    targetArray2[1, idx] = originalStruct.xpos_nbhs
+    targetArray2[2, idx] = originalStruct.xneg_nbhs
+    targetArray2[3, idx] = originalStruct.ypos_nbhs
+    targetArray2[4, idx] = originalStruct.yneg_nbhs
     targetArray2[5:4 + originalStruct.nbhs, idx] = originalStruct.conn
     targetArray2[15:14 + originalStruct.xpos_nbhs, idx] = originalStruct.xpos_conn
     targetArray2[25:24 + originalStruct.xneg_nbhs, idx] = originalStruct.xneg_conn
@@ -81,6 +81,13 @@ function convertToNeighbourArray(targetArray2, originalStruct::Point, idx)
     return  nothing
 end
 
+function convertToFauxArray(targetArray1, originalStruct::Point, idx, numPoints)
+    targetArray1[idx] = originalStruct.x
+    targetArray1[idx + numPoints] = originalStruct.y
+    targetArray1[idx + 2 * numPoints] = originalStruct.nx
+    targetArray1[idx + 3 * numPoints] = originalStruct.ny
+    return nothing
+end
 
 # function setSmallestPointDistance(self::Point, distance)
 #     self.short_distance = distance

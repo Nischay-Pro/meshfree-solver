@@ -1,4 +1,4 @@
-function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared, qtilde_shared)
+function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
     idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     thread_idx = threadIdx().x
     block_dim = blockDim().x
@@ -10,13 +10,13 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     sum_dely_delf = SVector{4,Float64}(0, 0, 0, 0)
 
 
-    x_i = gpuGlobalDataFixedPoint[idx].x
-    y_i = gpuGlobalDataFixedPoint[idx].y
-    nx = gpuGlobalDataFixedPoint[idx].nx
-    ny = gpuGlobalDataFixedPoint[idx].ny
+    x_i = gpuGlobalDataFauxFixed[idx]
+    y_i = gpuGlobalDataFauxFixed[idx + numPoints]
+    nx = gpuGlobalDataFauxFixed[idx + 2 * numPoints]
+    ny = gpuGlobalDataFauxFixed[idx + 3 * numPoints]
 
 
-    # power = gpuConfigData[6]
+    power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
     for iter in 15:24
         conn = gpuGlobalDataConn[iter, idx]
@@ -26,12 +26,12 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
 
         # x_k = gpuGlobalDataFixedPoint[conn].x
         # y_k = gpuGlobalDataFixedPoint[conn].y
-        delx = gpuGlobalDataFixedPoint[conn].x - x_i
-        dely = gpuGlobalDataFixedPoint[conn].y - y_i
+        delx = gpuGlobalDataFauxFixed[conn] - x_i
+        dely = gpuGlobalDataFauxFixed[conn + numPoints] - y_i
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, gpuConfigData[6])
+        weights = CUDAnative.pow(dist, power)
         # weights = 1.0
 
 
@@ -76,7 +76,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     return nothing
 end
 
-function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared, qtilde_shared)
+function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
     idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     thread_idx = threadIdx().x
     block_dim = blockDim().x
@@ -88,13 +88,13 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     sum_dely_delf = SVector{4,Float64}(0, 0, 0, 0)
     # shared[thread_idx + block_dim * 8], shared[thread_idx + block_dim * 9], shared[thread_idx + block_dim * 10], shared[thread_idx + block_dim * 11] = 0.0, 0.0, 0.0, 0.0
     # shared[thread_idx + block_dim * 12], shared[thread_idx + block_dim * 13], shared[thread_idx + block_dim * 14], shared[thread_idx + block_dim * 15] = 0.0, 0.0, 0.0, 0.0
-    x_i = gpuGlobalDataFixedPoint[idx].x
-    y_i = gpuGlobalDataFixedPoint[idx].y
-    nx = gpuGlobalDataFixedPoint[idx].nx
-    ny = gpuGlobalDataFixedPoint[idx].ny
+    x_i = gpuGlobalDataFauxFixed[idx]
+    y_i = gpuGlobalDataFauxFixed[idx + numPoints]
+    nx = gpuGlobalDataFauxFixed[idx + 2 * numPoints]
+    ny = gpuGlobalDataFauxFixed[idx + 3 * numPoints]
 
 
-    # power = gpuConfigData[6]
+    power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
     for iter in 25:34
         conn = gpuGlobalDataConn[iter, idx]
@@ -104,12 +104,12 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
 
         # x_k = gpuGlobalDataFixedPoint[conn].x
         # y_k = gpuGlobalDataFixedPoint[conn].y
-        delx = gpuGlobalDataFixedPoint[conn].x - x_i
-        dely = gpuGlobalDataFixedPoint[conn].y - y_i
+        delx = gpuGlobalDataFauxFixed[conn] - x_i
+        dely = gpuGlobalDataFauxFixed[conn + numPoints] - y_i
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, gpuConfigData[6])
+        weights = CUDAnative.pow(dist, power)
         # weights = 1.0
 
 
@@ -163,7 +163,7 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     return nothing
 end
 
-function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, shared, flux_shared, qtilde_shared)
+function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
     idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     thread_idx = threadIdx().x
     block_dim = blockDim().x
@@ -176,14 +176,14 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
 
 
 
-    x_i = gpuGlobalDataFixedPoint[idx].x
-    y_i = gpuGlobalDataFixedPoint[idx].y
-    nx = gpuGlobalDataFixedPoint[idx].nx
-    ny = gpuGlobalDataFixedPoint[idx].ny
+    x_i = gpuGlobalDataFauxFixed[idx]
+    y_i = gpuGlobalDataFauxFixed[idx + numPoints]
+    nx = gpuGlobalDataFauxFixed[idx + 2 * numPoints]
+    ny = gpuGlobalDataFauxFixed[idx + 3 * numPoints]
 
 
 
-    # power = gpuConfigData[6]
+    power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
 
     for iter in 45:54
@@ -194,12 +194,12 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
 
         # x_k = gpuGlobalDataFixedPoint[conn].x
         # y_k = gpuGlobalDataFixedPoint[conn].y
-        delx = gpuGlobalDataFixedPoint[conn].x - x_i
-        dely = gpuGlobalDataFixedPoint[conn].y - y_i
+        delx = gpuGlobalDataFauxFixed[conn] - x_i
+        dely = gpuGlobalDataFauxFixed[conn + numPoints] - y_i
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
         dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, gpuConfigData[6])
+        weights = CUDAnative.pow(dist, power)
         # weights = 1.0
 
 
