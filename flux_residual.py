@@ -55,7 +55,6 @@ def cal_flux_residual_cuda_kernel(globaldata, power, vl_const, gamma, wall, inte
 
 		other_shared = cuda.shared.array(shape = (1024), dtype=numba.float64)
 		flux_shared = cuda.shared.array(shape = (256), dtype=numba.float64)
-		temp1 = cuda.shared.array(shape = (256), dtype=numba.float64)
 		sum_delx_delf = cuda.shared.array(shape = (256), dtype=numba.float64)
 		sum_dely_delf = cuda.shared.array(shape = (256), dtype=numba.float64)
 		

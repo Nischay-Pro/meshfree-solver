@@ -87,11 +87,7 @@ def interior_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared, sum
     one_by_det = 1 / det
 
     for i in range(4):
-        sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] *= sum_dely_sqr
-        sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] *= sum_delx_dely
-
-    for i in range(4):
-        store[cuda.threadIdx.x + cuda.blockDim.x * i] += one_by_det * (sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
+        store[cuda.threadIdx.x + cuda.blockDim.x * i] += one_by_det * (sum_dely_sqr * sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_delx_dely * sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
 
 @cuda.jit(device=True)
 def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf):
@@ -173,11 +169,7 @@ def interior_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum
     one_by_det = 1 / det
 
     for i in range(4):
-        sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] *= sum_dely_sqr
-        sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] *= sum_delx_dely
-
-    for i in range(4):
-        store[cuda.threadIdx.x + cuda.blockDim.x * i] += one_by_det * (sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
+        store[cuda.threadIdx.x + cuda.blockDim.x * i] += one_by_det * (sum_dely_sqr * sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_delx_dely * sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
 
 @cuda.jit(device=True)
 def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf):
@@ -259,11 +251,7 @@ def interior_dGy_pos(globaldata, idx, power, vl_const, gamma, store, shared, sum
     one_by_det = 1 / det
 
     for i in range(4):
-        sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] *= sum_delx_dely
-        sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] *= sum_delx_sqr
-
-    for i in range(4):
-        store[cuda.threadIdx.x + cuda.blockDim.x * i] += one_by_det * (sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
+        store[cuda.threadIdx.x + cuda.blockDim.x * i] += one_by_det * (sum_delx_sqr * sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_delx_dely * sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
 
 @cuda.jit(device=True)
 def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf):
@@ -346,8 +334,4 @@ def interior_dGy_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum
     one_by_det = 1 / det
 
     for i in range(4):
-        sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] *= sum_delx_dely
-        sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] *= sum_delx_sqr
-
-    for i in range(4):
-        store[cuda.threadIdx.x + cuda.blockDim.x * i] += one_by_det * (sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
+        store[cuda.threadIdx.x + cuda.blockDim.x * i] += one_by_det * (sum_delx_sqr * sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_delx_dely * sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
