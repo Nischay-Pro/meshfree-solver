@@ -22,7 +22,7 @@ function interior_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
     power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
     for iter in 15:24
-        conn = gpuGlobalDataConn[iter, idx]
+        conn = gpuGlobalDataConn[idx, iter]
         if conn == 0.0
             break
         end
@@ -89,7 +89,7 @@ function interior_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
     power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
     for iter in 25:34
-        conn = gpuGlobalDataConn[iter, idx]
+        conn = gpuGlobalDataConn[idx, iter]
         if conn == 0.0
             break
         end
@@ -153,7 +153,7 @@ function interior_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
     # gamma = gpuConfigData[15]
 
     for iter in 35:44
-        conn = gpuGlobalDataConn[iter, idx]
+        conn = gpuGlobalDataConn[idx, iter]
         if conn == 0.0
             break
         end
@@ -220,7 +220,7 @@ function interior_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpu
     # gamma = gpuConfigData[15]
 
     for iter in 45:54
-        conn = gpuGlobalDataConn[iter, idx]
+        conn = gpuGlobalDataConn[idx, iter]
         if conn == 0.0
             break
         end

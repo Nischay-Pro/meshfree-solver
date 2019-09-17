@@ -69,15 +69,15 @@ function convertToFixedArray(targetArray1, originalStruct::Point, idx, numPoints
 end
 
 function convertToNeighbourArray(targetArray2, originalStruct::Point, idx)
-    targetArray2[1, idx] = originalStruct.xpos_nbhs
-    targetArray2[2, idx] = originalStruct.xneg_nbhs
-    targetArray2[3, idx] = originalStruct.ypos_nbhs
-    targetArray2[4, idx] = originalStruct.yneg_nbhs
-    targetArray2[5:4 + originalStruct.nbhs, idx] = originalStruct.conn
-    targetArray2[15:14 + originalStruct.xpos_nbhs, idx] = originalStruct.xpos_conn
-    targetArray2[25:24 + originalStruct.xneg_nbhs, idx] = originalStruct.xneg_conn
-    targetArray2[35:34 + originalStruct.ypos_nbhs, idx] = originalStruct.ypos_conn
-    targetArray2[45:44 + originalStruct.yneg_nbhs, idx] = originalStruct.yneg_conn
+    targetArray2[idx, 1] = originalStruct.xpos_nbhs
+    targetArray2[idx, 2] = originalStruct.xneg_nbhs
+    targetArray2[idx, 3] = originalStruct.ypos_nbhs
+    targetArray2[idx, 4] = originalStruct.yneg_nbhs
+    targetArray2[idx, 5:4 + originalStruct.nbhs] = originalStruct.conn
+    targetArray2[idx, 15:14 + originalStruct.xpos_nbhs] = originalStruct.xpos_conn
+    targetArray2[idx, 25:24 + originalStruct.xneg_nbhs] = originalStruct.xneg_conn
+    targetArray2[idx, 35:34 + originalStruct.ypos_nbhs] = originalStruct.ypos_conn
+    targetArray2[idx, 45:44 + originalStruct.yneg_nbhs] = originalStruct.yneg_conn
     return  nothing
 end
 

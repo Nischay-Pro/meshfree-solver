@@ -21,7 +21,7 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     # gamma = gpuConfigData[15]
 
     for iter in 15:24
-        conn = gpuGlobalDataConn[iter, idx]
+        conn = gpuGlobalDataConn[idx, iter]
         if conn == 0.0
             break
         end
@@ -86,7 +86,7 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     # gamma = gpuConfigData[15]
 
     for iter in 25:34
-        conn = gpuGlobalDataConn[iter, idx]
+        conn = gpuGlobalDataConn[idx, iter]
         if conn == 0.0
             break
         end
@@ -152,7 +152,7 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlo
     # gamma = gpuConfigData[15]
 
     for iter in 35:44
-        conn = gpuGlobalDataConn[iter, idx]
+        conn = gpuGlobalDataConn[idx, iter]
         if conn == 0.0
             break
         end

@@ -222,7 +222,7 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpu
 		gpuGlobalDataRest[25, idx], gpuGlobalDataRest[26, idx], gpuGlobalDataRest[27, idx], gpuGlobalDataRest[28, idx] = q1,q2,q3,q4
 
         for iter in 5:14
-            conn = gpuGlobalDataConn[iter, idx]
+            conn = gpuGlobalDataConn[idx, iter]
             if conn == 0.0
                 break
             end
@@ -298,7 +298,7 @@ function q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFix
         q1, q2, q3, q4 = gpuGlobalDataRest[9, idx], gpuGlobalDataRest[10, idx], gpuGlobalDataRest[11, idx], gpuGlobalDataRest[12, idx]
 
         for iter in 5:14
-            conn = gpuGlobalDataConn[iter, idx]
+            conn = gpuGlobalDataConn[idx, iter]
             if conn == 0.0
                 break
             end

@@ -8,7 +8,7 @@
         # TODO - Possible problem?
         min_delt = one(Float64)
         for iter in 5:14
-            conn = gpuGlobalDataConn[iter, idx]
+            conn = gpuGlobalDataConn[idx, iter]
             if conn == zero(Float64)
                 break
             end

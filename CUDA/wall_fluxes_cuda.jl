@@ -19,7 +19,7 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
     for iter in 15:24
-        conn = gpuGlobalDataConn[iter, idx]
+        conn = gpuGlobalDataConn[idx, iter]
         if conn == 0.0
             break
         end
@@ -97,7 +97,7 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
     for iter in 25:34
-        conn = gpuGlobalDataConn[iter, idx]
+        conn = gpuGlobalDataConn[idx, iter]
         if conn == 0.0
             break
         end
@@ -174,20 +174,16 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
     sum_delx_delf = SVector{4,Float64}(0, 0, 0, 0)
     sum_dely_delf = SVector{4,Float64}(0, 0, 0, 0)
 
-
-
     x_i = gpuGlobalDataFauxFixed[idx]
     y_i = gpuGlobalDataFauxFixed[idx + numPoints]
     nx = gpuGlobalDataFauxFixed[idx + 2 * numPoints]
     ny = gpuGlobalDataFauxFixed[idx + 3 * numPoints]
 
-
-
     power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
 
     for iter in 45:54
-        conn = gpuGlobalDataConn[iter, idx]
+        conn = gpuGlobalDataConn[idx, iter]
         if conn == 0.0
             break
         end
