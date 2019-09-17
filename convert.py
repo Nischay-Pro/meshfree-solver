@@ -101,7 +101,8 @@ def convert_globaldata_to_gpu_globaldata(globaldata):
                             ('ypos_conn', np.int32, (20,)),
                             ('yneg_conn', np.int32, (20,)),
                             ('delta', pres),
-                            ('min_dist', pres)], align=True)
+                            ('min_dist', pres),
+                            ('maxminq', pres, (2, 4))], align=True)
     temp = np.zeros(len(globaldata), dtype=point_dtype)
     for idx in trange(len(globaldata)):
         if idx > 0:

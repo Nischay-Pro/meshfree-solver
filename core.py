@@ -344,7 +344,11 @@ def q_var_derivatives_cuda_kernel(globaldata, power):
 
         for conn in itm['conn'][:itm['nbhs']]:
 
-
+            for i in range(4):
+                if globaldata[conn]['q'][i] > globaldata[idx]['maxminq'][0][i]:
+                    globaldata[idx]['maxminq'][0][i] = globaldata[conn]['q'][i]
+                if globaldata[conn]['q'][i] < globaldata[idx]['maxminq'][1][i]:
+                    globaldata[idx]['maxminq'][1][i] = globaldata[conn]['q'][i]
 
             x_k = globaldata[conn]['x']
             y_k = globaldata[conn]['y']
