@@ -73,6 +73,76 @@ def pointToNumpy(x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, pr
     temp['min_dist'] = min_dist
     return temp
 
+def convert_globaldata_to_gpu_globaldata_new(globaldata):
+    pres = np.float64
+
+    x = np.zeros(len(globaldata), dtype=np.float64)
+    y = np.zeros(len(globaldata), dtype=np.float64)
+    left = np.zeros(len(globaldata), dtype=np.int32)
+    right = np.zeros(len(globaldata), dtype=np.int32)
+    flag_1 = np.zeros(len(globaldata), dtype=np.int8)
+    flag_2 = np.zeros(len(globaldata), dtype=np.int8)
+    nbhs = np.zeros(len(globaldata), dtype=np.int8)
+    conn = np.zeros((len(globaldata), 20), dtype=np.int32)
+    nx = np.zeros(len(globaldata), np.float64)
+    ny = np.zeros(len(globaldata), np.float64)
+    prim = np.zeros((len(globaldata), 4), np.float64)
+    prim_old = np.zeros((len(globaldata), 4), np.float64)
+    flux_res = np.zeros((len(globaldata), 4), np.float64)
+    q = np.zeros((len(globaldata), 4), np.float64)
+    dq = np.zeros((len(globaldata), 2, 4), np.float64)
+    entropy = np.zeros(len(globaldata), np.float64)
+    xpos_nbhs = np.zeros(len(globaldata), np.int8)
+    xneg_nbhs = np.zeros(len(globaldata), np.int8)
+    ypos_nbhs = np.zeros(len(globaldata), np.int8)
+    yneg_nbhs = np.zeros(len(globaldata), np.int8)
+    xpos_conn = np.zeros((len(globaldata), 20), np.int32)
+    xneg_conn = np.zeros((len(globaldata), 20), np.int32)
+    ypos_conn = np.zeros((len(globaldata), 20), np.int32)
+    yneg_conn = np.zeros((len(globaldata), 20), np.int32)
+    delta = np.zeros(len(globaldata), np.float64)
+    min_dist = np.zeros(len(globaldata), np.float64)
+    maxminq = np.zeros((len(globaldata), 2, 4), np.float64)
+
+    for idx in trange(len(globaldata)):
+        if idx > 0:
+            x[idx] = globaldata[idx].x
+            y[idx] = globaldata[idx].y
+            left[idx] = globaldata[idx].left
+            right[idx] = globaldata[idx].right
+            flag_1[idx] = globaldata[idx].flag_1
+            flag_2[idx] = globaldata[idx].flag_2
+            nbhs[idx] = globaldata[idx].nbhs
+            connt = globaldata[idx].conn
+            for i in range(len(connt)):
+                conn[idx][i] = connt[i]
+            nx[idx] = globaldata[idx].nx
+            ny[idx] = globaldata[idx].ny
+            prim[idx] = globaldata[idx].prim
+            prim_old[idx] = np.zeros((4,))
+            flux_res[idx] = globaldata[idx].flux_res
+            q[idx] = globaldata[idx].q
+            dq[idx] = globaldata[idx].dq
+            xpos_nbhs[idx] = globaldata[idx].xpos_nbhs
+            xneg_nbhs[idx] = globaldata[idx].xneg_nbhs
+            ypos_nbhs[idx] = globaldata[idx].ypos_nbhs
+            yneg_nbhs[idx] = globaldata[idx].yneg_nbhs
+            xpos_connt = globaldata[idx].xpos_conn
+            for i in range(len(xpos_connt)):
+                xpos_conn[idx][i] = xpos_connt[i]
+            xneg_connt = globaldata[idx].xneg_conn
+            for i in range(len(xneg_connt)):
+                xneg_conn[idx][i] = xneg_connt[i]
+            ypos_connt = globaldata[idx].ypos_conn
+            for i in range(len(ypos_connt)):
+                ypos_conn[idx][i] = ypos_connt[i]
+            yneg_connt = globaldata[idx].yneg_conn
+            for i in range(len(yneg_connt)):
+                yneg_conn[idx][i] = yneg_connt[i]
+            delta[idx] = globaldata[idx].delta
+            min_dist[idx] = globaldata[idx].min_dist
+    
+    return x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, prim_old, flux_res, q, dq, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta, min_dist, maxminq
 
 def convert_globaldata_to_gpu_globaldata(globaldata):
     pres = np.float64

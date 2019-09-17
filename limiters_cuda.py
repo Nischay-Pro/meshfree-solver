@@ -3,22 +3,22 @@ from numba import cuda
 import numba
 
 @cuda.jit(device=True)
-def venkat_limiter(qtilde_shared, globaldata, idx, VL_CONST, shared, delx, dely, gamma):
-    epsi = VL_CONST * globaldata[idx]['min_dist']
+def venkat_limiter(qtilde_shared, q_gpu, maxminq, dq, nbhs, conn, x, y, min_dist, idx, VL_CONST, shared, delx, dely, gamma):
+    epsi = VL_CONST * min_dist[idx]
     epsi = math.pow(epsi,3)
     for i in range(4):
         qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = 1
-        q = globaldata[idx]['q'][i]
-        del_neg = globaldata[idx]['q'][i] - (0.5 * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i])) - q
+        q = q_gpu[idx][i]
+        del_neg = q_gpu[idx][i] - (0.5 * (delx * dq[idx][0][i] + dely * dq[idx][1][i])) - q
         
         if math.fabs(del_neg) <= 1e-5:
             qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = 1
 
         elif math.fabs(del_neg) > 1e-5:
             if del_neg > 0:
-                del_pos = globaldata[idx]['maxminq'][0][i] - q
+                del_pos = maxminq[idx][0][i] - q
             elif del_neg < 0:
-                del_pos = globaldata[idx]['maxminq'][1][i] - q
+                del_pos = maxminq[idx][1][i] - q
 
             num = (del_pos*del_pos) + (epsi*epsi)
             num = num*del_neg + 2.0*del_neg*del_neg*del_pos
@@ -36,7 +36,7 @@ def venkat_limiter(qtilde_shared, globaldata, idx, VL_CONST, shared, delx, dely,
                 qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = 1 
 
     for i in range(4):
-        qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = globaldata[idx]['q'][i] - 0.5 * (qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
+        qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = q_gpu[idx][i] - 0.5 * (qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * dq[idx][0][i] + dely * dq[idx][1][i]))
 
     beta = - qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * 3] * 0.5
 
