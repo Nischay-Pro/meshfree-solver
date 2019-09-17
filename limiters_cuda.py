@@ -2,35 +2,31 @@ import math
 from numba import cuda
 import numba
 
-@cuda.jit(device=True, inline=True)
-def venkat_limiter(qtilde, globaldata, idx, VL_CONST, phi):
+@cuda.jit(device=True)
+def venkat_limiter(qtilde_shared, globaldata, idx, VL_CONST, shared, delx, dely, gamma):
     del_pos = 0
     del_neg = 0
     max_q = cuda.local.array(4, dtype=numba.float64)
     min_q = cuda.local.array(4, dtype=numba.float64)
-    # ds = cuda.local.array(1, dtype=numba.float64)
+    epsi = VL_CONST * globaldata[idx]['min_dist']
+    epsi = math.pow(epsi,3)
     for i in range(4):
+        qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = 1
         q = globaldata[idx]['q'][i]
-        del_neg = qtilde[i] - q
+        del_neg = globaldata[idx]['q'][i] - (0.5 * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i])) - q
+        
         if math.fabs(del_neg) <= 1e-5:
-            phi[cuda.threadIdx.x + cuda.blockDim.x * i] = 0.5
+            qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = 1
+
         elif math.fabs(del_neg) > 1e-5:
             if del_neg > 0:
                 max_q[i] = 0
                 maximum(globaldata, idx, i, max_q)
                 del_pos = max_q[i] - q
-                # del_pos = globaldata[idx]['maxq'][i] - q
             elif del_neg < 0:
                 min_q[i] = 0
                 minimum(globaldata, idx, i, min_q)
                 del_pos = min_q[i] - q
-                # del_pos = globaldata[idx]['minq'][i] - q
-
-            # ds[0] = 0
-            # smallest_dist(globaldata, idx, ds)
-            # epsi = VL_CONST * ds[0]
-            epsi = VL_CONST * globaldata[idx]['min_dist']
-            epsi = math.pow(epsi,3)
 
             num = (del_pos*del_pos) + (epsi*epsi)
             num = num*del_neg + 2.0*del_neg*del_neg*del_pos
@@ -42,9 +38,30 @@ def venkat_limiter(qtilde, globaldata, idx, VL_CONST, phi):
             temp = num/den
 
             if temp < 1:
-                phi[cuda.threadIdx.x + cuda.blockDim.x * i] = temp * 0.5
+                qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = temp
+
             else:
-                phi[cuda.threadIdx.x + cuda.blockDim.x * i] = 0.5
+                qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = 1 
+
+    for i in range(4):
+        qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = globaldata[idx]['q'][i] - 0.5 * (qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
+
+    beta = - qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * 3] * 0.5
+
+    temp = 0.5/beta
+
+    u1 = qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * 1] * temp
+    u2 = qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * 2] * temp
+
+    temp1 = qtilde_shared[cuda.threadIdx.x] + beta * ( u1 * u1 + u2 * u2 )
+    temp2 = temp1 - (math.log(beta)/(gamma-1))
+    rho = math.exp(temp2)
+    pr = rho * temp
+
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 4] = u1
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 5] = u2
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 6] = rho
+    shared[cuda.threadIdx.x + cuda.blockDim.x * 7] = pr
 
 @cuda.jit(device=True, inline=True)
 def maximum(globaldata, idx, i, maxval):

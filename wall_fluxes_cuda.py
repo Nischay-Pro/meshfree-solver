@@ -9,14 +9,11 @@ from operator import add as addop, sub as subop
 
 
 @cuda.jit(device=True)
-def wall_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf):
+def wall_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf, qtilde_shared):
 
     sum_delx_sqr = 0
     sum_dely_sqr = 0
     sum_delx_dely = 0
-
-    qtilde_i = cuda.local.array((4), numba.float64)
-    qtilde_k = cuda.local.array((4), numba.float64)
 
     x_i = globaldata[idx]['x']
     y_i = globaldata[idx]['y']
@@ -53,31 +50,12 @@ def wall_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared, sum_del
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        zeros(qtilde_i, qtilde_i)
-        zeros(qtilde_k, qtilde_k)
-
-        for i in range(4):
-            qtilde_i[i] = globaldata[idx]['q'][i] - (0.5 * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
-            qtilde_k[i] = globaldata[itm]['q'][i] - (0.5 * (delx * globaldata[itm]['dq'][0][i] + dely * globaldata[itm]['dq'][1][i]))
-
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, shared)
-
-        for i in range(4):
-            qtilde_i[i] = globaldata[idx]['q'][i] - (shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
-
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, shared)
-
-        for i in range(4):
-            qtilde_k[i] = globaldata[itm]['q'][i] - (shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[itm]['dq'][0][i] + dely * globaldata[itm]['dq'][1][i]))
-
-        qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
-
         shared[cuda.threadIdx.x], shared[cuda.threadIdx.x + cuda.blockDim.x], shared[cuda.threadIdx.x + cuda.blockDim.x * 2], shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
 
+        limiters_cuda.venkat_limiter(qtilde_shared, globaldata, idx, vl_const, shared, delx, dely, gamma)
         quadrant_fluxes_cuda.flux_quad_GxII(nx, ny, shared, addop)
 
-        qtilde_to_primitive_cuda(qtilde_k, gamma, shared)
-
+        limiters_cuda.venkat_limiter(qtilde_shared, globaldata, itm, vl_const, shared, delx, dely, gamma)
         quadrant_fluxes_cuda.flux_quad_GxII(nx, ny, shared, subop)
 
         for i in range(4):
@@ -95,14 +73,11 @@ def wall_dGx_pos(globaldata, idx, power, vl_const, gamma, store, shared, sum_del
         store[cuda.threadIdx.x + cuda.blockDim.x * i] += 2 * one_by_det * (sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
 
 @cuda.jit(device=True)
-def wall_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf):
+def wall_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf, qtilde_shared):
 
     sum_delx_sqr = 0
     sum_dely_sqr = 0
     sum_delx_dely = 0
-
-    qtilde_i = cuda.local.array((4), numba.float64)
-    qtilde_k = cuda.local.array((4), numba.float64)
 
     x_i = globaldata[idx]['x']
     y_i = globaldata[idx]['y']
@@ -139,31 +114,12 @@ def wall_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum_del
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        zeros(qtilde_i, qtilde_i)
-        zeros(qtilde_k, qtilde_k)
-
-        for i in range(4):
-            qtilde_i[i] = globaldata[idx]['q'][i] - (0.5 * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
-            qtilde_k[i] = globaldata[itm]['q'][i] - (0.5 * (delx * globaldata[itm]['dq'][0][i] + dely * globaldata[itm]['dq'][1][i]))
-
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, shared)
-
-        for i in range(4):
-            qtilde_i[i] = globaldata[idx]['q'][i] - (shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
-
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, shared)
-
-        for i in range(4):
-            qtilde_k[i] = globaldata[itm]['q'][i] - (shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[itm]['dq'][0][i] + dely * globaldata[itm]['dq'][1][i]))
-
-        qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
-
         shared[cuda.threadIdx.x], shared[cuda.threadIdx.x + cuda.blockDim.x], shared[cuda.threadIdx.x + cuda.blockDim.x * 2], shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
 
+        limiters_cuda.venkat_limiter(qtilde_shared, globaldata, idx, vl_const, shared, delx, dely, gamma)
         quadrant_fluxes_cuda.flux_quad_GxI(nx, ny, shared, addop)
 
-        qtilde_to_primitive_cuda(qtilde_k, gamma, shared)
-
+        limiters_cuda.venkat_limiter(qtilde_shared, globaldata, itm, vl_const, shared, delx, dely, gamma)
         quadrant_fluxes_cuda.flux_quad_GxI(nx, ny, shared, subop)
 
         for i in range(4):
@@ -181,14 +137,11 @@ def wall_dGx_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum_del
         store[cuda.threadIdx.x + cuda.blockDim.x * i] += 2 * one_by_det * (sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
 
 @cuda.jit(device=True)
-def wall_dGy_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf):
+def wall_dGy_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf, qtilde_shared):
 
     sum_delx_sqr = 0
     sum_dely_sqr = 0
     sum_delx_dely = 0
-
-    qtilde_i = cuda.local.array((4), numba.float64)
-    qtilde_k = cuda.local.array((4), numba.float64)
 
     x_i = globaldata[idx]['x']
     y_i = globaldata[idx]['y']
@@ -225,31 +178,12 @@ def wall_dGy_neg(globaldata, idx, power, vl_const, gamma, store, shared, sum_del
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        zeros(qtilde_i, qtilde_i)
-        zeros(qtilde_k, qtilde_k)
-
-        for i in range(4):
-            qtilde_i[i] = globaldata[idx]['q'][i] - (0.5 * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
-            qtilde_k[i] = globaldata[itm]['q'][i] - (0.5 * (delx * globaldata[itm]['dq'][0][i] + dely * globaldata[itm]['dq'][1][i]))
-
-        limiters_cuda.venkat_limiter(qtilde_i, globaldata, idx, vl_const, shared)
-
-        for i in range(4):
-            qtilde_i[i] = globaldata[idx]['q'][i] - (shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[idx]['dq'][0][i] + dely * globaldata[idx]['dq'][1][i]))
-
-        limiters_cuda.venkat_limiter(qtilde_k, globaldata, itm, vl_const, shared)
-
-        for i in range(4):
-            qtilde_k[i] = globaldata[itm]['q'][i] - (shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * globaldata[itm]['dq'][0][i] + dely * globaldata[itm]['dq'][1][i]))
-
-        qtilde_to_primitive_cuda(qtilde_i, gamma, shared)
-
         shared[cuda.threadIdx.x], shared[cuda.threadIdx.x + cuda.blockDim.x], shared[cuda.threadIdx.x + cuda.blockDim.x * 2], shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
 
+        limiters_cuda.venkat_limiter(qtilde_shared, globaldata, idx, vl_const, shared, delx, dely, gamma)
         split_fluxes_cuda.flux_Gyn(nx, ny, shared, addop)
 
-        qtilde_to_primitive_cuda(qtilde_k, gamma, shared)
-
+        limiters_cuda.venkat_limiter(qtilde_shared, globaldata, itm, vl_const, shared, delx, dely, gamma)
         split_fluxes_cuda.flux_Gyn(nx, ny, shared, subop)
 
         for i in range(4):
