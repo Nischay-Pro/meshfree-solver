@@ -55,6 +55,11 @@ def cal_flux_residual_cuda_kernel(globaldata, power, vl_const, gamma, wall, inte
 
 		other_shared = cuda.shared.array(shape = (1024), dtype=numba.float64)
 		flux_shared = cuda.shared.array(shape = (256), dtype=numba.float64)
+		temp1 = cuda.shared.array(shape = (256), dtype=numba.float64)
+		temp2 = cuda.shared.array(shape = (256), dtype=numba.float64)
+		sum_delx_delf = cuda.shared.array(shape = (256), dtype=numba.float64)
+		sum_dely_delf = cuda.shared.array(shape = (256), dtype=numba.float64)
+		
 
 		zeros(other_shared, other_shared)
 		zeros(flux_shared, flux_shared)
@@ -63,9 +68,9 @@ def cal_flux_residual_cuda_kernel(globaldata, power, vl_const, gamma, wall, inte
 		flag_1 = itm['flag_1']
 		if flag_1 == wall:
 
-			wall_fluxes_cuda.wall_dGx_pos(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared)
-			wall_fluxes_cuda.wall_dGx_neg(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared)
-			wall_fluxes_cuda.wall_dGy_neg(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared)
+			wall_fluxes_cuda.wall_dGx_pos(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared, temp1, temp2, sum_delx_delf, sum_dely_delf)
+			wall_fluxes_cuda.wall_dGx_neg(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared, temp1, temp2, sum_delx_delf, sum_dely_delf)
+			wall_fluxes_cuda.wall_dGy_neg(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared, temp1, temp2, sum_delx_delf, sum_dely_delf)
 
 			globaldata[idx]['flux_res'][0] = flux_shared[cuda.threadIdx.x]
 			globaldata[idx]['flux_res'][1] = flux_shared[cuda.threadIdx.x + cuda.blockDim.x]
@@ -74,10 +79,10 @@ def cal_flux_residual_cuda_kernel(globaldata, power, vl_const, gamma, wall, inte
 
 		elif flag_1 == interior:
 
-			interior_fluxes_cuda.interior_dGx_pos(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared)
-			interior_fluxes_cuda.interior_dGx_neg(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared)
-			interior_fluxes_cuda.interior_dGy_pos(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared)
-			interior_fluxes_cuda.interior_dGy_neg(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared)
+			interior_fluxes_cuda.interior_dGx_pos(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared, temp1, temp2, sum_delx_delf, sum_dely_delf)
+			interior_fluxes_cuda.interior_dGx_neg(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared, temp1, temp2, sum_delx_delf, sum_dely_delf)
+			interior_fluxes_cuda.interior_dGy_pos(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared, temp1, temp2, sum_delx_delf, sum_dely_delf)
+			interior_fluxes_cuda.interior_dGy_neg(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared, temp1, temp2, sum_delx_delf, sum_dely_delf)
 
 			globaldata[idx]['flux_res'][0] = flux_shared[cuda.threadIdx.x]
 			globaldata[idx]['flux_res'][1] = flux_shared[cuda.threadIdx.x + cuda.blockDim.x]
@@ -86,9 +91,9 @@ def cal_flux_residual_cuda_kernel(globaldata, power, vl_const, gamma, wall, inte
 
 		elif flag_1 == outer:
 
-			outer_fluxes_cuda.outer_dGx_pos(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared)
-			outer_fluxes_cuda.outer_dGx_neg(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared)
-			outer_fluxes_cuda.outer_dGy_pos(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared)
+			outer_fluxes_cuda.outer_dGx_pos(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared, temp1, temp2, sum_delx_delf, sum_dely_delf)
+			outer_fluxes_cuda.outer_dGx_neg(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared, temp1, temp2, sum_delx_delf, sum_dely_delf)
+			outer_fluxes_cuda.outer_dGy_pos(globaldata, idx, power, vl_const, gamma, flux_shared, other_shared, temp1, temp2, sum_delx_delf, sum_dely_delf)
 
 			globaldata[idx]['flux_res'][0] = flux_shared[cuda.threadIdx.x]
 			globaldata[idx]['flux_res'][1] = flux_shared[cuda.threadIdx.x + cuda.blockDim.x]
