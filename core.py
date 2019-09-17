@@ -335,8 +335,8 @@ def q_var_derivatives_cuda_kernel(globaldata, power):
         # minq = cuda.local.array((4), dtype=numba.float64)
         # maxq = cuda.local.array((4), dtype=numba.float64)
 
-        # equalize(minq, globaldata[idx]['q'])
-        # equalize(maxq, globaldata[idx]['q'])
+        equalize(globaldata[idx]['maxminq'][0], globaldata[idx]['q'])
+        equalize(globaldata[idx]['maxminq'][1], globaldata[idx]['q'])
         
         # for i in range(4):
         #     limiters_cuda.minimum(globaldata, idx, i, globaldata[idx]['minq'])
