@@ -136,13 +136,6 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         # shared[thread_idx + block_dim * 12], shared[thread_idx + block_dim * 13], shared[thread_idx + block_dim * 14], shared[thread_idx + block_dim * 15] = shared[thread_idx]* deln_weights,
         # shared[thread_idx + block_dim]* deln_weights, shared[thread_idx + block_dim * 2]* deln_weights, shared[thread_idx + block_dim * 3]* deln_weights
 
-        # if idx == 3
-        #     @cuprintf("\n *** ")
-        #     @cuprintf("\n %f %f %f %f", gpuGlobalDataRest[37, idx], gpuGlobalDataRest[38, idx], gpuGlobalDataRest[39, idx], gpuGlobalDataRest[40, idx])
-        #     @cuprintf("\n %f %f %f %f", gpuGlobalDataRest[41, idx], gpuGlobalDataRest[42, idx], gpuGlobalDataRest[43, idx], gpuGlobalDataRest[44, idx])
-        #     @cuprintf("\n %f", dels_weights)
-        #     @cuprintf("\n %f", deln_weights)
-        # end
     end
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely

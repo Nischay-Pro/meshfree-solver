@@ -61,7 +61,10 @@ function main()
     end
 
 
+    dev = CuDevice(0)
+    CuContext(dev) do ctx
 
+    println("Running on ", dev)
     # return
     # typeof(globalDataConn[1])
     # print(globaldata[1].dq)
@@ -152,6 +155,7 @@ function main()
     end
     globalDataPrim = Array(gpuGlobalDataRest)
 
+
     # println()
     # println(globalDataCommon[:,1])
     # println()
@@ -172,16 +176,16 @@ function main()
     # end
     # close(file)
 
-    println("Writing cuda file")
-    file  = open("results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
-    for idx in 1:numPoints
-       primtowrite = globalDataPrim[1:4, idx]
-       for element in primtowrite
-           @printf(file,"%0.17f", element)
-           @printf(file, " ")
-       end
-       print(file, "\n")
+    # println("Writing cuda file")
+    # file  = open("results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
+    # for idx in 1:numPoints
+    #    primtowrite = globalDataPrim[1:4, idx]
+    #    for element in primtowrite
+        #    @printf(file,"%0.17f", element)
+        #    @printf(file, " ")
+    #    end
+    #    print(file, "\n")
+    # end
+    # close(file)
     end
-    close(file)
-
 end
