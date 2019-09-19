@@ -15,7 +15,7 @@ function main()
     # gpu_globaldata = CuArray{Point,1}(undef, getConfig()["core"]["points"])
     globaldata = Array{Point,1}(undef, numPoints)
     # globalDataCommon = zeros(Float64, 173, numPoints)
-    globalDataRest = zeros(Float64, 33, numPoints)
+    globalDataRest = zeros(Float64, numPoints, 33)
     globalDataFixedPoint = Array{FixedPoint,1}(undef, numPoints)
     globalDataConn = zeros(Int32, numPoints, 55)
     globalDataFauxFixed = zeros(Float64, 4 * numPoints)
@@ -192,7 +192,7 @@ function main()
     println("Writing cuda file")
     file  = open("results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
     for idx in 1:numPoints
-       primtowrite = globalDataPrim[1:4, idx]
+       primtowrite = globalDataPrim[idx, 1:4]
        for element in primtowrite
            @printf(file,"%0.17f", element)
            @printf(file, " ")

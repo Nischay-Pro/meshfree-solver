@@ -45,7 +45,7 @@ function readFile(file_name::String, globaldata, defprimal, globalDataRest, numP
         # end
 
         globaldata[idx] = temp
-        globalDataRest[1:4, idx] = copy(defprimal)
+        globalDataRest[idx, 1:4] = copy(defprimal)
     end
     return nothing
 end
@@ -92,7 +92,7 @@ function readFileExtra(file_name::String, globaldata, defprimal, globalDataRest,
                     zeros(Float64, 4))
 
         globaldata[idx] = temp
-        globalDataRest[1:4, idx] = copy(defprimal)
+        globalDataRest[idx, 1:4] = copy(defprimal)
     end
     return nothing
 end
@@ -147,7 +147,7 @@ function readFileExtra2(file_name::String, globaldata, defprimal, globalDataRest
                                                 # )
 
         globaldata[idx] = temp
-        globalDataRest[1:4, idx] = copy(defprimal)
+        globalDataRest[idx, 1:4] = copy(defprimal)
     end
     return nothing
 end
