@@ -6,7 +6,7 @@ function main()
     format = configData["format"]["type"]
 
     numPoints = returnFileLength(file_name)
-    if format == 2
+    if format == "old"
         numPoints += 1
     end
     println("Number of points ", numPoints)
@@ -31,11 +31,11 @@ function main()
     # outerptsidx = Array{Int,1}(undef, 0)
     # shapeptsidx = Array{Int,1}(undef, 0)
     println("Start Read")
-    if format == 0
+    if format == "structured"
         readFileExtra(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
-    elseif format == 1
+    elseif format == "quadtree"
         readFileExtra2(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
-    elseif format == 2
+    elseif format == "old"
         readFile(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
     else
         @warn "Illegal Format Type"
@@ -163,7 +163,7 @@ function main()
 
     test_code(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
 
-    open("results/timer_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w") do io
+    open("../results/timer_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w") do io
         print_timer(io, to)
     end
     globalDataPrim = Array(gpuGlobalDataRest)
@@ -190,7 +190,7 @@ function main()
     # close(file)
 
     println("Writing cuda file")
-    file  = open("results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
+    file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
     for idx in 1:numPoints
        primtowrite = globalDataPrim[idx, 1:4]
        for element in primtowrite
