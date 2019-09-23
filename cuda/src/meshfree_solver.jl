@@ -189,16 +189,16 @@ function main()
     # end
     # close(file)
 
-    println("Writing cuda file")
-    file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
-    for idx in 1:numPoints
-       primtowrite = globalDataPrim[idx, 1:4]
-       for element in primtowrite
-           @printf(file,"%0.17f", element)
-           @printf(file, " ")
-       end
-       print(file, "\n")
-    end
-    close(file)
+    # println("Writing cuda file")
+    # file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
+    # for idx in 1:numPoints
+    #    primtowrite = globalDataPrim[idx, 1:4]
+    #    for element in primtowrite
+    #        @printf(file,"%0.17f", element)
+    #        @printf(file, " ")
+    #    end
+    #    print(file, "\n")
+    # end
+    # close(file)
     end
 end

@@ -131,6 +131,8 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
     sum_delx_delf = zeros(Float64, 4)
     sum_dely_delf = zeros(Float64, 4)
 
+    println("Iteration Number ", iter, " ")
+
     for rk in 1:4
         # if iter == 1
             # println("Starting QVar")
@@ -150,7 +152,7 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
         # end
         state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old, rk, numPoints)
     end
-    println("Iteration Number ", iter, " ")
+
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # residue = res_old
     return nothing

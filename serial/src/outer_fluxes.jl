@@ -94,8 +94,8 @@ end
 
 function outer_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
 
-    power::Float64 = configData["core"]["power"]::Float64
-    limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
+    power::Float64 = configData["core"]["power"]
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -187,8 +187,8 @@ end
 
 function outer_dGy_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
 
-    power::Float64 = configData["core"]["power"]::Float64
-    limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
+    power::Float64 = configData["core"]["power"]
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)

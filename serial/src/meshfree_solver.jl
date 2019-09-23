@@ -4,8 +4,11 @@ function main()
     wallpts, Interiorpts, outerpts, shapepts = 0,0,0,0
 
     file_name = string(ARGS[1])
-
+    format = configData["format"]["type"]
     numPoints = returnFileLength(file_name)
+    if format == "old"
+        numPoints += 1
+    end
     println(numPoints)
     globaldata = Array{Point,1}(undef, numPoints)
     table = Array{Int32,1}(undef, numPoints)
@@ -18,18 +21,22 @@ function main()
 
     println("Start Read")
     # count = 0
-    readFile(file_name::String, globaldata, table, defprimal, wallptsidx, outerptsidx, Interiorptsidx, shapeptsidx,
-        wallpts, Interiorpts, outerpts, shapepts, numPoints)
-
-    format = configData["format"]["type"]
-    if format == 1
-        interior = configData["point"]["interior"]
-        wall = configData["point"]["wall"]
-        outer = configData["point"]["outer"]
-        @showprogress 2 "Computing Connectivity" for idx in 1:numPoints
-            placeNormals(globaldata, idx, configData, interior, wall, outer)
-        end
+    if format == "quadtree"
+        readFileExtra2(file_name::String, globaldata, table, defprimal, wallptsidx, outerptsidx, Interiorptsidx, shapeptsidx,
+            wallpts, Interiorpts, outerpts, shapepts, numPoints)
+    elseif format == "old"
+        readFile(file_name::String, globaldata, table, defprimal, wallptsidx, outerptsidx, Interiorptsidx, shapeptsidx,
+            wallpts, Interiorpts, outerpts, shapepts, numPoints)
     end
+
+    # if format == 1
+    interior = configData["point"]["interior"]
+    wall = configData["point"]["wall"]
+    outer = configData["point"]["outer"]
+    @showprogress 2 "Computing Connectivity" for idx in 1:numPoints
+        placeNormals(globaldata, idx, configData, interior, wall, outer)
+    end
+    # end
 
     println("Start table sorting")
     @showprogress 3 "Computing Table" for idx in table
@@ -65,7 +72,7 @@ function main()
         # Profile.print()
         # res_old[1] = 0.0
         println("Starting main function")
-        @timeit to "nest 4" begin
+        @timeit to "nest 1" begin
             run_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old, numPoints)
         end
     end
@@ -73,11 +80,11 @@ function main()
 
     test_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old, numPoints)
     # # println(to)
-    open("results/timer" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) *".txt", "w") do io
+    open("../results/timer" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) *".txt", "w") do io
         print_timer(io, to)
     end
 
-    compute_cl_cd_cm(globaldata, configData, shapeptsidx)
+    # compute_cl_cd_cm(globaldata, configData, shapeptsidx)
 
     # println(IOContext(stdout, :compact => false), globaldata[1].q)
     # println(IOContext(stdout, :compact => false), globaldata[1].dq)
@@ -100,7 +107,7 @@ function main()
     # println(IOContext(stdout, :compact => false), globaldata[100].ypos_conn)
     # println(IOContext(stdout, :compact => false), globaldata[100].yneg_conn)
     # println(globaldata[1])
-    file  = open("results/primvals" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
+    file  = open("../results/primvals" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
     for (idx, itm) in enumerate(globaldata)
         primtowrite = globaldata[idx].prim
         for element in primtowrite

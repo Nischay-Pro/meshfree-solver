@@ -1,7 +1,7 @@
 function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, Gxp)
 
-    power::Float64 = configData["core"]["power"]::Float64
-    limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
+    power::Float64 = configData["core"]["power"]
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -163,8 +163,8 @@ end
 
 function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, Gxn)
 
-    power::Float64 = configData["core"]["power"]::Float64
-    limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
+    power::Float64 = configData["core"]["power"]
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -260,8 +260,8 @@ end
 
 function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, Gyn)
 
-    power::Float64 = configData["core"]["power"]::Float64
-    limiter_flag::Float64 = configData["core"]["limiter_flag"]::Float64
+    power::Float64 = configData["core"]["power"]
+    limiter_flag::Float64 = configData["core"]["limiter_flag"]
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
