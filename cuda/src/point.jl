@@ -74,10 +74,10 @@ function convertToNeighbourArray(targetArray2, originalStruct::Point, idx)
     targetArray2[idx, 3] = originalStruct.ypos_nbhs
     targetArray2[idx, 4] = originalStruct.yneg_nbhs
     targetArray2[idx, 5:4 + originalStruct.nbhs] = originalStruct.conn
-    targetArray2[idx, 15:14 + originalStruct.xpos_nbhs] = originalStruct.xpos_conn
-    targetArray2[idx, 25:24 + originalStruct.xneg_nbhs] = originalStruct.xneg_conn
-    targetArray2[idx, 35:34 + originalStruct.ypos_nbhs] = originalStruct.ypos_conn
-    targetArray2[idx, 45:44 + originalStruct.yneg_nbhs] = originalStruct.yneg_conn
+    targetArray2[idx, 25:24 + originalStruct.xpos_nbhs] = originalStruct.xpos_conn
+    targetArray2[idx, 40:39 + originalStruct.xneg_nbhs] = originalStruct.xneg_conn
+    targetArray2[idx, 55:54 + originalStruct.ypos_nbhs] = originalStruct.ypos_conn
+    targetArray2[idx, 70:69 + originalStruct.yneg_nbhs] = originalStruct.yneg_conn
     return nothing
 end
 
