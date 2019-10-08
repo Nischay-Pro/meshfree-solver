@@ -1,4 +1,4 @@
-@inline function func_delta_kernel(gpuGlobalDataConn,  gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
+function func_delta_kernel(gpuGlobalDataConn,  gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
     cfl = gpuConfigData[2]
     tx = threadIdx().x
     bx = blockIdx().x - 1
@@ -38,7 +38,7 @@
     return nothing
 end
 
-@inline function state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataConn, gpuGlobalDataRest,  gpuConfigData, gpuSumResSqr, numPoints, rk)
+function state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataConn, gpuGlobalDataRest,  gpuConfigData, gpuSumResSqr, numPoints, rk)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x

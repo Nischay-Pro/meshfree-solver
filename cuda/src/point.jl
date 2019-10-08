@@ -78,7 +78,7 @@ function convertToNeighbourArray(targetArray2, originalStruct::Point, idx)
     targetArray2[idx, 25:24 + originalStruct.xneg_nbhs] = originalStruct.xneg_conn
     targetArray2[idx, 35:34 + originalStruct.ypos_nbhs] = originalStruct.ypos_conn
     targetArray2[idx, 45:44 + originalStruct.yneg_nbhs] = originalStruct.yneg_conn
-    return  nothing
+    return nothing
 end
 
 function convertToFauxArray(targetArray1, originalStruct::Point, idx, numPoints)
