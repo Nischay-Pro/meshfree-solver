@@ -119,15 +119,15 @@ function getPointDetails(gdata, p_i)
     bw = blockDim().x
     idx = bx * bw + tx
     if idx == p_i
-        @cuprintln("Q is", " ", gdata[p_i, 9], " ", gdata[p_i, 10], " ", gdata[p_i, 11], " ", gdata[p_i, 12])
-        @cuprintln("DQ is", " ", gdata[p_i, 13], " ", gdata[p_i, 14], " ", gdata[p_i, 15], " ", gdata[p_i, 16], " ",
-                    gdata[p_i, 17], " ", gdata[p_i, 18], " ", gdata[p_i, 19], " ", gdata[p_i, 20])
-        @cuprintln("Prim is", " ", gdata[p_i, 1], " ", gdata[p_i, 2], " ", gdata[p_i, 3], " ", gdata[p_i, 4])
-        @cuprintln("Flux Res is", " ", gdata[p_i, 5], " ", gdata[p_i, 6], " ", gdata[p_i, 7], " ", gdata[p_i, 8])
-        @cuprintln("MaxQ is", " ", gdata[p_i, 25], " ", gdata[p_i, 26], " ", gdata[p_i, 27], " ", gdata[p_i, 28])
-        @cuprintln("MinQ is", " ", gdata[p_i, 21], " ", gdata[p_i, 22], " ", gdata[p_i, 23], " ", gdata[p_i, 24])
-        # @cuprintln("Prim Old is", " ", gdata[p_i].prim_old)
-        @cuprintln("Delta is", " ", gdata[p_i, 29])
+        @cuprintf("\n Q is %lf %lf %lf %lf", gdata[p_i, 9], gdata[p_i, 10], gdata[p_i, 11], gdata[p_i, 12])
+        @cuprintf("\n DQ is %lf %lf %lf %lf %lf %lf %lf %lf", gdata[p_i, 13], gdata[p_i, 14], gdata[p_i, 15], gdata[p_i, 16],
+                    gdata[p_i, 17], gdata[p_i, 18], gdata[p_i, 19], gdata[p_i, 20])
+        @cuprintf("\n Prim is %lf %lf %lf %lf", gdata[p_i, 1], gdata[p_i, 2], gdata[p_i, 3], gdata[p_i, 4])
+        @cuprintf("\n Flux Res is %lf %lf %lf %lf", gdata[p_i, 5], gdata[p_i, 6], gdata[p_i, 7], gdata[p_i, 8])
+        @cuprintf("\n MaxQ is %lf %lf %lf %lf", gdata[p_i, 21], gdata[p_i, 22], gdata[p_i, 23], gdata[p_i, 24])
+        @cuprintf("\n MinQ is %lf %lf %lf %lf", gdata[p_i, 25], gdata[p_i, 26], gdata[p_i, 27], gdata[p_i, 28])
+        @cuprintf("\n Prim Old is %lf %lf %lf %lf", gdata[p_i, 30], gdata[p_i, 31], gdata[p_i, 32], gdata[p_i, 33])
+        @cuprintf("\n Delta is %lf", gdata[p_i, 29])
     end
     return nothing
 end
@@ -150,24 +150,24 @@ function fpi_solver_cuda(iter, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGl
             println("Compiling CUDA Kernel. This might take a while...")
         end
         @cuda blocks=blockspergrid threads=threadsperblock func_delta_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData)
-        # @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 3)
+        @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 3)
         for rk in 1:4
             # @cuprintf("\n Value is %f", gpuGlobalDataRest[3, 31])
             @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints)
             # synchronize(str)
             # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
             @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
-            # @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 3)
+            @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 3)
             # synchronize(str)
             # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
             @cuda blocks= blockspergrid threads= threadsperblock cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
-            # @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 3)
+            @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 3)
             # synchronize(str)
             # @cuprintf("\n It is %f ", gpuGlobalDataCommon[31, 3])
             # synchronize(str)
             # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
             @cuda blocks=blockspergrid threads=threadsperblock state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataConn, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, numPoints, rk)
-            # @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 3)
+            @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 3)
         end
         synchronize(str)
         gpu_reduced(+, gpuSumResSqr, gpuSumResSqrOutput)
@@ -198,14 +198,12 @@ function q_var_cuda_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints
     bw = blockDim().x
     idx = bx * bw + tx
     # itm = CuArray(Float64, 145)
-    # if idx == 3
-    #     @cuprintf("\n 1 It is %lf ", gpuGlobalDataCommon[31, 3])
-    # end
+
     if idx > 0 && idx <= numPoints
 
-        # if idx == 3
-        #     @cuprintln("======")
-        # end
+        if idx == 3
+            @cuprintln("==========================================")
+        end
         rho = gpuGlobalDataRest[idx, 1]
         u1 = gpuGlobalDataRest[idx, 2]
         u2 = gpuGlobalDataRest[idx, 3]

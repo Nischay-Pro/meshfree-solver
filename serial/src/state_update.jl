@@ -18,7 +18,7 @@ function func_delta(globaldata, configData)
             end
         end
         globaldata[idx].delta = min_delt
-        globaldata[idx].prim_old = globaldata[idx].prim
+        @. globaldata[idx].prim_old = globaldata[idx].prim
     end
     return nothing
 end

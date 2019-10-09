@@ -143,7 +143,6 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
     sum_dely_delf = zeros(Float64, 4)
 
     print("Iteration Number ", iter, " ")
-
     # getPointDetails(globaldata, 3)
     for rk in 1:4
         # println("=========")
