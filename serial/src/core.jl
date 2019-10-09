@@ -110,14 +110,15 @@ function calculateConnectivity(globaldata, idx)
 end
 
 function getPointDetails(globaldata, point_index)
+    println("")
     println(IOContext(stdout, :compact => false), "Q is", globaldata[point_index].q)
     println(IOContext(stdout, :compact => false), "DQ is", globaldata[point_index].dq)
     println(IOContext(stdout, :compact => false), "Prim is", globaldata[point_index].prim)
     println(IOContext(stdout, :compact => false), "Flux Res is", globaldata[point_index].flux_res)
-    println(IOContext(stdout, :compact => false), "MaxQ is", globaldata[point_index].max_q)
-    println(IOContext(stdout, :compact => false), "MinQ is", globaldata[point_index].min_q)
+    # println(IOContext(stdout, :compact => false), "MaxQ is", globaldata[point_index].max_q)
+    # println(IOContext(stdout, :compact => false), "MinQ is", globaldata[point_index].min_q)
     println(IOContext(stdout, :compact => false), "Prim Old is", globaldata[point_index].prim_old)
-    println(IOContext(stdout, :compact => false), "Delta is", globaldata[point_index].delta)
+    # println(IOContext(stdout, :compact => false), "Delta is", globaldata[point_index].delta)
 end
 
 function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old, numPoints)
@@ -145,7 +146,7 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
     print("Iteration Number ", iter, " ")
     # getPointDetails(globaldata, 3)
     for rk in 1:4
-        # println("=========")
+        println("=========")
         # if iter == 1
             # println("Starting QVar")
         # end
@@ -157,14 +158,14 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
         # end
         cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
             result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
-        # getPointDetails(globaldata, 3)
+        getPointDetails(globaldata, 3)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
         # residue = 0
         # if iter == 1
             # println("Starting StateUpdate")
         # end
         state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old, rk, numPoints)
-        # getPointDetails(globaldata, 3)
+        getPointDetails(globaldata, 3)
     end
 
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
@@ -184,9 +185,6 @@ function q_var_derivatives(globaldata::Array{Point,1}, configData)
         beta::Float64 = 0.5 * (rho / pr)
         globaldata[idx].q[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
         two_times_beta = 2.0 * beta
-        # if idx == 1
-        #     println(globaldata[idx].q[1])
-        # end
         globaldata[idx].q[2] = (two_times_beta * u1)
         globaldata[idx].q[3] = (two_times_beta * u2)
         globaldata[idx].q[4] = -two_times_beta

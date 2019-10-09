@@ -51,12 +51,12 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
 
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), itm)
-        #     println(IOContext(stdout, :compact => false), qtilde_k)
+        # #     println(IOContext(stdout, :compact => false), qtilde_k)
         # end
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
+            venkat_limiter(qtilde_k, globaldata, itm, configData, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
@@ -65,7 +65,7 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         #     println(IOContext(stdout, :compact => false), itm)
         #     println(IOContext(stdout, :compact => false), phi_i)
         #     println(IOContext(stdout, :compact => false), phi_k)
-        #     println(IOContext(stdout, :compact => false), qtilde_k)
+        # #     println(IOContext(stdout, :compact => false), qtilde_k)
         # end
 
         if limiter_flag == 2
@@ -91,19 +91,14 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         #     println("qtile_i ", qtilde_i)
         #     println("qtile_k ", qtilde_k)
         # end
-        if idx == 100
-            flag = 0
-        else
-            flag = 1
-        end
 
+        flag = 1
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), result)
         # end
         qtilde_to_primitive(result, qtilde_i, configData)
         # if idx == 3
-        #     println(IOContext(stdout, :compact => false), itm)
-        #     println(IOContext(stdout, :compact => false), result)
+        #     println(IOContext(stdout, :compact => false), " => ", result)
         # end
         flux_quad_GxII(G_i, nx, ny, result[1], result[2], result[3], result[4], flag)
         # if idx == 3
@@ -111,9 +106,12 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         # end
         qtilde_to_primitive(result, qtilde_k, configData)
         # if idx == 3
-        #     println(IOContext(stdout, :compact => false), result)
+        #     println(IOContext(stdout, :compact => false), " => ", result)
         # end
         flux_quad_GxII(G_k, nx, ny, result[1], result[2], result[3], result[4], flag)
+        # if idx == 3
+        #     println(IOContext(stdout, :compact => false), " => ", G_i)
+        # end
         # if idx == 100
         #     println("****")
         #     println(IOContext(stdout, :compact => false), phi_i)
@@ -140,6 +138,11 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
             sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
             sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
         end
+        # if idx == 3
+            # println(IOContext(stdout, :compact => false), dels_weights, deln_weights)
+            # println(IOContext(stdout, :compact => false), sum_delx_delf)
+            # println(IOContext(stdout, :compact => false), sum_dely_delf)
+        # end
     end
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
@@ -147,14 +150,12 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
     @. Gxp = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
     # if idx == 3
     #     println(IOContext(stdout, :compact => false), "===Gx===")
-    #     # println(IOContext(stdout, :compact => false), sum_delx_sqr)
-    #     # println(IOContext(stdout, :compact => false), sum_dely_sqr)
-    #     # println(IOContext(stdout, :compact => false), sum_delx_dely)
+    #     # println(IOContext(stdout, :compact => false), sum_delx_sqr," ", sum_dely_sqr, " ", sum_delx_dely)
     #     # println(IOContext(stdout, :compact => false), det)
     #     # println(IOContext(stdout, :compact => false), one_by_det)
-    #     println(IOContext(stdout, :compact => false), sum_delx_delf)
-    #     println(IOContext(stdout, :compact => false), sum_dely_delf)
-    #     println(IOContext(stdout, :compact => false), G)
+        # println(IOContext(stdout, :compact => false), sum_delx_delf)
+        # println(IOContext(stdout, :compact => false), sum_dely_delf)
+    #     # println(IOContext(stdout, :compact => false), G)
     #     println()
     # end
     # return G
@@ -215,7 +216,7 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
+            venkat_limiter(qtilde_k, globaldata, itm, configData, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
@@ -312,7 +313,7 @@ function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_k, globaldata, idx, configData, phi_k)
+            venkat_limiter(qtilde_k, globaldata, itm, configData, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end

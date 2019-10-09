@@ -16,9 +16,9 @@ function wallindices_flux_residual(globaldata, configData, wallindices, Gxp, Gxn
 		# GTemp =
 		@. globaldata[itm].flux_res = ((Gxp + Gxn + Gyn) * 2)
 		# if itm == 3
-		# 	println(IOContext(stdout, :compact => false), Gxp)
-		# 	println(IOContext(stdout, :compact => false), Gxp + Gxn)
-		# 	println(IOContext(stdout, :compact => false), Gxp + Gxn + Gyn)
+		# 	println(IOContext(stdout, :compact => false), 2 * Gxp)
+		# 	println(IOContext(stdout, :compact => false), 2 * (Gxp + Gxn))
+		# 	println(IOContext(stdout, :compact => false), 2 * (Gxp + Gxn + Gyn))
 		# end
 	end
 	return nothing

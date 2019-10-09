@@ -13,8 +13,10 @@ function venkat_limiter_kernel_qtilde(gpuGlobalDataFixedPoint, gpuGlobalDataRest
         q = gpuGlobalDataRest[idx, 9+i]
         del_neg = gpuGlobalDataRest[idx, 9+i] - 0.5*(delx * gpuGlobalDataRest[idx, 13+i] + dely * gpuGlobalDataRest[idx, 17+i]) - q
         if abs(del_neg) > 1e-5
-            del_pos = gpuGlobalDataRest[idx, 21+i] - q
-            if del_neg < 0
+            del_pos = 0.0
+            if del_neg > 0.0
+                del_pos = gpuGlobalDataRest[idx, 21+i] - q
+            elseif del_neg < 0.0
                 del_pos = gpuGlobalDataRest[idx, 25+i] - q
             end
             num = (del_pos*del_pos) + (epsi*epsi)
@@ -25,19 +27,18 @@ function venkat_limiter_kernel_qtilde(gpuGlobalDataFixedPoint, gpuGlobalDataRest
             den *= del_neg
 
             temp = num/den
-            if temp > 1
+            if temp > 1.0
                 temp = 1.0
             end
             qtilde_shared[thread_idx + block_dim * i] = temp
         end
     end
-    # return nothing
+
     for i in 0:3
         qtilde_shared[thread_idx + block_dim * i] = gpuGlobalDataRest[idx, 9+i] - 0.5*qtilde_shared[thread_idx + block_dim * i]*(delx * gpuGlobalDataRest[idx, 13+i] + dely * gpuGlobalDataRest[idx, 17+i])
     end
     beta = -qtilde_shared[thread_idx + block_dim * 3]*0.5
-    temp2 = 1/beta
-    temp = 0.5*temp2
+    temp = 0.5/beta
     u1 = qtilde_shared[thread_idx + block_dim * 1]*temp
     u2 = qtilde_shared[thread_idx + block_dim * 2]*temp
 
@@ -47,6 +48,72 @@ function venkat_limiter_kernel_qtilde(gpuGlobalDataFixedPoint, gpuGlobalDataRest
     shared[thread_idx + block_dim * 5] = u2
     shared[thread_idx + block_dim * 6] = CUDAnative.exp(temp2)
     shared[thread_idx + block_dim * 7] = shared[thread_idx + block_dim * 6]*temp
+    return nothing
+end
+
+function venkat_limiter_kernel_qtilde_comment(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, gpuConfigData, delx, dely, shared, qtilde_shared)
+    # @cuprintf("Type is %s", typeof(VL_CONST))
+    thread_idx = threadIdx().x
+    block_dim = blockDim().x
+    epsigh = ldg(gpuConfigData, 8) * gpuGlobalDataFixedPoint[idx].short_distance
+    epsi = epsigh*epsigh*epsigh
+
+    # shared[thread_idx], shared[thread_idx + block_dim * 1], shared[thread_idx + block_dim * 2], shared[thread_idx + block_dim * 3] = 1,1,1,1
+
+    for i in 0:3
+        qtilde_shared[thread_idx + block_dim * i] = 1.0
+        q = gpuGlobalDataRest[idx, 9+i]
+        del_neg = gpuGlobalDataRest[idx, 9+i] - 0.5*(delx * gpuGlobalDataRest[idx, 13+i] + dely * gpuGlobalDataRest[idx, 17+i]) - q
+        if abs(del_neg) > 1e-5
+            del_pos = 0.0
+            if del_neg > 0.0
+                del_pos = gpuGlobalDataRest[idx, 21+i] - q
+            elseif del_neg < 0.0
+                del_pos = gpuGlobalDataRest[idx, 25+i] - q
+            end
+            num = (del_pos*del_pos) + (epsi*epsi)
+            num = (num*del_neg) + 2 * (del_neg*del_neg*del_pos)
+
+            den = (del_pos*del_pos) + (2 *del_neg*del_neg)
+            den += (del_neg*del_pos) + (epsi*epsi)
+            den *= del_neg
+
+            temp = num/den
+            if temp > 1.0
+                temp = 1.0
+            end
+            qtilde_shared[thread_idx + block_dim * i] = temp
+        end
+    end
+
+    # if idx == 3
+    #     @cuprintf("\n => %.17f %.17f %.17f %.17f",
+    #             gpuGlobalDataRest[idx, 9] - 0.5*(delx * gpuGlobalDataRest[idx, 13] + dely * gpuGlobalDataRest[idx, 17]),
+    #             gpuGlobalDataRest[idx, 10] - 0.5*(delx * gpuGlobalDataRest[idx, 14] + dely * gpuGlobalDataRest[idx, 18]),
+    #             gpuGlobalDataRest[idx, 11] - 0.5*(delx * gpuGlobalDataRest[idx, 15] + dely * gpuGlobalDataRest[idx, 19]),
+    #             gpuGlobalDataRest[idx, 12] - 0.5*(delx * gpuGlobalDataRest[idx, 16] + dely * gpuGlobalDataRest[idx, 20]))
+    # end
+
+
+    for i in 0:3
+        qtilde_shared[thread_idx + block_dim * i] = gpuGlobalDataRest[idx, 9+i] - 0.5*qtilde_shared[thread_idx + block_dim * i]*(delx * gpuGlobalDataRest[idx, 13+i] + dely * gpuGlobalDataRest[idx, 17+i])
+    end
+    beta = -qtilde_shared[thread_idx + block_dim * 3]*0.5
+    temp = 0.5/beta
+    u1 = qtilde_shared[thread_idx + block_dim * 1]*temp
+    u2 = qtilde_shared[thread_idx + block_dim * 2]*temp
+
+    temp2 = qtilde_shared[thread_idx] + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(ldg(gpuConfigData, 15)-1))
+    # rho = CUDAnative.exp(temp2)
+    shared[thread_idx + block_dim * 4] = u1
+    shared[thread_idx + block_dim * 5] = u2
+    shared[thread_idx + block_dim * 6] = CUDAnative.exp(temp2)
+    shared[thread_idx + block_dim * 7] = shared[thread_idx + block_dim * 6]*temp
+
+    # if idx == 3
+    #     @cuprintf("\n => %.17f %.17f %.17f %.17f", shared[thread_idx + block_dim * 4], shared[thread_idx + block_dim * 5],
+    #                 shared[thread_idx + block_dim * 6], shared[thread_idx + block_dim * 7])
+    # end
     return nothing
 end
 
