@@ -146,7 +146,7 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
     print("Iteration Number ", iter, " ")
     # getPointDetails(globaldata, 3)
     for rk in 1:4
-        println("=========")
+        # println("=========")
         # if iter == 1
             # println("Starting QVar")
         # end
@@ -158,14 +158,14 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
         # end
         cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
             result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
-        getPointDetails(globaldata, 3)
+        # getPointDetails(globaldata, 3)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
         # residue = 0
         # if iter == 1
             # println("Starting StateUpdate")
         # end
         state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old, rk, numPoints)
-        getPointDetails(globaldata, 3)
+        # getPointDetails(globaldata, 3)
     end
 
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
