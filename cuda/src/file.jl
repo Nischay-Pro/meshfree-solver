@@ -9,7 +9,7 @@ function readFile(file_name::String, globaldata, defprimal, globalDataRest, numP
     splitdata = @view split(data1, "\n")[1:end-1]
     # print(splitdata[1:3])
     @showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
-        itmdata = split(itm, " ")
+        itmdata = split(itm)
         # println(itmdata)
         temp =  Point(idx,
                     parse(Float64,itmdata[1]),
@@ -20,7 +20,7 @@ function readFile(file_name::String, globaldata, defprimal, globalDataRest, numP
                     parse(Int8,itmdata[6]),
                     parse(Float64,itmdata[7]),
                     parse(Int8,itmdata[8]),
-                    parse.(Int, itmdata[9:end-1]),
+                    parse.(Int, itmdata[9:end]),
                     0.0,
                     0.0,
                     copy(defprimal),
@@ -55,7 +55,7 @@ function readFileExtra(file_name::String, globaldata, defprimal, globalDataRest,
     splitdata = @view split(data1, "\n")[1:end-1]
     # print(splitdata[1:3])
     @showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
-        itmdata = split(itm, " ")
+        itmdata = split(itm)
         # println(itmdata)
         if idx == 1
             continue
@@ -71,7 +71,7 @@ function readFileExtra(file_name::String, globaldata, defprimal, globalDataRest,
                     parse(Int8,itmdata[6]),
                     parse(Float64,itmdata[7]),
                     parse(Int8,itmdata[8]),
-                    parse.(Int, itmdata[9:end-1]),
+                    parse.(Int, itmdata[9:end]),
                     0.0,
                     0.0,
                     copy(defprimal),
@@ -97,12 +97,12 @@ function readFileExtra(file_name::String, globaldata, defprimal, globalDataRest,
     return nothing
 end
 
-function readFileExtra2(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
+function readFileQuadtree(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
     data1 = read(file_name, String)
     splitdata = @view split(data1, "\n")[2:end-1]
     # print(splitdata[1:3])
     @showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
-        itmdata = split(itm, " ")
+        itmdata = split(itm)
         temp =  Point(idx,
                     parse(Float64,itmdata[1]),
                     parse(Float64, itmdata[2]),
@@ -112,7 +112,7 @@ function readFileExtra2(file_name::String, globaldata, defprimal, globalDataRest
                     parse(Int8,itmdata[6]),
                     parse(Float64,itmdata[10]),
                     parse(Int8,itmdata[11]),
-                    parse.(Int, itmdata[12:end-1]),
+                    parse.(Int, itmdata[12:end]),
                     parse(Float64, itmdata[7]),
                     parse(Float64, itmdata[8]),
                     copy(defprimal),
@@ -131,20 +131,6 @@ function readFileExtra2(file_name::String, globaldata, defprimal, globalDataRest
                     0.0,
                     zeros(Float64, 4),
                     zeros(Float64, 4))
-
-        # globalDataFixedPoint[idx] = FixedPoint(idx,
-        #                                     parse(Float64,itmdata[1]),
-        #                                     parse(Float64, itmdata[2]),
-        #                                     parse(Int32,itmdata[3]),
-        #                                     parse(Int32,itmdata[4]),
-        #                                     parse(Int8,itmdata[5]),
-        #                                     parse(Int8,itmdata[6]),
-        #                                     parse(Float64,itmdata[10]),
-        #                                     parse(Int8,itmdata[11]),
-        #                                     parse(Float64, itmdata[7]),
-        #                                     parse(Float64, itmdata[8]),
-        #                                     0.0
-                                                # )
 
         globaldata[idx] = temp
         globalDataRest[idx, 1:4] = copy(defprimal)

@@ -50,10 +50,10 @@ end
 
 function readFileExtra2(file_name::String, globaldata, table, defprimal, wallptsidx, outerptsidx, Interiorptsidx, shapeptsidx,
     wallpts, Interiorpts, outerpts, shapepts, numPoints)
-data1 = read(file_name, String)
-splitdata = @view split(data1, "\n")[2:end-1]
-# print(splitdata[1:3])
-@showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
+    data1 = read(file_name, String)
+    splitdata = @view split(data1, "\n")[2:end-1]
+    # print(splitdata[1:3])
+    @showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
     itmdata = split(itm, " ")
     globaldata[idx] = Point(idx,
                 parse(Float64,itmdata[1]),

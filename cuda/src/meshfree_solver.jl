@@ -34,7 +34,7 @@ function main()
     if format == "structured"
         readFileExtra(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
     elseif format == "quadtree"
-        readFileExtra2(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
+        readFileQuadtree(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
     elseif format == "old"
         readFile(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
     else
@@ -54,14 +54,14 @@ function main()
     # print(wallptsidx)
 
     # if format == 1
-        interior = configData["point"]["interior"]
-        wall = configData["point"]["wall"]
-        outer = configData["point"]["outer"]
-        @showprogress 2 "Computing Connectivity" for idx in 1:numPoints
-            placeNormals(globaldata, idx, configData, interior, wall, outer)
-            convertToFixedArray(globalDataFixedPoint, globaldata[idx], idx, numPoints)
-            convertToFauxArray(globalDataFauxFixed, globaldata[idx], idx, numPoints)
-        end
+    interior = configData["point"]["interior"]
+    wall = configData["point"]["wall"]
+    outer = configData["point"]["outer"]
+    @showprogress 2 "Computing Connectivity" for idx in 1:numPoints
+        placeNormals(globaldata, idx, configData, interior, wall, outer)
+        convertToFixedArray(globalDataFixedPoint, globaldata[idx], idx, numPoints)
+        convertToFauxArray(globalDataFauxFixed, globaldata[idx], idx, numPoints)
+    end
     # end
 
     println("Start table sorting")
