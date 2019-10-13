@@ -4,8 +4,7 @@ function returnFileLength(file_name::String)
     return length(splitdata) - 2
 end
 
-function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, outerptsidx, Interiorptsidx, shapeptsidx,
-        wallpts, Interiorpts, outerpts, shapepts, numPoints)
+function readFile(file_name::String, globaldata, table, defprimal, shapeptsidx, shapepts, numPoints)
     data1 = read(file_name, String)
     splitdata = @view split(data1, "\n")[1:end-1]
     # print(splitdata[1:3])
@@ -29,16 +28,6 @@ function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, o
                     Array{Array{Float64,1},1}(undef, 2), 0.0, 0, 0, 0, 0, Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0),
                     Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), 0.0, zeros(Float64, 4), zeros(Float64, 4), zeros(Float64, 4))
 
-        if globaldata[idx].flag_1 == 0
-            wallpts += 1
-            push!(wallptsidx, globaldata[idx].localID)
-        elseif globaldata[idx].flag_1 == 1
-            Interiorpts += 1
-            push!(Interiorptsidx, globaldata[idx].localID)
-        elseif globaldata[idx].flag_1 == 2
-            outerpts += 1
-            push!(outerptsidx, globaldata[idx].localID)
-        end
         if globaldata[idx].flag_2 > 0
             shapepts +=1
             push!(shapeptsidx, globaldata[idx].localID)
@@ -48,8 +37,7 @@ function readFile(file_name::String, globaldata, table, defprimal, wallptsidx, o
     return nothing
 end
 
-function readFileExtra2(file_name::String, globaldata, table, defprimal, wallptsidx, outerptsidx, Interiorptsidx, shapeptsidx,
-    wallpts, Interiorpts, outerpts, shapepts, numPoints)
+function readFileQuadtree(file_name::String, globaldata, table, defprimal, shapeptsidx, shapepts, numPoints)
     data1 = read(file_name, String)
     splitdata = @view split(data1, "\n")[2:end-1]
     # print(splitdata[1:3])
@@ -73,16 +61,6 @@ function readFileExtra2(file_name::String, globaldata, table, defprimal, wallpts
                 Array{Array{Float64,1},1}(undef, 2), 0.0, 0, 0, 0, 0, Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0),
                 Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), 0.0, zeros(Float64, 4), zeros(Float64, 4), zeros(Float64, 4))
 
-    if globaldata[idx].flag_1 == 0
-        wallpts += 1
-        push!(wallptsidx, globaldata[idx].localID)
-    elseif globaldata[idx].flag_1 == 1
-        Interiorpts += 1
-        push!(Interiorptsidx, globaldata[idx].localID)
-    elseif globaldata[idx].flag_1 == 2
-        outerpts += 1
-        push!(outerptsidx, globaldata[idx].localID)
-    end
     if globaldata[idx].flag_2 > 0
         shapepts +=1
         push!(shapeptsidx, globaldata[idx].localID)

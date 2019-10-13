@@ -121,7 +121,7 @@ function getPointDetails(globaldata, point_index)
     # println(IOContext(stdout, :compact => false), "Delta is", globaldata[point_index].delta)
 end
 
-function fpi_solver(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old, numPoints)
+function fpi_solver(iter, globaldata, configData, res_old, numPoints)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # print(" 111\n")
     if iter == 1
@@ -156,7 +156,7 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
         # if iter == 1
             # println("Starting Calflux")
         # end
-        cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+        cal_flux_residual(globaldata, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
             result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
         # getPointDetails(globaldata, 3)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
@@ -164,7 +164,7 @@ function fpi_solver(iter, globaldata, configData, wallindices, outerindices, int
         # if iter == 1
             # println("Starting StateUpdate")
         # end
-        state_update(globaldata, wallindices, outerindices, interiorindices, configData, iter, res_old, rk, numPoints)
+        state_update(globaldata, configData, iter, res_old, rk, numPoints)
         # getPointDetails(globaldata, 3)
     end
 
@@ -182,7 +182,7 @@ function q_var_derivatives(globaldata::Array{Point,1}, configData)
         u2 = itm.prim[3]
         pr = itm.prim[4]
 
-        beta::Float64 = 0.5 * (rho / pr)
+        beta = 0.5 * (rho / pr)
         globaldata[idx].q[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
         two_times_beta = 2.0 * beta
         globaldata[idx].q[2] = (two_times_beta * u1)
@@ -205,6 +205,7 @@ function q_var_derivatives(globaldata::Array{Point,1}, configData)
             globaldata[idx].max_q[i] = globaldata[idx].q[i]
             globaldata[idx].min_q[i] = globaldata[idx].q[i]
         end
+
         for conn in itm.conn
             x_k = globaldata[conn].x
             y_k = globaldata[conn].y

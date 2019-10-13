@@ -1,7 +1,7 @@
 function main()
 
     configData = getConfig()
-    wallpts, Interiorpts, outerpts, shapepts = 0,0,0,0
+    shapepts = 0
 
     file_name = string(ARGS[1])
     format = configData["format"]["type"]
@@ -12,9 +12,7 @@ function main()
     println(numPoints)
     globaldata = Array{Point,1}(undef, numPoints)
     table = Array{Int32,1}(undef, numPoints)
-    wallptsidx = Array{Int32,1}(undef, 0)
-    Interiorptsidx = Array{Int32,1}(undef, 0)
-    outerptsidx = Array{Int32,1}(undef, 0)
+
     shapeptsidx = Array{Int32,1}(undef, 0)
     # print(splitdata[1:3])
     defprimal = getInitialPrimitive(configData)
@@ -22,11 +20,9 @@ function main()
     println("Start Read")
     # count = 0
     if format == "quadtree"
-        readFileExtra2(file_name::String, globaldata, table, defprimal, wallptsidx, outerptsidx, Interiorptsidx, shapeptsidx,
-            wallpts, Interiorpts, outerpts, shapepts, numPoints)
+        readFileQuadtree(file_name::String, globaldata, table, defprimal, shapeptsidx, shapepts, numPoints)
     elseif format == "old"
-        readFile(file_name::String, globaldata, table, defprimal, wallptsidx, outerptsidx, Interiorptsidx, shapeptsidx,
-            wallpts, Interiorpts, outerpts, shapepts, numPoints)
+        readFile(file_name::String, globaldata, table, defprimal, shapeptsidx, shapepts, numPoints)
     end
 
     # if format == 1
@@ -53,32 +49,32 @@ function main()
     # return
 
     println(Int(getConfig()["core"]["max_iters"]) + 1)
-    function run_code(globaldata, configData, wallptsidx::Array{Int32,1}, outerptsidx::Array{Int32,1}, Interiorptsidx::Array{Int32,1}, res_old, numPoints)
+    function run_code(globaldata, configData, res_old, numPoints)
         for i in 1:(Int(getConfig()["core"]["max_iters"]))
-            fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old, numPoints)
+            fpi_solver(i, globaldata, configData,  res_old, numPoints)
         end
     end
 
     res_old = zeros(Float64, 1)
-    function test_code(globaldata, configData, wallptsidx::Array{Int32,1}, outerptsidx::Array{Int32,1}, Interiorptsidx::Array{Int32,1}, res_old, numPoints)
+    function test_code(globaldata, configData, res_old, numPoints)
         println("Starting warmup function")
-        fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old, numPoints)
+        fpi_solver(1, globaldata, configData,  res_old, numPoints)
         res_old[1] = 0.0
         Profile.clear_malloc_data()
-        # @trace(fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old), maxdepth = 3)
+        # @trace(fpi_solver(1, globaldata, configData,  res_old), maxdepth = 3)
         # res_old[1] = 0.0
-        # fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
-        # @profile fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
+        # fpi_solver(1, globaldata, configData,  res_old)
+        # @profile fpi_solver(1, globaldata, configData,  res_old)
         # Profile.print()
         # res_old[1] = 0.0
         println("Starting main function")
         @timeit to "nest 1" begin
-            run_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old, numPoints)
+            run_code(globaldata, configData,  res_old, numPoints)
         end
     end
 
 
-    test_code(globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old, numPoints)
+    test_code(globaldata, configData, res_old, numPoints)
     # # println(to)
     open("../results/timer" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) *".txt", "w") do io
         print_timer(io, to)
