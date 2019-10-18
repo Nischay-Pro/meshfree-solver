@@ -2,7 +2,7 @@ function main()
 
     configData = getConfig()
     shapepts = 0
-
+    max_iters = parse(Int, ARGS[2])
     file_name = string(ARGS[1])
     format = configData["format"]["type"]
     numPoints = returnFileLength(file_name)
@@ -48,9 +48,9 @@ function main()
     # println(globaldata[3])
     # return
 
-    println(Int(getConfig()["core"]["max_iters"]) + 1)
+    println(max_iters + 1)
     function run_code(globaldata, configData, res_old, numPoints)
-        for i in 1:(Int(getConfig()["core"]["max_iters"]))
+        for i in 1:max_iters
             fpi_solver(i, globaldata, configData,  res_old, numPoints)
         end
     end
@@ -103,14 +103,14 @@ function main()
     # println(IOContext(stdout, :compact => false), globaldata[100].ypos_conn)
     # println(IOContext(stdout, :compact => false), globaldata[100].yneg_conn)
     # println(globaldata[1])
-    file  = open("../results/primvals" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
-    for (idx, itm) in enumerate(globaldata)
-        primtowrite = globaldata[idx].prim
-        for element in primtowrite
-            @printf(file,"%0.17f", element)
-            @printf(file, " ")
-        end
-        print(file, "\n")
-    end
-    close(file)
+    # file  = open("../results/primvals" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
+    # for (idx, itm) in enumerate(globaldata)
+    #     primtowrite = globaldata[idx].prim
+    #     for element in primtowrite
+    #         @printf(file,"%0.17f", element)
+    #         @printf(file, " ")
+    #     end
+    #     print(file, "\n")
+    # end
+    # close(file)
 end

@@ -77,6 +77,7 @@ function state_update_wall(globaldata, itm, max_res, sum_res_sqr, U, Uold, rk)
     #     println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # end
     primitive_to_conserved(globaldata, itm, nx, ny, U)
+    primitive_to_conserved_old(globaldata, itm, nx, ny, Uold)
     # if itm == 2
     #     println("Prim1.01a2.2")
     #     println(IOContext(stdout, :compact => false), globaldata[1].prim)
@@ -84,7 +85,6 @@ function state_update_wall(globaldata, itm, max_res, sum_res_sqr, U, Uold, rk)
     temp = U[1]
     @. U = U - 0.5 * globaldata[itm].delta .* globaldata[itm].flux_res
     if rk == 3
-        primitive_to_conserved_old(globaldata, itm, nx, ny, Uold)
         @. U = U * 1/3 + Uold * 2/3
     end
     U[3] = zero(Float64)
@@ -117,10 +117,10 @@ end
     nx = globaldata[itm].nx
     ny = globaldata[itm].ny
     conserved_vector_Ubar(globaldata, itm, nx, ny, configData, U)
+    conserved_vector_Ubar_old(globaldata, itm, nx, ny, configData, Uold)
     temp = U[1]
     @. U = U - 0.5 * globaldata[itm].delta * globaldata[itm].flux_res
     if rk == 3
-        conserved_vector_Ubar_old(globaldata, itm, nx, ny, configData, Uold)
         @. U = U * 1/3 + Uold * 2/3
     end
     U2_rot = U[2]
@@ -138,6 +138,7 @@ end
     nx = globaldata[itm].nx
     ny = globaldata[itm].ny
     primitive_to_conserved(globaldata, itm, nx, ny, U)
+    primitive_to_conserved_old(globaldata, itm, nx, ny, Uold)
     # if itm == 1
     #     println("Prim1.11")
     #     println(IOContext(stdout, :compact => false), globaldata[itm].prim)
@@ -149,7 +150,6 @@ end
     temp = U[1]
     @. U = U - 0.5 * globaldata[itm].delta .* globaldata[itm].flux_res
     if rk == 3
-        primitive_to_conserved_old(globaldata, itm, nx, ny, Uold)
         @. U = U * 1/3 + Uold * 2/3
     end
     U2_rot = U[2]

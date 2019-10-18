@@ -77,6 +77,14 @@ function state_update_wall_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, id
     U3 = temp1*nx + temp2*ny
     U4 = 2.5*gpuGlobalDataRest[idx, 4] + 0.5*(temp1*temp1 + temp2*temp2)/rho
 
+    rho = gpuGlobalDataRest[idx, 30]
+    U1_old = rho
+    temp1 = rho * gpuGlobalDataRest[idx, 31]
+    temp2 = rho * gpuGlobalDataRest[idx, 32]
+    U2_old = temp1*ny - temp2*nx
+    U3_old = temp1*nx + temp2*ny
+    U4_old = 2.5*gpuGlobalDataRest[idx, 33] + 0.5*(temp1*temp1 + temp2*temp2)/rho
+
     # if idx == 3
     #     @cuprintf("\n ======= ")
     #     @cuprintf("\n Values are %f %f %f %f \n", U1,U2, U3, U4)
@@ -88,13 +96,6 @@ function state_update_wall_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, id
     U3 -= 0.5 * min_delt * gpuGlobalDataRest[idx, 7]
     U4 -= 0.5 * min_delt * gpuGlobalDataRest[idx, 8]
     if rk == 3
-        rho = gpuGlobalDataRest[idx, 30]
-        U1_old = rho
-        temp1 = rho * gpuGlobalDataRest[idx, 31]
-        temp2 = rho * gpuGlobalDataRest[idx, 32]
-        U2_old = temp1*ny - temp2*nx
-        U3_old = temp1*nx + temp2*ny
-        U4_old = 2.5*gpuGlobalDataRest[idx, 33] + 0.5*(temp1*temp1 + temp2*temp2)/rho
         U1 = U1 * 1/3 + 2/3 * U1_old
         U2 = U2 * 1/3 + 2/3 * U2_old
         U3 = U3 * 1/3 + 2/3 * U3_old
@@ -141,6 +142,14 @@ function state_update_interior_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest
     U2 = temp1*ny - temp2*nx
     U3 = temp1*nx + temp2*ny
     U4 = 2.5*gpuGlobalDataRest[idx, 4] + 0.5*(temp1*temp1 + temp2*temp2)/rho
+
+    rho = gpuGlobalDataRest[idx, 30]
+    U1_old = rho
+    temp1 = rho * gpuGlobalDataRest[idx, 31]
+    temp2 = rho * gpuGlobalDataRest[idx, 32]
+    U2_old = temp1*ny - temp2*nx
+    U3_old = temp1*nx + temp2*ny
+    U4_old = 2.5*gpuGlobalDataRest[idx, 33] + 0.5*(temp1*temp1 + temp2*temp2)/rho
     # if idx == 1
     #     @cuprintf("\n %.17f %.17f %.17f %.17f", U1, U2, U3, U4)
     #     # @cuprintf("\n %.17f ", temp1)
@@ -153,13 +162,6 @@ function state_update_interior_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest
     U3 -= 0.5 * min_delt * gpuGlobalDataRest[idx, 7]
     U4 -= 0.5 * min_delt * gpuGlobalDataRest[idx, 8]
     if rk == 3
-        rho = gpuGlobalDataRest[idx, 30]
-        U1_old = rho
-        temp1 = rho * gpuGlobalDataRest[idx, 31]
-        temp2 = rho * gpuGlobalDataRest[idx, 32]
-        U2_old = temp1*ny - temp2*nx
-        U3_old = temp1*nx + temp2*ny
-        U4_old = 2.5*gpuGlobalDataRest[idx, 33] + 0.5*(temp1*temp1 + temp2*temp2)/rho
         U1 = U1 * 1/3 + 2/3 * U1_old
         U2 = U2 * 1/3 + 2/3 * U2_old
         U3 = U3 * 1/3 + 2/3 * U3_old
@@ -233,8 +235,34 @@ function state_update_outer_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, g
 
     temp1 = (rho_inf*A2n_inf* e_inf - 0.5*rho_inf*u2_inf_rot*B2_inf)
     temp2 = (rho*A2p*e + 0.5*rho*u2_rot*B2)
-
     U4 = (temp1 + temp2)
+
+    rho = gpuGlobalDataRest[idx, 30]
+    u1 = gpuGlobalDataRest[idx, 31]
+    u2 = gpuGlobalDataRest[idx, 32]
+    pr = gpuGlobalDataRest[idx, 33]
+
+    u1_rot = u1*tx + u2*ty
+    u2_rot = u1*nx + u2*ny
+
+    temp1 = (u1_rot*u1_rot + u2_rot*u2_rot)
+    e = (pr/(rho*(gamma-1))) + 0.5*(temp1)
+
+    beta = (rho)/(2*pr)
+    S2 = u2_rot*CUDAnative.sqrt(beta)
+    B2 = CUDAnative.exp(-S2*S2)/(2*CUDAnative.sqrt(pi*beta))
+    A2p = 0.5*(1 + CUDAnative.erf(S2))
+
+    U1_old = (rho_inf*A2n_inf) + (rho*A2p)
+    U2_old = (rho_inf*u1_inf_rot*A2n_inf) + (rho*u1_rot*A2p)
+
+    temp1 = rho_inf*(u2_inf_rot*A2n_inf - B2_inf)
+    temp2 = rho*(u2_rot*A2p + B2)
+    U3_old = (temp1 + temp2)
+
+    temp1 = (rho_inf*A2n_inf* e_inf - 0.5*rho_inf*u2_inf_rot*B2_inf)
+    temp2 = (rho*A2p*e + 0.5*rho*u2_rot*B2)
+    U4_old = (temp1 + temp2)
 
     temp = U1
     U1 -= 0.5 * min_delt * gpuGlobalDataRest[idx, 5]
@@ -242,35 +270,6 @@ function state_update_outer_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, g
     U3 -= 0.5 * min_delt * gpuGlobalDataRest[idx, 7]
     U4 -= 0.5 * min_delt * gpuGlobalDataRest[idx, 8]
     if rk == 3
-        rho = gpuGlobalDataRest[idx, 30]
-        u1 = gpuGlobalDataRest[idx, 31]
-        u2 = gpuGlobalDataRest[idx, 32]
-        pr = gpuGlobalDataRest[idx, 33]
-
-        u1_rot = u1*tx + u2*ty
-        u2_rot = u1*nx + u2*ny
-
-        temp1 = (u1_rot*u1_rot + u2_rot*u2_rot)
-        e = (pr/(rho*(gamma-1))) + 0.5*(temp1)
-
-        beta = (rho)/(2*pr)
-        S2 = u2_rot*CUDAnative.sqrt(beta)
-        B2 = CUDAnative.exp(-S2*S2)/(2*CUDAnative.sqrt(pi*beta))
-        A2p = 0.5*(1 + CUDAnative.erf(S2))
-
-        U1_old = (rho_inf*A2n_inf) + (rho*A2p)
-
-        U2_old = (rho_inf*u1_inf_rot*A2n_inf) + (rho*u1_rot*A2p)
-
-        temp1 = rho_inf*(u2_inf_rot*A2n_inf - B2_inf)
-        temp2 = rho*(u2_rot*A2p + B2)
-        U3_old = (temp1 + temp2)
-
-        temp1 = (rho_inf*A2n_inf* e_inf - 0.5*rho_inf*u2_inf_rot*B2_inf)
-        temp2 = (rho*A2p*e + 0.5*rho*u2_rot*B2)
-
-        U4_old = (temp1 + temp2)
-
         U1 = U1 * 1/3 + 2/3 * U1_old
         U2 = U2 * 1/3 + 2/3 * U2_old
         U3 = U3 * 1/3 + 2/3 * U3_old
