@@ -2,7 +2,7 @@ import math
 from numba import cuda
 import numba
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def flux_Gxp(nx, ny, shared, op):
 
     u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
@@ -35,7 +35,7 @@ def flux_Gxp(nx, ny, shared, op):
     temp1 = (6*pr_by_rho) + u_sqr
     shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = op((rho*(temp2 + 0.5*temp1*B1)), shared[cuda.threadIdx.x + cuda.blockDim.x * 3])
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def flux_Gxn(nx, ny, shared, op):
 
     u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
@@ -69,7 +69,7 @@ def flux_Gxn(nx, ny, shared, op):
     temp1 = (6*pr_by_rho) + u_sqr
     shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = op((rho*(temp2 - 0.5*temp1*B1)), shared[cuda.threadIdx.x + cuda.blockDim.x * 3])
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def flux_Gyp(nx, ny, shared, op):
 
     u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
@@ -104,7 +104,7 @@ def flux_Gyp(nx, ny, shared, op):
     temp1 = (6*pr_by_rho) + u_sqr
     shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = op((rho*(temp2 + 0.5*temp1*B2)), shared[cuda.threadIdx.x + cuda.blockDim.x * 3])
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def flux_Gyn(nx, ny, shared, op):
 
     u1 = shared[cuda.threadIdx.x + cuda.blockDim.x * 4]
@@ -137,3 +137,38 @@ def flux_Gyn(nx, ny, shared, op):
     temp2 = 0.5*un*temp1*A2neg 
     temp1 = (6*pr_by_rho) + u_sqr
     shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = op((rho*(temp2 - 0.5*temp1*B2)), shared[cuda.threadIdx.x + cuda.blockDim.x * 3])
+
+# @cuda.jit(device=True, inline=True)
+# def flux_Gx(Gx, nx, ny, u1, u2, rho, pr, Gx):
+#     tx = ny
+#     ty = -nx
+
+#     ut = u1*tx + u2*ty
+#     un = u1*nx + u2*ny
+
+#     Gx[0] = rho*ut
+
+#     Gx[1] = pr + rho*ut*ut
+
+#     Gx[2] = rho*ut*un
+
+#     temp1 = 0.5*(ut*ut + un*un)
+#     rho_e = 2.5*pr + rho*temp1
+#     Gx[3] = (pr + rho_e)*ut
+
+# def flux_Gy(Gy, nx, ny, u1, u2, rho, pr):
+#     tx = ny
+#     ty = -nx
+
+#     ut = u1*tx + u2*ty
+#     un = u1*nx + u2*ny
+
+#     Gy[0] = rho*un
+
+#     Gy[1] = rho*ut*un
+
+#     Gy[2] = pr + rho*un*un
+
+#     temp1 = 0.5*(ut*ut + un*un)
+#     rho_e = 2.5*pr + rho*temp1
+#     Gy[3] = (pr + rho_e)*un

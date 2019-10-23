@@ -103,7 +103,7 @@ def convert_globaldata_to_gpu_globaldata_new(globaldata):
     delta = np.zeros(len(globaldata), np.float64)
     min_dist = np.zeros(len(globaldata), np.float64)
     maxminq = np.zeros((len(globaldata), 2, 4), np.float64)
-
+    
     for idx in trange(len(globaldata)):
         if idx > 0:
             x[idx] = globaldata[idx].x
@@ -123,10 +123,12 @@ def convert_globaldata_to_gpu_globaldata_new(globaldata):
             flux_res[idx] = globaldata[idx].flux_res
             q[idx] = globaldata[idx].q
             dq[idx] = globaldata[idx].dq
+
             xpos_nbhs[idx] = globaldata[idx].xpos_nbhs
             xneg_nbhs[idx] = globaldata[idx].xneg_nbhs
             ypos_nbhs[idx] = globaldata[idx].ypos_nbhs
             yneg_nbhs[idx] = globaldata[idx].yneg_nbhs
+            
             xpos_connt = globaldata[idx].xpos_conn
             for i in range(len(xpos_connt)):
                 xpos_conn[idx][i] = xpos_connt[i]

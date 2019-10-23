@@ -55,19 +55,19 @@ def venkat_limiter(qtilde_shared, q_gpu, maxminq, dq, nbhs, conn, x, y, min_dist
     shared[cuda.threadIdx.x + cuda.blockDim.x * 6] = rho
     shared[cuda.threadIdx.x + cuda.blockDim.x * 7] = pr
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def maximum(globaldata, idx, i, maxval, itm):
     maxval[i] = globaldata[idx]['q'][i]
     if maxval[i] < globaldata[itm]['q'][i]:
         maxval[i] = globaldata[itm]['q'][i]
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def minimum(globaldata, idx, i, minval, itm):
     minval[i] = globaldata[idx]['q'][i]
     if minval[i] > globaldata[itm]['q'][i]:
         minval[i] = globaldata[itm]['q'][i]
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def smallest_dist(globaldata, idx, min_dist):
     min_dist[0] = 10000
 
@@ -78,3 +78,26 @@ def smallest_dist(globaldata, idx, min_dist):
         
         if ds < min_dist[0]:
             min_dist[0] = ds
+
+# def max_q_values(globaldata, idx, temp):
+
+#     maxq = globaldata[idx]['q']
+
+#     for itm in globaldata[idx]['conn']:
+#         currq = globaldata[itm]['q']
+#         for i in range(4):
+#             if maxq[i] < currq[i]:
+#                 maxq[i] = currq[i]
+    
+#     return maxq
+
+# def min_q_values(globaldata, idx, temp):
+#     minq = globaldata[idx]['q']
+
+#     for itm in globaldata[idx]['conn']:
+#         currq = globaldata[itm]['q']
+#         for i in range(4):
+#             if minq[i] > currq[i]:
+#                 minq[i] = currq[i]
+    
+#     return minq

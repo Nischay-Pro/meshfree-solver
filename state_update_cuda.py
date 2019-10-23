@@ -200,7 +200,7 @@ def state_update_cuda(x, y, nx_gpu, ny_gpu, flag_1_gpu, nbhs, conn, prim, prim_o
             prim[idx][2] = tempU[2]
             prim[idx][3] = tempU[3]
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def primitive_to_conserved_cuda_kernel(itm, nx, ny, result, prim):
 
     U = cuda.local.array((4), numba.float64)
@@ -219,7 +219,7 @@ def primitive_to_conserved_cuda_kernel(itm, nx, ny, result, prim):
     result[2] = U[2]
     result[3] = U[3]
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def conserved_vector_Ubar_cuda_kernel(itm, nx, ny, Mach, gamma, pr_inf, rho_inf, aoa, result, prim):
 
     Ubar = cuda.local.array((4), numba.float64)

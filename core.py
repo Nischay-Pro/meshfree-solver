@@ -44,7 +44,7 @@ def calculateTheta(configData):
     theta = math.radians(float(configData["core"]["aoa"]))
     return theta
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def calculateThetaCuda(aoa, value):
     pi = 3.14159265358979323846
     value[0] = (pi/180) * aoa
@@ -475,6 +475,16 @@ def q_var_derivatives_cuda_kernel(x, y, maxminq, conn_gpu, nbhs, q, dq, power):
         dq[idx][1][1] = tempsumy[1]
         dq[idx][1][2] = tempsumy[2]
         dq[idx][1][3] = tempsumy[3]
+
+@cuda.jit(inline=True)
+def min_max_q(globaldata, i):
+    tx = cuda.threadIdx.x
+    bx = cuda.blockIdx.x
+    bw = cuda.blockDim.x
+    idx =  bx * bw + tx
+    if idx > 0 and idx < len(globaldata):
+        limiters_cuda.minimum(globaldata, idx, i, globaldata[idx]['minq'])
+        limiters_cuda.maximum(globaldata, idx, i, globaldata[idx]['maxq'])
 
 def qtilde_to_primitive(qtilde, configData):
     

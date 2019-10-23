@@ -2,42 +2,42 @@ from numba import cuda
 from numba import vectorize, float64
 import math
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def subtract(x, y, store):
     for i in range(len(x)):
         store[i] = x[i] - y[i]
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def multiply(x, y, store):
     for i in range(len(y)):
         store[i] = x * y[i]
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def multiply_element_wise(x, y, store):
     for i in range(len(y)):
         store[i] = x[i] * y[i]
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def multiply_element_wise_shared(x, y, store):
     for i in range(len(x)):
         store[i] = x[i] * y[cuda.threadIdx.x + cuda.blockDim.x * i]
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def add(x, y, store):
     for i in range(len(x)):
         store[i] = x[i] + y[i]
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def zeros(x, store):
     for i in range(len(x)):
         store[i] = 0
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def equalize(x, y):
     for i in range(len(y)):
         x[i] = y[i]
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def qtilde_to_primitive_cuda(qtilde, gamma, shared):
 
     q1 = qtilde[0]
