@@ -5,6 +5,10 @@ function func_delta_kernel(gpuGlobalDataConn,  gpuGlobalDataFixedPoint, gpuGloba
     bw = blockDim().x
     idx = bx * bw + tx
     if idx > 0 && idx <= gpuGlobalDataFixedPoint[end].localID
+        gpuGlobalDataRest[idx, 30] = gpuGlobalDataRest[idx, 1]
+        gpuGlobalDataRest[idx, 31] = gpuGlobalDataRest[idx, 2]
+        gpuGlobalDataRest[idx, 32] = gpuGlobalDataRest[idx, 3]
+        gpuGlobalDataRest[idx, 33] = gpuGlobalDataRest[idx, 4]
         # TODO - Possible problem?
         min_delt = one(Float64)
         for iter in 5:24
@@ -20,6 +24,7 @@ function func_delta_kernel(gpuGlobalDataConn,  gpuGlobalDataFixedPoint, gpuGloba
             y_i = gpuGlobalDataFixedPoint[idx].y
             x_k = gpuGlobalDataFixedPoint[conn].x
             y_k = gpuGlobalDataFixedPoint[conn].y
+
             dist = CUDAnative.hypot((x_k - x_i),(y_k - y_i))
             mod_u = CUDAnative.hypot(u1,u2)
             delta_t = dist/(mod_u + 3*CUDAnative.sqrt(pr/rho))
@@ -29,10 +34,6 @@ function func_delta_kernel(gpuGlobalDataConn,  gpuGlobalDataFixedPoint, gpuGloba
             end
         end
         gpuGlobalDataRest[idx, 29] = min_delt
-        gpuGlobalDataRest[idx, 30] = gpuGlobalDataRest[idx, 1]
-        gpuGlobalDataRest[idx, 31] = gpuGlobalDataRest[idx, 2]
-        gpuGlobalDataRest[idx, 32] = gpuGlobalDataRest[idx, 3]
-        gpuGlobalDataRest[idx, 33] = gpuGlobalDataRest[idx, 4]
     end
     # sync_threads()
     return nothing
@@ -48,6 +49,9 @@ function state_update_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataConn, gpuGlob
         min_delt = gpuGlobalDataRest[idx, 29]
         # min_delt = min_delt
         flag1 = gpuGlobalDataFixedPoint[idx].flag_1
+        # if idx == 2000
+        #     @cuprintf("\n Flag is %d", flag1)
+        # end
         if flag1 == gpuConfigData[17]
             state_update_wall_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, idx, min_delt, rk)
         end
@@ -150,9 +154,9 @@ function state_update_interior_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest
     U2_old = temp1*ny - temp2*nx
     U3_old = temp1*nx + temp2*ny
     U4_old = 2.5*gpuGlobalDataRest[idx, 33] + 0.5*(temp1*temp1 + temp2*temp2)/rho
-    # if idx == 1
+    # if idx == 2000
     #     @cuprintf("\n %.17f %.17f %.17f %.17f", U1, U2, U3, U4)
-    #     # @cuprintf("\n %.17f ", temp1)
+        # @cuprintf("\n %.17f %.17f", nx, ny)
     # end
     # res_sqr = (U1 - temp)*(U1 - temp)
     # gpuSumResSqr[idx] = res_sqr

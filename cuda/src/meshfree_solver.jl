@@ -15,7 +15,7 @@ function main()
     # gpu_globaldata = CuArray{Point,1}(undef, getConfig()["core"]["points"])
     globaldata = Array{Point,1}(undef, numPoints)
     # globalDataCommon = zeros(Float64, 173, numPoints)
-    globalDataRest = zeros(Float64, numPoints, 33)
+    globalDataRest = zeros(Float64, numPoints, 37)
     globalDataFixedPoint = Array{FixedPoint,1}(undef, numPoints)
     globalDataConn = zeros(Int32, numPoints, 85)
     globalDataFauxFixed = zeros(Float64, 4 * numPoints)
@@ -151,7 +151,7 @@ function main()
 
     function test_code(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
         println("Starting warmup function")
-        fpi_solver_cuda(1, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, numPoints)
+        # fpi_solver_cuda(1, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, numPoints)
         res_old = 0
         println("Starting main function")
         @timeit to "nest 1" begin
@@ -176,7 +176,7 @@ function main()
     # println()
     # println(globalDataCommon1[:,end])
 
-    # compute_cl_cd_cm_kernel(globalDataCommon, configData, shapeptsidx)
+    # compute_cl_cd_cm(globalDataFixedPoint, globalDataPrim, configData)
 
     # file  = open("primvals.txt", "w")
     # for (idx, itm) in enumerate(globaldata)
@@ -189,16 +189,16 @@ function main()
     # end
     # close(file)
 
-    # println("Writing cuda file")
-    # file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
-    # for idx in 1:numPoints
-    #    primtowrite = globalDataPrim[idx, 1:4]
-    #    for element in primtowrite
-    #        @printf(file,"%0.17f", element)
-    #        @printf(file, " ")
-    #    end
-    #    print(file, "\n")
-    # end
-    # close(file)
+    println("Writing cuda file")
+    file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
+    for idx in 1:numPoints
+       primtowrite = globalDataPrim[idx, 1:4]
+       for element in primtowrite
+           @printf(file,"%0.17f", element)
+           @printf(file, " ")
+       end
+       print(file, "\n")
+    end
+    close(file)
     end
 end

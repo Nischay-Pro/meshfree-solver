@@ -59,11 +59,11 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlob
         temp_var = @SVector [shared[thread_idx], shared[thread_idx + block_dim], shared[thread_idx + block_dim * 2], shared[thread_idx + block_dim * 3]]
         sum_delx_delf += temp_var * dels_weights
         sum_dely_delf += temp_var * deln_weights
-        if idx == 3
+        # if idx == 3
             # @cuprintf("\n  %.17f %.17f", dels_weights, deln_weights)
             # @cuprintf("\n %.17f %.17f %.17f %.17f", sum_delx_delf[1], sum_delx_delf[2], sum_delx_delf[3], sum_delx_delf[4])
             # @cuprintf("\n %.17f %.17f %.17f %.17f", sum_dely_delf[1], sum_dely_delf[2], sum_dely_delf[3], sum_dely_delf[4])
-        end
+        # end
     end
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
