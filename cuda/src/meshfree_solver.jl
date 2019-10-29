@@ -145,7 +145,7 @@ function main()
     # gpu_input = CuArray(input)
     # gpu_output = CuArray(output)
 
-    threadsperblock = Int(getConfig()["core"]["threadsperblock"])
+    threadsperblock = Int(configData["core"]["threadsperblock"])
     threadsperblock = parse(Int , ARGS[2])
     blockspergrid = Int(ceil(numPoints/threadsperblock))
 
@@ -155,7 +155,7 @@ function main()
         res_old = 0
         println("Starting main function")
         @timeit to "nest 1" begin
-            CuArrays.@sync begin fpi_solver_cuda(Int(getConfig()["core"]["max_iters"]), gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput,
+            CuArrays.@sync begin fpi_solver_cuda(Int(configData["core"]["max_iters"]), configData["core"]["innerloop"], gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput,
                 threadsperblock,blockspergrid, numPoints)
             end
         end
@@ -163,7 +163,7 @@ function main()
 
     test_code(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
 
-    open("../results/timer_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w") do io
+    open("../results/timer_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(configData["core"]["max_iters"]) * ".txt", "w") do io
         print_timer(io, to)
     end
     globalDataPrim = Array(gpuGlobalDataRest)
@@ -189,8 +189,10 @@ function main()
     # end
     # close(file)
 
+    stagnation_pressure(globalDataPrim, numPoints, configData)
+
     println("Writing cuda file")
-    file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
+    file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(configData["core"]["max_iters"]) * ".txt", "w")
     for idx in 1:numPoints
        primtowrite = globalDataPrim[idx, 1:4]
        for element in primtowrite

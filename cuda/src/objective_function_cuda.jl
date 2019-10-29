@@ -61,3 +61,24 @@ function compute_cl_cd_cm(globalDataFixedPoint, globalDataPrim, configData)
     Cd = H*cos(theta) + V*sin(theta)
     Cm = pitch_mom
 end
+
+function stagnation_pressure(globalDataPrim, numPoints, configData)
+    gamma = configData["core"]["gamma"]
+    gammaPower = gamma/(gamma-1)
+    pMin, pMax = 0.0,0.0
+    for idx in 1:numPoints
+        prim = globalDataPrim[idx, 1:4]
+        angle = sqrt(gamma * prim[4]/ prim[1])
+        mach = hypot(prim[2], prim[3])/angle
+        p0 = prim[4]*((1 + ((gamma - 1)/2)*mach*mach) ^ gammaPower)
+        if idx == 1
+            pMin = p0
+            pMax = p0
+        elseif p0 < pMin
+            pMin = p0
+        elseif p0 > pMax
+            pMax = p0
+        end
+    end
+    println("Stagnation values are ", pMin, " ", pMax)
+end
