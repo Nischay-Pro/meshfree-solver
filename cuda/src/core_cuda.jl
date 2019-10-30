@@ -153,13 +153,13 @@ function fpi_solver_cuda(iter, inner, gpuGlobalDataConn, gpuGlobalDataFixedPoint
         # @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 2000)
         for rk in 1:4
             # @cuprintf("\n Value is %f", gpuGlobalDataRest[3, 31])
-            @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints)
+            @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataRest, numPoints)
             # synchronize(str)
             # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
             @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
             innermost = 0
             while innermost < inner
-                @cuda blocks= blockspergrid threads= threadsperblock q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
+                @cuda blocks= blockspergrid threads= threadsperblock q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
                 @cuda blocks= blockspergrid threads= threadsperblock update_innerloop_kernel(gpuGlobalDataRest, numPoints)
                 innermost += 1
             end
@@ -199,7 +199,7 @@ function fpi_solver_cuda(iter, inner, gpuGlobalDataConn, gpuGlobalDataFixedPoint
     return nothing
 end
 
-function q_var_cuda_kernel(gpuGlobalDataFixedPoint, gpuGlobalDataRest, numPoints)
+function q_var_cuda_kernel(gpuGlobalDataRest, numPoints)
     tx = threadIdx().x
     bx = blockIdx().x - 1
     bw = blockDim().x
@@ -308,7 +308,7 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpu
     return nothing
 end
 
-function q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataRest, gpuConfigData, numPoints)
+function q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
     idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     # itm = CuArray(Float64, 145)
 
@@ -319,8 +319,8 @@ function q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFix
         conn = 0.0
         sum_delx_delq1, sum_delx_delq2, sum_delx_delq3, sum_delx_delq4 = 0.0,0.0,0.0,0.0
         sum_dely_delq1, sum_dely_delq2, sum_dely_delq3, sum_dely_delq4 = 0.0,0.0,0.0,0.0
-        x_i = gpuGlobalDataFixedPoint[idx].x
-        y_i = gpuGlobalDataFixedPoint[idx].y
+        x_i = gpuGlobalDataFauxFixed[idx]
+        y_i = gpuGlobalDataFauxFixed[idx + numPoints]
         temp1 = 0.0
         temp2 = 0.0
         power = gpuConfigData[6]
@@ -333,8 +333,8 @@ function q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFix
                 break
             end
 
-            delx = gpuGlobalDataFixedPoint[conn].x - x_i
-            dely = gpuGlobalDataFixedPoint[conn].y - y_i
+            delx = gpuGlobalDataFauxFixed[conn] - x_i
+            dely = gpuGlobalDataFauxFixed[conn + numPoints] - y_i
             dist = CUDAnative.hypot(delx, dely)
             weights = CUDAnative.pow(dist, power)
             # weights = 1.0

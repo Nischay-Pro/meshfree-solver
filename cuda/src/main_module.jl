@@ -91,13 +91,13 @@ include("interior_fluxes_cuda.jl")
 export interior_dGx_pos_kernel, interior_dGx_neg_kernel, interior_dGy_pos_kernel, interior_dGy_neg_kernel
 
 include("limiters_cuda.jl")
-export qtilde_to_primitive_kernel
+export venkat_limiter_kernel_qtilde
 
 include("meshfree_solver.jl")
 export main
 
 include("objective_function_cuda.jl")
-export compute_cl_cd_cm_kernel, calculateTheta
+export compute_cl_cd_cm, calculateTheta
 
 include("outer_fluxes_cuda.jl")
 export outer_dGx_pos_kernel, outer_dGx_neg_kernel, outer_dGy_pos_kernel
