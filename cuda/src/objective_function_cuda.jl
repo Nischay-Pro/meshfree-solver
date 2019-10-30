@@ -63,9 +63,15 @@ function compute_cl_cd_cm(globalDataFixedPoint, globalDataPrim, configData)
 end
 
 function stagnation_pressure(globalDataPrim, numPoints, configData)
+    # rho_inf::Float64 = configData["core"]["rho_inf"]
+    pr_inf::Float64 = configData["core"]["pr_inf"]
+    Mach_inf::Float64 = configData["core"]["mach"]
     gamma = configData["core"]["gamma"]
     gammaPower = gamma/(gamma-1)
-    pMin, pMax = 0.0,0.0
+
+    p0_inf = pr_inf*((1 + ((gamma - 1)/2)*Mach_inf*Mach_inf) ^ gammaPower)
+
+    pMin, pMax,indexMin, indexMax = 0.0, 0.0, 0.0, 0.0
     for idx in 1:numPoints
         prim = globalDataPrim[idx, 1:4]
         angle = sqrt(gamma * prim[4]/ prim[1])
@@ -73,12 +79,16 @@ function stagnation_pressure(globalDataPrim, numPoints, configData)
         p0 = prim[4]*((1 + ((gamma - 1)/2)*mach*mach) ^ gammaPower)
         if idx == 1
             pMin = p0
+            indexMin = idx
+            indexMax = idx
             pMax = p0
         elseif p0 < pMin
             pMin = p0
+            indexMin = idx
         elseif p0 > pMax
             pMax = p0
+            indexMax = idx
         end
     end
-    println("Stagnation values are ", pMin, " ", pMax)
+    println("Stagnation values are ", pMin, " ", pMax, " ", pMin/p0_inf, " ", pMax/p0_inf," ", indexMin, " ", indexMax)
 end

@@ -189,7 +189,7 @@ function main()
     # end
     # close(file)
 
-    stagnation_pressure(globalDataPrim, numPoints, configData)
+    # stagnation_pressure(globalDataPrim, numPoints, configData)
 
     println("Writing cuda file")
     file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(configData["core"]["max_iters"]) * ".txt", "w")
