@@ -86,6 +86,8 @@ function convertToFauxArray(targetArray1, originalStruct::Point, idx, numPoints)
     targetArray1[idx + numPoints] = originalStruct.y
     targetArray1[idx + 2 * numPoints] = originalStruct.nx
     targetArray1[idx + 3 * numPoints] = originalStruct.ny
+    targetArray1[idx + 4 * numPoints] = originalStruct.flag_1
+    targetArray1[idx + 5 * numPoints] = originalStruct.short_distance
     return nothing
 end
 

@@ -16,11 +16,11 @@ function main()
     globaldata = Array{Point,1}(undef, numPoints)
     # globalDataCommon = zeros(Float64, 173, numPoints)
     globalDataRest = zeros(Float64, numPoints, 37)
-    globalDataFixedPoint = Array{FixedPoint,1}(undef, numPoints)
+    # globalDataFixedPoint = Array{FixedPoint,1}(undef, numPoints)
     globalDataConn = zeros(Int32, numPoints, 85)
-    globalDataFauxFixed = zeros(Float64, 4 * numPoints)
+    globalDataFauxFixed = zeros(Float64, 6 * numPoints)
     println(sizeof(globalDataRest))
-    println(sizeof(globalDataFixedPoint))
+    # println(sizeof(globalDataFixedPoint))
     println(sizeof(globalDataConn))
 
     # table = Array{Int,1}(undef, numPoints)
@@ -59,7 +59,7 @@ function main()
     outer = configData["point"]["outer"]
     @showprogress 2 "Computing Connectivity" for idx in 1:numPoints
         placeNormals(globaldata, idx, configData, interior, wall, outer)
-        convertToFixedArray(globalDataFixedPoint, globaldata[idx], idx, numPoints)
+        # convertToFixedArray(globalDataFixedPoint, globaldata[idx], idx, numPoints)
         convertToFauxArray(globalDataFauxFixed, globaldata[idx], idx, numPoints)
     end
     # end
@@ -113,7 +113,7 @@ function main()
                             getConfig()["point"]["interior"],
                             getConfig()["point"]["outer"]
                         ])
-    gpuGlobalDataFixedPoint = CuArray(globalDataFixedPoint)
+    # gpuGlobalDataFixedPoint = CuArray(globalDataFixedPoint)
     gpuGlobalDataRest = CuArray(globalDataRest)
     gpuGlobalDataConn = CuArray(globalDataConn)
     gpuGlobalDataFauxFixed = CuArray(globalDataFauxFixed)
@@ -149,19 +149,19 @@ function main()
     threadsperblock = parse(Int , ARGS[2])
     blockspergrid = Int(ceil(numPoints/threadsperblock))
 
-    function test_code(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
+    function test_code(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
         println("Starting warmup function")
         # fpi_solver_cuda(1, gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, numPoints)
         res_old = 0
         println("Starting main function")
         @timeit to "nest 1" begin
-            CuArrays.@sync begin fpi_solver_cuda(Int(configData["core"]["max_iters"]), configData["core"]["innerloop"], gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput,
+            CuArrays.@sync begin fpi_solver_cuda(Int(configData["core"]["max_iters"]), configData["core"]["innerloop"], gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput,
                 threadsperblock,blockspergrid, numPoints)
             end
         end
     end
 
-    test_code(gpuGlobalDataConn, gpuGlobalDataFixedPoint, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
+    test_code(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock,blockspergrid, numPoints)
 
     open("../results/timer_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(configData["core"]["max_iters"]) *
             "_" * string(configData["core"]["innerloop"]) *".txt", "w") do io
@@ -179,30 +179,19 @@ function main()
 
     # compute_cl_cd_cm(globalDataFixedPoint, globalDataPrim, configData)
 
-    # file  = open("primvals.txt", "w")
-    # for (idx, itm) in enumerate(globaldata)
-    #     primtowrite = globaldata[idx].prim
-    #     for element in primtowrite
-    #         @printf(file,"%0.17f", element)
-    #         @printf(file, " ")
-    #     end
-    #     print(file, "\n")
+    stagnation_pressure(globalDataPrim, numPoints, configData)
+
+    # println("Writing cuda file")
+    # file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(configData["core"]["max_iters"]) *
+    #         "_" * string(configData["core"]["innerloop"]) * ".txt", "w")
+    # for idx in 1:numPoints
+    #    primtowrite = globalDataPrim[idx, 1:4]
+    #    for element in primtowrite
+    #        @printf(file,"%0.17f", element)
+    #        @printf(file, " ")
+    #    end
+    #    print(file, "\n")
     # end
     # close(file)
-
-    # stagnation_pressure(globalDataPrim, numPoints, configData)
-
-    println("Writing cuda file")
-    file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(configData["core"]["max_iters"]) *
-            "_" * string(configData["core"]["innerloop"]) * ".txt", "w")
-    for idx in 1:numPoints
-       primtowrite = globalDataPrim[idx, 1:4]
-       for element in primtowrite
-           @printf(file,"%0.17f", element)
-           @printf(file, " ")
-       end
-       print(file, "\n")
-    end
-    close(file)
     end
 end
