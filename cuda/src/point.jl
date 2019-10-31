@@ -68,16 +68,24 @@ function convertToFixedArray(targetArray1, originalStruct::Point, idx, numPoints
     end
 end
 
-function convertToNeighbourArray(targetArray2, originalStruct::Point, idx)
-    targetArray2[idx, 1] = originalStruct.xpos_nbhs
-    targetArray2[idx, 2] = originalStruct.xneg_nbhs
-    targetArray2[idx, 3] = originalStruct.ypos_nbhs
-    targetArray2[idx, 4] = originalStruct.yneg_nbhs
-    targetArray2[idx, 5:4 + originalStruct.nbhs] = originalStruct.conn
-    targetArray2[idx, 25:24 + originalStruct.xpos_nbhs] = originalStruct.xpos_conn
-    targetArray2[idx, 40:39 + originalStruct.xneg_nbhs] = originalStruct.xneg_conn
-    targetArray2[idx, 55:54 + originalStruct.ypos_nbhs] = originalStruct.ypos_conn
-    targetArray2[idx, 70:69 + originalStruct.yneg_nbhs] = originalStruct.yneg_conn
+function convertToNeighbourArray(targetArray1, targetArray2, originalStruct::Point, idx)
+    targetArray1[idx, 1:0 + originalStruct.nbhs] = originalStruct.conn
+    # targetArray1[idx, 25:24 + originalStruct.xpos_nbhs] = originalStruct.xpos_conn
+    # targetArray1[idx, 40:39 + originalStruct.xneg_nbhs] = originalStruct.xneg_conn
+    # targetArray1[idx, 55:54 + originalStruct.ypos_nbhs] = originalStruct.ypos_conn
+    # targetArray1[idx, 70:69 + originalStruct.yneg_nbhs] = originalStruct.yneg_conn
+    for (inner_idx, itm) in enumerate(originalStruct.xpos_conn)
+        targetArray2[idx, inner_idx] = findfirst(isequal(itm), originalStruct.conn)
+    end
+    for (inner_idx, itm) in enumerate(originalStruct.xneg_conn)
+        targetArray2[idx, 15 + inner_idx] = findfirst(isequal(itm), originalStruct.conn)
+    end
+    for (inner_idx, itm) in enumerate(originalStruct.ypos_conn)
+        targetArray2[idx, 30 + inner_idx] = findfirst(isequal(itm), originalStruct.conn)
+    end
+    for (inner_idx, itm) in enumerate(originalStruct.yneg_conn)
+        targetArray2[idx, 45 + inner_idx] = findfirst(isequal(itm), originalStruct.conn)
+    end
     return nothing
 end
 

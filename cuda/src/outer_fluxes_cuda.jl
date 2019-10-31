@@ -1,4 +1,4 @@
-function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
+function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
     idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     thread_idx = threadIdx().x
     block_dim = blockDim().x
@@ -20,11 +20,12 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlob
     power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
 
-    for iter in 25:39
-        conn = gpuGlobalDataConn[idx, iter]
-        if conn == 0.0
+    for iter in 1:15
+        conn = gpuGlobalDataConnSection[idx, iter]
+        if conn == 0
             break
         end
+        conn = gpuGlobalDataConn[idx, conn]
 
         delx = gpuGlobalDataFauxFixed[conn] - x_i
         dely = gpuGlobalDataFauxFixed[conn + numPoints] - y_i
@@ -63,7 +64,7 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlob
     return nothing
 end
 
-function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
+function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
     idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     thread_idx = threadIdx().x
     block_dim = blockDim().x
@@ -85,12 +86,12 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlob
     power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
 
-    for iter in 40:54
-        conn = gpuGlobalDataConn[idx, iter]
-        if conn == 0.0
+    for iter in 16:30
+        conn = gpuGlobalDataConnSection[idx, iter]
+        if conn == 0
             break
         end
-
+        conn = gpuGlobalDataConn[idx, conn]
         # x_k = gpuGlobalDataFauxFixed[conn].x
         # y_k = gpuGlobalDataFauxFixed[conn].y
         delx = gpuGlobalDataFauxFixed[conn] - x_i
@@ -130,7 +131,7 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlob
     return nothing
 end
 
-function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
+function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
     idx = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     thread_idx = threadIdx().x
     block_dim = blockDim().x
@@ -151,11 +152,12 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlob
     power = gpuConfigData[6]
     # gamma = gpuConfigData[15]
 
-    for iter in 55:69
-        conn = gpuGlobalDataConn[idx, iter]
-        if conn == 0.0
+    for iter in 31:45
+        conn = gpuGlobalDataConnSection[idx, iter]
+        if conn == 0
             break
         end
+        conn = gpuGlobalDataConn[idx, conn]
 
         # x_k = gpuGlobalDataFauxFixed[conn].x
         # y_k = gpuGlobalDataFauxFixed[conn].y

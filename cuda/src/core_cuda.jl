@@ -133,7 +133,7 @@ function getPointDetails(gdata, p_i)
     return nothing
 end
 
-function fpi_solver_cuda(iter, inner, gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, numPoints)
+function fpi_solver_cuda(iter, inner, gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput, threadsperblock, blockspergrid, numPoints)
 
     # dev::CuDevice=CuDevice(0)
     str = CuStream()
@@ -156,7 +156,7 @@ function fpi_solver_cuda(iter, inner, gpuGlobalDataConn, gpuGlobalDataFauxFixed,
             @cuda blocks=blockspergrid threads=threadsperblock q_var_cuda_kernel(gpuGlobalDataRest, numPoints)
             # synchronize(str)
             # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
-            @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
+            @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataConn,  gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
             innermost = 0
             while innermost < inner
                 @cuda blocks= blockspergrid threads= threadsperblock q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
@@ -166,7 +166,7 @@ function fpi_solver_cuda(iter, inner, gpuGlobalDataConn, gpuGlobalDataFauxFixed,
             # @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 2000)
             # synchronize(str)
             # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
-            @cuda blocks= blockspergrid threads= threadsperblock cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
+            @cuda blocks= blockspergrid threads= threadsperblock cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
             # @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 3)
             # synchronize(str)
             # @cuprintf("\n It is %f ", gpuGlobalDataCommon[31, 3])
@@ -254,9 +254,9 @@ function q_var_derivatives_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpu
         temp = 0.0
         power = gpuConfigData[6]
 
-        for iter in 5:24
+        for iter in 1:20
             conn = gpuGlobalDataConn[idx, iter]
-            if conn == 0.0
+            if conn == 0
                 break
             end
 
@@ -327,9 +327,9 @@ function q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFau
 
         q1, q2, q3, q4 = gpuGlobalDataRest[idx, 9], gpuGlobalDataRest[idx, 10], gpuGlobalDataRest[idx, 11], gpuGlobalDataRest[idx, 12]
 
-        for iter in 5:24
+        for iter in 1:20
             conn = gpuGlobalDataConn[idx, iter]
-            if conn == 0.0
+            if conn == 0
                 break
             end
 

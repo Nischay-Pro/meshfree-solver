@@ -48,20 +48,6 @@ mutable struct Point
     min_q::Array{Float64,1}
 end
 
-struct FixedPoint
-    localID::Int32
-    x::Float64
-    y::Float64
-    left::Int32
-    right::Int32
-    flag_1::Int8
-    flag_2::Int8
-    short_distance::Float64
-    nbhs::Int8
-    nx::Float64
-    ny::Float64
-    entropy::Float64
-end
 
 # using PyCall
 
