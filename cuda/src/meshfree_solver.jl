@@ -1,7 +1,6 @@
 
 function main()
     configData = getConfig()
-    # globaldataCommon = zeros(Float64, 38, getConfig()["core"]["points"])
     file_name = string(ARGS[1])
     format = configData["format"]["type"]
 
@@ -10,18 +9,17 @@ function main()
         numPoints += 1
     end
     println("Number of points ", numPoints)
-    # globaldataDq = [Array{Array{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
-    # gpuGlobaldataDq = [CuArray{CuArray{Float64,1},2}(undef,2,4) for iterating in 1:getConfig()["core"]["points"]]
-    # gpu_globaldata = CuArray{Point,1}(undef, getConfig()["core"]["points"])
+
     globaldata = Array{Point,1}(undef, numPoints)
-    # globalDataCommon = zeros(Float64, 173, numPoints)
+
     globalDataRest = zeros(Float64, numPoints, 37)
     globalDataConn = zeros(Int32, numPoints, 20)
     globalDataConnSection = zeros(Int8, numPoints, 60)
     globalDataFauxFixed = zeros(Float64, 6 * numPoints)
     println(sizeof(globalDataRest))
-
+    println(sizeof(globalDataFauxFixed))
     println(sizeof(globalDataConn))
+    println(sizeof(globalDataConnSection))
 
     # table = Array{Int,1}(undef, numPoints)
     defprimal = getInitialPrimitive(configData)
@@ -180,17 +178,17 @@ function main()
 
     stagnation_pressure(globalDataPrim, numPoints, configData)
 
-    println("Writing cuda file")
-    file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(configData["core"]["max_iters"]) *
-            "_" * string(configData["core"]["innerloop"]) * ".txt", "w")
-    for idx in 1:numPoints
-       primtowrite = globalDataPrim[idx, 1:4]
-       for element in primtowrite
-           @printf(file,"%0.17f", element)
-           @printf(file, " ")
-       end
-       print(file, "\n")
-    end
-    close(file)
+    # println("Writing cuda file")
+    # file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(configData["core"]["max_iters"]) *
+    #         "_" * string(configData["core"]["innerloop"]) * ".txt", "w")
+    # for idx in 1:numPoints
+    #    primtowrite = globalDataPrim[idx, 1:4]
+    #    for element in primtowrite
+    #        @printf(file,"%0.17f", element)
+    #        @printf(file, " ")
+    #    end
+    #    print(file, "\n")
+    # end
+    # close(file)
     end
 end
