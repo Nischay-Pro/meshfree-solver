@@ -39,3 +39,5 @@ grid_*
 runner.sh
 counts.txt
 ssprk43_results/
+results/
+run.sh

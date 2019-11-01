@@ -2,12 +2,12 @@ import math
 import core
 import numpy as np
 
-def compute_cl_cd_cm(globaldata, configData, wallindices):
+def compute_cl_cd_cm(x, y, nx_gpu, ny_gpu, left_gpu, right_gpu, prim, flag_2_gpu, configData, wallindices):
 
     rho_inf = configData["core"]["rho_inf"]
     Mach = configData["core"]["mach"]
     pr_inf = configData["core"]["pr_inf"]
-    shapes = getGeometryCount(globaldata)
+    shapes = getGeometryCount(flag_2_gpu)
     theta = core.calculateTheta(configData)
 
     temp = 0.5*rho_inf*Mach*Mach
@@ -23,14 +23,14 @@ def compute_cl_cd_cm(globaldata, configData, wallindices):
     with open('cp_file', 'w+') as the_file:
 
         for itm in wallindices:
-            left = globaldata[itm].left
-            right = globaldata[itm].right
-            lx = globaldata[left].x
-            ly = globaldata[left].y
-            rx = globaldata[right].x
-            ry = globaldata[right].y
-            mx = globaldata[itm].x
-            my = globaldata[itm].y
+            left = left_gpu[itm]
+            right = right_gpu[itm]
+            lx = x[left]
+            ly = y[left]
+            rx = x[right]
+            ry = y[right]
+            mx = x[itm]
+            my = y[itm]
 
             ds1 = (mx - lx)**2 + (my - ly)**2
             ds1 = math.sqrt(ds1)
@@ -41,13 +41,13 @@ def compute_cl_cd_cm(globaldata, configData, wallindices):
             ds = 0.5*(ds1 + ds2)
 
 
-            nx = globaldata[itm].nx
-            ny = globaldata[itm].ny
+            nx = nx_gpu[itm]
+            ny = ny_gpu[itm]
 
-            cp = globaldata[itm].prim[3] - pr_inf
+            cp = prim[itm][3] - pr_inf
             cp = -cp/temp
 
-            flag_2 = globaldata[itm].flag_2 - 1
+            flag_2 = flag_2_gpu[itm] - 1
             the_file.write("{} {} {}\n".format(flag_2, mx, cp))
 
             H[flag_2] += cp * nx * ds
@@ -66,9 +66,9 @@ def compute_cl_cd_cm(globaldata, configData, wallindices):
         print("Cl:",Cl)
         print("Cd:",Cd)
 
-def getGeometryCount(globaldata):
+def getGeometryCount(flag_2):
     maxFlag = 0
-    for itm in globaldata[1:]:
-        if maxFlag < itm.flag_2:
-            maxFlag = itm.flag_2
+    for itm in flag_2[1:]:
+        if maxFlag < itm:
+            maxFlag = itm
     return maxFlag

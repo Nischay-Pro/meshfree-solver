@@ -29,6 +29,7 @@ def interior_dGx_pos(x, y, nx_gpu, ny_gpu, min_dist, nbhs, conn, xpos_nbhs, xpos
 
     for itm in xpos_conn[idx][:xpos_nbhs[idx]]:
 
+        itm = conn[idx][itm]
         x_k = x[itm]
         y_k = y[itm]
 
@@ -89,6 +90,7 @@ def interior_dGx_neg(x, y, nx_gpu, ny_gpu, min_dist, nbhs, conn, xpos_nbhs, xpos
 
     for itm in xneg_conn[idx][:xneg_nbhs[idx]]:
 
+        itm = conn[idx][itm]
         x_k = x[itm]
         y_k = y[itm]
 
@@ -149,6 +151,7 @@ def interior_dGy_pos(x, y, nx_gpu, ny_gpu, min_dist, nbhs, conn, xpos_nbhs, xpos
 
     for itm in ypos_conn[idx][:ypos_nbhs[idx]]:
 
+        itm = conn[idx][itm]
         x_k = x[itm]
         y_k = y[itm]
 
@@ -209,6 +212,7 @@ def interior_dGy_neg(x, y, nx_gpu, ny_gpu, min_dist, nbhs, conn, xpos_nbhs, xpos
 
     for itm in yneg_conn[idx][:yneg_nbhs[idx]]:
 
+        itm = conn[idx][itm]
         x_k = x[itm]
         y_k = y[itm]
 

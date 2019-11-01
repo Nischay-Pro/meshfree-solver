@@ -141,7 +141,7 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         os.remove("residue")
     except:
         pass
-    x_gpu, y_gpu, left_gpu, right_gpu, flag_1_gpu, flag_2_gpu, nbhs_gpu, conn_gpu, nx_gpu, ny_gpu, prim_gpu, prim_old_gpu, flux_res_gpu, q_gpu, dq_gpu, xpos_nbhs_gpu, xneg_nbhs_gpu, ypos_nbhs_gpu, yneg_nbhs_gpu, xpos_conn_gpu, xneg_conn_gpu, ypos_conn_gpu, yneg_conn_gpu, delta_gpu, min_dist_gpu, maxminq = convert.convert_globaldata_to_gpu_globaldata_new(globaldata)
+    x_gpu, y_gpu, left_gpu, right_gpu, flag_1_gpu, flag_2_gpu, nbhs_gpu, conn_gpu, nx_gpu, ny_gpu, prim_gpu, prim_old_gpu, flux_res_gpu, q_gpu, dq_gpu, xpos_nbhs_gpu, xneg_nbhs_gpu, ypos_nbhs_gpu, yneg_nbhs_gpu, xpos_conn_gpu, xneg_conn_gpu, ypos_conn_gpu, yneg_conn_gpu, delta_gpu, min_dist_gpu, maxminq, inner_gpu = convert.convert_globaldata_to_gpu_globaldata_new(globaldata)
     sum_res_sqr = np.zeros(len(globaldata), dtype=np.float64)
     a = time.time()
     if configData['core']['ssprk']:
@@ -184,6 +184,10 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         blockspergrid_x = math.ceil(len(globaldata) / threadsperblock[0])
         blockspergrid_y = math.ceil(1)
         blockspergrid = (blockspergrid_x, blockspergrid_y)
+        if int(configData['core']['inner']) != 0:
+            print("Inner Iterations are set to {}".format(int(configData['core']['inner'])))
+        else:
+            print("Inner Iterations are currently disabled.")
         for i in range(1, iter):
             state_update_cuda.func_delta_cuda_kernel[blockspergrid, threadsperblock](prim_gpu, prim_old_gpu, x_gpu, y_gpu, conn_gpu, nbhs_gpu, delta_gpu, float(configData["core"]["cfl"]))
             if i == 1:
@@ -192,6 +196,11 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
             for rk in range(1, rks):
                 q_var_cuda_kernel[blockspergrid, threadsperblock](prim_gpu, q_gpu)
                 q_var_derivatives_cuda_kernel[blockspergrid, threadsperblock](x_gpu, y_gpu, maxminq_gpu, conn_gpu, nbhs_gpu, q_gpu, dq_gpu, float(configData['core']['power']))
+
+                if int(configData['core']['inner']) != 0:
+                    for _ in range(0, configData['core']['inner']):
+                        q_var_derivatives_innerloops_kernel[blockspergrid, threadsperblock](x_gpu, y_gpu, q_gpu, dq_gpu, conn_gpu, nbhs_gpu, float(configData['core']['power']), inner_gpu)
+                        update_innerloop[blockspergrid, threadsperblock](dq_gpu, inner_gpu)
                 flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, xpos_nbhs_gpu, xpos_conn_gpu, xneg_nbhs_gpu, xneg_conn_gpu, ypos_nbhs_gpu, ypos_conn_gpu, yneg_nbhs_gpu, yneg_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]))
                 state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, nbhs_gpu, conn_gpu, prim_gpu, prim_old_gpu, delta_gpu, flux_res_gpu, float(configData["core"]["mach"]), float(configData["core"]["gamma"]), float(configData["core"]["pr_inf"]), float(configData["core"]["rho_inf"]), float(configData["core"]["aoa"]), sum_res_sqr_gpu, int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]), rk, eu)
             if i == 1:
@@ -206,16 +215,19 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
             print("Iteration: %s Residue: %s" % (str(i), residue))
             with open('residue', 'a+') as the_file:
                 the_file.write("%s %s\n" % (i, residue))
+            if math.isnan(residue):
+                print("Found NaN exiting!!")
+                exit()
         temp = x_gpu.copy_to_host()
         if configData["core"]["debug"]:
             sum_res_sqr = sum_res_sqr_gpu.copy_to_host()
+            stagnation_pressure(prim_gpu.copy_to_host(),configData)
     b = time.time()
     with open('grid_{}.txt'.format(len(globaldata)), 'a+') as the_file:
         the_file.write("Block Dimensions: ({}, 1)\nRuntime: {}\n".format(int(configData['core']['blockGridX']), (b - a - (d - c))))
     if configData["core"]["profile"]:
         exit()
-    globaldata = convert.convert_gpu_globaldata_to_globaldata(temp)
-    objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
+    objective_function.compute_cl_cd_cm(x_gpu.copy_to_host(), y_gpu.copy_to_host(), nx_gpu.copy_to_host(), ny_gpu.copy_to_host(), left_gpu.copy_to_host(), right_gpu.copy_to_host(), prim_gpu.copy_to_host(), flag_2_gpu.copy_to_host(), configData, wallindices)
     if configData["core"]["debug"]:
         helper.printPrimitive(globaldata)
     return res_old, globaldata
@@ -477,14 +489,89 @@ def q_var_derivatives_cuda_kernel(x, y, maxminq, conn_gpu, nbhs, q, dq, power):
         dq[idx][1][3] = tempsumy[3]
 
 @cuda.jit(inline=True)
-def min_max_q(globaldata, i):
+def q_var_derivatives_innerloops_kernel(x, y, q, dq, conn_gpu, nbhs, power, inner):
     tx = cuda.threadIdx.x
     bx = cuda.blockIdx.x
     bw = cuda.blockDim.x
     idx =  bx * bw + tx
-    if idx > 0 and idx < len(globaldata):
-        limiters_cuda.minimum(globaldata, idx, i, globaldata[idx]['minq'])
-        limiters_cuda.maximum(globaldata, idx, i, globaldata[idx]['maxq'])
+    if idx > 0 and idx < len(x):
+
+        x_i = x[idx]
+        y_i = y[idx]
+
+        sum_delx_sqr = 0
+        sum_dely_sqr = 0
+        sum_delx_dely = 0
+
+        sum_delx_delq1, sum_delx_delq2, sum_delx_delq3, sum_delx_delq4 = 0.0,0.0,0.0,0.0
+        sum_dely_delq1, sum_dely_delq2, sum_dely_delq3, sum_dely_delq4 = 0.0,0.0,0.0,0.0
+
+        temp1 = 0.0
+        temp2 = 0.0
+
+        q1 = q[idx][0]
+        q2 = q[idx][1]
+        q3 = q[idx][2]
+        q4 = q[idx][3]
+
+        for conn in conn_gpu[idx][:nbhs[idx]]:
+            delx = x[conn] - x_i
+            dely = y[conn] - y_i
+
+            dist = math.sqrt(delx*delx + dely*dely)
+            weights = dist ** power
+            sum_delx_sqr = sum_delx_sqr + ((delx * delx) * weights)
+            sum_dely_sqr = sum_dely_sqr + ((dely * dely) * weights)
+            sum_delx_dely = sum_delx_dely + ((delx * dely) * weights)
+
+            temp1 = q1 - 0.5 * (delx * dq[idx][0][0] + dely * dq[idx][1][0])
+            temp2 = q[conn][0] - 0.5 * (delx * dq[conn][0][0] + dely * dq[conn][1][0])
+            sum_delx_delq1 += (weights * delx * (temp2 - temp1))
+            sum_dely_delq1 += (weights * dely * (temp2 - temp1))
+
+            temp1 = q2 - 0.5 * (delx * dq[idx][0][1] + dely * dq[idx][1][1])
+            temp2 = q[conn][1] - 0.5 * (delx * dq[conn][0][1] + dely * dq[conn][1][1])
+            sum_delx_delq2 += (weights * delx * (temp2 - temp1))
+            sum_dely_delq2 += (weights * dely * (temp2 - temp1))
+
+            temp1 = q3 - 0.5 * (delx * dq[idx][0][2] + dely * dq[idx][1][2])
+            temp2 = q[conn][2] - 0.5 * (delx * dq[conn][0][2] + dely * dq[conn][1][2])
+            sum_delx_delq3 += (weights * delx * (temp2 - temp1))
+            sum_dely_delq3 += (weights * dely * (temp2 - temp1))
+
+            temp1 = q4 - 0.5 * (delx * dq[idx][0][3] + dely * dq[idx][1][3])
+            temp2 = q[conn][3] - 0.5 * (delx * dq[conn][0][3] + dely * dq[conn][1][3])
+            sum_delx_delq4 += (weights * delx * (temp2 - temp1))
+            sum_dely_delq4 += (weights * dely * (temp2 - temp1))
+
+        det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
+        one_by_det = 1.0 / det
+
+        inner[idx][0] = one_by_det * (sum_delx_delq1 * sum_dely_sqr - sum_dely_delq1 * sum_delx_dely)
+        inner[idx][1] = one_by_det * (sum_delx_delq2 * sum_dely_sqr - sum_dely_delq2 * sum_delx_dely)
+        inner[idx][2] = one_by_det * (sum_delx_delq3 * sum_dely_sqr - sum_dely_delq3 * sum_delx_dely)
+        inner[idx][3] = one_by_det * (sum_delx_delq4 * sum_dely_sqr - sum_dely_delq4 * sum_delx_dely)
+        inner[idx][4] = one_by_det * (sum_dely_delq1 * sum_delx_sqr - sum_delx_delq1 * sum_delx_dely)
+        inner[idx][5] = one_by_det * (sum_dely_delq2 * sum_delx_sqr - sum_delx_delq2 * sum_delx_dely)
+        inner[idx][6] = one_by_det * (sum_dely_delq3 * sum_delx_sqr - sum_delx_delq3 * sum_delx_dely)
+        inner[idx][7] = one_by_det * (sum_dely_delq4 * sum_delx_sqr - sum_delx_delq4 * sum_delx_dely)
+
+@cuda.jit(inline=True)
+def update_innerloop(dq, inner):
+    tx = cuda.threadIdx.x
+    bx = cuda.blockIdx.x
+    bw = cuda.blockDim.x
+    idx =  bx * bw + tx
+    if idx > 0 and idx < len(dq):
+        dq[idx][0][0] = inner[idx][0]
+        dq[idx][0][1] = inner[idx][1]
+        dq[idx][0][2] = inner[idx][2]
+        dq[idx][0][3] = inner[idx][3]
+        dq[idx][1][0] = inner[idx][4]
+        dq[idx][1][1] = inner[idx][5]
+        dq[idx][1][2] = inner[idx][6]
+        dq[idx][1][3] = inner[idx][7]
+
 
 def qtilde_to_primitive(qtilde, configData):
     
@@ -507,5 +594,22 @@ def qtilde_to_primitive(qtilde, configData):
     rho = math.exp(temp2)
     pr = rho*temp
 
-
     return (u1,u2,rho,pr)
+
+def stagnation_pressure(primGPU, configData):
+    gamma = configData["core"]["gamma"]
+    gammaPower = gamma/(gamma-1)
+    pMin, pMax = 0,0
+    for idx in range(1, len(primGPU)):
+        prim = primGPU[idx]
+        angle = math.sqrt(gamma * prim[3]/ prim[0])
+        mach = (math.sqrt(prim[1] ** 2 + prim[2] ** 2))/angle
+        p0 = (1/1.4)*((1 + ((gamma - 1)/2)*mach*mach) ** gammaPower)
+        if idx == 1:
+            pMin = p0
+            pMax = p0
+        elif p0 < pMin:
+            pMin = p0
+        elif p0 > pMax:
+            pMax = p0
+    print("Stagnation values are {} {}".format(pMin, pMax))

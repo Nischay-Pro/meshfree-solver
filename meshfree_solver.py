@@ -18,10 +18,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", help="Grid File Location", type=str, default="partGridNew")
     parser.add_argument("-t", "--thread", help="Thread Block Size", type=int, default=0)
+    parser.add_argument("-i", "--inner", help="Inner Loop Iterations", type=int, default=0)
     args = parser.parse_args()
 
     if not args.thread == 0:
         configData["core"]["blockGridX"] = args.thread
+
+    if not args.inner == 0:
+        configData["core"]["inner"] = args.inner
 
     file1 = open(args.file)
     print("Loading file: %s" % args.file)

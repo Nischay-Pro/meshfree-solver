@@ -16,7 +16,8 @@
         "ssprk": true,
         "profile": true,
         "debug": false,
-        "output": false
+        "output": false,
+        "inner": 0
     },
     "point": {
         "wall": 0,
