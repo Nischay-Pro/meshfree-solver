@@ -178,7 +178,7 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         delta_gpu = cuda.to_device(delta_gpu, stream)
         min_dist_gpu = cuda.to_device(min_dist_gpu, stream)
         maxminq_gpu = cuda.to_device(maxminq, stream)
-
+        inner_gpu = cuda.to_device(inner_gpu, stream)
         sum_res_sqr_gpu = cuda.to_device(sum_res_sqr, stream)
         threadsperblock = (int(configData['core']['blockGridX']), 1)
         blockspergrid_x = math.ceil(len(globaldata) / threadsperblock[0])
