@@ -48,11 +48,11 @@ def main():
     for idx, itm in enumerate(tqdm(splitdata)):
         itmdata = itm.split(" ")[:-1]
         if format == 1:
-            temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), 1, 1, int(itmdata[5]), int(itmdata[6]), int(itmdata[8]), list(map(int,itmdata[9:])), float(itmdata[3]), float(itmdata[4]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[7]))
+            temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), 1, 1, int(itmdata[5]), int(itmdata[6]), int(itmdata[8]), list(map(int,itmdata[9:])), float(itmdata[3]), float(itmdata[4]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[7]), 0)
         elif format == 2:
-            temp = Point(idx + 1, float(itmdata[0]), float(itmdata[1]), int(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[10]), list(map(int, itmdata[11:])), float(itmdata[6]), float(itmdata[7]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[9]))
+            temp = Point(idx + 1, float(itmdata[0]), float(itmdata[1]), int(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[10]), list(map(int, itmdata[11:])), float(itmdata[6]), float(itmdata[7]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[9]), int(itmdata[8]))
         else:
-            temp = Point(idx + 1, float(itmdata[0]), float(itmdata[1]), int(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[7]), list(map(int,itmdata[8:])), 1, 0, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[6]))
+            temp = Point(idx + 1, float(itmdata[0]), float(itmdata[1]), int(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[7]), list(map(int,itmdata[8:])), 1, 0, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[6]), 0)
         globaldata.append(temp)
         if format == 0 or format == 1:
             if int(itmdata[4]) == configData["point"]["wall"]:
@@ -109,9 +109,6 @@ def main():
 
     print("Starting FPI Solver")
     _, globaldata = core.fpi_solver(config.getConfig()["core"]["max_iters"] + 1, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx, res_old)
-
-    if configData["core"]["output"] and not configData["core"]["debug"]:
-        output.generateOutput(globaldata)
 
     print("Done")
 
