@@ -85,8 +85,8 @@ function main()
     # gpu_globaldata[1:2000] = CuArray(globaldata[1:2000])
     # println(typeof(gpuGlobaldataDq))
     # gpuGlobaldataLocalID = CuArray(globaldataLocalID)
-    gpuSumResSqr = CuArrays.zeros(Float32, numPoints)
-    gpuSumResSqrOutput = CuArrays.zeros(Float32, numPoints)
+    gpuSumResSqr = CuArrays.zeros(Float64, numPoints)
+    gpuSumResSqrOutput = CuArrays.zeros(Float64, numPoints)
     println("Passing to GPU Globaldata")
     # gpuGlobalDataCommon = CuArray(globalDataCommon)
     gpuConfigData = CuArray([
@@ -176,7 +176,7 @@ function main()
 
     # compute_cl_cd_cm(globalDataFixedPoint, globalDataPrim, configData)
 
-    stagnation_pressure(globalDataPrim, numPoints, configData)
+    # stagnation_pressure(globalDataPrim, numPoints, configData)
 
     # println("Writing cuda file")
     # file  = open("../results/primvals_cuda" * string(numPoints) * "_" * string(threadsperblock) * "_" * string(configData["core"]["max_iters"]) *
