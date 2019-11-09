@@ -35,3 +35,4 @@ test*
 *.nsight-cuprof-report
 *.pdf
 testfile
+serial/*
