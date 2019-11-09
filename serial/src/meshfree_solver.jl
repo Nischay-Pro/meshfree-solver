@@ -58,7 +58,7 @@ function main()
     res_old = zeros(Float64, 1)
     function test_code(globaldata, configData, res_old, numPoints)
         println("Starting warmup function")
-        fpi_solver(1, globaldata, configData,  res_old, numPoints)
+        # fpi_solver(1, globaldata, configData,  res_old, numPoints)
         res_old[1] = 0.0
         Profile.clear_malloc_data()
         # @trace(fpi_solver(1, globaldata, configData,  res_old), maxdepth = 3)
