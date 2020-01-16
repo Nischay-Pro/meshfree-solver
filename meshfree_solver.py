@@ -27,32 +27,47 @@ def main():
     print("Getting Primitive Values Default")
     defprimal = core.getInitialPrimitive(configData)
 
-    original_format = configData["core"]["format"]
-    if original_format == 0:
-        original_format = True
-    else:
-        original_format = False
+    format = configData["core"]["format"]
+
+    # Format 0: 6th Grid Format
+    # Format 1: Old Format
+    # Format 2: QuadTree Format
+
+    splitdata.pop(0)
 
     print("Converting RAW dataset to Globaldata")
     for idx, itm in enumerate(tqdm(splitdata)):
         itmdata = itm.split(" ")[:-1]
-        if not original_format:
-            temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), 1, 1, int(itmdata[5]), int(itmdata[6]), int(itmdata[8]), list(map(int,itmdata[9:])), float(itmdata[3]), float(itmdata[4]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[7]), None, None)
+        if format == 1:
+            temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), 1, 1, int(itmdata[5]), int(itmdata[6]), int(itmdata[8]), list(map(int,itmdata[9:])), float(itmdata[3]), float(itmdata[4]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[7]))
+        elif format == 2:
+            temp = Point(idx + 1, float(itmdata[0]), float(itmdata[1]), int(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[10]), list(map(int, itmdata[11:])), float(itmdata[6]), float(itmdata[7]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[9]))
         else:
-            temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[6]), int(itmdata[8]), list(map(int,itmdata[9:])), 1, 0, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[7]), None, None)
+            temp = Point(idx + 1, float(itmdata[0]), float(itmdata[1]), int(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[7]), list(map(int,itmdata[8:])), 1, 0, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[6]))
         globaldata.append(temp)
-        if int(itmdata[5]) == configData["point"]["wall"]:
-            wallpts += 1
-            wallptsidx.append(int(itmdata[0]))
-        elif int(itmdata[5]) == configData["point"]["interior"]:
-            interiorpts += 1
-            interiorptsidx.append(int(itmdata[0]))
-        elif int(itmdata[5]) == configData["point"]["outer"]:
-            outerpts += 1
-            outerptsidx.append(int(itmdata[0]))
-        table.append(int(itmdata[0]))
+        if format == 0 or format == 1:
+            if int(itmdata[4]) == configData["point"]["wall"]:
+                wallpts += 1
+                wallptsidx.append(idx + 1)
+            elif int(itmdata[4]) == configData["point"]["interior"]:
+                interiorpts += 1
+                interiorptsidx.append(idx + 1)
+            elif int(itmdata[4]) == configData["point"]["outer"]:
+                outerpts += 1
+                outerptsidx.append(idx + 1)
+        else:
+            if int(itmdata[4]) == configData["point"]["wall"]:
+                wallpts += 1
+                wallptsidx.append(idx + 1)
+            elif int(itmdata[4]) == configData["point"]["interior"]:
+                interiorpts += 1
+                interiorptsidx.append(idx + 1)
+            elif int(itmdata[4]) == configData["point"]["outer"]:
+                outerpts += 1
+                outerptsidx.append(idx + 1)
+        table.append(idx + 1)
 
-    if original_format:
+    if format == 0 or format == 2:
         for idx in wallptsidx:
             currpt = globaldata[idx].getxy()
             leftpt = globaldata[idx].left

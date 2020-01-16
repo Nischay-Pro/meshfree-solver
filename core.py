@@ -106,13 +106,16 @@ def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interior
         os.remove("residue")
     except:
         pass
+    rks = 5
+    eu = 1
     a = time.time()
     for i in range(1, iter):
-        globaldata = q_var_derivatives(globaldata, configData)
-        globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
         globaldata = state_update.func_delta(globaldata, configData)
-        globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, i, res_old)
-        # objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
+        for rk in range(1, rks):
+            globaldata = q_var_derivatives(globaldata, configData)
+            globaldata = flux_residual.cal_flux_residual(globaldata, wallindices, outerindices, interiorindices, configData)
+            globaldata, res_old = state_update.state_update(globaldata, wallindices, outerindices, interiorindices, configData, i, rk, eu, res_old)
+            # objective_function.compute_cl_cd_cm(globaldata, configData, wallindices)
     b = time.time()
     with open('grid_{}.txt'.format(len(globaldata)), 'a+') as the_file:
         the_file.write("Runtime: {}\nIterations: {}\n".format((b - a), iter))
