@@ -26,6 +26,7 @@ def main():
         splitdata = splitdata[:-1]
     print("Getting Primitive Values Default")
     defprimal = core.getInitialPrimitive(configData)
+    
 
     format = configData["core"]["format"]
 
@@ -92,6 +93,8 @@ def main():
         globaldata[idx].setConnectivity(connectivity)
 
     res_old = 0
+
+    globaldata = core.useRestartSolution(globaldata)
 
     print("Starting FPI Solver")
     core.fpi_solver(config.getConfig()["core"]["max_iters"] + 1, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx, res_old)

@@ -28,6 +28,22 @@ def getInitialPrimitive2(configData):
         except:
             print(idx)
     return finaldata
+
+def useRestartSolution(globaldata):
+    dataman = open("restart.dat")
+    data = dataman.read()
+    data = data.split("\n")
+    for idx,itm in enumerate(data):
+        if idx > 0:
+            try:
+                itm2 = " ".join(itm.split()).split(" ")
+                globaldata[idx].prim[0] = float(itm2[4])
+                globaldata[idx].prim[1] = float(itm2[5])
+                globaldata[idx].prim[2] = float(itm2[6])
+                globaldata[idx].prim[3] = float(itm2[7])
+            except:
+                pass
+    return globaldata
     
 def calculateTheta(configData):
     theta = math.radians(float(configData["core"]["aoa"]))
