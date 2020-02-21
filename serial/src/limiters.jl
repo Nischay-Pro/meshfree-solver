@@ -1,8 +1,8 @@
-function venkat_limiter(qtilde, globaldata_point, configData, phi)
+function venkat_limiter(qtilde, vl_const, globaldata_point, configData, phi)
     # smallest_dist(globaldata, idx)
-    VL_CONST = configData["core"]["vl_const"]
+    # VL_CONST = configData["core"]["vl_const"]
     ds = globaldata_point.short_distance
-    epsi = VL_CONST * ds
+    epsi = vl_const * ds
     epsi = epsi ^ 3
     # phi = zeros(Float64, 4)
     del_pos = zero(Float64)
