@@ -1,0 +1,29 @@
+{
+  "core": {
+    "points": 9600,
+    "cfl": 1,
+    "max_iters": 3,
+    "mach": 0.63,
+    "aoa": 2,
+    "power": 0,
+    "limiter_flag": 1,
+    "vl_const": 200,
+    "initial_conditions_flag": 0,
+    "interior_points_normal_flag": 0,
+    "shapes": 1,
+    "rho_inf": 1,
+    "pr_inf": 0.7142857142857142,
+    "threadsperblock": 128,
+    "gamma": 1.4,
+    "clcd_flag": 0,
+    "innerloop": 0
+  },
+  "point": {
+    "wall": 0,
+    "interior": 1,
+    "outer": 2
+  },
+  "format": {
+    "type": "structured"
+  }
+}

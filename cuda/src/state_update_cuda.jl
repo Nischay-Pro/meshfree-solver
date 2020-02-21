@@ -118,7 +118,7 @@ function state_update_wall_kernel(gpuGlobalDataFauxFixed, gpuGlobalDataRest, idx
     # gpuSumResSqr[idx] = res_sqr
     # if idx == 3
     #     @cuprintf("\n ======= ")
-    #     @cuprintf("\n Values are %f %f %f %f \n", U1,U2, U3, U4)
+    # @cuprintf("\n %d - %f %f %f %f", idx, U1,U2,U3,U4)
     # end
 
     # if res_sqr > max_res
