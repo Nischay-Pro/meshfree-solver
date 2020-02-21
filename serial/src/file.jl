@@ -6,7 +6,7 @@ end
 
 function readFile(file_name::String, globaldata, table, defprimal, shapeptsidx, shapepts, numPoints)
     data1 = read(file_name, String)
-    splitdata = @view split(data1, "\n")[1:end-1]
+    splitdata = @view split(data1, "\n")[2:end-1]
     # print(splitdata[1:3])
     @showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
         itmdata = split(itm, " ")

@@ -6,9 +6,9 @@ function main()
     file_name = string(ARGS[1])
     format = configData["format"]["type"]
     numPoints = returnFileLength(file_name)
-    if format == "old"
-        numPoints += 1
-    end
+    # if format == "old"
+        # numPoints += 0
+    # end
     println(numPoints)
     globaldata = Array{Point,1}(undef, numPoints)
     table = Array{Int32,1}(undef, numPoints)
@@ -43,42 +43,48 @@ function main()
         #     println("Bump In Table")
         # end
     end
-    # println(wallptsidx)
 
-    # println(globaldata[3])
-    # return
 
     println(max_iters + 1)
-    function run_code(globaldata, configData, res_old, numPoints)
+    function run_code(globaldata, configData, res_old, numPoints, main_store)
         for i in 1:max_iters
-            fpi_solver(i, globaldata, configData,  res_old, numPoints)
+            fpi_solver(i, globaldata, configData,  res_old, numPoints, main_store)
         end
     end
 
     res_old = zeros(Float64, 1)
-    function test_code(globaldata, configData, res_old, numPoints)
+
+    main_store = zeros(Float64, 52)
+
+    function test_code(globaldata, configData, res_old, numPoints, main_store)
         println("Starting warmup function")
         # fpi_solver(1, globaldata, configData,  res_old, numPoints)
         res_old[1] = 0.0
-        Profile.clear_malloc_data()
+        # Profile.clear_malloc_data()
+        # Profile.clear()
         # @trace(fpi_solver(1, globaldata, configData,  res_old), maxdepth = 3)
         # res_old[1] = 0.0
-        # fpi_solver(1, globaldata, configData,  res_old)
+        # fpi_solver(1, globaldata, configData,  res_old, numPoints)
         # @profile fpi_solver(1, globaldata, configData,  res_old)
         # Profile.print()
         # res_old[1] = 0.0
         println("Starting main function")
         @timeit to "nest 1" begin
-            run_code(globaldata, configData,  res_old, numPoints)
+            run_code(globaldata, configData,  res_old, numPoints, main_store)
         end
+        # open("prof.txt", "w") do s
+            # Profile.print(IOContext(s, :displaysize => (24, 500)))
+        # end
     end
 
 
-    test_code(globaldata, configData, res_old, numPoints)
-    # # println(to)
+    test_code(globaldata, configData, res_old, numPoints, main_store)
+
     open("../results/timer" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) *".txt", "w") do io
         print_timer(io, to)
     end
+end
+
 
     # compute_cl_cd_cm(globaldata, configData, shapeptsidx)
 
@@ -113,4 +119,3 @@ function main()
     #     print(file, "\n")
     # end
     # close(file)
-end

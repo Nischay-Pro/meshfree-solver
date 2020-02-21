@@ -1,61 +1,43 @@
-function venkat_limiter(qtilde, globaldata, idx, configData, phi)
+function venkat_limiter(qtilde, globaldata_point, configData, phi)
     # smallest_dist(globaldata, idx)
     VL_CONST = configData["core"]["vl_const"]
-    ds = globaldata[idx].short_distance
+    ds = globaldata_point.short_distance
     epsi = VL_CONST * ds
     epsi = epsi ^ 3
     # phi = zeros(Float64, 4)
     del_pos = zero(Float64)
     del_neg = zero(Float64)
-    @. phi = VLBroadcaster.(globaldata[idx].q, qtilde, globaldata[idx].max_q, globaldata[idx].min_q, phi, epsi, del_pos, del_neg)
+    VLBroadcaster(globaldata_point.q, qtilde, globaldata_point.max_q, globaldata_point.min_q, phi, epsi, del_pos, del_neg)
     return nothing
 end
 
 function VLBroadcaster(q, qtilde, max_q, min_q, phi, epsi, del_pos, del_neg)
-    del_neg = qtilde - q
-    phi = 1.0
-    if abs(del_neg) > 1e-5
-        if del_neg > 0.0
-            # maximum(globaldata, idx, i)
-            del_pos = max_q - q
-        elseif del_neg < 0.0
-            # minimum(globaldata, idx, i)
-            del_pos = min_q - q
-        end
-        num = (del_pos*del_pos) + (epsi*epsi)
-        num = (num*del_neg) + 2 * (del_neg*del_neg*del_pos)
-        den = (del_pos*del_pos) + (2 *del_neg*del_neg)
-        den = den + (del_neg*del_pos) + (epsi*epsi)
-        den = den*del_neg
-        temp = num/den
-        if temp < 1.0
-            phi = temp
-        else
-            phi = 1.0
+    for i in 1:4
+        del_neg = qtilde[i] - q[i]
+        if abs(del_neg) <= 1e-5
+            phi[i] = 1.0
+        elseif abs(del_neg) > 1e-5
+            if del_neg > 0.0
+                del_pos = max_q[i] - q[i]
+            elseif del_neg < 0.0
+                del_pos = min_q[i] - q[i]
+            end
+            num = (del_pos*del_pos) + (epsi*epsi)
+            num = (num*del_neg) + 2 * (del_neg*del_neg*del_pos)
+
+            den = (del_pos*del_pos) + (2 *del_neg*del_neg)
+            den = den + (del_neg*del_pos) + (epsi*epsi)
+            den = den*del_neg
+
+            temp = num/den
+            if temp < 1.0
+                phi[i] = temp
+            else
+                phi[i] = 1.0
+            end
         end
     end
-    return phi
 end
-
-# @inline function maximum(globaldata, idx, i)
-#     globaldata[idx].max_q[i] = copy(globaldata[idx].q[i])
-#     for itm in globaldata[idx].conn
-#         if globaldata[idx].max_q[i] < globaldata[itm].q[i]
-#             globaldata[idx].max_q[i] = globaldata[itm].q[i]
-#         end
-#     end
-#     return  nothing
-# end
-
-# @inline function minimum(globaldata, idx, i)
-#     globaldata[idx].min_q[i] = copy(globaldata[idx].q[i])
-#     for itm in globaldata[idx].conn
-#         if globaldata[idx].min_q[i] > globaldata[itm].q[i]
-#             globaldata[idx].min_q[i] = globaldata[itm].q[i]
-#         end
-#     end
-#     return nothing
-# end
 
 @inline function smallest_dist(globaldata, idx)
     min_dist = 1000.0
@@ -95,7 +77,7 @@ end
     return minq
 end
 
-@inline function qtilde_to_primitive(result::Array{Float64,1}, qtilde::Array{Float64,1}, configData)
+@inline function qtilde_to_primitive(result, qtilde, configData)
     gamma::Float64 = configData["core"]["gamma"]
     beta = -qtilde[4]*0.5
     temp = 0.5/beta

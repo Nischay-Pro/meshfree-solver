@@ -7,8 +7,8 @@ function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    fill!(sum_delx_delf,0.0)
-    fill!(sum_dely_delf, 0.0)
+    fill!(sum_delx_delf, zero(Float64))
+    fill!(sum_dely_delf, zero(Float64))
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -50,8 +50,8 @@ function interior_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
         end
 
         if limiter_flag == 1
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_k, globaldata, itm, configData, phi_k)
+            venkat_limiter(qtilde_i, globaldata[idx], configData, phi_i)
+            venkat_limiter(qtilde_k, globaldata[itm], configData, phi_k)
             for i in 1:4
                 qtilde_i[i] = (globaldata[idx].q[i]) - 0.5 * phi_i[i] * (delx*(globaldata[idx].dq[1][i]) + dely*(globaldata[idx].dq[2][i]))
                 qtilde_k[i] = (globaldata[itm].q[i]) - 0.5 * phi_k[i] * (delx*(globaldata[itm].dq[1][i]) + dely*(globaldata[itm].dq[2][i]))
@@ -107,8 +107,8 @@ function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    fill!(sum_delx_delf,0.0)
-    fill!(sum_dely_delf, 0.0)
+    fill!(sum_delx_delf, zero(Float64))
+    fill!(sum_dely_delf, zero(Float64))
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -151,8 +151,8 @@ function interior_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
         end
 
         if limiter_flag == 1
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_k, globaldata, itm, configData, phi_k)
+            venkat_limiter(qtilde_i, globaldata[idx], configData, phi_i)
+            venkat_limiter(qtilde_k, globaldata[itm], configData, phi_k)
             for i in 1:4
                 qtilde_i[i] = (globaldata[idx].q[i]) - 0.5 * phi_i[i] * (delx*(globaldata[idx].dq[1][i]) + dely*(globaldata[idx].dq[2][i]))
                 qtilde_k[i] = (globaldata[itm].q[i]) - 0.5 * phi_k[i] * (delx*(globaldata[itm].dq[1][i]) + dely*(globaldata[itm].dq[2][i]))
@@ -215,8 +215,8 @@ function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    fill!(sum_delx_delf,0.0)
-    fill!(sum_dely_delf, 0.0)
+    fill!(sum_delx_delf, zero(Float64))
+    fill!(sum_dely_delf, zero(Float64))
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -259,8 +259,8 @@ function interior_dGy_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
         end
 
         if limiter_flag == 1
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_k, globaldata, itm, configData, phi_k)
+            venkat_limiter(qtilde_i, globaldata[idx], configData, phi_i)
+            venkat_limiter(qtilde_k, globaldata[itm], configData, phi_k)
             for i in 1:4
                 qtilde_i[i] = (globaldata[idx].q[i]) - 0.5 * phi_i[i] * (delx*(globaldata[idx].dq[1][i]) + dely*(globaldata[idx].dq[2][i]))
                 qtilde_k[i] = (globaldata[itm].q[i]) - 0.5 * phi_k[i] * (delx*(globaldata[itm].dq[1][i]) + dely*(globaldata[itm].dq[2][i]))
@@ -317,8 +317,8 @@ function interior_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    fill!(sum_delx_delf,0.0)
-    fill!(sum_dely_delf, 0.0)
+    fill!(sum_delx_delf, zero(Float64))
+    fill!(sum_dely_delf, zero(Float64))
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -361,8 +361,8 @@ function interior_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, r
         end
 
         if limiter_flag == 1
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_k, globaldata, itm, configData, phi_k)
+            venkat_limiter(qtilde_i, globaldata[idx], configData, phi_i)
+            venkat_limiter(qtilde_k, globaldata[itm], configData, phi_k)
             for i in 1:4
                 qtilde_i[i] = (globaldata[idx].q[i]) - 0.5 * phi_i[i] * (delx*(globaldata[idx].dq[1][i]) + dely*(globaldata[idx].dq[2][i]))
                 qtilde_k[i] = (globaldata[itm].q[i]) - 0.5 * phi_k[i] * (delx*(globaldata[itm].dq[1][i]) + dely*(globaldata[itm].dq[2][i]))

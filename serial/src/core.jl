@@ -121,7 +121,7 @@ function getPointDetails(globaldata, point_index)
     # println(IOContext(stdout, :compact => false), "Delta is", globaldata[point_index].delta)
 end
 
-function fpi_solver(iter, globaldata, configData, res_old, numPoints)
+function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # print(" 111\n")
     if iter == 1
@@ -129,35 +129,40 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints)
     end
     func_delta(globaldata, configData)
 
-    phi_i = zeros(Float64,4)
-	phi_k = zeros(Float64,4)
-	G_i = zeros(Float64,4)
-    G_k = zeros(Float64,4)
-	result = zeros(Float64,4)
-	qtilde_i = zeros(Float64,4)
-	qtilde_k = zeros(Float64,4)
-	Gxp = zeros(Float64, 4)
-	Gxn = zeros(Float64, 4)
-	Gyp = zeros(Float64, 4)
-	Gyn = zeros(Float64, 4)
-    sum_delx_delf = zeros(Float64, 4)
-    sum_dely_delf = zeros(Float64, 4)
+    phi_i = @view main_store[1:4]
+	phi_k = @view main_store[5:8]
+	G_i = @view main_store[9:12]
+    G_k = @view main_store[13:16]
+	result = @view main_store[17:20]
+	qtilde_i = @view main_store[21:24]
+	qtilde_k = @view main_store[25:28]
+	Gxp = @view main_store[29:32]
+	Gxn = @view main_store[33:36]
+	Gyp = @view main_store[37:40]
+	Gyn = @view main_store[41:44]
+    sum_delx_delf = @view main_store[45:48]
+    sum_dely_delf = @view main_store[49:52]
 
     print("Iteration Number ", iter, " ")
     # getPointDetails(globaldata, 3)
     for rk in 1:4
+        q_variables(globaldata, configData)
         # println("=========")
         # if iter == 1
             # println("Starting QVar")
         # end
-        q_var_derivatives(globaldata, configData)
+        # @timeit to "nest 2" begin
+            q_var_derivatives(globaldata, configData)
+        # end
         # getPointDetails(globaldata, 3)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
         # if iter == 1
             # println("Starting Calflux")
         # end
+        @timeit to "nest 2" begin
         cal_flux_residual(globaldata, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
-            result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
+                result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
+        end
         # getPointDetails(globaldata, 3)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
         # residue = 0
@@ -173,9 +178,7 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints)
     return nothing
 end
 
-function q_var_derivatives(globaldata::Array{Point,1}, configData)
-    power::Float64 = configData["core"]["power"]
-
+function q_variables(globaldata::Array{Point,1}, configData)
     for (idx, itm) in enumerate(globaldata)
         rho = itm.prim[1]
         u1 = itm.prim[2]
@@ -190,7 +193,9 @@ function q_var_derivatives(globaldata::Array{Point,1}, configData)
         globaldata[idx].q[4] = -two_times_beta
 
     end
-    # println(IOContext(stdout, :compact => false), globaldata[3].q)
+end
+function q_var_derivatives(globaldata::Array{Point,1}, configData)
+    power::Float64 = configData["core"]["power"]
     sum_delx_delq = zeros(Float64, 4)
     sum_dely_delq = zeros(Float64, 4)
     for (idx, itm) in enumerate(globaldata)

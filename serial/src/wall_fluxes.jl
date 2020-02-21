@@ -7,8 +7,8 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    fill!(sum_delx_delf, 0.0)
-    fill!(sum_dely_delf, 0.0)
+    fill!(sum_delx_delf, zero(Float64))
+    fill!(sum_dely_delf, zero(Float64))
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -19,11 +19,6 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
     tx::Float64 = ny
     ty::Float64 = -nx
 
-    # G_i = zeros(Float64,4)
-    # G_k = zeros(Float64,4)
-    # result = zeros(Float64,4)
-    # phi_i = zeros(Float64,4)
-    # phi_k = zeros(Float64,4)
 
     for itm in globaldata[idx].xpos_conn
 
@@ -55,8 +50,8 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         # end
 
         if limiter_flag == 1
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_k, globaldata, itm, configData, phi_k)
+            venkat_limiter(qtilde_i, globaldata[idx], configData, phi_i)
+            venkat_limiter(qtilde_k, globaldata[itm], configData, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
@@ -171,8 +166,8 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    fill!(sum_delx_delf, 0.0)
-    fill!(sum_dely_delf, 0.0)
+    fill!(sum_delx_delf, zero(Float64))
+    fill!(sum_dely_delf, zero(Float64))
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -182,12 +177,6 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
 
     tx = ny
     ty = -nx
-
-    # G_i = zeros(Float64,4)
-    # G_k = zeros(Float64,4)
-    # result = zeros(Float64,4)
-    # phi_i = zeros(Float64,4)
-    # phi_k = zeros(Float64,4)
 
     for itm in globaldata[idx].xneg_conn
 
@@ -215,8 +204,8 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         @. qtilde_k = globaldata[itm].q - 0.5*(delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
 
         if limiter_flag == 1
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_k, globaldata, itm, configData, phi_k)
+            venkat_limiter(qtilde_i, globaldata[idx], configData, phi_i)
+            venkat_limiter(qtilde_k, globaldata[itm], configData, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
@@ -268,8 +257,8 @@ function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
 
-    fill!(sum_delx_delf, 0.0)
-    fill!(sum_dely_delf, 0.0)
+    fill!(sum_delx_delf, zero(Float64))
+    fill!(sum_dely_delf, zero(Float64))
 
     x_i = globaldata[idx].x
     y_i = globaldata[idx].y
@@ -279,12 +268,6 @@ function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
 
     tx = ny
     ty = -nx
-
-    # G_i = zeros(Float64,4)
-    # G_k = zeros(Float64,4)
-    # result = zeros(Float64,4)
-    # phi_i = zeros(Float64,4)
-    # phi_k = zeros(Float64,4)
 
     for itm in globaldata[idx].yneg_conn
 
@@ -312,8 +295,8 @@ function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         @. qtilde_k = globaldata[itm].q - 0.5*(delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
 
         if limiter_flag == 1
-            venkat_limiter(qtilde_i, globaldata, idx, configData, phi_i)
-            venkat_limiter(qtilde_k, globaldata, itm, configData, phi_k)
+            venkat_limiter(qtilde_i, globaldata[idx], configData, phi_i)
+            venkat_limiter(qtilde_k, globaldata[itm], configData, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
