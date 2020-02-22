@@ -242,14 +242,18 @@ function q_var_derivatives(globaldata::Array{Point,1}, power, sum_delx_delq, sum
                 end
             end
         end
-        det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
-        one_by_det = 1.0 / det
-        for iter in 1:4
-            itm.dq1[iter] = one_by_det * (sum_delx_delq[iter] * sum_dely_sqr - sum_dely_delq[iter] * sum_delx_dely)
-            itm.dq2[iter] = one_by_det * (sum_dely_delq[iter] * sum_delx_sqr - sum_delx_delq[iter] * sum_delx_dely)
-        end
+        q_var_derivatives_update(itm, sum_delx_sqr, sum_dely_sqr, sum_delx_dely, sum_delx_delq, sum_dely_delq)
     end
     return nothing
+end
+
+@inline function q_var_derivatives_update(itm, sum_delx_sqr, sum_dely_sqr, sum_delx_dely, sum_delx_delq, sum_dely_delq)
+    det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
+    one_by_det = 1.0 / det
+    for iter in 1:4
+        itm.dq1[iter] = one_by_det * (sum_delx_delq[iter] * sum_dely_sqr - sum_dely_delq[iter] * sum_delx_dely)
+        itm.dq2[iter] = one_by_det * (sum_dely_delq[iter] * sum_delx_sqr - sum_delx_delq[iter] * sum_delx_dely)
+    end
 end
 
 function q_var_derivatives_innerloop(globaldata::Array{Point,1}, power, tempdq, sum_delx_delq, sum_dely_delq, qi_tilde, qk_tilde)
