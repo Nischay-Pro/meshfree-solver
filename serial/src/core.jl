@@ -153,12 +153,9 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
         # if iter == 1
             # println("Starting QVar")
         # end
-        # @timeit to "nest 2" begin
-        @timeit to "nest 2" begin
-            q_var_derivatives(globaldata, power)
-        end
+        q_var_derivatives(globaldata, power)
         for inner_iters in 1:3
-            @profile q_var_derivatives_innerloop(globaldata, power, tempdq)
+            q_var_derivatives_innerloop(globaldata, power, tempdq)
         end
         # end
         # end

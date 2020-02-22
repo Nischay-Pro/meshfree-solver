@@ -1,4 +1,4 @@
-function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const, Gxp)
+function wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const, Gxp)
 
    # power::Float64 = configData["core"]["power"]
    # limiter_flag::Float64 = configData["core"]["limiter_flag"]
@@ -50,8 +50,8 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         # end
 
         if limiter_flag == 1
-            venkat_limiter(qtilde_i, vl_const, globaldata[idx], configData, phi_i)
-            venkat_limiter(qtilde_k, vl_const, globaldata[itm], configData, phi_k)
+            venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
+            venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
@@ -63,25 +63,7 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         # #     println(IOContext(stdout, :compact => false), qtilde_k)
         # end
 
-        if limiter_flag == 2
-            maxi = max_q_values(globaldata, idx)
-            mini = min_q_values(globaldata, idx)
 
-            for i in 1:4
-                if qtilde_i[i] > maxi[i]
-                    qtilde_i[i] = maxi[i]
-                end
-                if qtilde_i[i] < mini[i]
-                    qtilde_i[i] = mini[i]
-                end
-                if qtilde_k[i] > maxi[i]
-                    qtilde_k[i] = maxi[i]
-                end
-                if qtilde_k[i] < mini[i]
-                    qtilde_k[i] = mini[i]
-                end
-            end
-        end
         # if idx == 76
         #     println("qtile_i ", qtilde_i)
         #     println("qtile_k ", qtilde_k)
@@ -91,7 +73,7 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), result)
         # end
-        qtilde_to_primitive(result, qtilde_i, configData)
+        qtilde_to_primitive(result, qtilde_i, gamma)
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), " => ", result)
         # end
@@ -99,7 +81,7 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), result)
         # end
-        qtilde_to_primitive(result, qtilde_k, configData)
+        qtilde_to_primitive(result, qtilde_k, gamma)
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), " => ", result)
         # end
@@ -157,7 +139,7 @@ function wall_dGx_pos(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
     return nothing
 end
 
-function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const, Gxn)
+function wall_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const, Gxn)
 
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
@@ -201,35 +183,17 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         @. qtilde_k = globaldata[itm].q - 0.5*(delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
 
         if limiter_flag == 1
-            venkat_limiter(qtilde_i, vl_const, globaldata[idx], configData, phi_i)
-            venkat_limiter(qtilde_k, vl_const, globaldata[itm], configData, phi_k)
+            venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
+            venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
 
-        if limiter_flag == 2
-            maxi = max_q_values(globaldata, idx)
-            mini = min_q_values(globaldata, idx)
 
-            for i in 1:4
-                if qtilde_i[i] > maxi[i]
-                    qtilde_i[i] = maxi[i]
-                end
-                if qtilde_i[i] < mini[i]
-                    qtilde_i[i] = mini[i]
-                end
-                if qtilde_k[i] > maxi[i]
-                    qtilde_k[i] = maxi[i]
-                end
-                if qtilde_k[i] < mini[i]
-                    qtilde_k[i] = mini[i]
-                end
-            end
-        end
-        qtilde_to_primitive(result, qtilde_i, configData)
+        qtilde_to_primitive(result, qtilde_i, gamma)
         flux_quad_GxI(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
-        qtilde_to_primitive(result, qtilde_k, configData)
+        qtilde_to_primitive(result, qtilde_k, gamma)
         flux_quad_GxI(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
         for i in 1:4
@@ -245,7 +209,7 @@ function wall_dGx_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
     return nothing
 end
 
-function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const, Gyn)
+function wall_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const, Gyn)
 
    # power::Float64 = configData["core"]["power"]
    # limiter_flag::Float64 = configData["core"]["limiter_flag"]
@@ -292,34 +256,16 @@ function wall_dGy_neg(globaldata, idx, configData, phi_i, phi_k, G_i, G_k, resul
         @. qtilde_k = globaldata[itm].q - 0.5*(delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
 
         if limiter_flag == 1
-            venkat_limiter(qtilde_i, vl_const, globaldata[idx], configData, phi_i)
-            venkat_limiter(qtilde_k, vl_const, globaldata[itm], configData, phi_k)
+            venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
+            venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
             @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
         end
-        if limiter_flag == 2
-            maxi = max_q_values(globaldata, idx)
-            mini = min_q_values(globaldata, idx)
 
-            for i in 1:4
-                if qtilde_i[i] > maxi[i]
-                    qtilde_i[i] = maxi[i]
-                end
-                if qtilde_i[i] < mini[i]
-                    qtilde_i[i] = mini[i]
-                end
-                if qtilde_k[i] > maxi[i]
-                    qtilde_k[i] = maxi[i]
-                end
-                if qtilde_k[i] < mini[i]
-                    qtilde_k[i] = mini[i]
-                end
-            end
-        end
-        qtilde_to_primitive(result, qtilde_i, configData)
+        qtilde_to_primitive(result, qtilde_i, gamma)
         flux_Gyn(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
-        qtilde_to_primitive(result, qtilde_k, configData)
+        qtilde_to_primitive(result, qtilde_k, gamma)
         flux_Gyn(G_k, nx, ny, result[1], result[2], result[3], result[4])
 
         for i in 1:4

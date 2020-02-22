@@ -1,10 +1,7 @@
-function venkat_limiter(qtilde, vl_const, globaldata_point, configData, phi)
-    # smallest_dist(globaldata, idx)
-    # VL_CONST = configData["core"]["vl_const"]
+function venkat_limiter(qtilde, vl_const, globaldata_point, gamma, phi)
     ds = globaldata_point.short_distance
     epsi = vl_const * ds
     epsi = epsi ^ 3
-    # phi = zeros(Float64, 4)
     del_pos = zero(Float64)
     del_neg = zero(Float64)
     VLBroadcaster(globaldata_point.q, qtilde, globaldata_point.max_q, globaldata_point.min_q, phi, epsi, del_pos, del_neg)
@@ -37,6 +34,7 @@ function VLBroadcaster(q, qtilde, max_q, min_q, phi, epsi, del_pos, del_neg)
             end
         end
     end
+    return nothing
 end
 
 @inline function smallest_dist(globaldata, idx)
@@ -51,34 +49,7 @@ end
     return nothing
 end
 
-@inline function max_q_values(globaldata, idx)
-    maxq = copy(globaldata[idx].q)
-    for itm in globaldata[idx].conn
-        currq = globaldata[itm].q
-        for i in 1:4
-            if maxq[i] < currq[i]
-                maxq[i] = currq[i]
-            end
-        end
-    end
-    return maxq
-end
-
-@inline function min_q_values(globaldata, idx)
-    minq = copy(globaldata[idx].q)
-    for itm in globaldata[idx].conn
-        currq = globaldata[itm].q
-        for i in 1:4
-            if minq[i] > currq[i]
-                minq[i] = currq[i]
-            end
-        end
-    end
-    return minq
-end
-
-@inline function qtilde_to_primitive(result, qtilde, configData)
-    gamma::Float64 = configData["core"]["gamma"]
+@inline function qtilde_to_primitive(result, qtilde, gamma)
     beta = -qtilde[4]*0.5
     temp = 0.5/beta
     u1 = qtilde[2]*temp
