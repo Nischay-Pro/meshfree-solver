@@ -30,7 +30,8 @@ mutable struct Point
     # Size 4 (Pressure, vx, vy, density) x numberpts
     q::Array{Float64,1}
     # Size 2(x,y) 4(Pressure, vx, vy, density) numberpts
-    dq::Array{Float64,2}
+    dq1::Array{Float64,1}
+    dq2::Array{Float64,1}
     entropy::Float64
     xpos_nbhs::Int8
     xneg_nbhs::Int8

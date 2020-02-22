@@ -42,15 +42,7 @@ function outer_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        @. qtilde_i = globaldata[idx].q - 0.5*(delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-        @. qtilde_k = globaldata_itm.q - 0.5*(delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
-
-        if limiter_flag == 1
-            venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
-            venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
-            @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            @. qtilde_k = globaldata_itm.q - 0.5 * phi_k * (delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
-        end
+        calculate_qtile(qtilde_i, qtilde_k, globaldata[idx], globaldata_itm, delx, dely, vl_const, gamma, limiter_flag, phi_i, phi_k)
 
         qtilde_to_primitive(result, qtilde_i, gamma)
         flux_quad_GxIII(G_i, nx, ny, result[1], result[2], result[3], result[4])
@@ -114,15 +106,7 @@ function outer_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        @. qtilde_i = globaldata[idx].q - 0.5*(delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-        @. qtilde_k = globaldata_itm.q - 0.5*(delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
-
-        if limiter_flag == 1
-            venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
-            venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
-            @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            @. qtilde_k = globaldata_itm.q - 0.5 * phi_k * (delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
-        end
+        calculate_qtile(qtilde_i, qtilde_k, globaldata[idx], globaldata_itm, delx, dely, vl_const, gamma, limiter_flag, phi_i, phi_k)
 
 
         qtilde_to_primitive(result, qtilde_i, gamma)
@@ -183,15 +167,7 @@ function outer_dGy_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        @. qtilde_i = globaldata[idx].q - 0.5*(delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-        @. qtilde_k = globaldata_itm.q - 0.5*(delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
-
-        if limiter_flag == 1
-            venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
-            venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
-            @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            @. qtilde_k = globaldata_itm.q - 0.5 * phi_k * (delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
-        end
+        calculate_qtile(qtilde_i, qtilde_k, globaldata[idx], globaldata_itm, delx, dely, vl_const, gamma, limiter_flag, phi_i, phi_k)
 
         qtilde_to_primitive(result, qtilde_i, gamma)
         flux_Gyp(G_i, nx, ny, result[1], result[2], result[3], result[4])

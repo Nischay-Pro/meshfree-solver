@@ -65,3 +65,30 @@ end
     result[4] = pr
     return nothing
 end
+
+
+function calculate_qtile(qtilde_i, qtilde_k, globaldata_idx, globaldata_itm, delx, dely, vl_const, gamma, limiter_flag, phi_i, phi_k)
+    update_qtildes(qtilde_i, globaldata_idx.q, globaldata_idx.dq1, globaldata_idx.dq2, delx, dely)
+    update_qtildes(qtilde_k, globaldata_itm.q, globaldata_itm.dq1, globaldata_itm.dq2, delx, dely)
+
+    if limiter_flag == 1
+        venkat_limiter(qtilde_i, vl_const, globaldata_idx, gamma, phi_i)
+        venkat_limiter(qtilde_k, vl_const, globaldata_itm, gamma, phi_k)
+        update_qtildes(qtilde_i, globaldata_idx.q, globaldata_idx.dq1, globaldata_idx.dq2, delx, dely, phi_i)
+        update_qtildes(qtilde_k, globaldata_itm.q, globaldata_itm.dq1, globaldata_itm.dq2, delx, dely, phi_k)
+    end
+end
+
+@inline function update_qtildes(qtilde, q, dq1, dq2, delx, dely)
+    for iter in 1:4
+        qtilde[iter] = q[iter] - 0.5 * (delx * dq1[iter] + dely * dq2[iter])
+    end
+    return nothing
+end
+
+@inline function update_qtildes(qtilde, q, dq1, dq2, delx, dely, phi)
+    for iter in 1:4
+        qtilde[iter] = q[iter] - 0.5 * phi[iter] * (delx * dq1[iter] + dely * dq2[iter])
+    end
+    return nothing
+end

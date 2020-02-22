@@ -38,11 +38,6 @@ function main()
         calculateConnectivity(globaldata, idx)
     end
 
-    # for (idx, itm) in enumerate(globaldata)
-    #     itm.dq[1] = zeros(Float64, 4)
-    #     itm.dq[2] = zeros(Float64, 4)
-    # end
-
     println(max_iters + 1)
     function run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
         for i in 1:max_iters

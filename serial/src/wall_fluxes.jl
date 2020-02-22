@@ -39,20 +39,7 @@ function wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
         sum_dely_sqr = sum_dely_sqr + deln*deln_weights
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        @. qtilde_i = globaldata[idx].q - 0.5*(delx * globaldata[idx].dq[1] + dely * globaldata[idx].dq[2])
-        @. qtilde_k = globaldata_itm.q - 0.5*(delx * globaldata_itm.dq[1] + dely * globaldata_itm.dq[2])
-
-        # if idx == 3
-        #     println(IOContext(stdout, :compact => false), itm)
-        # #     println(IOContext(stdout, :compact => false), qtilde_k)
-        # end
-
-        if limiter_flag == 1
-            venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
-            venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
-            @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            @. qtilde_k = globaldata_itm.q - 0.5 * phi_k * (delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
-        end
+        calculate_qtile(qtilde_i, qtilde_k, globaldata[idx], globaldata_itm, delx, dely, vl_const, gamma, limiter_flag, phi_i, phi_k)
 
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), itm)
@@ -178,15 +165,7 @@ function wall_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        @. qtilde_i = globaldata[idx].q - 0.5*(delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-        @. qtilde_k = globaldata_itm.q - 0.5*(delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
-
-        if limiter_flag == 1
-            venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
-            venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
-            @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            @. qtilde_k = globaldata_itm.q - 0.5 * phi_k * (delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
-        end
+        calculate_qtile(qtilde_i, qtilde_k, globaldata[idx], globaldata_itm, delx, dely, vl_const, gamma, limiter_flag, phi_i, phi_k)
 
 
         qtilde_to_primitive(result, qtilde_i, gamma)
@@ -249,15 +228,7 @@ function wall_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        @. qtilde_i = globaldata[idx].q - 0.5*(delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-        @. qtilde_k = globaldata_itm.q - 0.5*(delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
-
-        if limiter_flag == 1
-            venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
-            venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
-            @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            @. qtilde_k = globaldata_itm.q - 0.5 * phi_k * (delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
-        end
+        calculate_qtile(qtilde_i, qtilde_k, globaldata[idx], globaldata_itm, delx, dely, vl_const, gamma, limiter_flag, phi_i, phi_k)
 
         qtilde_to_primitive(result, qtilde_i, gamma)
         flux_Gyn(G_i, nx, ny, result[1], result[2], result[3], result[4])
