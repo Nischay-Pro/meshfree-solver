@@ -154,8 +154,10 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
             # println("Starting QVar")
         # end
         q_var_derivatives(globaldata, power)
-        for inner_iters in 1:3
-            q_var_derivatives_innerloop(globaldata, power, tempdq)
+        @timeit to "inner_loop" begin
+            for inner_iters in 1:3
+               @profile q_var_derivatives_innerloop(globaldata, power, tempdq, sum_delx_delf, sum_dely_delf)
+            end
         end
         # end
         # end
@@ -165,9 +167,9 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
             # println("Starting Calflux")
         # end
 
-        @timeit to "nest 3" begin
-        cal_flux_residual(globaldata, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
-                result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
+        @timeit to "flux_res" begin
+            cal_flux_residual(globaldata, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+                    result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
         end
         # getPointDetails(globaldata, 3)
         # println(IOContext(stdout, :compact => false), globaldata[3].prim)
@@ -175,7 +177,9 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
         # if iter == 1
             # println("Starting StateUpdate")
         # end
-        state_update(globaldata, configData, iter, res_old, rk, numPoints)
+        @timeit to "state_update" begin
+            state_update(globaldata, configData, iter, res_old, rk, numPoints)
+        end
         # getPointDetails(globaldata, 3)
     end
 
@@ -192,11 +196,11 @@ function q_variables(globaldata::Array{Point,1}, configData)
         pr = itm.prim[4]
 
         beta = 0.5 * (rho / pr)
-        globaldata[idx].q[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
+        itm.q[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
         two_times_beta = 2.0 * beta
-        globaldata[idx].q[2] = (two_times_beta * u1)
-        globaldata[idx].q[3] = (two_times_beta * u2)
-        globaldata[idx].q[4] = -two_times_beta
+        itm.q[2] = (two_times_beta * u1)
+        itm.q[3] = (two_times_beta * u2)
+        itm.q[4] = -two_times_beta
 
     end
 end
@@ -229,6 +233,7 @@ function q_var_derivatives(globaldata::Array{Point,1}, power)
 
             @. sum_delx_delq += (weights * delx * (globaldata[conn].q - globaldata[idx].q))
             @. sum_dely_delq += (weights * dely * (globaldata[conn].q - globaldata[idx].q))
+            
             for i in 1:4
                 if globaldata[idx].max_q[i] < globaldata[conn].q[i]
                     globaldata[idx].max_q[i] = globaldata[conn].q[i]
@@ -251,9 +256,7 @@ function q_var_derivatives(globaldata::Array{Point,1}, power)
     return nothing
 end
 
-function q_var_derivatives_innerloop(globaldata::Array{Point,1}, power, tempdq)
-    sum_delx_delq = zeros(Float64, 4)
-    sum_dely_delq = zeros(Float64, 4)
+function q_var_derivatives_innerloop(globaldata::Array{Point,1}, power, tempdq, sum_delx_delq, sum_dely_delq)
     qi_tilde = zeros(Float64, 4)
     qk_tilde = zeros(Float64, 4)
     for (idx, itm) in enumerate(globaldata)
@@ -265,8 +268,9 @@ function q_var_derivatives_innerloop(globaldata::Array{Point,1}, power, tempdq)
         fill!(sum_delx_delq, zero(Float64))
         fill!(sum_dely_delq, zero(Float64))
         for conn in itm.conn
-            x_k = globaldata[conn].x
-            y_k = globaldata[conn].y
+            itm_conn = globaldata[conn]
+            x_k = itm_conn.x
+            y_k = itm_conn.y
             delx = x_k - x_i
             dely = y_k - y_i
             dist = hypot(delx, dely)
@@ -275,16 +279,21 @@ function q_var_derivatives_innerloop(globaldata::Array{Point,1}, power, tempdq)
             sum_dely_sqr += ((dely * dely) * weights)
             sum_delx_dely += ((delx * dely) * weights)
 
-            @. qi_tilde = itm.q - 0.5 * (delx * itm.dq[1] + dely * itm.dq[2])
-            @. qk_tilde = globaldata[conn].q - 0.5 * (delx * globaldata[conn].dq[1] + dely * globaldata[conn].dq[2])
-
-            @. sum_delx_delq += (weights * delx * (qk_tilde - qi_tilde))
-            @. sum_dely_delq += (weights * dely * (qk_tilde - qi_tilde))
+            for iter in 1:4    
+                qi_tilde[iter] = itm.q[iter] - 0.5 * (delx * itm.dq[1][iter] + dely * itm.dq[2][iter])
+                qk_tilde[iter] = globaldata[conn].q[iter] - 0.5 * (delx * itm_conn.dq[1][iter] + dely * itm_conn.dq[2][iter])
+            end
+            for iter in 1:4
+                sum_delx_delq[iter] += (weights * delx * (qk_tilde[iter] - qi_tilde[iter]))
+                sum_dely_delq[iter] += (weights * dely * (qk_tilde[iter] - qi_tilde[iter]))
+            end
         end
         det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
         one_by_det = 1.0 / det
-        @. @views tempdq[idx, 1, :] = one_by_det * (sum_delx_delq * sum_dely_sqr - sum_dely_delq * sum_delx_dely)
-        @. @views tempdq[idx, 2, :] = one_by_det * (sum_dely_delq * sum_delx_sqr - sum_delx_delq * sum_delx_dely)
+        for iter in 1:4
+            tempdq[idx, 1, iter] = one_by_det * (sum_delx_delq[iter] * sum_dely_sqr - sum_dely_delq[iter] * sum_delx_dely)
+            tempdq[idx, 2, iter] = one_by_det * (sum_dely_delq[iter] * sum_delx_sqr - sum_delx_delq[iter] * sum_delx_dely)
+        end 
     end
 
     for (idx, itm) in enumerate(globaldata)

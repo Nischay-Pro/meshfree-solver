@@ -62,8 +62,8 @@ function main()
         println("Starting warmup function")
         # fpi_solver(1, globaldata, configData,  res_old, numPoints)
         res_old[1] = 0.0
-        # Profile.clear_malloc_data()
-        # Profile.clear()
+        Profile.clear_malloc_data()
+        Profile.clear()
         # @trace(fpi_solver(1, globaldata, configData,  res_old), maxdepth = 3)
         # res_old[1] = 0.0
         # fpi_solver(1, globaldata, configData,  res_old, numPoints)
@@ -75,9 +75,9 @@ function main()
         @timeit to "nest 1" begin
             run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
         end
-        # open("prof.txt", "w") do s
-        #     Profile.print(IOContext(s, :displaysize => (24, 500)))
-        # end
+        open("prof.txt", "w") do s
+            Profile.print(IOContext(s, :displaysize => (24, 500)))
+        end
     end
 
 

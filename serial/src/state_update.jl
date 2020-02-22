@@ -28,18 +28,23 @@ function state_update(globaldata, configData, iter, res_old, rk, numPoints)
     sum_res_sqr = zeros(Float64, 1)
     U = zeros(Float64, 4)
     Uold = zeros(Float64, 4)
+    Mach::Float64 = configData["core"]["mach"]::Float64
+    gamma::Float64 = configData["core"]["gamma"]::Float64
+    pr_inf::Float64 = configData["core"]["pr_inf"]::Float64
+    rho_inf::Float64 = configData["core"]["rho_inf"]::Float64
+    theta::Float64 = calculateTheta(configData)
     # println("Prim1.01a")
     # println(IOContext(stdout, :compact => false), globaldata[1].prim)
-    for (itm, _) in enumerate(globaldata)
-        if globaldata[itm].flag_1 == 0
+    for (idx, itm) in enumerate(globaldata)
+        if globaldata[idx].flag_1 == 0
             fill!(U, 0.0)
-            state_update_wall(globaldata, itm, max_res, sum_res_sqr, U, Uold, rk)
-        elseif globaldata[itm].flag_1 == 2
+            state_update_wall(itm, max_res, sum_res_sqr, U, Uold, rk)
+        elseif globaldata[idx].flag_1 == 2
             fill!(U, 0.0)
-            state_update_outer(globaldata, configData, itm, max_res, sum_res_sqr, U, Uold, rk)
-        elseif globaldata[itm].flag_1 == 1
+            state_update_outer(itm, Mach, gamma, pr_inf, rho_inf, theta, max_res, sum_res_sqr, U, Uold, rk)
+        elseif globaldata[idx].flag_1 == 1
             fill!(U, 0.0)
-            state_update_interior(globaldata, itm, max_res, sum_res_sqr, U, Uold, rk)
+            state_update_interior(itm, max_res, sum_res_sqr, U, Uold, rk)
         end
     end
 
@@ -48,17 +53,17 @@ function state_update(globaldata, configData, iter, res_old, rk, numPoints)
     # println(sum_res_sqr[1])
     # println("The length is ", length(globaldata))
     res_new = sqrt(sum_res_sqr[1])/ length(globaldata)
-    residue = 0
+    residue = zero(Float64)
     # println(res_old)
     if iter <= 2
         res_old[1] = res_new
-        residue = 0
+        residue = zero(Float64)
     else
         residue = log10(res_new/res_old[1])
     end
     # println(residue)
     if rk == 4
-        println(" ", residue, " ")
+        @printf("%.17f \n", residue)
     end
     # open("residue_" * string(numPoints) * ".txt", "a+") do residue_io
     #     @printf(residue_io, "%d %s\n", iter, residue)
@@ -69,21 +74,21 @@ function state_update(globaldata, configData, iter, res_old, rk, numPoints)
     return  nothing
 end
 
-function state_update_wall(globaldata, itm, max_res, sum_res_sqr, U, Uold, rk)
-    nx = globaldata[itm].nx
-    ny = globaldata[itm].ny
+function state_update_wall(itm, max_res, sum_res_sqr, U, Uold, rk)
+    nx = itm.nx
+    ny = itm.ny
     # if itm == 2
     #     println("Prim1.01a2.1")
     #     println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # end
-    primitive_to_conserved(globaldata, itm, nx, ny, U)
-    primitive_to_conserved_old(globaldata, itm, nx, ny, Uold)
+    primitive_to_conserved(itm, nx, ny, U)
+    primitive_to_conserved_old(itm, nx, ny, Uold)
     # if itm == 2
     #     println("Prim1.01a2.2")
     #     println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # end
     temp = U[1]
-    @. U = U - 0.5 * globaldata[itm].delta .* globaldata[itm].flux_res
+    @. U = U - 0.5 * itm.delta .* itm.flux_res
     if rk == 3
         @. U = U * 1/3 + Uold * 2/3
     end
@@ -102,24 +107,24 @@ function state_update_wall(globaldata, itm, max_res, sum_res_sqr, U, Uold, rk)
     #     max_res_point = itm
     # end
     sum_res_sqr[1] += res_sqr
-    globaldata[itm].prim[1] = U[1]
+    itm.prim[1] = U[1]
     temp = 1.0 / U[1]
-    globaldata[itm].prim[2] = U[2]*temp
-    globaldata[itm].prim[3] = U[3]*temp
-    globaldata[itm].prim[4] = (0.4*U[4]) - ((0.2 * temp) * (U[2] * U[2] + U[3] * U[3]))
+    itm.prim[2] = U[2]*temp
+    itm.prim[3] = U[3]*temp
+    itm.prim[4] = (0.4*U[4]) - ((0.2 * temp) * (U[2] * U[2] + U[3] * U[3]))
     # if itm == 2
     #     println("Prim1.01a2.5")
     #     println(IOContext(stdout, :compact => false), globaldata[1].prim)
     # end
 end
 
-@inline function state_update_outer(globaldata, configData, itm, max_res, sum_res_sqr, U, Uold, rk)
-    nx = globaldata[itm].nx
-    ny = globaldata[itm].ny
-    conserved_vector_Ubar(globaldata, itm, nx, ny, configData, U)
-    conserved_vector_Ubar_old(globaldata, itm, nx, ny, configData, Uold)
+@inline function state_update_outer(itm, Mach, gamma, pr_inf, rho_inf, theta, max_res, sum_res_sqr, U, Uold, rk)
+    nx = itm.nx
+    ny = itm.ny
+    conserved_vector_Ubar(itm, nx, ny, Mach, gamma, pr_inf, rho_inf, theta, U)
+    conserved_vector_Ubar_old(itm, nx, ny, Mach, gamma, pr_inf, rho_inf, theta, Uold)
     temp = U[1]
-    @. U = U - 0.5 * globaldata[itm].delta * globaldata[itm].flux_res
+    @. U = U - 0.5 * itm.delta * itm.flux_res
     if rk == 3
         @. U = U * 1/3 + Uold * 2/3
     end
@@ -127,28 +132,28 @@ end
     U3_rot = U[3]
     U[2] = U2_rot*ny + U3_rot*nx
     U[3] = U3_rot*ny - U2_rot*nx
-    globaldata[itm].prim[1] = U[1]
+    itm.prim[1] = U[1]
     temp = 1.0 / U[1]
-    globaldata[itm].prim[2] = U[2]*temp
-    globaldata[itm].prim[3] = U[3]*temp
-    globaldata[itm].prim[4] = (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
+    itm.prim[2] = U[2]*temp
+    itm.prim[3] = U[3]*temp
+    itm.prim[4] = (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
 end
 
-@inline function state_update_interior(globaldata, itm, max_res, sum_res_sqr, U, Uold, rk)
-    nx = globaldata[itm].nx
-    ny = globaldata[itm].ny
-    primitive_to_conserved(globaldata, itm, nx, ny, U)
-    primitive_to_conserved_old(globaldata, itm, nx, ny, Uold)
+@inline function state_update_interior(itm, max_res, sum_res_sqr, U, Uold, rk)
+    nx = itm.nx
+    ny = itm.ny
+    primitive_to_conserved(itm, nx, ny, U)
+    primitive_to_conserved_old(itm, nx, ny, Uold)
     # if itm == 1
     #     println("Prim1.11")
-    #     println(IOContext(stdout, :compact => false), globaldata[itm].prim)
+    #     println(IOContext(stdout, :compact => false), itm.prim)
     # end
     # if itm == 1
     #     println(IOContext(stdout, :compact => false), U)
     #     # println(IOContext(stdout, :compact => false), temp)
     # end
     temp = U[1]
-    @. U = U - 0.5 * globaldata[itm].delta .* globaldata[itm].flux_res
+    @. U = U - 0.5 * itm.delta .* itm.flux_res
     if rk == 3
         @. U = U * 1/3 + Uold * 2/3
     end
@@ -170,58 +175,52 @@ end
     #     println(IOContext(stdout, :compact => false), U)
     #     println(IOContext(stdout, :compact => false), temp)
     # end
-    globaldata[itm].prim[1] = U[1]
+    itm.prim[1] = U[1]
     temp = 1.0 / U[1]
-    globaldata[itm].prim[2] = U[2]*temp
-    globaldata[itm].prim[3] = U[3]*temp
-    globaldata[itm].prim[4] = (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
+    itm.prim[2] = U[2]*temp
+    itm.prim[3] = U[3]*temp
+    itm.prim[4] = (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
 end
 
-@inline function primitive_to_conserved(globaldata, itm, nx, ny, U)
+@inline function primitive_to_conserved(itm, nx, ny, U)
     # if itm == 1
     #     println("Prim1.1")
-    #     println(IOContext(stdout, :compact => false), globaldata[itm].prim)
+    #     println(IOContext(stdout, :compact => false), itm.prim)
     # end
-    rho = globaldata[itm].prim[1]
+    rho = itm.prim[1]
     U[1] = rho
-    temp1::Float64 = rho * globaldata[itm].prim[2]
-    temp2::Float64 = rho * globaldata[itm].prim[3]
+    temp1::Float64 = rho * itm.prim[2]
+    temp2::Float64 = rho * itm.prim[3]
     U[2] = temp1*ny - temp2*nx
     U[3] = temp1*nx + temp2*ny
-    U[4] = 2.5*globaldata[itm].prim[4] + 0.5*(temp1^2 + temp2^2)/rho
+    U[4] = 2.5*itm.prim[4] + 0.5*(temp1*temp1 + temp2*temp2)/rho
     # if itm == 1
     #     println("U")
     #     println(IOContext(stdout, :compact => false), U)
     # end
 end
 
-@inline function primitive_to_conserved_old(globaldata, itm, nx, ny, U)
+@inline function primitive_to_conserved_old(itm, nx, ny, U)
     # if itm == 1
     #     println("Prim1.1")
-    #     println(IOContext(stdout, :compact => false), globaldata[itm].prim)
+    #     println(IOContext(stdout, :compact => false), itm.prim)
     # end
-    rho = globaldata[itm].prim_old[1]
+    rho = itm.prim_old[1]
     U[1] = rho
-    temp1::Float64 = rho * globaldata[itm].prim_old[2]
-    temp2::Float64 = rho * globaldata[itm].prim_old[3]
+    temp1 = rho * itm.prim_old[2]
+    temp2 = rho * itm.prim_old[3]
     U[2] = temp1*ny - temp2*nx
     U[3] = temp1*nx + temp2*ny
-    U[4] = 2.5*globaldata[itm].prim_old[4] + 0.5*(temp1^2 + temp2^2)/rho
+    U[4] = 2.5*itm.prim_old[4] + 0.5*(temp1*temp1 + temp2*temp2)/rho
     # if itm == 1
     #     println("U")
     #     println(IOContext(stdout, :compact => false), U)
     # end
 end
 
-@inline function conserved_vector_Ubar(globaldata, itm, nx, ny, configData, Ubar)
-    Mach::Float64 = configData["core"]["mach"]::Float64
-    gamma::Float64 = configData["core"]["gamma"]::Float64
-    pr_inf::Float64 = configData["core"]["pr_inf"]::Float64
-    rho_inf::Float64 = configData["core"]["rho_inf"]::Float64
-    theta = calculateTheta(configData)
-
-    u1_inf::Float64 = Mach*cos(theta)
-    u2_inf::Float64 = Mach*sin(theta)
+@inline function conserved_vector_Ubar(itm, nx, ny, Mach, gamma, pr_inf, rho_inf, theta, Ubar)
+    u1_inf = Mach*cos(theta)
+    u2_inf = Mach*sin(theta)
 
     tx = ny
     ty = -nx
@@ -237,10 +236,10 @@ end
     B2_inf = exp(-S2*S2)/(2*sqrt(Float64(pi)*beta))
     A2n_inf = 0.5 * (1 - SpecialFunctions.erf(S2))
 
-    rho = globaldata[itm].prim[1]
-    u1 = globaldata[itm].prim[2]
-    u2 = globaldata[itm].prim[3]
-    pr = globaldata[itm].prim[4]
+    rho = itm.prim[1]
+    u1 = itm.prim[2]
+    u2 = itm.prim[3]
+    pr = itm.prim[4]
 
     u1_rot = u1*tx + u2*ty
     u2_rot = u1*nx + u2*ny
@@ -267,15 +266,9 @@ end
     Ubar[4] = (temp1 + temp2)
 end
 
-@inline function conserved_vector_Ubar_old(globaldata, itm, nx, ny, configData, Ubar)
-    Mach::Float64 = configData["core"]["mach"]::Float64
-    gamma::Float64 = configData["core"]["gamma"]::Float64
-    pr_inf::Float64 = configData["core"]["pr_inf"]::Float64
-    rho_inf::Float64 = configData["core"]["rho_inf"]::Float64
-    theta = calculateTheta(configData)
-
-    u1_inf::Float64 = Mach*cos(theta)
-    u2_inf::Float64 = Mach*sin(theta)
+@inline function conserved_vector_Ubar_old(itm, nx, ny, Mach, gamma, pr_inf, rho_inf, theta, Ubar)
+    u1_inf = Mach*cos(theta)
+    u2_inf = Mach*sin(theta)
 
     tx = ny
     ty = -nx
@@ -291,10 +284,10 @@ end
     B2_inf = exp(-S2*S2)/(2*sqrt(Float64(pi)*beta))
     A2n_inf = 0.5 * (1 - SpecialFunctions.erf(S2))
 
-    rho = globaldata[itm].prim_old[1]
-    u1 = globaldata[itm].prim_old[2]
-    u2 = globaldata[itm].prim_old[3]
-    pr = globaldata[itm].prim_old[4]
+    rho = itm.prim_old[1]
+    u1 = itm.prim_old[2]
+    u2 = itm.prim_old[3]
+    pr = itm.prim_old[4]
 
     u1_rot = u1*tx + u2*ty
     u2_rot = u1*nx + u2*ny

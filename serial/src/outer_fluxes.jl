@@ -19,11 +19,6 @@ function outer_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
     tx = ny
     ty = -nx
 
-    # G_i = zeros(Float64,4)
-    # G_k = zeros(Float64,4)
-    # result = zeros(Float64,4)
-
-
     for itm in globaldata[idx].xpos_conn
 
         x_k = globaldata[itm].x

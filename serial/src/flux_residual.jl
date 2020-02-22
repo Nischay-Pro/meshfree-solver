@@ -41,9 +41,7 @@ function outerindices_flux_residual(globaldata, gamma, idx, Gxp, Gxn, Gyp, Gyn, 
 	Gxp .= outer_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const)
 	Gxn .= outer_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const)
 	Gyp .= outer_dGy_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const)
-		# GTemp =
 	@. globaldata[idx].flux_res = Gxp + Gxn + Gyp
-	# end
 	return nothing
 end
 

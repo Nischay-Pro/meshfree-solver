@@ -1,7 +1,7 @@
 
 # TODO - Check deg2rad
 function calculateTheta(configData)
-    theta = deg2rad(Float64(configData["core"]["aoa"]))::Float64
+    theta::Float64 = deg2rad(Float64(configData["core"]["aoa"]))
     return theta
 end
 
