@@ -156,7 +156,7 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
         q_var_derivatives(globaldata, power)
         @timeit to "inner_loop" begin
             for inner_iters in 1:3
-               @profile q_var_derivatives_innerloop(globaldata, power, tempdq, sum_delx_delf, sum_dely_delf)
+               q_var_derivatives_innerloop(globaldata, power, tempdq, sum_delx_delf, sum_dely_delf)
             end
         end
         # end
@@ -168,7 +168,7 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
         # end
 
         @timeit to "flux_res" begin
-            cal_flux_residual(globaldata, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+            @profile cal_flux_residual(globaldata, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
                     result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
         end
         # getPointDetails(globaldata, 3)

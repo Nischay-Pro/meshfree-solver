@@ -21,8 +21,9 @@ function outer_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
 
     for itm in globaldata[idx].xpos_conn
 
-        x_k = globaldata[itm].x
-        y_k = globaldata[itm].y
+        globaldata_itm = globaldata[itm]
+        x_k = globaldata_itm.x
+        y_k = globaldata_itm.y
 
         delx = x_k - x_i
         dely = y_k - y_i
@@ -42,13 +43,13 @@ function outer_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
         @. qtilde_i = globaldata[idx].q - 0.5*(delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-        @. qtilde_k = globaldata[itm].q - 0.5*(delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+        @. qtilde_k = globaldata_itm.q - 0.5*(delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
             venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+            @. qtilde_k = globaldata_itm.q - 0.5 * phi_k * (delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
         end
 
         qtilde_to_primitive(result, qtilde_i, gamma)
@@ -97,8 +98,9 @@ function outer_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
 
     for itm in globaldata[idx].xneg_conn
 
-        x_k = globaldata[itm].x
-        y_k = globaldata[itm].y
+        globaldata_itm = globaldata[itm]
+        x_k = globaldata_itm.x
+        y_k = globaldata_itm.y
 
         delx = x_k - x_i
         dely = y_k - y_i
@@ -118,13 +120,13 @@ function outer_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
         @. qtilde_i = globaldata[idx].q - 0.5*(delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-        @. qtilde_k = globaldata[itm].q - 0.5*(delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+        @. qtilde_k = globaldata_itm.q - 0.5*(delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
             venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+            @. qtilde_k = globaldata_itm.q - 0.5 * phi_k * (delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
         end
 
 
@@ -171,8 +173,9 @@ function outer_dGy_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
 
 
     for itm in globaldata[idx].ypos_conn
-        x_k = globaldata[itm].x
-        y_k = globaldata[itm].y
+        globaldata_itm = globaldata[itm]
+        x_k = globaldata_itm.x
+        y_k = globaldata_itm.y
 
         delx = x_k - x_i
         dely = y_k - y_i
@@ -192,13 +195,13 @@ function outer_dGy_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
         @. qtilde_i = globaldata[idx].q - 0.5*(delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-        @. qtilde_k = globaldata[itm].q - 0.5*(delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+        @. qtilde_k = globaldata_itm.q - 0.5*(delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
             venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+            @. qtilde_k = globaldata_itm.q - 0.5 * phi_k * (delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
         end
 
         qtilde_to_primitive(result, qtilde_i, gamma)

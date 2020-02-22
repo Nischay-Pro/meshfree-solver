@@ -22,8 +22,9 @@ function wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
 
     for itm in globaldata[idx].xpos_conn
 
-        x_k = globaldata[itm].x
-        y_k = globaldata[itm].y
+        globaldata_itm = globaldata[itm]
+        x_k = globaldata_itm.x
+        y_k = globaldata_itm.y
 
         delx = x_k - x_i
         dely = y_k - y_i
@@ -42,7 +43,7 @@ function wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
         @. qtilde_i = globaldata[idx].q - 0.5*(delx * globaldata[idx].dq[1] + dely * globaldata[idx].dq[2])
-        @. qtilde_k = globaldata[itm].q - 0.5*(delx * globaldata[itm].dq[1] + dely * globaldata[itm].dq[2])
+        @. qtilde_k = globaldata_itm.q - 0.5*(delx * globaldata_itm.dq[1] + dely * globaldata_itm.dq[2])
 
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), itm)
@@ -53,7 +54,7 @@ function wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
             venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
             venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+            @. qtilde_k = globaldata_itm.q - 0.5 * phi_k * (delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
         end
 
         # if idx == 3
@@ -159,8 +160,9 @@ function wall_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
 
     for itm in globaldata[idx].xneg_conn
 
-        x_k = globaldata[itm].x
-        y_k = globaldata[itm].y
+        globaldata_itm = globaldata[itm]
+        x_k = globaldata_itm.x
+        y_k = globaldata_itm.y
 
         delx = x_k - x_i
         dely = y_k - y_i
@@ -180,13 +182,13 @@ function wall_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
         @. qtilde_i = globaldata[idx].q - 0.5*(delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-        @. qtilde_k = globaldata[itm].q - 0.5*(delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+        @. qtilde_k = globaldata_itm.q - 0.5*(delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
             venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+            @. qtilde_k = globaldata_itm.q - 0.5 * phi_k * (delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
         end
 
 
@@ -232,8 +234,9 @@ function wall_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
 
     for itm in globaldata[idx].yneg_conn
 
-        x_k = globaldata[itm].x
-        y_k = globaldata[itm].y
+        globaldata_itm = globaldata[itm]
+        x_k = globaldata_itm.x
+        y_k = globaldata_itm.y
 
         delx = x_k - x_i
         dely = y_k - y_i
@@ -253,13 +256,13 @@ function wall_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
         @. qtilde_i = globaldata[idx].q - 0.5*(delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-        @. qtilde_k = globaldata[itm].q - 0.5*(delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+        @. qtilde_k = globaldata_itm.q - 0.5*(delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
 
         if limiter_flag == 1
             venkat_limiter(qtilde_i, vl_const, globaldata[idx], gamma, phi_i)
             venkat_limiter(qtilde_k, vl_const, globaldata[itm], gamma, phi_k)
             @. qtilde_i = globaldata[idx].q - 0.5 * phi_i * (delx*globaldata[idx].dq[1] + dely*globaldata[idx].dq[2])
-            @. qtilde_k = globaldata[itm].q - 0.5 * phi_k * (delx*globaldata[itm].dq[1] + dely*globaldata[itm].dq[2])
+            @. qtilde_k = globaldata_itm.q - 0.5 * phi_k * (delx*globaldata_itm.dq[1] + dely*globaldata_itm.dq[2])
         end
 
         qtilde_to_primitive(result, qtilde_i, gamma)
