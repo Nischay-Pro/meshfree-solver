@@ -33,15 +33,15 @@ function main()
     end
     # end
 
-    println("Start table sorting")
+    println("Start Connectivity Generation")
     @showprogress 3 "Computing Table" for idx in 1:numPoints
         calculateConnectivity(globaldata, idx)
     end
 
-    for (idx, itm) in enumerate(globaldata)
-        itm.dq[1] = zeros(Float64, 4)
-        itm.dq[2] = zeros(Float64, 4)
-    end
+    # for (idx, itm) in enumerate(globaldata)
+    #     itm.dq[1] = zeros(Float64, 4)
+    #     itm.dq[2] = zeros(Float64, 4)
+    # end
 
     println(max_iters + 1)
     function run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)

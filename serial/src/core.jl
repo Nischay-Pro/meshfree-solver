@@ -243,8 +243,8 @@ function q_var_derivatives(globaldata::Array{Point,1}, power, sum_delx_delq, sum
         det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
         one_by_det = 1.0 / det
         for iter in 1:4
-            itm.dq[1][iter] = one_by_det * (sum_delx_delq[iter] * sum_dely_sqr - sum_dely_delq[iter] * sum_delx_dely)
-            itm.dq[2][iter] = one_by_det * (sum_dely_delq[iter] * sum_delx_sqr - sum_delx_delq[iter] * sum_delx_dely)
+            itm.dq[1, iter] = one_by_det * (sum_delx_delq[iter] * sum_dely_sqr - sum_dely_delq[iter] * sum_delx_dely)
+            itm.dq[2, iter] = one_by_det * (sum_dely_delq[iter] * sum_delx_sqr - sum_delx_delq[iter] * sum_delx_dely)
         end
     end
     return nothing
@@ -290,8 +290,8 @@ function q_var_derivatives_innerloop(globaldata::Array{Point,1}, power, tempdq, 
 
     for (idx, itm) in enumerate(globaldata)
         for iter in 1:4
-            itm.dq[1][iter] = tempdq[idx, 1, iter]
-            itm.dq[2][iter] = tempdq[idx, 2, iter]
+            itm.dq[1, iter] = tempdq[idx, 1, iter]
+            itm.dq[2, iter] = tempdq[idx, 2, iter]
         end
     end
     return nothing
