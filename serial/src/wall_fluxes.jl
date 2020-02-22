@@ -1,8 +1,5 @@
 function wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const, Gxp)
 
-   # power::Float64 = configData["core"]["power"]
-   # limiter_flag::Float64 = configData["core"]["limiter_flag"]
-
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
@@ -32,7 +29,7 @@ function wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = hypot(dels, deln)
+        dist = sqrt(dels*dels+deln*deln)
         weights = dist^power
 
         dels_weights = dels*weights
@@ -170,7 +167,7 @@ function wall_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = hypot(dels, deln)
+        dist = sqrt(dels*dels+deln*deln)
         weights = dist^power
 
         dels_weights = dels*weights
@@ -213,9 +210,6 @@ end
 
 function wall_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const, Gyn)
 
-   # power::Float64 = configData["core"]["power"]
-   # limiter_flag::Float64 = configData["core"]["limiter_flag"]
-
     sum_delx_sqr = zero(Float64)
     sum_dely_sqr = zero(Float64)
     sum_delx_dely = zero(Float64)
@@ -244,7 +238,7 @@ function wall_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = hypot(dels, deln)
+        dist = sqrt(dels*dels+deln*deln)
         weights = dist^power
 
         dels_weights = dels*weights

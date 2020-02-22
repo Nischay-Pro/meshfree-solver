@@ -1,7 +1,7 @@
 import SpecialFunctions
 
 function flux_quad_GxI(G, nx, ny, u1, u2, rho, pr)
-    # G = Array{Float64,1}(undef, 0)
+
     tx = ny
     ty = -nx
     ut = u1*tx + u2*ty
@@ -57,7 +57,7 @@ function flux_quad_GxII(G, nx, ny, u1, u2, rho, pr, flag)
     A2neg = 0.5*(1.0 - SpecialFunctions.erf(S2))
 
     pr_by_rho = pr/rho
-    u_sqr = ut^2 + un^2
+    u_sqr = ut*ut + un*un
     G[1] = rho * A2neg* (ut*A1pos + B1)
 
     temp1 = pr_by_rho + ut*ut

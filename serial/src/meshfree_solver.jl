@@ -1,7 +1,6 @@
 function main()
 
     configData = getConfig()
-    shapepts = 0
     max_iters = parse(Int, ARGS[2])
     file_name = string(ARGS[1])
     format = configData["format"]["type"]
@@ -11,20 +10,18 @@ function main()
     # end
     println(numPoints)
     globaldata = Array{Point,1}(undef, numPoints)
-    table = Array{Int32,1}(undef, numPoints)
+    # table = Array{Int32,1}(undef, numPoints)
     res_old = zeros(Float64, 1)
     main_store = zeros(Float64, 52)
 
-    # shapeptsidx = Array{Int32,1}(undef, 0)
-    # print(splitdata[1:3])
     defprimal = getInitialPrimitive(configData)
 
     println("Start Read")
     # count = 0
     if format == "quadtree"
-        readFileQuadtree(file_name::String, globaldata, table, defprimal, shapepts, numPoints)
+        readFileQuadtree(file_name::String, globaldata, defprimal, numPoints)
     elseif format == "old"
-        readFile(file_name::String, globaldata, table, defprimal, shapepts, numPoints)
+        readFile(file_name::String, globaldata, defprimal, numPoints)
     end
 
     # if format == 1
@@ -37,13 +34,8 @@ function main()
     # end
 
     println("Start table sorting")
-    @showprogress 3 "Computing Table" for idx in table
-        connectivity = calculateConnectivity(globaldata, idx)
-        setConnectivity(globaldata[idx], connectivity)
-        # smallest_dist(globaldata, idx)
-        # if idx % (length(table) * 0.25) == 0
-        #     println("Bump In Table")
-        # end
+    @showprogress 3 "Computing Table" for idx in 1:numPoints
+        calculateConnectivity(globaldata, idx)
     end
 
     for (idx, itm) in enumerate(globaldata)
@@ -62,8 +54,8 @@ function main()
         println("Starting warmup function")
         # fpi_solver(1, globaldata, configData,  res_old, numPoints)
         res_old[1] = 0.0
-        Profile.clear_malloc_data()
-        Profile.clear()
+        # Profile.clear_malloc_data()
+        # Profile.clear()
         # @trace(fpi_solver(1, globaldata, configData,  res_old), maxdepth = 3)
         # res_old[1] = 0.0
         # fpi_solver(1, globaldata, configData,  res_old, numPoints)
@@ -75,9 +67,9 @@ function main()
         @timeit to "nest 1" begin
             run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
         end
-        open("prof.txt", "w") do s
-            Profile.print(IOContext(s, :displaysize => (24, 500)))
-        end
+        # open("prof.txt", "w") do s
+        #     Profile.print(IOContext(s, :displaysize => (24, 500)))
+        # end
     end
 
 

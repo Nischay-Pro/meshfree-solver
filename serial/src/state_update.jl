@@ -48,10 +48,6 @@ function state_update(globaldata, configData, iter, res_old, rk, numPoints)
         end
     end
 
-    # println("Prim1.01b")
-    # println(IOContext(stdout, :compact => false), globaldata[1].prim)
-    # println(sum_res_sqr[1])
-    # println("The length is ", length(globaldata))
     res_new = sqrt(sum_res_sqr[1])/ length(globaldata)
     residue = zero(Float64)
     # println(res_old)
@@ -70,7 +66,6 @@ function state_update(globaldata, configData, iter, res_old, rk, numPoints)
     # end
 
     # res_old = 0
-
     return  nothing
 end
 

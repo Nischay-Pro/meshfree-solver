@@ -73,7 +73,7 @@ function calculateConnectivity(globaldata, idx)
 
     flag = ptInterest.flag_1
 
-    xpos_conn,xneg_conn,ypos_conn,yneg_conn = Array{Int32,1}(undef, 0),Array{Int32,1}(undef, 0),Array{Int32,1}(undef, 0),Array{Int32,1}(undef, 0)
+    xpos_conn,xneg_conn,ypos_conn,yneg_conn = Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0)
 
     tx = ny
     ty = -nx
@@ -106,7 +106,15 @@ function calculateConnectivity(globaldata, idx)
             push!(ypos_conn, itm)
         end
     end
-    return (xpos_conn, xneg_conn, ypos_conn, yneg_conn)
+    ptInterest.xpos_conn = xpos_conn
+    ptInterest.xpos_nbhs = length(xpos_conn)
+    ptInterest.xneg_conn = xneg_conn
+    ptInterest.xneg_nbhs = length(xneg_conn)
+    ptInterest.ypos_conn = ypos_conn
+    ptInterest.ypos_nbhs = length(ypos_conn)
+    ptInterest.yneg_conn = yneg_conn
+    ptInterest.yneg_nbhs = length(yneg_conn)
+    return nothing
 end
 
 function getPointDetails(globaldata, point_index)
@@ -127,7 +135,10 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
     if iter == 1
         println("Starting FuncDelta")
     end
+    # @timeit to "func_delta" begin
     func_delta(globaldata, configData)
+    # end
+
 
     phi_i = @view main_store[1:4]
 	phi_k = @view main_store[5:8]
@@ -145,50 +156,39 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
 
     power::Float64 = configData["core"]["power"]
 
-    print("Iteration Number ", iter, " ")
-    # getPointDetails(globaldata, 3)
+    @printf("Iteration Number %d ", iter)
+
     for rk in 1:4
-        q_variables(globaldata, configData)
+        # @timeit to "q_var" begin
+            q_variables(globaldata)
+        # end
         # println("=========")
         # if iter == 1
             # println("Starting QVar")
         # end
-        q_var_derivatives(globaldata, power)
-        @timeit to "inner_loop" begin
+        # @timeit to "q_derv" begin
+            q_var_derivatives(globaldata, power, sum_delx_delf, sum_dely_delf)
+        # end
+        # @timeit to "inner_loop" begin
             for inner_iters in 1:3
-               q_var_derivatives_innerloop(globaldata, power, tempdq, sum_delx_delf, sum_dely_delf)
+               q_var_derivatives_innerloop(globaldata, power, tempdq, sum_delx_delf, sum_dely_delf, qtilde_i, qtilde_k)
             end
-        end
-        # end
-        # end
-        # getPointDetails(globaldata, 3)
-        # println(IOContext(stdout, :compact => false), globaldata[3].prim)
-        # if iter == 1
-            # println("Starting Calflux")
         # end
 
-        @timeit to "flux_res" begin
-            @profile cal_flux_residual(globaldata, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+        # @timeit to "flux_res" begin
+            cal_flux_residual(globaldata, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
                     result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf)
-        end
-        # getPointDetails(globaldata, 3)
-        # println(IOContext(stdout, :compact => false), globaldata[3].prim)
-        # residue = 0
-        # if iter == 1
-            # println("Starting StateUpdate")
         # end
-        @timeit to "state_update" begin
-            state_update(globaldata, configData, iter, res_old, rk, numPoints)
-        end
-        # getPointDetails(globaldata, 3)
-    end
 
-    # println(IOContext(stdout, :compact => false), globaldata[3].prim)
-    # residue = res_old
+        # @timeit to "state_update" begin
+            state_update(globaldata, configData, iter, res_old, rk, numPoints)
+        # end
+
+    end
     return nothing
 end
 
-function q_variables(globaldata::Array{Point,1}, configData)
+function q_variables(globaldata::Array{Point,1})
     for (idx, itm) in enumerate(globaldata)
         rho = itm.prim[1]
         u1 = itm.prim[2]
@@ -201,13 +201,10 @@ function q_variables(globaldata::Array{Point,1}, configData)
         itm.q[2] = (two_times_beta * u1)
         itm.q[3] = (two_times_beta * u2)
         itm.q[4] = -two_times_beta
-
     end
 end
 
-function q_var_derivatives(globaldata::Array{Point,1}, power)
-    sum_delx_delq = zeros(Float64, 4)
-    sum_dely_delq = zeros(Float64, 4)
+function q_var_derivatives(globaldata::Array{Point,1}, power, sum_delx_delq, sum_dely_delq)
     for (idx, itm) in enumerate(globaldata)
         x_i = itm.x
         y_i = itm.y
@@ -231,15 +228,15 @@ function q_var_derivatives(globaldata::Array{Point,1}, power)
             sum_dely_sqr += ((dely * dely) * weights)
             sum_delx_dely += ((delx * dely) * weights)
 
-            @. sum_delx_delq += (weights * delx * (globaldata[conn].q - globaldata[idx].q))
-            @. sum_dely_delq += (weights * dely * (globaldata[conn].q - globaldata[idx].q))
+            @. sum_delx_delq += (weights * delx * (globaldata[conn].q - itm.q))
+            @. sum_dely_delq += (weights * dely * (globaldata[conn].q - itm.q))
             
             for i in 1:4
-                if globaldata[idx].max_q[i] < globaldata[conn].q[i]
-                    globaldata[idx].max_q[i] = globaldata[conn].q[i]
+                if itm.max_q[i] < globaldata[conn].q[i]
+                    itm.max_q[i] = globaldata[conn].q[i]
                 end
-                if globaldata[idx].min_q[i] > globaldata[conn].q[i]
-                    globaldata[idx].min_q[i] = globaldata[conn].q[i]
+                if itm.min_q[i] > globaldata[conn].q[i]
+                    itm.min_q[i] = globaldata[conn].q[i]
                 end
             end
         end
@@ -250,15 +247,10 @@ function q_var_derivatives(globaldata::Array{Point,1}, power)
             itm.dq[2][iter] = one_by_det * (sum_dely_delq[iter] * sum_delx_sqr - sum_delx_delq[iter] * sum_delx_dely)
         end
     end
-    # println(IOContext(stdout, :compact => false), globaldata[3].dq)
-    # println(IOContext(stdout, :compact => false), globaldata[3].max_q)
-    # println(IOContext(stdout, :compact => false), globaldata[3].min_q)
     return nothing
 end
 
-function q_var_derivatives_innerloop(globaldata::Array{Point,1}, power, tempdq, sum_delx_delq, sum_dely_delq)
-    qi_tilde = zeros(Float64, 4)
-    qk_tilde = zeros(Float64, 4)
+function q_var_derivatives_innerloop(globaldata::Array{Point,1}, power, tempdq, sum_delx_delq, sum_dely_delq, qi_tilde, qk_tilde)
     for (idx, itm) in enumerate(globaldata)
         x_i = itm.x
         y_i = itm.y

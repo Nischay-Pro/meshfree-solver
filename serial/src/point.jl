@@ -11,17 +11,17 @@ function getxy(self)
     return (self.x, self.y)
 end
 
-function setConnectivity(self, conn)
-    self.xpos_conn = conn[1]
-    self.xpos_nbhs = length(conn[1])
-    self.xneg_conn = conn[2]
-    self.xneg_nbhs = length(conn[2])
-    self.ypos_conn = conn[3]
-    self.ypos_nbhs = length(conn[3])
-    self.yneg_conn = conn[4]
-    self.yneg_nbhs = length(conn[4])
-    return nothing
-end
+# function setConnectivity(self, conn)
+#     self.xpos_conn = conn[1]
+#     self.xpos_nbhs = length(conn[1])
+#     self.xneg_conn = conn[2]
+#     self.xneg_nbhs = length(conn[2])
+#     self.ypos_conn = conn[3]
+#     self.ypos_nbhs = length(conn[3])
+#     self.yneg_conn = conn[4]
+#     self.yneg_nbhs = length(conn[4])
+#     return nothing
+# end
 
 # function setSmallestPointDistance(self::Point, distance)
 #     self.short_distance = distance

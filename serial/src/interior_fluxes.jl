@@ -30,7 +30,7 @@ function interior_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = hypot(dels, deln)
+        dist = sqrt(dels*dels+deln*deln)
         weights = dist^power
 
         dels_weights = dels*weights
@@ -55,7 +55,6 @@ function interior_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
             # end
         end
 
-
         qtilde_to_primitive(result, qtilde_i, gamma)
         flux_Gxp(G_i, nx, ny, result[1], result[2], result[3], result[4])
 
@@ -66,6 +65,7 @@ function interior_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
             sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
             sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
         end
+
     end
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = one(Float64) / det
@@ -108,7 +108,7 @@ function interior_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = hypot(dels, deln)
+        dist = sqrt(dels*dels+deln*deln)
         weights = dist^power
 
         dels_weights = dels*weights
@@ -193,7 +193,7 @@ function interior_dGy_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = hypot(dels, deln)
+        dist = sqrt(dels*dels+deln*deln)
         weights = dist^power
 
         dels_weights = dels*weights
@@ -276,7 +276,7 @@ function interior_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
         dels = delx*tx + dely*ty
         deln = delx*nx + dely*ny
 
-        dist = hypot(dels, deln)
+        dist = sqrt(dels*dels+deln*deln)
         weights = dist^power
 
         dels_weights = dels*weights
