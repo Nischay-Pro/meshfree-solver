@@ -12,17 +12,19 @@ function main()
     println(numPoints)
     globaldata = Array{Point,1}(undef, numPoints)
     table = Array{Int32,1}(undef, numPoints)
+    res_old = zeros(Float64, 1)
+    main_store = zeros(Float64, 52)
 
-    shapeptsidx = Array{Int32,1}(undef, 0)
+    # shapeptsidx = Array{Int32,1}(undef, 0)
     # print(splitdata[1:3])
     defprimal = getInitialPrimitive(configData)
 
     println("Start Read")
     # count = 0
     if format == "quadtree"
-        readFileQuadtree(file_name::String, globaldata, table, defprimal, shapeptsidx, shapepts, numPoints)
+        readFileQuadtree(file_name::String, globaldata, table, defprimal, shapepts, numPoints)
     elseif format == "old"
-        readFile(file_name::String, globaldata, table, defprimal, shapeptsidx, shapepts, numPoints)
+        readFile(file_name::String, globaldata, table, defprimal, shapepts, numPoints)
     end
 
     # if format == 1
@@ -44,17 +46,17 @@ function main()
         # end
     end
 
-
-    println(max_iters + 1)
-    function run_code(globaldata, configData, res_old, numPoints, main_store)
-        for i in 1:max_iters
-            fpi_solver(i, globaldata, configData,  res_old, numPoints, main_store)
-        end
+    for (idx, itm) in enumerate(globaldata)
+        itm.dq[1] = zeros(Float64, 4)
+        itm.dq[2] = zeros(Float64, 4)
     end
 
-    res_old = zeros(Float64, 1)
-
-    main_store = zeros(Float64, 52)
+    println(max_iters + 1)
+    function run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
+        for i in 1:max_iters
+            fpi_solver(i, globaldata, configData, res_old, numPoints, main_store, tempdq)
+        end
+    end
 
     function test_code(globaldata, configData, res_old, numPoints, main_store)
         println("Starting warmup function")
@@ -69,8 +71,9 @@ function main()
         # Profile.print()
         # res_old[1] = 0.0
         println("Starting main function")
+        tempdq = zeros(Float64, numPoints, 2, 4)
         @timeit to "nest 1" begin
-            run_code(globaldata, configData,  res_old, numPoints, main_store)
+            run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
         end
         open("prof.txt", "w") do s
             Profile.print(IOContext(s, :displaysize => (24, 500)))

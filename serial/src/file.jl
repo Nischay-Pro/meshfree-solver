@@ -4,7 +4,7 @@ function returnFileLength(file_name::String)
     return length(splitdata) - 2
 end
 
-function readFile(file_name::String, globaldata, table, defprimal, shapeptsidx, shapepts, numPoints)
+function readFile(file_name::String, globaldata, table, defprimal, shapepts, numPoints)
     data1 = read(file_name, String)
     splitdata = @view split(data1, "\n")[2:end-1]
     # print(splitdata[1:3])
@@ -28,16 +28,16 @@ function readFile(file_name::String, globaldata, table, defprimal, shapeptsidx, 
                     Array{Array{Float64,1},1}(undef, 2), 0.0, 0, 0, 0, 0, Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0),
                     Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), 0.0, zeros(Float64, 4), zeros(Float64, 4), zeros(Float64, 4))
 
-        if globaldata[idx].flag_2 > 0
-            shapepts +=1
-            push!(shapeptsidx, globaldata[idx].localID)
-        end
+        # if globaldata[idx].flag_2 > 0
+        #     shapepts +=1
+        #     push!(shapeptsidx, globaldata[idx].localID)
+        # end
         table[idx] = globaldata[idx].localID
     end
     return nothing
 end
 
-function readFileQuadtree(file_name::String, globaldata, table, defprimal, shapeptsidx, shapepts, numPoints)
+function readFileQuadtree(file_name::String, globaldata, table, defprimal, shapepts, numPoints)
     data1 = read(file_name, String)
     splitdata = @view split(data1, "\n")[2:end-1]
     # print(splitdata[1:3])
@@ -61,10 +61,10 @@ function readFileQuadtree(file_name::String, globaldata, table, defprimal, shape
                 Array{Array{Float64,1},1}(undef, 2), 0.0, 0, 0, 0, 0, Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0),
                 Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), 0.0, zeros(Float64, 4), zeros(Float64, 4), zeros(Float64, 4))
 
-    if globaldata[idx].flag_2 > 0
-        shapepts +=1
-        push!(shapeptsidx, globaldata[idx].localID)
-    end
+    # if globaldata[idx].flag_2 > 0
+    #     shapepts +=1
+    #     push!(shapeptsidx, globaldata[idx].localID)
+    # end
     table[idx] = globaldata[idx].localID
 end
 return nothing
