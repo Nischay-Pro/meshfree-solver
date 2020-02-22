@@ -66,6 +66,28 @@ end
     return nothing
 end
 
+@inline function connectivity_stats(x_i, y_i, nx, ny, power, globaldata_itm, sum_delx_sqr, sum_dely_sqr, sum_delx_dely)
+    x_k = globaldata_itm.x
+    y_k = globaldata_itm.y
+    
+    delx = x_k - x_i
+    dely = y_k - y_i
+    
+    dels = delx*ny - dely*nx
+    deln = delx*nx + dely*ny
+    
+    dist = sqrt(dels*dels+deln*deln)
+    weights = dist ^ power
+    
+    dels_weights = dels*weights
+    deln_weights = deln*weights
+    
+    sum_delx_sqr += dels*dels_weights
+    sum_dely_sqr += deln*deln_weights
+    sum_delx_dely += dels*deln_weights
+
+    return delx, dely, dels_weights, deln_weights, sum_delx_sqr, sum_dely_sqr, sum_delx_dely
+end
 
 function calculate_qtile(qtilde_i, qtilde_k, globaldata_idx, globaldata_itm, delx, dely, vl_const, gamma, limiter_flag, phi_i, phi_k)
     update_qtildes(qtilde_i, globaldata_idx.q, globaldata_idx.dq1, globaldata_idx.dq2, delx, dely)
@@ -77,6 +99,7 @@ function calculate_qtile(qtilde_i, qtilde_k, globaldata_idx, globaldata_itm, del
         update_qtildes(qtilde_i, globaldata_idx.q, globaldata_idx.dq1, globaldata_idx.dq2, delx, dely, phi_i)
         update_qtildes(qtilde_k, globaldata_itm.q, globaldata_itm.dq1, globaldata_itm.dq2, delx, dely, phi_k)
     end
+    return nothing
 end
 
 @inline function update_qtildes(qtilde, q, dq1, dq2, delx, dely)

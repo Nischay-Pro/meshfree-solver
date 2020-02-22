@@ -201,6 +201,7 @@ function q_variables(globaldata::Array{Point,1})
         itm.q[3] = (two_times_beta * u2)
         itm.q[4] = -two_times_beta
     end
+    return nothing
 end
 
 function q_var_derivatives(globaldata::Array{Point,1}, power, sum_delx_delq, sum_dely_delq)
