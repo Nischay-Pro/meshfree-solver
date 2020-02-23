@@ -5,36 +5,30 @@ function main()
     file_name = string(ARGS[1])
     format = configData["format"]["type"]
     numPoints = returnFileLength(file_name)
-    # if format == "old"
-        # numPoints += 0
-    # end
+
     println(numPoints)
     globaldata = Array{Point,1}(undef, numPoints)
-    # table = Array{Int32,1}(undef, numPoints)
     res_old = zeros(Float64, 1)
     main_store = zeros(Float64, 52)
 
     defprimal = getInitialPrimitive(configData)
 
     println("Start Read")
-    # count = 0
     if format == "quadtree"
         readFileQuadtree(file_name::String, globaldata, defprimal, numPoints)
     elseif format == "old"
         readFile(file_name::String, globaldata, defprimal, numPoints)
     end
 
-    # if format == 1
-    interior = configData["point"]["interior"]
-    wall = configData["point"]["wall"]
-    outer = configData["point"]["outer"]
-    @showprogress 2 "Computing Connectivity" for idx in 1:numPoints
+    interior::Int64 = configData["point"]["interior"]
+    wall::Int64 = configData["point"]["wall"]
+    outer::Int64 = configData["point"]["outer"]
+    @showprogress 2 "Computing Normals" for idx in 1:numPoints
         placeNormals(globaldata, idx, configData, interior, wall, outer)
     end
-    # end
 
     println("Start Connectivity Generation")
-    @showprogress 3 "Computing Table" for idx in 1:numPoints
+    @showprogress 3 "Computing Connectivity" for idx in 1:numPoints
         calculateConnectivity(globaldata, idx)
     end
 
@@ -51,7 +45,6 @@ function main()
         res_old[1] = 0.0
         # Profile.clear_malloc_data()
         # Profile.clear()
-        # @trace(fpi_solver(1, globaldata, configData,  res_old), maxdepth = 3)
         # res_old[1] = 0.0
         # fpi_solver(1, globaldata, configData,  res_old, numPoints)
         # @profile fpi_solver(1, globaldata, configData,  res_old)
@@ -59,6 +52,7 @@ function main()
         # res_old[1] = 0.0
         println("Starting main function")
         tempdq = zeros(Float64, numPoints, 2, 4)
+        # @trace(fpi_solver(1, globaldata, configData,  res_old, main_store, tempdq), maxdepth = 3)
         @timeit to "nest 1" begin
             run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
         end

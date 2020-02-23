@@ -14,7 +14,6 @@ function getInitialPrimitive2(configData)
     data1 = split(data, "\n")
     finaldata = Array{Array{Float64,1},1}(undef, 0)
     for (idx,itm) in enumerate(data1)
-        # try
         da = split(itm)
         da1 = parse.(Float64, da)
         push!(finaldata, da1)
@@ -129,7 +128,7 @@ function getPointDetails(globaldata, point_index)
     # println(IOContext(stdout, :compact => false), "Delta is", globaldata[point_index].delta)
 end
 
-function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store, tempdq)
+function fpi_solver(iter, globaldata::Array{Point,1}, configData, res_old, numPoints, main_store, tempdq)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # print(" 111\n")
     if iter == 1
@@ -169,7 +168,7 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
         @timeit to "q_derv" begin
             q_var_derivatives(globaldata, power, sum_delx_delf, sum_dely_delf)
         end
-        @timeit to "update_loop" begin
+        @timeit to "q_derv_innerloop" begin
             for inner_iters in 1:3
                 q_var_derivatives_innerloop(globaldata, power, tempdq, sum_delx_delf, sum_dely_delf, qtilde_i, qtilde_k)
             end
@@ -204,7 +203,7 @@ function q_variables(globaldata::Array{Point,1})
     return nothing
 end
 
-function q_var_derivatives(globaldata::Array{Point,1}, power, sum_delx_delq, sum_dely_delq)
+function q_var_derivatives(globaldata, power, sum_delx_delq, sum_dely_delq)
     for (idx, itm) in enumerate(globaldata)
         x_i = itm.x
         y_i = itm.y
@@ -256,7 +255,7 @@ end
     end
 end
 
-function q_var_derivatives_innerloop(globaldata::Array{Point,1}, power, tempdq, sum_delx_delq, sum_dely_delq, qi_tilde, qk_tilde)
+function q_var_derivatives_innerloop(globaldata, power, tempdq, sum_delx_delq, sum_dely_delq, qi_tilde, qk_tilde)
     for (idx, itm) in enumerate(globaldata)
         x_i = itm.x
         y_i = itm.y
