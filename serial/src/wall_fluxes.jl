@@ -1,28 +1,28 @@
-function wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const, Gxp)
+function wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gxp)
     
-    sum_delx_sqr = zero(Float64)
-    sum_dely_sqr = zero(Float64)
-    sum_delx_dely = zero(Float64)
+    ∑_Δx_sqr = zero(Float64)
+    ∑_Δy_sqr = zero(Float64)
+    ∑_Δx_Δy = zero(Float64)
     
-    fill!(sum_delx_delf, zero(Float64))
-    fill!(sum_dely_delf, zero(Float64))
+    fill!(∑_Δx_Δf, zero(Float64))
+    fill!(∑_Δy_Δf, zero(Float64))
     
-    x_i = globaldata[idx].x
-    y_i = globaldata[idx].y
+    x_i = globaldata.x[idx]
+    y_i = globaldata.y[idx]
     
-    nx = globaldata[idx].nx
-    ny = globaldata[idx].ny
+    nx = globaldata.nx[idx]
+    ny = globaldata.ny[idx]
     
     tx::Float64 = ny
     ty::Float64 = -nx
     
     
-    for itm in globaldata[idx].xpos_conn
+    for conn in globaldata.xpos_conn[idx]
         
-        globaldata_itm = globaldata[itm]
-        delx, dely, dels_weights, deln_weights, sum_delx_sqr, sum_dely_sqr, sum_delx_dely = connectivity_stats(x_i, y_i, nx, ny, power, globaldata_itm, sum_delx_sqr, sum_dely_sqr, sum_delx_dely)
+
+        Δx, Δy, Δs_weights, Δn_weights, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy = connectivity_stats(x_i, y_i, nx, ny, power, globaldata.x[conn], globaldata.y[conn], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy)
         
-        calculate_qtile(qtilde_i, qtilde_k, globaldata[idx], globaldata_itm, delx, dely, vl_const, gamma, limiter_flag, phi_i, phi_k)
+        calculate_qtile(qtilde_i, qtilde_k, globaldata, idx, conn, Δx, Δy, vl_const, gamma, limiter_flag, phi_i, phi_k)
         
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), itm)
@@ -67,8 +67,8 @@ function wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
         #     println(IOContext(stdout, :compact => false), result)
         #     println(IOContext(stdout, :compact => false), G_i)
         #     println(IOContext(stdout, :compact => false), G_k)
-        #     # println(IOContext(stdout, :compact => false), dels_weights)
-        #     # println(IOContext(stdout, :compact => false), deln_weights)
+        #     # println(IOContext(stdout, :compact => false), Δs_weights)
+        #     # println(IOContext(stdout, :compact => false), Δn_weights)
         #     println("****")
         # end
         # if idx == 3
@@ -76,30 +76,30 @@ function wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
         #     println(IOContext(stdout, :compact => false), result)
         #     println(IOContext(stdout, :compact => false), G_i)
         #     println(IOContext(stdout, :compact => false), G_k)
-        #     # println(IOContext(stdout, :compact => false), dels_weights)
-        #     # println(IOContext(stdout, :compact => false), deln_weights)
+        #     # println(IOContext(stdout, :compact => false), Δs_weights)
+        #     # println(IOContext(stdout, :compact => false), Δn_weights)
         # end
         for i in 1:4
-            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
-            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+            ∑_Δx_Δf[i] += (G_k[i] - G_i[i]) * Δs_weights
+            ∑_Δy_Δf[i] += (G_k[i] - G_i[i]) * Δn_weights
         end
         # if idx == 3
-        # println(IOContext(stdout, :compact => false), dels_weights, deln_weights)
-        # println(IOContext(stdout, :compact => false), sum_delx_delf)
-        # println(IOContext(stdout, :compact => false), sum_dely_delf)
+        # println(IOContext(stdout, :compact => false), Δs_weights, Δn_weights)
+        # println(IOContext(stdout, :compact => false), ∑_Δx_Δf)
+        # println(IOContext(stdout, :compact => false), ∑_Δy_Δf)
         # end
     end
     
-    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = ∑_Δx_sqr*∑_Δy_sqr - ∑_Δx_Δy*∑_Δx_Δy
     one_by_det = 1.0 / det
-    @. Gxp = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
+    @. Gxp = (∑_Δx_Δf*∑_Δy_sqr - ∑_Δy_Δf*∑_Δx_Δy)*one_by_det
     # if idx == 3
     #     println(IOContext(stdout, :compact => false), "===Gx===")
-    #     # println(IOContext(stdout, :compact => false), sum_delx_sqr," ", sum_dely_sqr, " ", sum_delx_dely)
+    #     # println(IOContext(stdout, :compact => false), ∑_Δx_sqr," ", ∑_Δy_sqr, " ", ∑_Δx_Δy)
     #     # println(IOContext(stdout, :compact => false), det)
     #     # println(IOContext(stdout, :compact => false), one_by_det)
-    # println(IOContext(stdout, :compact => false), sum_delx_delf)
-    # println(IOContext(stdout, :compact => false), sum_dely_delf)
+    # println(IOContext(stdout, :compact => false), ∑_Δx_Δf)
+    # println(IOContext(stdout, :compact => false), ∑_Δy_Δf)
     #     # println(IOContext(stdout, :compact => false), G)
     #     println()
     # end
@@ -107,30 +107,30 @@ function wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
     return nothing
 end
 
-function wall_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const, Gxn)
+function wall_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gxn)
     
-    sum_delx_sqr = zero(Float64)
-    sum_dely_sqr = zero(Float64)
-    sum_delx_dely = zero(Float64)
+    ∑_Δx_sqr = zero(Float64)
+    ∑_Δy_sqr = zero(Float64)
+    ∑_Δx_Δy = zero(Float64)
     
-    fill!(sum_delx_delf, zero(Float64))
-    fill!(sum_dely_delf, zero(Float64))
+    fill!(∑_Δx_Δf, zero(Float64))
+    fill!(∑_Δy_Δf, zero(Float64))
     
-    x_i = globaldata[idx].x
-    y_i = globaldata[idx].y
+    x_i = globaldata.x[idx]
+    y_i = globaldata.y[idx]
     
-    nx = globaldata[idx].nx
-    ny = globaldata[idx].ny
+    nx = globaldata.nx[idx]
+    ny = globaldata.ny[idx]
     
     tx = ny
     ty = -nx
     
-    for itm in globaldata[idx].xneg_conn
+    for conn in globaldata.xneg_conn[idx]
         
-        globaldata_itm = globaldata[itm]
-        delx, dely, dels_weights, deln_weights, sum_delx_sqr, sum_dely_sqr, sum_delx_dely = connectivity_stats(x_i, y_i, nx, ny, power, globaldata_itm, sum_delx_sqr, sum_dely_sqr, sum_delx_dely)
+
+        Δx, Δy, Δs_weights, Δn_weights, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy = connectivity_stats(x_i, y_i, nx, ny, power, globaldata.x[conn], globaldata.y[conn], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy)
         
-        calculate_qtile(qtilde_i, qtilde_k, globaldata[idx], globaldata_itm, delx, dely, vl_const, gamma, limiter_flag, phi_i, phi_k)
+        calculate_qtile(qtilde_i, qtilde_k, globaldata, idx, conn, Δx, Δy, vl_const, gamma, limiter_flag, phi_i, phi_k)
         
         qtilde_to_primitive(result, qtilde_i, gamma)
         flux_quad_GxI(G_i, nx, ny, result[1], result[2], result[3], result[4])
@@ -139,42 +139,42 @@ function wall_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
         flux_quad_GxI(G_k, nx, ny, result[1], result[2], result[3], result[4])
         
         for i in 1:4
-            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
-            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+            ∑_Δx_Δf[i] += (G_k[i] - G_i[i]) * Δs_weights
+            ∑_Δy_Δf[i] += (G_k[i] - G_i[i]) * Δn_weights
         end
         
     end
-    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = ∑_Δx_sqr*∑_Δy_sqr - ∑_Δx_Δy*∑_Δx_Δy
     one_by_det = 1.0 / det
-    @. Gxn = (sum_delx_delf*sum_dely_sqr - sum_dely_delf*sum_delx_dely)*one_by_det
+    @. Gxn = (∑_Δx_Δf*∑_Δy_sqr - ∑_Δy_Δf*∑_Δx_Δy)*one_by_det
     # return G
     return nothing
 end
 
-function wall_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, sum_delx_delf, sum_dely_delf, power, limiter_flag, vl_const, Gyn)
+function wall_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gyn)
     
-    sum_delx_sqr = zero(Float64)
-    sum_dely_sqr = zero(Float64)
-    sum_delx_dely = zero(Float64)
+    ∑_Δx_sqr = zero(Float64)
+    ∑_Δy_sqr = zero(Float64)
+    ∑_Δx_Δy = zero(Float64)
     
-    fill!(sum_delx_delf, zero(Float64))
-    fill!(sum_dely_delf, zero(Float64))
+    fill!(∑_Δx_Δf, zero(Float64))
+    fill!(∑_Δy_Δf, zero(Float64))
     
-    x_i = globaldata[idx].x
-    y_i = globaldata[idx].y
+    x_i = globaldata.x[idx]
+    y_i = globaldata.y[idx]
     
-    nx = globaldata[idx].nx
-    ny = globaldata[idx].ny
+    nx = globaldata.nx[idx]
+    ny = globaldata.ny[idx]
     
     tx = ny
     ty = -nx
     
-    for itm in globaldata[idx].yneg_conn
+    for conn in globaldata.yneg_conn[idx]
         
-        globaldata_itm = globaldata[itm]
-        delx, dely, dels_weights, deln_weights, sum_delx_sqr, sum_dely_sqr, sum_delx_dely = connectivity_stats(x_i, y_i, nx, ny, power, globaldata_itm, sum_delx_sqr, sum_dely_sqr, sum_delx_dely)
+
+        Δx, Δy, Δs_weights, Δn_weights, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy = connectivity_stats(x_i, y_i, nx, ny, power, globaldata.x[conn], globaldata.y[conn], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy)
         
-        calculate_qtile(qtilde_i, qtilde_k, globaldata[idx], globaldata_itm, delx, dely, vl_const, gamma, limiter_flag, phi_i, phi_k)
+        calculate_qtile(qtilde_i, qtilde_k, globaldata, idx, conn, Δx, Δy, vl_const, gamma, limiter_flag, phi_i, phi_k)
         
         qtilde_to_primitive(result, qtilde_i, gamma)
         flux_Gyn(G_i, nx, ny, result[1], result[2], result[3], result[4])
@@ -183,8 +183,8 @@ function wall_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
         flux_Gyn(G_k, nx, ny, result[1], result[2], result[3], result[4])
         
         for i in 1:4
-            sum_delx_delf[i] += (G_k[i] - G_i[i]) * dels_weights
-            sum_dely_delf[i] += (G_k[i] - G_i[i]) * deln_weights
+            ∑_Δx_Δf[i] += (G_k[i] - G_i[i]) * Δs_weights
+            ∑_Δy_Δf[i] += (G_k[i] - G_i[i]) * Δn_weights
         end
         # if idx == 3
         #     println(IOContext(stdout, :compact => false), itm)
@@ -194,13 +194,13 @@ function wall_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qt
         # end
     end
     
-    det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
+    det = ∑_Δx_sqr*∑_Δy_sqr - ∑_Δx_Δy*∑_Δx_Δy
     one_by_det = 1.0 / det
-    @. Gyn = (sum_dely_delf*sum_delx_sqr - sum_delx_delf*sum_delx_dely)*one_by_det
+    @. Gyn = (∑_Δy_Δf*∑_Δx_sqr - ∑_Δx_Δf*∑_Δx_Δy)*one_by_det
     # if idx == 3
     #     println(IOContext(stdout, :compact => false), "===Gx===")
-    #     println(IOContext(stdout, :compact => false), sum_delx_delf)
-    #     println(IOContext(stdout, :compact => false), sum_dely_delf)
+    #     println(IOContext(stdout, :compact => false), ∑_Δx_Δf)
+    #     println(IOContext(stdout, :compact => false), ∑_Δy_Δf)
     #     # println(IOContext(stdout, :compact => false), G)
     #     # println()
     # end

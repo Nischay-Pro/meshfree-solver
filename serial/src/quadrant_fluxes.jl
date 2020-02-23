@@ -1,5 +1,3 @@
-import SpecialFunctions
-
 function flux_quad_GxI(G, nx, ny, u1, u2, rho, pr)
 
     tx = ny

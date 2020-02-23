@@ -5,7 +5,9 @@ module main_module
 using Profile
 using ProgressMeter
 using Printf
+using StructArrays
 using TimerOutputs
+using SpecialFunctions
 # using DelimitedFiles
 using Traceur
 

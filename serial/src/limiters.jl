@@ -1,10 +1,10 @@
-function venkat_limiter(qtilde, vl_const, globaldata_point, gamma, phi)
-    ds = globaldata_point.short_distance
+function venkat_limiter(qtilde, vl_const, globaldata, index, gamma, phi)
+    ds = globaldata.short_distance[index]
     epsi = vl_const * ds
     epsi = epsi ^ 3
     del_pos = zero(Float64)
     del_neg = zero(Float64)
-    VLBroadcaster(globaldata_point.q, qtilde, globaldata_point.max_q, globaldata_point.min_q, phi, epsi, del_pos, del_neg)
+    VLBroadcaster(globaldata.q[index], qtilde, globaldata.max_q[index], globaldata.min_q[index], phi, epsi, del_pos, del_neg)
     return nothing
 end
 
@@ -37,17 +37,6 @@ function VLBroadcaster(q, qtilde, max_q, min_q, phi, epsi, del_pos, del_neg)
     return nothing
 end
 
-@inline function smallest_dist(globaldata, idx)
-    min_dist = 1000.0
-    for itm in globaldata[idx].conn
-        ds = hypot(globaldata[idx].x - globaldata[itm].x, globaldata[idx].y - globaldata[itm].y)
-        if ds < min_dist
-            min_dist = ds
-        end
-    end
-    globaldata[idx].short_distance = min_dist
-    return nothing
-end
 
 @inline function qtilde_to_primitive(result, qtilde, gamma)
     beta = -qtilde[4]*0.5
@@ -66,52 +55,52 @@ end
     return nothing
 end
 
-@inline function connectivity_stats(x_i, y_i, nx, ny, power, globaldata_itm, sum_delx_sqr, sum_dely_sqr, sum_delx_dely)
-    x_k = globaldata_itm.x
-    y_k = globaldata_itm.y
+@inline function connectivity_stats(x_i, y_i, nx, ny, power, conn_x, conn_y, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy)
+    x_k = conn_x
+    y_k = conn_y
     
-    delx = x_k - x_i
-    dely = y_k - y_i
+    Δx = x_k - x_i
+    Δy = y_k - y_i
     
-    dels = delx*ny - dely*nx
-    deln = delx*nx + dely*ny
+    Δs = Δx*ny - Δy*nx
+    Δn = Δx*nx + Δy*ny
     
-    dist = sqrt(dels*dels+deln*deln)
+    dist = sqrt(Δs*Δs+Δn*Δn)
     weights = dist ^ power
     
-    dels_weights = dels*weights
-    deln_weights = deln*weights
+    Δs_weights = Δs*weights
+    Δn_weights = Δn*weights
     
-    sum_delx_sqr += dels*dels_weights
-    sum_dely_sqr += deln*deln_weights
-    sum_delx_dely += dels*deln_weights
+    ∑_Δx_sqr += Δs*Δs_weights
+    ∑_Δy_sqr += Δn*Δn_weights
+    ∑_Δx_Δy += Δs*Δn_weights
 
-    return delx, dely, dels_weights, deln_weights, sum_delx_sqr, sum_dely_sqr, sum_delx_dely
+    return Δx, Δy, Δs_weights, Δn_weights, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy
 end
 
-function calculate_qtile(qtilde_i, qtilde_k, globaldata_idx, globaldata_itm, delx, dely, vl_const, gamma, limiter_flag, phi_i, phi_k)
-    update_qtildes(qtilde_i, globaldata_idx.q, globaldata_idx.dq1, globaldata_idx.dq2, delx, dely)
-    update_qtildes(qtilde_k, globaldata_itm.q, globaldata_itm.dq1, globaldata_itm.dq2, delx, dely)
+function calculate_qtile(qtilde_i, qtilde_k, globaldata, idx, conn, Δx, Δy, vl_const, gamma, limiter_flag, phi_i, phi_k)
+    update_qtildes(qtilde_i, globaldata.q[idx], globaldata.dq1[idx], globaldata.dq2[idx], Δx, Δy)
+    update_qtildes(qtilde_k, globaldata.q[conn], globaldata.dq1[conn], globaldata.dq2[conn], Δx, Δy)
 
     if limiter_flag == 1
-        venkat_limiter(qtilde_i, vl_const, globaldata_idx, gamma, phi_i)
-        venkat_limiter(qtilde_k, vl_const, globaldata_itm, gamma, phi_k)
-        update_qtildes(qtilde_i, globaldata_idx.q, globaldata_idx.dq1, globaldata_idx.dq2, delx, dely, phi_i)
-        update_qtildes(qtilde_k, globaldata_itm.q, globaldata_itm.dq1, globaldata_itm.dq2, delx, dely, phi_k)
+        venkat_limiter(qtilde_i, vl_const, globaldata, idx, gamma, phi_i)
+        venkat_limiter(qtilde_k, vl_const, globaldata, conn, gamma, phi_k)
+        update_qtildes(qtilde_i, globaldata.q[idx], globaldata.dq1[idx], globaldata.dq2[idx], Δx, Δy, phi_i)
+        update_qtildes(qtilde_k, globaldata.q[conn], globaldata.dq1[conn], globaldata.dq2[conn], Δx, Δy, phi_k)
     end
     return nothing
 end
 
-@inline function update_qtildes(qtilde, q, dq1, dq2, delx, dely)
+@inline function update_qtildes(qtilde, q, dq1, dq2, Δx, Δy)
     for iter in 1:4
-        qtilde[iter] = q[iter] - 0.5 * (delx * dq1[iter] + dely * dq2[iter])
+        qtilde[iter] = q[iter] - 0.5 * (Δx * dq1[iter] + Δy * dq2[iter])
     end
     return nothing
 end
 
-@inline function update_qtildes(qtilde, q, dq1, dq2, delx, dely, phi)
+@inline function update_qtildes(qtilde, q, dq1, dq2, Δx, Δy, phi)
     for iter in 1:4
-        qtilde[iter] = q[iter] - 0.5 * phi[iter] * (delx * dq1[iter] + dely * dq2[iter])
+        qtilde[iter] = q[iter] - 0.5 * phi[iter] * (Δx * dq1[iter] + Δy * dq2[iter])
     end
     return nothing
 end
