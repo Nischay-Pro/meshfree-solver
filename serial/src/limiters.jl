@@ -104,3 +104,11 @@ end
     end
     return nothing
 end
+
+@inline function update_delf(∑_Δx_Δf, ∑_Δy_Δf, G_k, G_i, Δs_weights, Δn_weights)
+    for iter in 1:4
+        ∑_Δx_Δf[iter] += (G_k[iter] - G_i[iter]) * Δs_weights
+        ∑_Δy_Δf[iter] += (G_k[iter] - G_i[iter]) * Δn_weights
+    end
+    return nothing
+end

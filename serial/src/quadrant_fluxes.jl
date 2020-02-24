@@ -36,17 +36,13 @@ function flux_quad_GxI(G, nx, ny, u1, u2, rho, pr)
     return nothing
 end
 
-function flux_quad_GxII(G, nx, ny, u1, u2, rho, pr, flag)
+function flux_quad_GxII(G, nx, ny, u1, u2, rho, pr)
     tx = ny
     ty = -nx
     ut = u1*tx + u2*ty
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
-    # if flag == 0
-    #     println(IOContext(stdout, :compact => false), rho)
-    #     println(IOContext(stdout, :compact => false), pr)
-    # end
     S1 = ut*sqrt(beta)
     S2 = un*sqrt(beta)
     B1 = 0.5*exp(-S1*S1)/sqrt(pi*beta)
@@ -65,29 +61,6 @@ function flux_quad_GxII(G, nx, ny, u1, u2, rho, pr, flag)
     temp1 = ut*A1pos + B1
     temp2 = un*A2neg - B2
     G[3] = rho*temp1*temp2
-
-    # if flag == 0
-    #     println("===%%%%===")
-    #     println(IOContext(stdout, :compact => false), beta)
-    #     println(IOContext(stdout, :compact => false), ut)
-    #     println(IOContext(stdout, :compact => false), S1)
-    #     println(IOContext(stdout, :compact => false), B1)
-    #     println(IOContext(stdout, :compact => false), "####")
-    #     println(IOContext(stdout, :compact => false), 0.5* exp(-S1*S1))
-    #     println(IOContext(stdout, :compact => false), sqrt(pi*beta))
-    #     println(IOContext(stdout, :compact => false), "####")
-    #     # println(IOContext(stdout, :compact => false), B2)
-    #     println(IOContext(stdout, :compact => false), A1pos)
-    #     # println(IOContext(stdout, :compact => false), A2neg)
-    #     # println(IOContext(stdout, :compact => false), u_sqr)
-    #     println(IOContext(stdout, :compact => false), temp1)
-    #     println(IOContext(stdout, :compact => false), temp2)
-    #     # println(IOContext(stdout, :compact => false), temp3)
-    #     # println(IOContext(stdout, :compact => false), temp4)
-    #     println(IOContext(stdout, :compact => false), rho)
-    #     println(IOContext(stdout, :compact => false), rho*temp1*temp2)
-    #     println()
-    # end
 
     temp1 = (7 *pr_by_rho) + u_sqr
     temp2 = 0.5*ut*temp1*A1pos

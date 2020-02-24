@@ -28,10 +28,7 @@ function interior_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
         qtilde_to_primitive(result, qtilde_k, gamma)
         flux_Gxp(G_k, nx, ny, result[1], result[2], result[3], result[4])
         
-        for i in 1:4
-            ∑_Δx_Δf[i] += (G_k[i] - G_i[i]) * Δs_weights
-            ∑_Δy_Δf[i] += (G_k[i] - G_i[i]) * Δn_weights
-        end
+        update_delf(∑_Δx_Δf, ∑_Δy_Δf, G_k, G_i, Δs_weights, Δn_weights)
         
     end
     det = ∑_Δx_sqr*∑_Δy_sqr - ∑_Δx_Δy*∑_Δx_Δy
@@ -76,10 +73,7 @@ function interior_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
         qtilde_to_primitive(result, qtilde_k, gamma)
         flux_Gxn(G_k, nx, ny, result[1], result[2], result[3], result[4])
         
-        for i in 1:4
-            ∑_Δx_Δf[i] += (G_k[i] - G_i[i]) * Δs_weights
-            ∑_Δy_Δf[i] += (G_k[i] - G_i[i]) * Δn_weights
-        end
+        update_delf(∑_Δx_Δf, ∑_Δy_Δf, G_k, G_i, Δs_weights, Δn_weights)
     end
     det = ∑_Δx_sqr*∑_Δy_sqr - ∑_Δx_Δy*∑_Δx_Δy
     one_by_det = one(Float64) / det
@@ -121,10 +115,7 @@ function interior_dGy_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
         qtilde_to_primitive(result, qtilde_k, gamma)
         flux_Gyp(G_k, nx, ny, result[1], result[2], result[3], result[4])
         
-        for i in 1:4
-            ∑_Δx_Δf[i] += (G_k[i] - G_i[i]) * Δs_weights
-            ∑_Δy_Δf[i] += (G_k[i] - G_i[i]) * Δn_weights
-        end
+        update_delf(∑_Δx_Δf, ∑_Δy_Δf, G_k, G_i, Δs_weights, Δn_weights)
         
     end
     det = ∑_Δx_sqr*∑_Δy_sqr - ∑_Δx_Δy*∑_Δx_Δy
@@ -166,10 +157,7 @@ function interior_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
         qtilde_to_primitive(result, qtilde_k, gamma)
         flux_Gyn(G_k, nx, ny, result[1], result[2], result[3], result[4])
         
-        for i in 1:4
-            ∑_Δx_Δf[i] += (G_k[i] - G_i[i]) * Δs_weights
-            ∑_Δy_Δf[i] += (G_k[i] - G_i[i]) * Δn_weights
-        end
+        update_delf(∑_Δx_Δf, ∑_Δy_Δf, G_k, G_i, Δs_weights, Δn_weights)
         
     end
     det = ∑_Δx_sqr*∑_Δy_sqr - ∑_Δx_Δy*∑_Δx_Δy

@@ -1,8 +1,5 @@
 function outer_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gxp)
     
-    # power::Float64 = configData["core"]["power"]
-    # limiter_flag::Float64 = configData["core"]["limiter_flag"]
-    
     ∑_Δx_sqr = zero(Float64)
     ∑_Δy_sqr = zero(Float64)
     ∑_Δx_Δy = zero(Float64)
@@ -32,10 +29,7 @@ function outer_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
         qtilde_to_primitive(result, qtilde_k, gamma)
         flux_quad_GxIII(G_k, nx, ny, result[1], result[2], result[3], result[4])
         
-        for i in 1:4
-            ∑_Δx_Δf[i] += (G_k[i] - G_i[i]) * Δs_weights
-            ∑_Δy_Δf[i] += (G_k[i] - G_i[i]) * Δn_weights
-        end
+        update_delf(∑_Δx_Δf, ∑_Δy_Δf, G_k, G_i, Δs_weights, Δn_weights)
     end
     
     det = ∑_Δx_sqr*∑_Δy_sqr - ∑_Δx_Δy*∑_Δx_Δy
@@ -79,10 +73,7 @@ function outer_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
         qtilde_to_primitive(result, qtilde_k, gamma)
         flux_quad_GxIV(G_k, nx, ny, result[1], result[2], result[3], result[4])
         
-        for i in 1:4
-            ∑_Δx_Δf[i] += (G_k[i] - G_i[i]) * Δs_weights
-            ∑_Δy_Δf[i] += (G_k[i] - G_i[i]) * Δn_weights
-        end
+        update_delf(∑_Δx_Δf, ∑_Δy_Δf, G_k, G_i, Δs_weights, Δn_weights)
     end
     det = ∑_Δx_sqr*∑_Δy_sqr - ∑_Δx_Δy*∑_Δx_Δy
     one_by_det = one(Float64) / det
@@ -121,10 +112,7 @@ function outer_dGy_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
         qtilde_to_primitive(result, qtilde_k, gamma)
         flux_Gyp(G_k, nx, ny, result[1], result[2], result[3], result[4])
         
-        for i in 1:4
-            ∑_Δx_Δf[i] += (G_k[i] - G_i[i]) * Δs_weights
-            ∑_Δy_Δf[i] += (G_k[i] - G_i[i]) * Δn_weights
-        end
+        update_delf(∑_Δx_Δf, ∑_Δy_Δf, G_k, G_i, Δs_weights, Δn_weights)
         
     end
     det = ∑_Δx_sqr*∑_Δy_sqr - ∑_Δx_Δy*∑_Δx_Δy
