@@ -1,10 +1,10 @@
 function cal_flux_residual(globaldata, numPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
-        result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf)
+        result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
         
-    power::Float64 = configData["core"]["power"]::Float64
-    limiter_flag::Int64 = configData["core"]["limiter_flag"]::Int64
-    vl_const::Float64 = configData["core"]["vl_const"]::Float64
-    gamma::Float64 = configData["core"]["gamma"]::Float64
+    power::Float64 = main_store[53]
+    limiter_flag = main_store[55]
+    vl_const = main_store[56]
+    gamma = main_store[59]
 
 	for idx in 1:numPoints
         if globaldata.flag_1[idx] == 0

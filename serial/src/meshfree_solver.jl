@@ -9,7 +9,7 @@ function main()
     println(numPoints)
     globaldata = Array{Point,1}(undef, numPoints)
     res_old = zeros(Float64, 1)
-    main_store = zeros(Float64, 52)
+    main_store = zeros(Float64, 62)
 
     defprimal = getInitialPrimitive(configData)
 
@@ -31,6 +31,17 @@ function main()
     @showprogress 3 "Computing Connectivity" for idx in 1:numPoints
         calculateConnectivity(globaldata, idx)
     end
+
+    main_store[53] = configData["core"]["power"]::Float64
+    main_store[54] = configData["core"]["cfl"]::Float64 
+    main_store[55] = configData["core"]["limiter_flag"]::Int64
+    main_store[56] = configData["core"]["vl_const"]::Float64
+    main_store[57] = configData["core"]["aoa"]::Float64
+    main_store[58] = configData["core"]["mach"]::Float64
+    main_store[59] = configData["core"]["gamma"]::Float64
+    main_store[60] = configData["core"]["pr_inf"]::Float64
+    main_store[61] = configData["core"]["rho_inf"]::Float64
+    main_store[62] = calculateTheta(configData)::Float64
 
     globaldata = StructArray(globaldata)
 
@@ -73,27 +84,6 @@ end
 
 
     # compute_cl_cd_cm(globaldata, configData, shapeptsidx)
-
-    # println(IOContext(stdout, :compact => false), globaldata[1].q)
-    # println(IOContext(stdout, :compact => false), globaldata[1].dq)
-    # println(IOContext(stdout, :compact => false), globaldata[100].q)
-    # println(IOContext(stdout, :compact => false), globaldata[100].dq)
-    # println(IOContext(stdout, :compact => false), globaldata[1000].q)
-    # println(IOContext(stdout, :compact => false), globaldata[1000].dq)
-    # println()
-    # println(IOContext(stdout, :compact => false), globaldata[1].flux_res)
-    # println(IOContext(stdout, :compact => false), globaldata[100].flux_res)
-    # println(IOContext(stdout, :compact => false), globaldata[1000].flux_res)
-    # println()
-    # println(IOContext(stdout, :compact => false), globaldata[1].delta)
-    # println(IOContext(stdout, :compact => false), globaldata[100].delta)
-    # println(IOContext(stdout, :compact => false), globaldata[1000].delta)
-    # println()
-    # println(IOContext(stdout, :compact => false), globaldata[1].prim)
-    # println(IOContext(stdout, :compact => false), globaldata[100].prim)
-    # println(IOContext(stdout, :compact => false), globaldata[1000].prim)
-    # println(IOContext(stdout, :compact => false), globaldata[100].ypos_conn)
-    # println(IOContext(stdout, :compact => false), globaldata[100].yneg_conn)
     # println(globaldata[1])
     # file  = open("../results/primvals" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
     # for (idx, itm) in enumerate(globaldata)

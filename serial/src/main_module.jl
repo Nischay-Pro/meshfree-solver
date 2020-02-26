@@ -2,9 +2,12 @@ __precompile__()
 
 module main_module
 
+# using Cthulhu
+# using CuArrays
 using Profile
 using ProgressMeter
 using Printf
+# using StaticArrays
 using StructArrays
 using TimerOutputs
 using SpecialFunctions
@@ -14,11 +17,11 @@ using Traceur
 const to = TimerOutput()
 
 mutable struct Point
-    localID::Int64
+    localID::Int32
     x::Float64
     y::Float64
-    left::Int64
-    right::Int64
+    left::Int32
+    right::Int32
     flag_1::Int8
     flag_2::Int8
     short_distance::Float64

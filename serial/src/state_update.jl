@@ -20,14 +20,14 @@ function func_delta(globaldata, numPoints, cfl)
     return nothing
 end
 
-function state_update(globaldata, numPoints, configData, iter, res_old, rk, U, Uold)
+function state_update(globaldata, numPoints, configData, iter, res_old, rk, U, Uold, main_store)
     max_res = zero(Float64)
     ∑_res_sqr = zeros(Float64, 1)
-    Mach::Float64 = configData["core"]["mach"]::Float64
-    gamma::Float64 = configData["core"]["gamma"]::Float64
-    pr_inf::Float64 = configData["core"]["pr_inf"]::Float64
-    rho_inf::Float64 = configData["core"]["rho_inf"]::Float64
-    theta::Float64 = calculateTheta(configData)
+    Mach = main_store[58] 
+    gamma = main_store[59] 
+    pr_inf = main_store[60] 
+    rho_inf = main_store[61] 
+    theta = main_store[62]
 
     for idx in 1:numPoints
         if globaldata.flag_1[idx] == 0
@@ -71,9 +71,13 @@ function state_update_wall(globaldata, idx, max_res, ∑_res_sqr, U, Uold, rk)
     primitive_to_conserved_old(globaldata.prim_old[idx], nx, ny, Uold)
 
     temp = U[1]
-    @. U = U - 0.5 * globaldata.delta[idx] * globaldata.flux_res[idx]
+    for iter in 1:4
+        U[iter] = U[iter] - 0.5 * globaldata.delta[idx][iter] * globaldata.flux_res[idx][iter]
+    end
     if rk == 3
-        @. U = U * 1/3 + Uold * 2/3
+        for iter in 1:4
+            U[iter] = U[iter] * 1/3 + Uold[iter] * 2/3
+        end
     end
     U[3] = zero(Float64)
     U2_rot = U[2]
@@ -97,9 +101,13 @@ function state_update_outer(globaldata, idx, Mach, gamma, pr_inf, rho_inf, theta
     conserved_vector_Ubar(globaldata.prim[idx], nx, ny, Mach, gamma, pr_inf, rho_inf, theta, U)
     conserved_vector_Ubar_old(globaldata.prim_old[idx], nx, ny, Mach, gamma, pr_inf, rho_inf, theta, Uold)
     temp = U[1]
-    @. U = U - 0.5 * globaldata.delta[idx] * globaldata.flux_res[idx]
+    for iter in 1:4
+        U[iter] = U[iter] - 0.5 * globaldata.delta[idx][iter] * globaldata.flux_res[idx][iter]
+    end
     if rk == 3
-        @. U = U * 1/3 + Uold * 2/3
+        for iter in 1:4
+            U[iter] = U[iter] * 1/3 + Uold[iter] * 2/3
+        end
     end
     U2_rot = U[2]
     U3_rot = U[3]
@@ -120,9 +128,13 @@ function state_update_interior(globaldata, idx, max_res, ∑_res_sqr, U, Uold, r
     primitive_to_conserved_old(globaldata.prim_old[idx], nx, ny, Uold)
 
     temp = U[1]
-    @. U = U - 0.5 * globaldata.delta[idx] * globaldata.flux_res[idx]
+    for iter in 1:4
+        U[iter] = U[iter] - 0.5 * globaldata.delta[idx][iter] * globaldata.flux_res[idx][iter]
+    end
     if rk == 3
-        @. U = U * 1/3 + Uold * 2/3
+        for iter in 1:4
+            U[iter] = U[iter] * 1/3 + Uold[iter] * 2/3
+        end
     end
     U2_rot = U[2]
     U3_rot = U[3]

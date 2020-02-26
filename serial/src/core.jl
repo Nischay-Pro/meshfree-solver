@@ -135,8 +135,8 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
         println("Starting FuncDelta")
     end
 
-    power::Float64 = configData["core"]["power"]::Float64
-    cfl::Float64 = configData["core"]["cfl"]::Float64 
+    power = main_store[53]
+    cfl = main_store[54]
 
     @timeit to "func_delta" begin
         func_delta(globaldata, numPoints, cfl)
@@ -176,11 +176,11 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
         end
         @timeit to "flux_res" begin
             cal_flux_residual(globaldata, numPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
-                    result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf)
+                    result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
         end
 
         @timeit to "state_update" begin
-            state_update(globaldata, numPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf)
+            state_update(globaldata, numPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
         end
 
     end
@@ -189,11 +189,7 @@ end
 
 function q_variables(globaldata, numPoints)
     for idx in 1:numPoints
-        itm = globaldata.prim[idx]
-        rho = itm[1]
-        u1 = itm[2]
-        u2 = itm[3]
-        pr = itm[4]
+        rho, u1, u2, pr = globaldata.prim[idx]
 
         itm = globaldata.q[idx]
         beta = 0.5 * (rho / pr)
@@ -256,6 +252,7 @@ end
         dq1[iter] = one_by_det * (∑_Δx_Δq[iter] * ∑_Δy_sqr - ∑_Δy_Δq[iter] * ∑_Δx_Δy)
         dq2[iter] = one_by_det * (∑_Δy_Δq[iter] * ∑_Δx_sqr - ∑_Δx_Δq[iter] * ∑_Δx_Δy)
     end
+    return nothing
 end
 
 function q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_Δx_Δq, ∑_Δy_Δq, qi_tilde, qk_tilde)
