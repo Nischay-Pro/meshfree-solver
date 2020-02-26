@@ -8,7 +8,7 @@ using Profile
 using ProgressMeter
 using Printf
 # using StaticArrays
-using StructArrays
+# using StructArrays
 using TimerOutputs
 using SpecialFunctions
 # using DelimitedFiles
@@ -52,14 +52,6 @@ mutable struct Point
     prim_old::Array{Float64,1}
 end
 
-# using PyCall
-
-# const math = PyNULL()
-
-# function __init__()
-#     copy!(math, pyimport("math"))
-# end
-
 include("config.jl")
 export getConfig
 
@@ -76,7 +68,7 @@ include("interior_fluxes.jl")
 export interior_dGx_pos, interior_dGx_neg, interior_dGy_pos, interior_dGy_neg
 
 include("limiters.jl")
-export venkat_limiter, maximum, minimum, smallest_dist, min_q_values, qtilde_to_primitive
+export venkat_limiter, maximum, minimum, qtilde_to_primitive
 
 include("meshfree_solver.jl")
 export main
@@ -88,7 +80,7 @@ include("outer_fluxes.jl")
 export outer_dGx_pos, outer_dGx_neg, outer_dGy_pos
 
 include("point.jl")
-export getxy, setConnectivity
+export getxy
 
 include("quadrant_fluxes.jl")
 export flux_quad_GxI, flux_quad_GxII, flux_quad_GxIII, flux_quad_GxIV
