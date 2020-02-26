@@ -2,6 +2,9 @@ function func_delta(globaldata, numPoints, cfl)
     for idx in 1:numPoints
         min_delt = one(Float64)
         for conn in globaldata.conn[idx]
+            if conn == 0
+                break
+            end
             x_i = globaldata.x[idx]
             y_i = globaldata.y[idx]
             x_k = globaldata.x[conn]

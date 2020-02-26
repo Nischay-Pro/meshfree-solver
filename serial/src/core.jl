@@ -72,10 +72,12 @@ function calculateConnectivity(globaldata, idx)
 
     flag = ptInterest.flag_1
 
-    xpos_conn,xneg_conn,ypos_conn,yneg_conn = Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0)
-
     tx = ny
     ty = -nx
+    xpos_nbhs = 0
+    xneg_nbhs = 0
+    ypos_nbhs = 0
+    yneg_nbhs = 0
 
     for itm in ptInterest.conn
         itmx = globaldata[itm].x
@@ -87,32 +89,35 @@ function calculateConnectivity(globaldata, idx)
         Δs = Δx*tx + Δy*ty
         Δn = Δx*nx + Δy*ny
         if Δs <= 0.0
-            push!(xpos_conn, itm)
+            xpos_nbhs += 1
+            ptInterest.xpos_conn[xpos_nbhs] = itm
         end
         if Δs >= 0.0
-            push!(xneg_conn, itm)
+            xneg_nbhs += 1
+            ptInterest.xneg_conn[xneg_nbhs] = itm
         end
         if flag == 1
             if Δn <= 0.0
-                push!(ypos_conn, itm)
+                ypos_nbhs += 1
+                ptInterest.ypos_conn[ypos_nbhs] = itm
             end
             if Δn >= 0.0
-                push!(yneg_conn, itm)
+                yneg_nbhs += 1
+                ptInterest.yneg_conn[yneg_nbhs] = itm
             end
         elseif flag == 0
-            push!(yneg_conn, itm)
+            yneg_nbhs += 1
+            ptInterest.yneg_conn[yneg_nbhs] = itm
         elseif flag == 2
-            push!(ypos_conn, itm)
+            ypos_nbhs += 1
+            ptInterest.ypos_conn[ypos_nbhs] = itm
         end
     end
-    ptInterest.xpos_conn = xpos_conn
-    ptInterest.xpos_nbhs = length(xpos_conn)
-    ptInterest.xneg_conn = xneg_conn
-    ptInterest.xneg_nbhs = length(xneg_conn)
-    ptInterest.ypos_conn = ypos_conn
-    ptInterest.ypos_nbhs = length(ypos_conn)
-    ptInterest.yneg_conn = yneg_conn
-    ptInterest.yneg_nbhs = length(yneg_conn)
+   
+    ptInterest.xpos_nbhs = xpos_nbhs 
+    ptInterest.xneg_nbhs = xneg_nbhs 
+    ptInterest.ypos_nbhs = ypos_nbhs 
+    ptInterest.yneg_nbhs = yneg_nbhs 
     return nothing
 end
 
@@ -216,6 +221,9 @@ function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δ
         @. globaldata.min_q[idx] = globaldata.q[idx]
 
         for conn in globaldata.conn[idx]
+            if conn == 0
+                break
+            end
             x_k = globaldata.x[conn]
             y_k = globaldata.y[conn]
             Δx = x_k - x_i
@@ -265,6 +273,9 @@ function q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_�
         fill!(∑_Δx_Δq, zero(Float64))
         fill!(∑_Δy_Δq, zero(Float64))
         for conn in globaldata.conn[idx]
+            if conn == 0
+                break
+            end
             x_k = globaldata.x[conn]
             y_k = globaldata.y[conn]
             Δx = x_k - x_i

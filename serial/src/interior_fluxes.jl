@@ -17,6 +17,9 @@ function interior_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
     ty = -nx
     
     for conn in globaldata.xpos_conn[idx]
+        if conn == 0
+            break
+        end
 
         Δx, Δy, Δs_weights, Δn_weights, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy = connectivity_stats(x_i, y_i, nx, ny, power, globaldata.x[conn], globaldata.y[conn], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy)
         
@@ -61,7 +64,9 @@ function interior_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
     ty = -nx
     
     for conn in globaldata.xneg_conn[idx]
-        
+        if conn == 0
+            break
+        end        
 
         Δx, Δy, Δs_weights, Δn_weights, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy = connectivity_stats(x_i, y_i, nx, ny, power, globaldata.x[conn], globaldata.y[conn], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy)
         
@@ -103,7 +108,9 @@ function interior_dGy_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
     ty = -nx
     
     for conn in globaldata.ypos_conn[idx]
-        
+        if conn == 0
+            break
+        end        
 
         Δx, Δy, Δs_weights, Δn_weights, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy = connectivity_stats(x_i, y_i, nx, ny, power, globaldata.x[conn], globaldata.y[conn], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy)
         
@@ -145,7 +152,9 @@ function interior_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
     ty = -nx
     
     for conn in globaldata.yneg_conn[idx]
-        
+        if conn == 0
+            break
+        end        
 
         Δx, Δy, Δs_weights, Δn_weights, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy = connectivity_stats(x_i, y_i, nx, ny, power, globaldata.x[conn], globaldata.y[conn], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy)
         
