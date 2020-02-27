@@ -8,7 +8,7 @@ module main_module
 # using Profile
 using ProgressMeter
 using Printf
-# using StaticArrays
+using StaticArrays
 using StructArrays
 using TimerOutputs
 using SpecialFunctions

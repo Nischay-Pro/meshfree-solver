@@ -196,7 +196,10 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
 end
 
 function q_variables(globaldata_prim, globaldata_q)
-    rho, u1, u2, pr = globaldata_prim
+    rho = globaldata_prim[1]
+    u1 = globaldata_prim[2]
+    u2 = globaldata_prim[3]
+    pr = globaldata_prim[4]
     itm = globaldata_q
     beta = 0.5 * (rho / pr)
     itm[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
