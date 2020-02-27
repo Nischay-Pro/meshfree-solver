@@ -4,15 +4,16 @@ module main_module
 
 # using Cthulhu
 # using CuArrays
-using Profile
+# using LoopVectorization
+# using Profile
 using ProgressMeter
 using Printf
 # using StaticArrays
-# using StructArrays
+using StructArrays
 using TimerOutputs
 using SpecialFunctions
 # using DelimitedFiles
-using Traceur
+# using Traceur
 
 const to = TimerOutput()
 

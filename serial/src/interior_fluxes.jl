@@ -17,7 +17,7 @@ function interior_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
     ty = -nx
     
     for conn in globaldata.xpos_conn[idx]
-        if conn == 0
+        if conn == zero(Float64)
             break
         end
 
@@ -64,7 +64,7 @@ function interior_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
     ty = -nx
     
     for conn in globaldata.xneg_conn[idx]
-        if conn == 0
+        if conn == zero(Float64)
             break
         end        
 
@@ -108,7 +108,7 @@ function interior_dGy_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
     ty = -nx
     
     for conn in globaldata.ypos_conn[idx]
-        if conn == 0
+        if conn == zero(Float64)
             break
         end        
 
@@ -152,7 +152,7 @@ function interior_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
     ty = -nx
     
     for conn in globaldata.yneg_conn[idx]
-        if conn == 0
+        if conn == zero(Float64)
             break
         end        
 

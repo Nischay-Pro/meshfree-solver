@@ -80,6 +80,9 @@ function calculateConnectivity(globaldata, idx)
     yneg_nbhs = 0
 
     for itm in ptInterest.conn
+        if itm == zero(Float64)
+            break
+        end
         itmx = globaldata[itm].x
         itmy = globaldata[itm].y
 
@@ -165,7 +168,7 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
 
     for rk in 1:4
         @timeit to "q_var" begin
-            q_variables(globaldata, numPoints)
+            q_variables.(globaldata.prim, globaldata.q)
         end
         # # println("=========")
         # # if iter == 1
@@ -192,18 +195,15 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
     return nothing
 end
 
-function q_variables(globaldata, numPoints)
-    for idx in 1:numPoints
-        rho, u1, u2, pr = globaldata.prim[idx]
-
-        itm = globaldata.q[idx]
-        beta = 0.5 * (rho / pr)
-        itm[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
-        two_times_beta = 2.0 * beta
-        itm[2] = (two_times_beta * u1)
-        itm[3] = (two_times_beta * u2)
-        itm[4] = -two_times_beta
-    end
+function q_variables(globaldata_prim, globaldata_q)
+    rho, u1, u2, pr = globaldata_prim
+    itm = globaldata_q
+    beta = 0.5 * (rho / pr)
+    itm[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
+    two_times_beta = 2.0 * beta
+    itm[2] = (two_times_beta * u1)
+    itm[3] = (two_times_beta * u2)
+    itm[4] = -two_times_beta
     return nothing
 end
 
@@ -221,7 +221,7 @@ function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δ
         @. globaldata.min_q[idx] = globaldata.q[idx]
 
         for conn in globaldata.conn[idx]
-            if conn == 0
+            if conn == zero(Float64)
                 break
             end
             x_k = globaldata.x[conn]
@@ -273,7 +273,7 @@ function q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_�
         fill!(∑_Δx_Δq, zero(Float64))
         fill!(∑_Δy_Δq, zero(Float64))
         for conn in globaldata.conn[idx]
-            if conn == 0
+            if conn == zero(Float64)
                 break
             end
             x_k = globaldata.x[conn]

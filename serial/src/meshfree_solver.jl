@@ -44,6 +44,7 @@ function main()
     main_store[62] = calculateTheta(configData)::Float64
 
     globaldata = StructArray(globaldata)
+    # replace_storage(CuArray, globaldata)
 
     println(max_iters + 1)
     function run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
