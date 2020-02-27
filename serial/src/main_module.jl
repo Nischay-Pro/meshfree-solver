@@ -34,7 +34,7 @@ mutable struct Point
     prim::Array{Float64,1}
     flux_res::SArray{Tuple{4},Float64,1,4}
     # Size 4 (Pressure, vx, vy, density) x numberpts
-    q::Array{Float64,1}
+    q::SArray{Tuple{4},Float64,1,4}
     # Size 2(x,y) 4(Pressure, vx, vy, density) numberpts
     dq1::Array{Float64,1}
     dq2::Array{Float64,1}

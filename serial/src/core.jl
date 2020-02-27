@@ -168,7 +168,7 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
 
     for rk in 1:4
         @timeit to "q_var" begin
-            q_variables(globaldata, numPoints)
+            q_variables(globaldata, numPoints, result)
         end
         # # println("=========")
         # # if iter == 1
@@ -195,19 +195,19 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
     return nothing
 end
 
-function q_variables(globaldata, numPoints)
+function q_variables(globaldata, numPoints, q_result)
     for idx in 1:numPoints
         rho = globaldata.prim[idx][1]
         u1 = globaldata.prim[idx][2]
         u2 = globaldata.prim[idx][3]
         pr = globaldata.prim[idx][4]
-        itm = globaldata.q[idx]
         beta = 0.5 * (rho / pr)
         two_times_beta = 2.0 * beta
-        itm[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
-        itm[2] = (two_times_beta * u1)
-        itm[3] = (two_times_beta * u2)
-        itm[4] = -two_times_beta
+        q_result[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
+        q_result[2] = (two_times_beta * u1)
+        q_result[3] = (two_times_beta * u2)
+        q_result[4] = -two_times_beta
+        globaldata.q[idx] = SVector{4}(q_result)
     end
     return nothing
 end
