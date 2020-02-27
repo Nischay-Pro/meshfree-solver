@@ -32,7 +32,7 @@ mutable struct Point
     ny::Float64
     # Size 4 (Pressure, vx, vy, density) x numberpts
     prim::Array{Float64,1}
-    flux_res::Array{Float64,1}
+    flux_res::SArray{Tuple{4},Float64,1,4}
     # Size 4 (Pressure, vx, vy, density) x numberpts
     q::Array{Float64,1}
     # Size 2(x,y) 4(Pressure, vx, vy, density) numberpts
@@ -50,7 +50,7 @@ mutable struct Point
     delta::Float64
     max_q::Array{Float64,1}
     min_q::Array{Float64,1}
-    prim_old::Array{Float64,1}
+    prim_old::SArray{Tuple{4},Float64,1,4}
 end
 
 include("config.jl")

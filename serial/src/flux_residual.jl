@@ -22,7 +22,8 @@ function wallindices_flux_residual(globaldata, gamma, idx, Gxp, Gxn, Gyp, Gyn, p
 	wall_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gxp)
 	wall_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gxn)
 	wall_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gyn)
-	@. globaldata.flux_res[idx] = (Gxp + Gxn + Gyn) * 2
+    @. Gxp = (Gxp + Gxn + Gyn) * 2
+    globaldata.flux_res[idx] = SVector{4}(Gxp)
 	return nothing
 end
 
@@ -32,7 +33,8 @@ function outerindices_flux_residual(globaldata, gamma, idx, Gxp, Gxn, Gyp, Gyn, 
 	outer_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gxp)
 	outer_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gxn)
 	outer_dGy_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gyp)
-    @. globaldata.flux_res[idx] = Gxp + Gxn + Gyp
+    @. Gxp = Gxp + Gxn + Gyp
+    globaldata.flux_res[idx] = SVector{4}(Gxp)
 	return nothing
 end
 
@@ -42,6 +44,7 @@ function interiorindices_flux_residual(globaldata, gamma, idx, Gxp, Gxn, Gyp, Gy
 	interior_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gxn)
 	interior_dGy_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gyp)
 	interior_dGy_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const, Gyn) 
-    @. globaldata.flux_res[idx] = Gxp + Gxn + Gyp + Gyn
+    @. Gxp = Gxp + Gxn + Gyp + Gyn
+    globaldata.flux_res[idx] = SVector{4}(Gxp)
 	return nothing
 end

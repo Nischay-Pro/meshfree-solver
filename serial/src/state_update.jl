@@ -18,7 +18,7 @@ function func_delta(globaldata, numPoints, cfl)
             end
         end
         globaldata.delta[idx] = min_delt
-        @. globaldata.prim_old[idx] = globaldata.prim[idx]
+        globaldata.prim_old[idx] = SVector{4}(globaldata.prim[idx])
     end
     return nothing
 end
