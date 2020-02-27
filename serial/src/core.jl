@@ -93,27 +93,27 @@ function calculateConnectivity(globaldata, idx)
         Δn = Δx*nx + Δy*ny
         if Δs <= 0.0
             xpos_nbhs += 1
-            ptInterest.xpos_conn[xpos_nbhs] = itm
+            ptInterest.xpos_conn = setindex(ptInterest.xpos_conn, itm, xpos_nbhs)
         end
         if Δs >= 0.0
             xneg_nbhs += 1
-            ptInterest.xneg_conn[xneg_nbhs] = itm
+            ptInterest.xneg_conn = setindex(ptInterest.xneg_conn, itm, xneg_nbhs)
         end
         if flag == 1
             if Δn <= 0.0
                 ypos_nbhs += 1
-                ptInterest.ypos_conn[ypos_nbhs] = itm
+                ptInterest.ypos_conn = setindex(ptInterest.ypos_conn, itm, ypos_nbhs)
             end
             if Δn >= 0.0
                 yneg_nbhs += 1
-                ptInterest.yneg_conn[yneg_nbhs] = itm
+                ptInterest.yneg_conn = setindex(ptInterest.yneg_conn, itm, yneg_nbhs)
             end
         elseif flag == 0
             yneg_nbhs += 1
-            ptInterest.yneg_conn[yneg_nbhs] = itm
+            ptInterest.yneg_conn = setindex(ptInterest.yneg_conn, itm, yneg_nbhs)
         elseif flag == 2
             ypos_nbhs += 1
-            ptInterest.ypos_conn[ypos_nbhs] = itm
+            ptInterest.ypos_conn = setindex(ptInterest.ypos_conn, itm, ypos_nbhs)
         end
     end
    

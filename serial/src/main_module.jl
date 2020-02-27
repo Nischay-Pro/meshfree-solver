@@ -27,7 +27,7 @@ mutable struct Point
     flag_2::Int8
     short_distance::Float64
     nbhs::Int8
-    conn::Array{Int32,1}
+    conn::SArray{Tuple{20},Int32,1,20}
     nx::Float64
     ny::Float64
     # Size 4 (Pressure, vx, vy, density) x numberpts
@@ -43,10 +43,10 @@ mutable struct Point
     xneg_nbhs::Int8
     ypos_nbhs::Int8
     yneg_nbhs::Int8
-    xpos_conn::Array{Int32,1}
-    xneg_conn::Array{Int32,1}
-    ypos_conn::Array{Int32,1}
-    yneg_conn::Array{Int32,1}
+    xpos_conn::SArray{Tuple{20},Int32,1,20}
+    xneg_conn::SArray{Tuple{20},Int32,1,20}
+    ypos_conn::SArray{Tuple{20},Int32,1,20}
+    yneg_conn::SArray{Tuple{20},Int32,1,20}
     delta::Float64
     max_q::Array{Float64,1}
     min_q::Array{Float64,1}
