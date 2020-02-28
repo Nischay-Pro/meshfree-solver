@@ -31,7 +31,7 @@ mutable struct Point
     nx::Float64
     ny::Float64
     # Size 4 (Pressure, vx, vy, density) x numberpts
-    prim::Array{Float64,1}
+    prim::SArray{Tuple{4},Float64,1,4}
     flux_res::SArray{Tuple{4},Float64,1,4}
     # Size 4 (Pressure, vx, vy, density) x numberpts
     q::SArray{Tuple{4},Float64,1,4}
