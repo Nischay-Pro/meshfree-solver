@@ -3,7 +3,7 @@ __precompile__()
 module main_module
 
 # using Cthulhu
-# using CuArrays
+using CuArrays
 # using LoopVectorization
 # using Profile
 using ProgressMeter
@@ -18,7 +18,7 @@ using SpecialFunctions
 
 const to = TimerOutput()
 
-mutable struct Point
+struct Point
     localID::Int32
     x::Float64
     y::Float64

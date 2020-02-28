@@ -31,9 +31,9 @@ function placeNormals(globaldata, idx, configData, interior, wall, outer)
         rightpt = globaldata[idx].right
         rightpt = getxy(globaldata[rightpt])
         normals = calculateNormals(leftpt, rightpt, currpt[1], currpt[2])
-        setNormals(globaldata[idx], normals)
+        setNormals(globaldata, idx, normals)
     elseif flag == interior
-        setNormals(globaldata[idx], (0,1))
+        setNormals(globaldata, idx, (0,1))
     else
         @warn "Illegal Point Type"
     end
@@ -78,6 +78,10 @@ function calculateConnectivity(globaldata, idx)
     xneg_nbhs = 0
     ypos_nbhs = 0
     yneg_nbhs = 0
+    xpos_conn = SVector{20}([zero(Float64) for iter in 1:20])
+    xneg_conn = SVector{20}([zero(Float64) for iter in 1:20])
+    yneg_conn = SVector{20}([zero(Float64) for iter in 1:20])
+    ypos_conn = SVector{20}([zero(Float64) for iter in 1:20])
 
     for itm in ptInterest.conn
         if itm == zero(Float64)
@@ -93,34 +97,38 @@ function calculateConnectivity(globaldata, idx)
         Δn = Δx*nx + Δy*ny
         if Δs <= 0.0
             xpos_nbhs += 1
-            ptInterest.xpos_conn = setindex(ptInterest.xpos_conn, itm, xpos_nbhs)
+            xpos_conn = setindex(xpos_conn, itm, xpos_nbhs)
         end
         if Δs >= 0.0
             xneg_nbhs += 1
-            ptInterest.xneg_conn = setindex(ptInterest.xneg_conn, itm, xneg_nbhs)
+            xneg_conn = setindex(xneg_conn, itm, xneg_nbhs)
         end
         if flag == 1
             if Δn <= 0.0
                 ypos_nbhs += 1
-                ptInterest.ypos_conn = setindex(ptInterest.ypos_conn, itm, ypos_nbhs)
+                ypos_conn = setindex(ypos_conn, itm, ypos_nbhs)
             end
             if Δn >= 0.0
                 yneg_nbhs += 1
-                ptInterest.yneg_conn = setindex(ptInterest.yneg_conn, itm, yneg_nbhs)
+                yneg_conn = setindex(yneg_conn, itm, yneg_nbhs)
             end
         elseif flag == 0
             yneg_nbhs += 1
-            ptInterest.yneg_conn = setindex(ptInterest.yneg_conn, itm, yneg_nbhs)
+            yneg_conn = setindex(yneg_conn, itm, yneg_nbhs)
         elseif flag == 2
             ypos_nbhs += 1
-            ptInterest.ypos_conn = setindex(ptInterest.ypos_conn, itm, ypos_nbhs)
+            ypos_conn = setindex(ypos_conn, itm, ypos_nbhs)
         end
     end
-   
-    ptInterest.xpos_nbhs = xpos_nbhs 
-    ptInterest.xneg_nbhs = xneg_nbhs 
-    ptInterest.ypos_nbhs = ypos_nbhs 
-    ptInterest.yneg_nbhs = yneg_nbhs 
+    globaldata[idx] = setproperties(globaldata[idx], 
+                                    xpos_conn = xpos_conn,
+                                    xneg_conn = xneg_conn,
+                                    yneg_conn = yneg_conn,
+                                    ypos_conn = ypos_conn, 
+                                    xpos_nbhs = xpos_nbhs, 
+                                    xneg_nbhs = xneg_nbhs, 
+                                    ypos_nbhs = ypos_nbhs, 
+                                    yneg_nbhs = yneg_nbhs)
     return nothing
 end
 
