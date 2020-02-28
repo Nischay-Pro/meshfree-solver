@@ -9,7 +9,7 @@ function readFile(file_name::String, globaldata, defprimal, numPoints)
     splitdata = @view split(data1, "\n")[2:end-1]
     # print(splitdata[1:3])
     @showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
-        itmdata = split(itm, " ")
+        itmdata = split(itm)
         globaldata[idx] = Point(idx,
                     parse(Float64,itmdata[1]),
                     parse(Float64, itmdata[2]),
@@ -19,7 +19,7 @@ function readFile(file_name::String, globaldata, defprimal, numPoints)
                     parse(Int8,itmdata[6]),
                     parse(Float64,itmdata[7]),
                     parse(Int8,itmdata[8]),
-                    parse.(Int, itmdata[9:end-1]),
+                    parse.(Int, itmdata[9:end]),
                     0.0,
                     0.0,
                     copy(defprimal),
@@ -46,7 +46,7 @@ function readFileQuadtree(file_name::String, globaldata, defprimal, numPoints)
     splitdata = @view split(data1, "\n")[2:end-1]
     # print(splitdata[1:3])
     @showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
-    itmdata = split(itm, " ")
+    itmdata = split(itm)
     globaldata[idx] = Point(idx,
                 parse(Float64,itmdata[1]),
                 parse(Float64, itmdata[2]),
@@ -56,7 +56,7 @@ function readFileQuadtree(file_name::String, globaldata, defprimal, numPoints)
                 parse(Int8,itmdata[6]),
                 parse(Float64,itmdata[10]),
                 parse(Int8,itmdata[11]),
-                parse.(Int, itmdata[12:end-1]),
+                parse.(Int, itmdata[12:end]),
                 parse(Float64, itmdata[7]),
                 parse(Float64, itmdata[8]),
                 copy(defprimal),

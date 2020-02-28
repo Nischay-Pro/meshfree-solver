@@ -8,7 +8,7 @@ using Profile
 using ProgressMeter
 using Printf
 # using StaticArrays
-# using StructArrays
+using StructArrays
 using TimerOutputs
 using SpecialFunctions
 # using DelimitedFiles
