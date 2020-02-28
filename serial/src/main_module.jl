@@ -48,8 +48,8 @@ mutable struct Point
     ypos_conn::SArray{Tuple{20},Int32,1,20}
     yneg_conn::SArray{Tuple{20},Int32,1,20}
     delta::Float64
-    max_q::Array{Float64,1}
-    min_q::Array{Float64,1}
+    max_q::SArray{Tuple{4},Float64,1,4}
+    min_q::SArray{Tuple{4},Float64,1,4}
     prim_old::SArray{Tuple{4},Float64,1,4}
 end
 

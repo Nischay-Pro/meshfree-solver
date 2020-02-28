@@ -175,7 +175,7 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
         #     # println("Starting QVar")
         # # end
         @timeit to "q_derv" begin
-            q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf)
+            q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
         end
         @timeit to "q_derv_innerloop" begin
             for inner_iters in 1:3
@@ -212,7 +212,7 @@ function q_variables(globaldata, numPoints, q_result)
     return nothing
 end
 
-function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δq)
+function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δq, max_q, min_q)
     for idx in 1:numPoints
         x_i = globaldata.x[idx]
         y_i = globaldata.y[idx]
@@ -222,8 +222,8 @@ function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δ
         fill!(∑_Δx_Δq, zero(Float64))
         fill!(∑_Δy_Δq, zero(Float64))
 
-        @. globaldata.max_q[idx] = globaldata.q[idx]
-        @. globaldata.min_q[idx] = globaldata.q[idx]
+        @. max_q = globaldata.q[idx]
+        @. min_q = globaldata.q[idx]
 
         for conn in globaldata.conn[idx]
             if conn == zero(Float64)
@@ -245,14 +245,16 @@ function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δ
             end
 
             for i in 1:4
-                if globaldata.max_q[idx][i] < globaldata.q[conn][i]
-                    globaldata.max_q[idx][i] = globaldata.q[conn][i]
+                if max_q[i] < globaldata.q[conn][i]
+                    max_q[i] = globaldata.q[conn][i]
                 end
-                if globaldata.min_q[idx][i] > globaldata.q[conn][i]
-                    globaldata.min_q[idx][i] = globaldata.q[conn][i]
+                if min_q[i] > globaldata.q[conn][i]
+                    min_q[i] = globaldata.q[conn][i]
                 end
             end
         end
+        globaldata.max_q[idx] = SVector{4}(max_q)
+        globaldata.min_q[idx] = SVector{4}(min_q)
         q_var_derivatives_update(globaldata.dq1[idx], globaldata.dq2[idx], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq)
     end
     return nothing

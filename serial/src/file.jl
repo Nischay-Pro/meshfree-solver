@@ -38,8 +38,8 @@ function readFile(file_name::String, globaldata, defprimal, numPoints)
                     SVector{20}([zero(Int32) for iter in 1:20]), 
                     SVector{20}([zero(Int32) for iter in 1:20]), 
                     0.0, 
-                    zeros(Float64, 4), 
-                    zeros(Float64, 4), 
+                    SVector{4}([zero(Float64) for iter in 1:4]), 
+                    SVector{4}([zero(Float64) for iter in 1:4]), 
                     SVector{4}([zero(Float64) for iter in 1:4]))
 
     end
@@ -80,8 +80,8 @@ function readFileQuadtree(file_name::String, globaldata, defprimal, numPoints)
                     SVector{20}([zero(Int32) for iter in 1:20]), 
                     SVector{20}([zero(Int32) for iter in 1:20]), 
                     0.0, 
-                    zeros(Float64, 4), 
-                    zeros(Float64, 4), 
+                    SVector{4}([zero(Float64) for iter in 1:4]), 
+                    SVector{4}([zero(Float64) for iter in 1:4]), 
                     SVector{4}([zero(Float64) for iter in 1:4]))
     end
 return nothing
