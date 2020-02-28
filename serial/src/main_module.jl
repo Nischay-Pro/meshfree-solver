@@ -8,6 +8,7 @@ module main_module
 # using Profile
 using ProgressMeter
 using Printf
+using Setfield
 using StaticArrays
 using StructArrays
 using TimerOutputs
@@ -36,8 +37,8 @@ mutable struct Point
     # Size 4 (Pressure, vx, vy, density) x numberpts
     q::SArray{Tuple{4},Float64,1,4}
     # Size 2(x,y) 4(Pressure, vx, vy, density) numberpts
-    dq1::Array{Float64,1}
-    dq2::Array{Float64,1}
+    dq1::SArray{Tuple{4},Float64,1,4}
+    dq2::SArray{Tuple{4},Float64,1,4}
     entropy::Float64
     xpos_nbhs::Int8
     xneg_nbhs::Int8

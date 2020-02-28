@@ -255,17 +255,19 @@ function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δ
         end
         globaldata.max_q[idx] = SVector{4}(max_q)
         globaldata.min_q[idx] = SVector{4}(min_q)
-        q_var_derivatives_update(globaldata.dq1[idx], globaldata.dq2[idx], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq)
+        q_var_derivatives_update(globaldata.dq1[idx], globaldata.dq2[idx], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq, max_q, min_q)
+        globaldata.dq1[idx] = SVector{4}(max_q)
+        globaldata.dq2[idx] = SVector{4}(min_q)
     end
     return nothing
 end
 
-@inline function q_var_derivatives_update(dq1, dq2, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq)
+@inline function q_var_derivatives_update(dq1, dq2, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq, dq1_store, dq2_store)
     det = (∑_Δx_sqr * ∑_Δy_sqr) - (∑_Δx_Δy * ∑_Δx_Δy)
     one_by_det = 1.0 / det
     for iter in 1:4
-        dq1[iter] = one_by_det * (∑_Δx_Δq[iter] * ∑_Δy_sqr - ∑_Δy_Δq[iter] * ∑_Δx_Δy)
-        dq2[iter] = one_by_det * (∑_Δy_Δq[iter] * ∑_Δx_sqr - ∑_Δx_Δq[iter] * ∑_Δx_Δy)
+        dq1_store[iter] = one_by_det * (∑_Δx_Δq[iter] * ∑_Δy_sqr - ∑_Δy_Δq[iter] * ∑_Δx_Δy)
+        dq2_store[iter] = one_by_det * (∑_Δy_Δq[iter] * ∑_Δx_sqr - ∑_Δx_Δq[iter] * ∑_Δx_Δy)
     end
     return nothing
 end
@@ -303,7 +305,9 @@ function q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_�
         end 
     end
     for idx in 1:numPoints
-        q_var_derivatives_update_innerloop(globaldata.dq1[idx], globaldata.dq2[idx], idx, tempdq)
+        q_var_derivatives_update_innerloop(qi_tilde, qk_tilde, idx, tempdq)
+        globaldata.dq1[idx] = SVector{4}(qi_tilde)
+        globaldata.dq2[idx] = SVector{4}(qk_tilde)
     end
     return nothing
 end
