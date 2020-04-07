@@ -2,8 +2,11 @@ __precompile__()
 
 module main_module
 
+using BenchmarkTools
 # using Cthulhu
-using CuArrays
+# using CuArrays
+# using CUDAnative
+using GPUifyLoops
 # using LoopVectorization
 # using Profile
 using ProgressMeter

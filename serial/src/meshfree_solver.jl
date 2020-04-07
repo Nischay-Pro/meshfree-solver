@@ -44,10 +44,24 @@ function main()
     main_store[62] = calculateTheta(configData)::Float64
 
     globaldata = StructArray(globaldata)
+    # println(typeof(globaldata))
+    # println(typeof(globaldata.prim))
     # println(isbits(globaldata[1]))
     # println(isbits(globaldata.prim))
     # println(isbits(globaldata))
+    # data = rand(Float32, 134217728)
+    # @timeit to "transfer time" begin
+    #     CuArray(data)
+    #     gpu_data = CuArray(globaldata.prim)
+    #     time = @belapsed unsafe_copyto!($(pointer(gpu_data)), $(pointer(globaldata.prim)), $(numPoints))
+    #     println(time)
+    #     println(Base.format_bytes(sizeof(globaldata.prim) / time) * "/s")
+    # end
+    # println(typeof(globaldata))
     # replace_storage(CuArray, globaldata)
+    # println(typeof(globaldata))
+    # replace_storage(Array, globaldata)
+    # println(typeof(globaldata))
 
     println(max_iters + 1)
     function run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)

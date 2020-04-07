@@ -20,25 +20,33 @@ function interior_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result
         if conn == zero(Float64)
             break
         end
+        # @timeit to "struct stats" begin
+            Δx, Δy, Δs_weights, Δn_weights, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy = connectivity_stats(x_i, y_i, nx, ny, power, globaldata.x[conn], globaldata.y[conn], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy)
+        # end
 
-        Δx, Δy, Δs_weights, Δn_weights, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy = connectivity_stats(x_i, y_i, nx, ny, power, globaldata.x[conn], globaldata.y[conn], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy)
+        # @timeit to "qtilde" begin
+            calculate_qtile(qtilde_i, qtilde_k, globaldata, idx, conn, Δx, Δy, vl_const, gamma, limiter_flag, phi_i, phi_k)
+        # end 
         
-        calculate_qtile(qtilde_i, qtilde_k, globaldata, idx, conn, Δx, Δy, vl_const, gamma, limiter_flag, phi_i, phi_k)
-        
-        qtilde_to_primitive(result, qtilde_i, gamma)
-        flux_Gxp(G_i, nx, ny, result[1], result[2], result[3], result[4])
-        
-        qtilde_to_primitive(result, qtilde_k, gamma)
-        flux_Gxp(G_k, nx, ny, result[1], result[2], result[3], result[4])
-        
-        update_delf(∑_Δx_Δf, ∑_Δy_Δf, G_k, G_i, Δs_weights, Δn_weights)
-        
+        # @timeit to "prim and flux" begin
+            qtilde_to_primitive(result, qtilde_i, gamma)
+            flux_Gxp(G_i, nx, ny, result[1], result[2], result[3], result[4])
+
+            qtilde_to_primitive(result, qtilde_k, gamma)
+            flux_Gxp(G_k, nx, ny, result[1], result[2], result[3], result[4])
+        # end
+
+        # @timeit to "delf" begin
+            update_delf(∑_Δx_Δf, ∑_Δy_Δf, G_k, G_i, Δs_weights, Δn_weights)
+        # end
     end
+    # @timeit to "final" begin
     det = ∑_Δx_sqr*∑_Δy_sqr - ∑_Δx_Δy*∑_Δx_Δy
     one_by_det = one(Float64) / det
     for iter in 1:4
         Gxp[iter] = (∑_Δx_Δf[iter]*∑_Δy_sqr - ∑_Δy_Δf[iter]*∑_Δx_Δy)*one_by_det
     end
+    # end
     return nothing
 end
 

@@ -178,10 +178,9 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
         @timeit to "q_var" begin
             q_variables(globaldata, numPoints, result)
         end
-        # # println("=========")
-        # # if iter == 1
-        #     # println("Starting QVar")
-        # # end
+
+        # temp = CuArray(globaldata.prim)
+        # globaldata.prim .= Array(temp)
         @timeit to "q_derv" begin
             q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
         end
@@ -248,8 +247,9 @@ function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δ
             ∑_Δx_Δy += (Δx * Δy) * weights
 
             for iter in 1:4
-                ∑_Δx_Δq[iter] += weights * Δx * (globaldata.q[conn][iter] - globaldata.q[idx][iter])
-                ∑_Δy_Δq[iter] += weights * Δy * (globaldata.q[conn][iter] - globaldata.q[idx][iter])
+                intermediate_var = weights * (globaldata.q[conn][iter] - globaldata.q[idx][iter])
+                ∑_Δx_Δq[iter] += Δx * intermediate_var
+                ∑_Δy_Δq[iter] += Δy * intermediate_var
             end
 
             for i in 1:4
@@ -263,14 +263,14 @@ function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δ
         end
         globaldata.max_q[idx] = SVector{4}(max_q)
         globaldata.min_q[idx] = SVector{4}(min_q)
-        q_var_derivatives_update(globaldata.dq1[idx], globaldata.dq2[idx], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq, max_q, min_q)
+        q_var_derivatives_update(∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq, max_q, min_q)
         globaldata.dq1[idx] = SVector{4}(max_q)
         globaldata.dq2[idx] = SVector{4}(min_q)
     end
     return nothing
 end
 
-@inline function q_var_derivatives_update(dq1, dq2, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq, dq1_store, dq2_store)
+@inline function q_var_derivatives_update(∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq, dq1_store, dq2_store)
     det = (∑_Δx_sqr * ∑_Δy_sqr) - (∑_Δx_Δy * ∑_Δx_Δy)
     one_by_det = 1.0 / det
     for iter in 1:4
@@ -325,8 +325,9 @@ end
         qi_tilde[iter] = globaldata.q[idx][iter] - 0.5 * (Δx * globaldata.dq1[idx][iter] + Δy * globaldata.dq2[idx][iter])
         qk_tilde[iter] = globaldata.q[conn][iter] - 0.5 * (Δx * globaldata.dq1[conn][iter] + Δy * globaldata.dq2[conn][iter])
 
-        ∑_Δx_Δq[iter] += weights * Δx * (qk_tilde[iter] - qi_tilde[iter])
-        ∑_Δy_Δq[iter] += weights * Δy * (qk_tilde[iter] - qi_tilde[iter])
+        intermediate_var = weights * (qk_tilde[iter] - qi_tilde[iter])
+        ∑_Δx_Δq[iter] += Δx * intermediate_var
+        ∑_Δy_Δq[iter] += Δy * intermediate_var
     end
     return nothing
 end
