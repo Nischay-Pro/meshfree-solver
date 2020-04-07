@@ -31,9 +31,9 @@ function placeNormals(globaldata, idx, configData, interior, wall, outer)
         rightpt = globaldata[idx].right
         rightpt = getxy(globaldata[rightpt])
         normals = calculateNormals(leftpt, rightpt, currpt[1], currpt[2])
-        setNormals(globaldata[idx], normals)
+        setNormals(globaldata, idx, normals)
     elseif flag == interior
-        setNormals(globaldata[idx], (0,1))
+        setNormals(globaldata, idx, (0,1))
     else
         @warn "Illegal Point Type"
     end
@@ -72,12 +72,21 @@ function calculateConnectivity(globaldata, idx)
 
     flag = ptInterest.flag_1
 
-    xpos_conn,xneg_conn,ypos_conn,yneg_conn = Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0), Array{Int32,1}(undef, 0)
-
     tx = ny
     ty = -nx
+    xpos_nbhs = 0
+    xneg_nbhs = 0
+    ypos_nbhs = 0
+    yneg_nbhs = 0
+    xpos_conn = SVector{20}([zero(Float64) for iter in 1:20])
+    xneg_conn = SVector{20}([zero(Float64) for iter in 1:20])
+    yneg_conn = SVector{20}([zero(Float64) for iter in 1:20])
+    ypos_conn = SVector{20}([zero(Float64) for iter in 1:20])
 
     for itm in ptInterest.conn
+        if itm == zero(Float64)
+            break
+        end
         itmx = globaldata[itm].x
         itmy = globaldata[itm].y
 
@@ -87,32 +96,39 @@ function calculateConnectivity(globaldata, idx)
         Δs = Δx*tx + Δy*ty
         Δn = Δx*nx + Δy*ny
         if Δs <= 0.0
-            push!(xpos_conn, itm)
+            xpos_nbhs += 1
+            xpos_conn = setindex(xpos_conn, itm, xpos_nbhs)
         end
         if Δs >= 0.0
-            push!(xneg_conn, itm)
+            xneg_nbhs += 1
+            xneg_conn = setindex(xneg_conn, itm, xneg_nbhs)
         end
         if flag == 1
             if Δn <= 0.0
-                push!(ypos_conn, itm)
+                ypos_nbhs += 1
+                ypos_conn = setindex(ypos_conn, itm, ypos_nbhs)
             end
             if Δn >= 0.0
-                push!(yneg_conn, itm)
+                yneg_nbhs += 1
+                yneg_conn = setindex(yneg_conn, itm, yneg_nbhs)
             end
         elseif flag == 0
-            push!(yneg_conn, itm)
+            yneg_nbhs += 1
+            yneg_conn = setindex(yneg_conn, itm, yneg_nbhs)
         elseif flag == 2
-            push!(ypos_conn, itm)
+            ypos_nbhs += 1
+            ypos_conn = setindex(ypos_conn, itm, ypos_nbhs)
         end
     end
-    ptInterest.xpos_conn = xpos_conn
-    ptInterest.xpos_nbhs = length(xpos_conn)
-    ptInterest.xneg_conn = xneg_conn
-    ptInterest.xneg_nbhs = length(xneg_conn)
-    ptInterest.ypos_conn = ypos_conn
-    ptInterest.ypos_nbhs = length(ypos_conn)
-    ptInterest.yneg_conn = yneg_conn
-    ptInterest.yneg_nbhs = length(yneg_conn)
+    globaldata[idx] = setproperties(globaldata[idx], 
+                                    xpos_conn = xpos_conn,
+                                    xneg_conn = xneg_conn,
+                                    yneg_conn = yneg_conn,
+                                    ypos_conn = ypos_conn, 
+                                    xpos_nbhs = xpos_nbhs, 
+                                    xneg_nbhs = xneg_nbhs, 
+                                    ypos_nbhs = ypos_nbhs, 
+                                    yneg_nbhs = yneg_nbhs)
     return nothing
 end
 
@@ -160,14 +176,13 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
 
     for rk in 1:4
         @timeit to "q_var" begin
-            q_variables(globaldata, numPoints)
+            q_variables(globaldata, numPoints, result)
         end
-        # # println("=========")
-        # # if iter == 1
-        #     # println("Starting QVar")
-        # # end
+
+        # temp = CuArray(globaldata.prim)
+        # globaldata.prim .= Array(temp)
         @timeit to "q_derv" begin
-            q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf)
+            q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
         end
         @timeit to "q_derv_innerloop" begin
             for inner_iters in 1:3
@@ -187,22 +202,24 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
     return nothing
 end
 
-function q_variables(globaldata, numPoints)
+function q_variables(globaldata, numPoints, q_result)
     for idx in 1:numPoints
-        rho, u1, u2, pr = globaldata.prim[idx]
-
-        itm = globaldata.q[idx]
+        rho = globaldata.prim[idx][1]
+        u1 = globaldata.prim[idx][2]
+        u2 = globaldata.prim[idx][3]
+        pr = globaldata.prim[idx][4]
         beta = 0.5 * (rho / pr)
-        itm[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
         two_times_beta = 2.0 * beta
-        itm[2] = (two_times_beta * u1)
-        itm[3] = (two_times_beta * u2)
-        itm[4] = -two_times_beta
+        q_result[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
+        q_result[2] = (two_times_beta * u1)
+        q_result[3] = (two_times_beta * u2)
+        q_result[4] = -two_times_beta
+        globaldata.q[idx] = SVector{4}(q_result)
     end
     return nothing
 end
 
-function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δq)
+function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δq, max_q, min_q)
     for idx in 1:numPoints
         x_i = globaldata.x[idx]
         y_i = globaldata.y[idx]
@@ -212,10 +229,13 @@ function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δ
         fill!(∑_Δx_Δq, zero(Float64))
         fill!(∑_Δy_Δq, zero(Float64))
 
-        @. globaldata.max_q[idx] = globaldata.q[idx]
-        @. globaldata.min_q[idx] = globaldata.q[idx]
+        @. max_q = globaldata.q[idx]
+        @. min_q = globaldata.q[idx]
 
         for conn in globaldata.conn[idx]
+            if conn == zero(Float64)
+                break
+            end
             x_k = globaldata.x[conn]
             y_k = globaldata.y[conn]
             Δx = x_k - x_i
@@ -227,30 +247,35 @@ function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δ
             ∑_Δx_Δy += (Δx * Δy) * weights
 
             for iter in 1:4
-                ∑_Δx_Δq[iter] += weights * Δx * (globaldata.q[conn][iter] - globaldata.q[idx][iter])
-                ∑_Δy_Δq[iter] += weights * Δy * (globaldata.q[conn][iter] - globaldata.q[idx][iter])
+                intermediate_var = weights * (globaldata.q[conn][iter] - globaldata.q[idx][iter])
+                ∑_Δx_Δq[iter] += Δx * intermediate_var
+                ∑_Δy_Δq[iter] += Δy * intermediate_var
             end
 
             for i in 1:4
-                if globaldata.max_q[idx][i] < globaldata.q[conn][i]
-                    globaldata.max_q[idx][i] = globaldata.q[conn][i]
+                if max_q[i] < globaldata.q[conn][i]
+                    max_q[i] = globaldata.q[conn][i]
                 end
-                if globaldata.min_q[idx][i] > globaldata.q[conn][i]
-                    globaldata.min_q[idx][i] = globaldata.q[conn][i]
+                if min_q[i] > globaldata.q[conn][i]
+                    min_q[i] = globaldata.q[conn][i]
                 end
             end
         end
-        q_var_derivatives_update(globaldata.dq1[idx], globaldata.dq2[idx], ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq)
+        globaldata.max_q[idx] = SVector{4}(max_q)
+        globaldata.min_q[idx] = SVector{4}(min_q)
+        q_var_derivatives_update(∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq, max_q, min_q)
+        globaldata.dq1[idx] = SVector{4}(max_q)
+        globaldata.dq2[idx] = SVector{4}(min_q)
     end
     return nothing
 end
 
-@inline function q_var_derivatives_update(dq1, dq2, ∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq)
+@inline function q_var_derivatives_update(∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq, dq1_store, dq2_store)
     det = (∑_Δx_sqr * ∑_Δy_sqr) - (∑_Δx_Δy * ∑_Δx_Δy)
     one_by_det = 1.0 / det
     for iter in 1:4
-        dq1[iter] = one_by_det * (∑_Δx_Δq[iter] * ∑_Δy_sqr - ∑_Δy_Δq[iter] * ∑_Δx_Δy)
-        dq2[iter] = one_by_det * (∑_Δy_Δq[iter] * ∑_Δx_sqr - ∑_Δx_Δq[iter] * ∑_Δx_Δy)
+        dq1_store[iter] = one_by_det * (∑_Δx_Δq[iter] * ∑_Δy_sqr - ∑_Δy_Δq[iter] * ∑_Δx_Δy)
+        dq2_store[iter] = one_by_det * (∑_Δy_Δq[iter] * ∑_Δx_sqr - ∑_Δx_Δq[iter] * ∑_Δx_Δy)
     end
     return nothing
 end
@@ -265,6 +290,9 @@ function q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_�
         fill!(∑_Δx_Δq, zero(Float64))
         fill!(∑_Δy_Δq, zero(Float64))
         for conn in globaldata.conn[idx]
+            if conn == zero(Float64)
+                break
+            end
             x_k = globaldata.x[conn]
             y_k = globaldata.y[conn]
             Δx = x_k - x_i
@@ -285,7 +313,9 @@ function q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_�
         end 
     end
     for idx in 1:numPoints
-        q_var_derivatives_update_innerloop(globaldata.dq1[idx], globaldata.dq2[idx], idx, tempdq)
+        q_var_derivatives_update_innerloop(qi_tilde, qk_tilde, idx, tempdq)
+        globaldata.dq1[idx] = SVector{4}(qi_tilde)
+        globaldata.dq2[idx] = SVector{4}(qk_tilde)
     end
     return nothing
 end
@@ -295,8 +325,9 @@ end
         qi_tilde[iter] = globaldata.q[idx][iter] - 0.5 * (Δx * globaldata.dq1[idx][iter] + Δy * globaldata.dq2[idx][iter])
         qk_tilde[iter] = globaldata.q[conn][iter] - 0.5 * (Δx * globaldata.dq1[conn][iter] + Δy * globaldata.dq2[conn][iter])
 
-        ∑_Δx_Δq[iter] += weights * Δx * (qk_tilde[iter] - qi_tilde[iter])
-        ∑_Δy_Δq[iter] += weights * Δy * (qk_tilde[iter] - qi_tilde[iter])
+        intermediate_var = weights * (qk_tilde[iter] - qi_tilde[iter])
+        ∑_Δx_Δq[iter] += Δx * intermediate_var
+        ∑_Δy_Δq[iter] += Δy * intermediate_var
     end
     return nothing
 end
