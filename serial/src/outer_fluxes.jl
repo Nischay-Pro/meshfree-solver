@@ -17,7 +17,7 @@ function outer_dGx_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
     ty = -nx
     
     for conn in globaldata.xpos_conn[idx]
-        if conn == 0
+        if conn == zero(Float64)
             break
         end        
 
@@ -62,7 +62,7 @@ function outer_dGx_neg(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
     ty = -nx
     
     for conn in globaldata.xneg_conn[idx]
-        if conn == 0
+        if conn == zero(Float64)
             break
         end        
 
@@ -105,7 +105,7 @@ function outer_dGy_pos(globaldata, idx, gamma, phi_i, phi_k, G_i, G_k, result, q
     ty = -nx
     
     for conn in globaldata.ypos_conn[idx]
-        if conn == 0
+        if conn == zero(Float64)
             break
         end        
 

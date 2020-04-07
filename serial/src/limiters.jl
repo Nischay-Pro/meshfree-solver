@@ -1,7 +1,7 @@
 function venkat_limiter(qtilde, vl_const, globaldata, index, gamma, phi)
     ds = globaldata.short_distance[index]
     epsi = vl_const * ds
-    epsi = epsi ^ 3
+    epsi = epsi * epsi * epsi
     del_pos = zero(Float64)
     del_neg = zero(Float64)
     VLBroadcaster(globaldata.q[index], qtilde, globaldata.max_q[index], globaldata.min_q[index], phi, epsi, del_pos, del_neg)
@@ -12,11 +12,11 @@ function VLBroadcaster(q, qtilde, max_q, min_q, phi, epsi, del_pos, del_neg)
     for i in 1:4
         del_neg = qtilde[i] - q[i]
         if abs(del_neg) <= 1e-5
-            phi[i] = 1.0
+            phi[i] = one(Float64)
         elseif abs(del_neg) > 1e-5
-            if del_neg > 0.0
+            if del_neg > zero(Float64)
                 del_pos = max_q[i] - q[i]
-            elseif del_neg < 0.0
+            elseif del_neg < zero(Float64)
                 del_pos = min_q[i] - q[i]
             end
             num = (del_pos*del_pos) + (epsi*epsi)
@@ -27,10 +27,10 @@ function VLBroadcaster(q, qtilde, max_q, min_q, phi, epsi, del_pos, del_neg)
             den = den*del_neg
 
             temp = num/den
-            if temp < 1.0
+            if temp < one(Float64)
                 phi[i] = temp
             else
-                phi[i] = 1.0
+                phi[i] = one(Float64)
             end
         end
     end
@@ -107,8 +107,9 @@ end
 
 @inline function update_delf(∑_Δx_Δf, ∑_Δy_Δf, G_k, G_i, Δs_weights, Δn_weights)
     for iter in 1:4
-        ∑_Δx_Δf[iter] += (G_k[iter] - G_i[iter]) * Δs_weights
-        ∑_Δy_Δf[iter] += (G_k[iter] - G_i[iter]) * Δn_weights
+        intermediate_var = G_k[iter] - G_i[iter]
+        ∑_Δx_Δf[iter] += intermediate_var * Δs_weights
+        ∑_Δy_Δf[iter] += intermediate_var * Δn_weights
     end
     return nothing
 end

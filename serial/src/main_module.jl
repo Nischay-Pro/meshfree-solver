@@ -2,21 +2,26 @@ __precompile__()
 
 module main_module
 
+using BenchmarkTools
 # using Cthulhu
 # using CuArrays
-using Profile
+# using CUDAnative
+# using GPUifyLoops
+# using LoopVectorization
+# using Profile
 using ProgressMeter
 using Printf
-# using StaticArrays
+using Setfield
+using StaticArrays
 using StructArrays
 using TimerOutputs
 using SpecialFunctions
 # using DelimitedFiles
-using Traceur
+# using Traceur
 
 const to = TimerOutput()
 
-mutable struct Point
+struct Point
     localID::Int32
     x::Float64
     y::Float64
@@ -26,30 +31,30 @@ mutable struct Point
     flag_2::Int8
     short_distance::Float64
     nbhs::Int8
-    conn::Array{Int32,1}
+    conn::SArray{Tuple{20},Int32,1,20}
     nx::Float64
     ny::Float64
     # Size 4 (Pressure, vx, vy, density) x numberpts
-    prim::Array{Float64,1}
-    flux_res::Array{Float64,1}
+    prim::SArray{Tuple{4},Float64,1,4}
+    flux_res::SArray{Tuple{4},Float64,1,4}
     # Size 4 (Pressure, vx, vy, density) x numberpts
-    q::Array{Float64,1}
+    q::SArray{Tuple{4},Float64,1,4}
     # Size 2(x,y) 4(Pressure, vx, vy, density) numberpts
-    dq1::Array{Float64,1}
-    dq2::Array{Float64,1}
+    dq1::SArray{Tuple{4},Float64,1,4}
+    dq2::SArray{Tuple{4},Float64,1,4}
     entropy::Float64
     xpos_nbhs::Int8
     xneg_nbhs::Int8
     ypos_nbhs::Int8
     yneg_nbhs::Int8
-    xpos_conn::Array{Int32,1}
-    xneg_conn::Array{Int32,1}
-    ypos_conn::Array{Int32,1}
-    yneg_conn::Array{Int32,1}
+    xpos_conn::SArray{Tuple{20},Int32,1,20}
+    xneg_conn::SArray{Tuple{20},Int32,1,20}
+    ypos_conn::SArray{Tuple{20},Int32,1,20}
+    yneg_conn::SArray{Tuple{20},Int32,1,20}
     delta::Float64
-    max_q::Array{Float64,1}
-    min_q::Array{Float64,1}
-    prim_old::Array{Float64,1}
+    max_q::SArray{Tuple{4},Float64,1,4}
+    min_q::SArray{Tuple{4},Float64,1,4}
+    prim_old::SArray{Tuple{4},Float64,1,4}
 end
 
 include("config.jl")

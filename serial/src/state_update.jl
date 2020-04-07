@@ -2,7 +2,7 @@ function func_delta(globaldata, numPoints, cfl)
     for idx in 1:numPoints
         min_delt = one(Float64)
         for conn in globaldata.conn[idx]
-            if conn == 0
+            if conn == zero(Float64)
                 break
             end
             x_i = globaldata.x[idx]
@@ -18,7 +18,7 @@ function func_delta(globaldata, numPoints, cfl)
             end
         end
         globaldata.delta[idx] = min_delt
-        @. globaldata.prim_old[idx] = globaldata.prim[idx]
+        globaldata.prim_old[idx] = SVector{4}(globaldata.prim[idx])
     end
     return nothing
 end
@@ -71,7 +71,7 @@ function state_update_wall(globaldata, idx, max_res, ∑_res_sqr, U, Uold, rk)
     ny = globaldata.ny[idx]
 
     primitive_to_conserved(globaldata.prim[idx], nx, ny, U)
-    primitive_to_conserved_old(globaldata.prim_old[idx], nx, ny, Uold)
+    primitive_to_conserved(globaldata.prim_old[idx], nx, ny, Uold)
 
     temp = U[1]
     for iter in 1:4
@@ -90,11 +90,12 @@ function state_update_wall(globaldata, idx, max_res, ∑_res_sqr, U, Uold, rk)
     res_sqr = (U[1] - temp)*(U[1] - temp)
 
     ∑_res_sqr[1] += res_sqr
-    globaldata.prim[idx][1] = U[1]
+    Uold[1] = U[1]
     temp = 1.0 / U[1]
-    globaldata.prim[idx][2] = U[2]*temp
-    globaldata.prim[idx][3] = U[3]*temp
-    globaldata.prim[idx][4] = (0.4*U[4]) - ((0.2 * temp) * (U[2] * U[2] + U[3] * U[3]))
+    Uold[2] = U[2]*temp
+    Uold[3] = U[3]*temp
+    Uold[4] = (0.4*U[4]) - ((0.2 * temp) * (U[2] * U[2] + U[3] * U[3]))
+    globaldata.prim[idx] = SVector{4}(Uold)
     return nothing
 end
 
@@ -102,7 +103,7 @@ function state_update_outer(globaldata, idx, Mach, gamma, pr_inf, rho_inf, theta
     nx = globaldata.nx[idx]
     ny = globaldata.ny[idx]
     conserved_vector_Ubar(globaldata.prim[idx], nx, ny, Mach, gamma, pr_inf, rho_inf, theta, U)
-    conserved_vector_Ubar_old(globaldata.prim_old[idx], nx, ny, Mach, gamma, pr_inf, rho_inf, theta, Uold)
+    conserved_vector_Ubar(globaldata.prim_old[idx], nx, ny, Mach, gamma, pr_inf, rho_inf, theta, Uold)
     temp = U[1]
     for iter in 1:4
         U[iter] = U[iter] - 0.5 * globaldata.delta[idx][iter] * globaldata.flux_res[idx][iter]
@@ -116,11 +117,12 @@ function state_update_outer(globaldata, idx, Mach, gamma, pr_inf, rho_inf, theta
     U3_rot = U[3]
     U[2] = U2_rot*ny + U3_rot*nx
     U[3] = U3_rot*ny - U2_rot*nx
-    globaldata.prim[idx][1] = U[1]
+    Uold[1] = U[1]
     temp = 1.0 / U[1]
-    globaldata.prim[idx][2] = U[2]*temp
-    globaldata.prim[idx][3] = U[3]*temp
-    globaldata.prim[idx][4] = (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
+    Uold[2] = U[2]*temp
+    Uold[3] = U[3]*temp
+    Uold[4] = (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
+    globaldata.prim[idx] = SVector{4}(Uold)
     return nothing
 end
 
@@ -128,7 +130,7 @@ function state_update_interior(globaldata, idx, max_res, ∑_res_sqr, U, Uold, r
     nx = globaldata.nx[idx]
     ny = globaldata.ny[idx]
     primitive_to_conserved(globaldata.prim[idx], nx, ny, U)
-    primitive_to_conserved_old(globaldata.prim_old[idx], nx, ny, Uold)
+    primitive_to_conserved(globaldata.prim_old[idx], nx, ny, Uold)
 
     temp = U[1]
     for iter in 1:4
@@ -147,34 +149,23 @@ function state_update_interior(globaldata, idx, max_res, ∑_res_sqr, U, Uold, r
 
     ∑_res_sqr[1] += res_sqr
 
-    globaldata.prim[idx][1] = U[1]
+    Uold[1] = U[1]
     temp = 1.0 / U[1]
-    globaldata.prim[idx][2] = U[2]*temp
-    globaldata.prim[idx][3] = U[3]*temp
-    globaldata.prim[idx][4] = (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
+    Uold[2] = U[2]*temp
+    Uold[3] = U[3]*temp
+    Uold[4] = (0.4*U[4]) - (0.2*temp)*(U[2]*U[2] + U[3]*U[3])
+    globaldata.prim[idx] = SVector{4}(Uold)
     return nothing
 end
 
 @inline function primitive_to_conserved(globaldata_prim, nx, ny, U)
     rho = globaldata_prim[1]
     U[1] = rho
-    temp1::Float64 = rho * globaldata_prim[2]
-    temp2::Float64 = rho * globaldata_prim[3]
+    temp1 = rho * globaldata_prim[2]
+    temp2 = rho * globaldata_prim[3]
     U[2] = temp1*ny - temp2*nx
     U[3] = temp1*nx + temp2*ny
     U[4] = 2.5*globaldata_prim[4] + 0.5*(temp1*temp1 + temp2*temp2)/rho
-    return nothing
-end
-
-@inline function primitive_to_conserved_old(globaldata_prim_old, nx, ny, U)
-
-    rho = globaldata_prim_old[1]
-    U[1] = rho
-    temp1 = rho * globaldata_prim_old[2]
-    temp2 = rho * globaldata_prim_old[3]
-    U[2] = temp1*ny - temp2*nx
-    U[3] = temp1*nx + temp2*ny
-    U[4] = 2.5*globaldata_prim_old[4] + 0.5*(temp1*temp1 + temp2*temp2)/rho
     return nothing
 end
 
@@ -200,55 +191,6 @@ end
     u1 = globaldata_prim[2]
     u2 = globaldata_prim[3]
     pr = globaldata_prim[4]
-
-    u1_rot = u1*tx + u2*ty
-    u2_rot = u1*nx + u2*ny
-
-    temp1 = (u1_rot*u1_rot + u2_rot*u2_rot)
-    e = (pr/(rho*(gamma-1))) + 0.5*(temp1)
-
-    beta = (rho)/(2*pr)
-    S2 = u2_rot*sqrt(beta)
-    B2 = exp(-S2*S2)/(2*sqrt(Float64(pi)*beta))
-    A2p = 0.5*(1 + SpecialFunctions.erf(S2))
-
-    Ubar[1] = (rho_inf*A2n_inf) + (rho*A2p)
-
-    Ubar[2] = (rho_inf*u1_inf_rot*A2n_inf) + (rho*u1_rot*A2p)
-
-    temp1 = rho_inf*(u2_inf_rot*A2n_inf - B2_inf)
-    temp2 = rho*(u2_rot*A2p + B2)
-    Ubar[3] = (temp1 + temp2)
-
-    temp1 = (rho_inf*A2n_inf* e_inf - 0.5*rho_inf*u2_inf_rot*B2_inf)
-    temp2 = (rho*A2p*e + 0.5*rho*u2_rot*B2)
-
-    Ubar[4] = (temp1 + temp2)
-    return nothing
-end
-
-@inline function conserved_vector_Ubar_old(globaldata_prim_old, nx, ny, Mach, gamma, pr_inf, rho_inf, theta, Ubar)
-    u1_inf = Mach*cos(theta)
-    u2_inf = Mach*sin(theta)
-
-    tx = ny
-    ty = -nx
-
-    u1_inf_rot = u1_inf*tx + u2_inf*ty
-    u2_inf_rot = u1_inf*nx + u2_inf*ny
-
-    temp1 = (u1_inf_rot * u1_inf_rot + u2_inf_rot*u2_inf_rot)
-    e_inf = (pr_inf/(rho_inf*(gamma-1))) + 0.5 * (temp1)
-
-    beta = (0.5 * rho_inf)/pr_inf
-    S2 = u2_inf_rot * sqrt(beta)
-    B2_inf = exp(-S2*S2)/(2*sqrt(Float64(pi)*beta))
-    A2n_inf = 0.5 * (1 - SpecialFunctions.erf(S2))
-
-    rho = globaldata_prim_old[1]
-    u1 = globaldata_prim_old[2]
-    u2 = globaldata_prim_old[3]
-    pr = globaldata_prim_old[4]
 
     u1_rot = u1*tx + u2*ty
     u2_rot = u1*nx + u2*ny
