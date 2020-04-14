@@ -75,7 +75,7 @@ function state_update_wall(globaldata, idx, max_res, ∑_res_sqr, U, Uold, rk)
 
     temp = U[1]
     for iter in 1:4
-        U[iter] = U[iter] - 0.5 * globaldata.delta[idx][iter] * globaldata.flux_res[idx][iter]
+        U[iter] = U[iter] - 0.5 * globaldata.delta[idx] * globaldata.flux_res[idx][iter]
     end
     if rk == 3
         for iter in 1:4
@@ -106,7 +106,7 @@ function state_update_outer(globaldata, idx, Mach, gamma, pr_inf, rho_inf, theta
     conserved_vector_Ubar(globaldata.prim_old[idx], nx, ny, Mach, gamma, pr_inf, rho_inf, theta, Uold)
     temp = U[1]
     for iter in 1:4
-        U[iter] = U[iter] - 0.5 * globaldata.delta[idx][iter] * globaldata.flux_res[idx][iter]
+        U[iter] = U[iter] - 0.5 * globaldata.delta[idx] * globaldata.flux_res[idx][iter]
     end
     if rk == 3
         for iter in 1:4
@@ -134,7 +134,7 @@ function state_update_interior(globaldata, idx, max_res, ∑_res_sqr, U, Uold, r
 
     temp = U[1]
     for iter in 1:4
-        U[iter] = U[iter] - 0.5 * globaldata.delta[idx][iter] * globaldata.flux_res[idx][iter]
+        U[iter] = U[iter] - 0.5 * globaldata.delta[idx] * globaldata.flux_res[idx][iter]
     end
     if rk == 3
         for iter in 1:4
