@@ -13,6 +13,7 @@ using MPI
 using ProgressMeter
 using Printf
 using Setfield
+# using SparseArrays
 using StaticArrays
 using StructArrays
 using TimerOutputs

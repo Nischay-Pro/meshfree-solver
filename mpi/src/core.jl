@@ -216,6 +216,19 @@ function q_variables(globaldata, numPoints, q_result)
         q_result[4] = -two_times_beta
         globaldata.q[idx] = SVector{4}(q_result)
     end
+    # tempor = globaldata.q[1]
+    # tempor = globaldata[1].q
+    # tempor = Array(globaldata[1].q)
+    # tempor = globaldata.q[1:10]
+    # tempor = [Dict('a'=>2, 'b'=>3), Dict('f'=>8, 'r'=>3)]
+    # tempor = globaldata[1:3]
+    # tempor = [Base.ImmutableDict("a"=>2), Base.ImmutableDict("f"=>8)]
+    # tempor = spzeros(3,3)
+    # tempor = globaldata.q[1]
+    # print(tempor, "\n")
+    # MPI.Sendrecv!(MPI.Buffer_send(globaldata.q[1]), 0, 1,  q_result, 0, 1, MPI.COMM_WORLD)
+    # print(q_result, "\n")
+    # MPI.Bcast!(MPI.Buffer_send(tempor), 0, MPI.COMM_WORLD)
     return nothing
 end
 

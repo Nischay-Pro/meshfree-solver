@@ -36,3 +36,4 @@ test*
 *.pdf
 testfile
 serial/*
+mpi/examples/*

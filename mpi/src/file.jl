@@ -49,7 +49,6 @@ end
 function readFileQuadtree(file_name::String, globaldata, defprimal, numPoints)
     data1 = read(file_name, String)
     splitdata = @view split(data1, "\n")[2:end-1]
-    # print(splitdata[1:3])
     @showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
         itmdata = split(itm)
         connectivity = zeros(Int32, 20)
