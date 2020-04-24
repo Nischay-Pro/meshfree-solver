@@ -25,6 +25,7 @@ const to = TimerOutput()
 
 struct Point
     localID::Int32
+    globalID::Int32
     x::Float64
     y::Float64
     left::Int32

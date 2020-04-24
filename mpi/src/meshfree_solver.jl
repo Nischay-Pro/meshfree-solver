@@ -1,4 +1,5 @@
 function main()
+
     MPI.Init()
     comm = MPI.COMM_WORLD
     rank = MPI.Comm_rank(comm)
@@ -9,23 +10,34 @@ function main()
     configData = getConfig()
     max_iters = parse(Int, ARGS[2])
     file_name = string(ARGS[1])
+    file_name = specificCoreFile(file_name)
     format = configData["format"]["type"]
     numPoints = returnFileLength(file_name)
+    localPoints, ghostPoints = 0 , 0
 
     println(numPoints)
     globaldata = Array{Point,1}(undef, numPoints)
     res_old = zeros(Float64, 1)
     main_store = zeros(Float64, 62)
-
     defprimal = getInitialPrimitive(configData)
 
+    #####
+    ##### File Reading
+    #####
     println("Start Read")
     if format == "quadtree"
         readFileQuadtree(file_name::String, globaldata, defprimal, numPoints)
     elseif format == "old"
         readFile(file_name::String, globaldata, defprimal, numPoints)
+    elseif format == "mpi"
+        readFileMPIQuadtree(file_name::String, globaldata, defprimal, localPoints, ghostPoints)
     end
 
+    exit(0)
+
+    #####
+    ##### Normals & Connectivity Generation
+    #####
     interior::Int64 = configData["point"]["interior"]
     wall::Int64 = configData["point"]["wall"]
     outer::Int64 = configData["point"]["outer"]
@@ -38,6 +50,9 @@ function main()
         calculateConnectivity(globaldata, idx)
     end
 
+    #####
+    ##### Config File Data
+    #####
     main_store[53] = configData["core"]["power"]::Float64
     main_store[54] = configData["core"]["cfl"]::Float64 
     main_store[55] = configData["core"]["limiter_flag"]::Int64
@@ -69,6 +84,9 @@ function main()
     # replace_storage(Array, globaldata)
     # println(typeof(globaldata))
 
+    #####
+    ##### Core Running Code
+    #####
     println(max_iters + 1)
     function run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
         for i in 1:max_iters
@@ -98,14 +116,14 @@ function main()
         # end
     end
 
-
     test_code(globaldata, configData, res_old, numPoints, main_store)
 
+    #####
+    ##### Output & Benchmark Files
+    #####
     open("../results/timer" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) *".txt", "w") do io
         print_timer(io, to)
     end
-end
-
 
     # compute_cl_cd_cm(globaldata, configData, shapeptsidx)
     # println(globaldata[1])
@@ -119,3 +137,5 @@ end
     #     print(file, "\n")
     # end
     # close(file)
+
+end
