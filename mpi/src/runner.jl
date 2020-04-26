@@ -1,5 +1,5 @@
 push!(LOAD_PATH, pwd());
-println("=== Compiling. ===\n");
+print("=== Compiling. ===\n");
 using main_module;
-println("=== Compilation done. ===\n");
+print("=== Compilation done. ===\n");
 main()

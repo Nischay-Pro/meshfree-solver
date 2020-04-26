@@ -1,5 +1,5 @@
-function func_delta(globaldata, numPoints, cfl)
-    for idx in 1:numPoints
+function func_delta(globaldata, localPoints, cfl)
+    for idx in 1:localPoints
         min_delt = one(Float64)
         for conn in globaldata.conn[idx]
             if conn == zero(Float64)
@@ -23,7 +23,7 @@ function func_delta(globaldata, numPoints, cfl)
     return nothing
 end
 
-function state_update(globaldata, numPoints, configData, iter, res_old, rk, U, Uold, main_store)
+function state_update(globaldata, localPoints, configData, iter, res_old, rk, U, Uold, main_store)
     max_res = zero(Float64)
     ∑_res_sqr = zeros(Float64, 1)
     Mach = main_store[58] 
@@ -32,7 +32,7 @@ function state_update(globaldata, numPoints, configData, iter, res_old, rk, U, U
     rho_inf = main_store[61] 
     theta = main_store[62]
 
-    for idx in 1:numPoints
+    for idx in 1:localPoints
         if globaldata.flag_1[idx] == 0
             fill!(U, zero(Float64))
             state_update_wall(globaldata, idx, max_res, ∑_res_sqr, U, Uold, rk)
@@ -45,7 +45,7 @@ function state_update(globaldata, numPoints, configData, iter, res_old, rk, U, U
         end
     end
 
-    res_new = sqrt(∑_res_sqr[1])/ numPoints
+    res_new = sqrt(∑_res_sqr[1])/ localPoints
     residue = zero(Float64)
 
     if iter <= 2
@@ -58,7 +58,7 @@ function state_update(globaldata, numPoints, configData, iter, res_old, rk, U, U
     if rk == 4
         @printf("%.17f \n", residue)
     end
-    # open("residue_" * string(numPoints) * ".txt", "a+") do residue_io
+    # open("residue_" * string(localPoints) * ".txt", "a+") do residue_io
     #     @printf(residue_io, "%d %s\n", iter, residue)
     # end
 

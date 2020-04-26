@@ -1,3 +1,41 @@
+function set_local_to_ghost_ID(globaldata, foreignGhostPoints, localPoints, ghostPoints, rank, size, comm)
+    for numParts in 0:size-1
+        if numParts == rank
+            continue
+        end
+
+        # To be sent to specific partition with all ghost points info related to that array
+        transferArray = zeros(Int, 0) 
+        for idx in localPoints + 1:localPoints + ghostPoints
+            gPoint = globaldata[idx]
+            # If partition number match
+            if gPoint.left == numParts
+                # Append the localID of that point in that specific parition  
+                append!(transferArray, gPoint.right) 
+            end
+        end
+        # Send non-blocking calls. Example (0 => (data, 1,0, comm))
+        MPI.Isend(transferArray, numParts, rank, comm)
+    end
+
+    requests = Array{MPI.Request,1}(undef, size-1)
+
+    for numParts in 0:size-1
+        if numParts == rank
+            continue
+        end
+
+        # Send non-blocking receives. Example (1 => (buffer, 0, 0, comm))
+        receiveSlice = @views foreignGhostPoints[:, numParts+1]
+        if numParts < rank
+            requests[numParts+1] = MPI.Irecv!(receiveSlice, numParts, numParts, comm)
+        else
+            requests[numParts] = MPI.Irecv!(receiveSlice, numParts, numParts, comm)
+        end
+    end
+    status = MPI.Waitall!(requests)
+end
+
 function getInitialPrimitive(configData)
     rho_inf::Float64 = configData["core"]["rho_inf"]
     mach::Float64 = configData["core"]["mach"]
@@ -144,18 +182,18 @@ function getPointDetails(globaldata, point_index)
     # println(IOContext(stdout, :compact => false), "Delta is", globaldata[point_index].delta)
 end
 
-function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store, tempdq)
+function fpi_solver(iter, globaldata, configData, res_old, localPoints, ghostPoints, main_store, rank, size, comm, tempdq)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # print(" 111\n")
-    if iter == 1
-        println("Starting FuncDelta")
+    if iter == 1 && rank == 0
+        println("Starting FuncDelta for Rank:$rank")
     end
 
     power = main_store[53]
     cfl = main_store[54]
 
     @timeit to "func_delta" begin
-        func_delta(globaldata, numPoints, cfl)
+        func_delta(globaldata, localPoints, cfl)
     end
 
     phi_i = @view main_store[1:4]
@@ -172,38 +210,56 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
     ∑_Δx_Δf = @view main_store[45:48]
     ∑_Δy_Δf = @view main_store[49:52]
 
-    @printf("Iteration Number %d ", iter)
+    if rank == 0
+        @printf("Iteration Number %d ", iter)
+    end
 
-    for rk in 1:4
+    for rk in 1:1
         @timeit to "q_var" begin
-            q_variables(globaldata, numPoints, result)
+            q_variables(globaldata, localPoints, result)
         end
 
-        # temp = CuArray(globaldata.prim)
-        # globaldata.prim .= Array(temp)
+        update_ghost_q(globaldata, localPoints, ghostPoints, rank, result)
+
+        # temporarray1 = zeros(Float64,4,4)
+        # requests = Array{MPI.Request,1}(undef, 1)
+        # if rank == 0
+        #     MPI.Isend(zeros(0), 1, 133, comm)
+        #     # MPI.Isend([1.2,2.3,3.3,4.3], 1, 134, comm)
+        # elseif rank == 1
+        #     array_slice = @views temporarray1[1, :]
+        #     requests[1] = MPI.Irecv!(array_slice, 0, 133, comm)
+        #     # array_slice = @views temporarray1[5:8]
+        #     # requests[2] = MPI.Irecv!(array_slice, 0, 134, comm)
+        #     status = MPI.Waitall!(requests)
+        #     print(status[1].error, "\n")
+        #     print(temporarray1, "\n")
+        # end
+
+
         @timeit to "q_derv" begin
-            q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
+            q_var_derivatives(globaldata, localPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
         end
         @timeit to "q_derv_innerloop" begin
             for inner_iters in 1:3
-                q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
+                q_var_derivatives_innerloop(globaldata, localPoints, power, tempdq, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
             end
         end
-        @timeit to "flux_res" begin
-            cal_flux_residual(globaldata, numPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
-                    result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
-        end
+        # @timeit to "flux_res" begin
+        #     cal_flux_residual(globaldata, localPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+        #             result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+        # end
 
-        @timeit to "state_update" begin
-            state_update(globaldata, numPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
-        end
+        # @timeit to "state_update" begin
+        #     state_update(globaldata, localPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+        # end
 
     end
     return nothing
 end
 
-function q_variables(globaldata, numPoints, q_result)
-    for idx in 1:numPoints
+function q_variables(globaldata, localPoints, q_result)
+    for idx in 1:localPoints
         rho = globaldata.prim[idx][1]
         u1 = globaldata.prim[idx][2]
         u2 = globaldata.prim[idx][3]
@@ -232,8 +288,8 @@ function q_variables(globaldata, numPoints, q_result)
     return nothing
 end
 
-function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δq, max_q, min_q)
-    for idx in 1:numPoints
+function q_var_derivatives(globaldata, localPoints, power, ∑_Δx_Δq, ∑_Δy_Δq, max_q, min_q)
+    for idx in 1:localPoints
         x_i = globaldata.x[idx]
         y_i = globaldata.y[idx]
         ∑_Δx_sqr = zero(Float64)
@@ -293,8 +349,8 @@ end
     return nothing
 end
 
-function q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_Δx_Δq, ∑_Δy_Δq, qi_tilde, qk_tilde)
-    for idx in 1:numPoints
+function q_var_derivatives_innerloop(globaldata, localPoints, power, tempdq, ∑_Δx_Δq, ∑_Δy_Δq, qi_tilde, qk_tilde)
+    for idx in 1:localPoints
         x_i = globaldata.x[idx]
         y_i = globaldata.y[idx]
         ∑_Δx_sqr = zero(Float64)
@@ -325,7 +381,7 @@ function q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_�
             tempdq[idx, 2, iter] = one_by_det * (∑_Δy_Δq[iter] * ∑_Δx_sqr - ∑_Δx_Δq[iter] * ∑_Δx_Δy)
         end 
     end
-    for idx in 1:numPoints
+    for idx in 1:localPoints
         q_var_derivatives_update_innerloop(qi_tilde, qk_tilde, idx, tempdq)
         globaldata.dq1[idx] = SVector{4}(qi_tilde)
         globaldata.dq2[idx] = SVector{4}(qk_tilde)
@@ -351,4 +407,20 @@ end
         dq2[iter] = tempdq[idx, 2, iter]
     end
     return nothing
+end
+
+function update_ghost_q(globaldata, localPoints, ghostPoints, rank, q_store)
+    ghostPartition = rank
+    for idx in localPoints+1:localPoints+ghostPoints
+        # if rank == 0 && idx == 12178
+        #     println(globaldata.q[idx])
+        # end
+        originalPartition = globaldata.left[idx]
+        originalPointID = globaldata.right[idx]
+        # MPI.Sendrecv!(MPI.Buffer_send(globaldata[originalPointID].q), ghostPartition, idx,  q_store, originalPartition, idx, MPI.COMM_WORLD)
+        globaldata.q[idx] = SVector{4}(q_store)
+        # if rank == 0 && idx == 12178
+        #     println(" PartionNo- " ,originalPartition, " PartitionID- ", originalPointID, " Rank- ", rank, " QStore- ", q_store, " Qvalue- ", globaldata.q[idx])
+        # end
+    end
 end

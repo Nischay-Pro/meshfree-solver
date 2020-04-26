@@ -14,7 +14,7 @@ function returnFileLength(file_name::String)
     return length(splitdata) - 2
 end
 
-function readFile(file_name::String, globaldata, defprimal, numPoints)
+function readFile(file_name::String, globaldata, defprimal)
     data1 = read(file_name, String)
     splitdata = @view split(data1, "\n")[2:end-1]
     # print(splitdata[1:3])
@@ -56,7 +56,7 @@ function readFile(file_name::String, globaldata, defprimal, numPoints)
     return nothing
 end
 
-function readFileQuadtree(file_name::String, globaldata, defprimal, numPoints)
+function readFileQuadtree(file_name::String, globaldata, defprimal)
     data1 = read(file_name, String)
     splitdata = @view split(data1, "\n")[2:end-1]
     @showprogress 1 "Computing ReadFile" for (idx, itm) in enumerate(splitdata)
@@ -102,6 +102,7 @@ function readFileMPIQuadtree(file_name::String, globaldata, defprimal, localPoin
     metadata = split(metadata)
     localPoints = parse(Int, metadata[3])
     ghostPoints = parse(Int, metadata[4])
+    partitionGhostLimit = parse(Int, metadata[5])
     # println(localPoints, " Test ", ghostPoints)
     splitdata = @view split(data1, "\n")[2:end-1]
     
@@ -176,5 +177,5 @@ function readFileMPIQuadtree(file_name::String, globaldata, defprimal, localPoin
         println(globaldata[end].localID)
         error(" MPI file reading mismatch ")
     end
-    return nothing
+    return localPoints, ghostPoints, partitionGhostLimit
 end

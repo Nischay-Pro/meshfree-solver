@@ -1,11 +1,10 @@
 function main()
-
     MPI.Init()
     comm = MPI.COMM_WORLD
     rank = MPI.Comm_rank(comm)
     size = MPI.Comm_size(comm)
-    println("Hello world, I am rank $(rank) of $(size)\n")
-    MPI.Barrier(comm)
+    # print("Hello world, I am rank $(rank) of $(size)\n")
+    # MPI.Barrier(comm)
 
     configData = getConfig()
     max_iters = parse(Int, ARGS[2])
@@ -13,9 +12,11 @@ function main()
     file_name = specificCoreFile(file_name)
     format = configData["format"]["type"]
     numPoints = returnFileLength(file_name)
-    localPoints, ghostPoints = 0 , 0
+    localPoints, ghostPoints, partitionGhostLimit = 0, 0, 0
 
-    println(numPoints)
+    if rank == 0
+        println(numPoints, " for Rank:$rank")
+    end
     globaldata = Array{Point,1}(undef, numPoints)
     res_old = zeros(Float64, 1)
     main_store = zeros(Float64, 62)
@@ -24,16 +25,18 @@ function main()
     #####
     ##### File Reading
     #####
-    println("Start Read")
+    if rank == 0
+        println("Start Read")
+    end
     if format == "quadtree"
-        readFileQuadtree(file_name::String, globaldata, defprimal, numPoints)
+        readFileQuadtree(file_name::String, globaldata, defprimal)
     elseif format == "old"
-        readFile(file_name::String, globaldata, defprimal, numPoints)
+        readFile(file_name::String, globaldata, defprimal)
     elseif format == "mpi"
-        readFileMPIQuadtree(file_name::String, globaldata, defprimal, localPoints, ghostPoints)
+        localPoints, ghostPoints, partitionGhostLimit = readFileMPIQuadtree(file_name::String, globaldata, defprimal, localPoints, ghostPoints)
     end
 
-    exit(0)
+    foreignGhostPoints = zeros(Int, partitionGhostLimit, size)
 
     #####
     ##### Normals & Connectivity Generation
@@ -41,14 +44,23 @@ function main()
     interior::Int64 = configData["point"]["interior"]
     wall::Int64 = configData["point"]["wall"]
     outer::Int64 = configData["point"]["outer"]
-    @showprogress 2 "Computing Normals" for idx in 1:numPoints
+    @showprogress 2 "Computing Normals" for idx in 1:localPoints
         placeNormals(globaldata, idx, configData, interior, wall, outer)
     end
 
-    println("Start Connectivity Generation")
-    @showprogress 3 "Computing Connectivity" for idx in 1:numPoints
+    if rank == 0
+        println("Start Connectivity Generation")
+    end
+    @showprogress 3 "Computing Connectivity" for idx in 1:localPoints
         calculateConnectivity(globaldata, idx)
     end
+
+    set_local_to_ghost_ID(globaldata, foreignGhostPoints, localPoints, ghostPoints, rank, size, comm)
+    # if rank == 0
+    #     # for idx in 1:partitionGhostLimit
+    #         print(foreignGhostPoints, "\n")
+    #     # end
+    # end
 
     #####
     ##### Config File Data
@@ -83,19 +95,25 @@ function main()
     # println(typeof(globaldata))
     # replace_storage(Array, globaldata)
     # println(typeof(globaldata))
-
+    
     #####
     ##### Core Running Code
     #####
-    println(max_iters + 1)
-    function run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
+    if rank == 0
+        println(max_iters + 1)
+        println(localPoints)
+        println(ghostPoints)
+    end
+    function run_code(globaldata, configData, res_old, localPoints, ghostPoints, main_store, rank, size, comm, tempdq)
         for i in 1:max_iters
-            fpi_solver(i, globaldata, configData, res_old, numPoints, main_store, tempdq)
+            fpi_solver(i, globaldata, configData, res_old, localPoints, ghostPoints, main_store, rank, size, comm, tempdq)
         end
     end
 
-    function test_code(globaldata, configData, res_old, numPoints, main_store)
-        println("Starting warmup function")
+    function test_code(globaldata, configData, res_old, localPoints, ghostPoints, main_store, rank, size, comm)
+        if rank == 0
+            println("Starting warmup function")
+        end
         # fpi_solver(1, globaldata, configData,  res_old, numPoints)
         res_old[1] = 0.0
         # Profile.clear_malloc_data()
@@ -105,37 +123,44 @@ function main()
         # @profile fpi_solver(1, globaldata, configData,  res_old)
         # Profile.print()
         # res_old[1] = 0.0
-        println("Starting main function")
-        tempdq = zeros(Float64, numPoints, 2, 4)
+        if rank == 0
+            println("Starting main function")
+        end
+        tempdq = zeros(Float64, localPoints, 2, 4)
         # @trace(fpi_solver(1, globaldata, configData,  res_old, main_store, tempdq), maxdepth = 3)
         @timeit to "nest 1" begin
-            run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
+            run_code(globaldata, configData, res_old, localPoints, ghostPoints, main_store, rank, size, comm, tempdq)
         end
         # open("prof.txt", "w") do s
         #     Profile.print(IOContext(s, :displaysize => (24, 500)))
         # end
     end
 
-    test_code(globaldata, configData, res_old, numPoints, main_store)
+    test_code(globaldata, configData, res_old, localPoints, ghostPoints, main_store, rank, size, comm)
+    localPointsArray = [localPoints]
+    storePointsAll = zeros(Int, 1)
+    MPI.Allreduce!(localPointsArray, storePointsAll, +, comm)
+    # print(storePointsAll, "\n")
+
 
     #####
     ##### Output & Benchmark Files
     #####
-    open("../results/timer" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) *".txt", "w") do io
+    open("../results_mpi/timer_mpi" * string(storePointsAll[1]) * "_" * string(rank) * "_" * string(getConfig()["core"]["max_iters"]) *".txt", "w") do io
         print_timer(io, to)
     end
 
     # compute_cl_cd_cm(globaldata, configData, shapeptsidx)
     # println(globaldata[1])
-    # file  = open("../results/primvals" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
-    # for (idx, itm) in enumerate(globaldata)
-    #     primtowrite = globaldata[idx].prim
-    #     for element in primtowrite
-    #         @printf(file,"%0.17f", element)
-    #         @printf(file, " ")
-    #     end
-    #     print(file, "\n")
-    # end
-    # close(file)
+    file  = open("../results_mpi/primvals_mpi" * string(storePointsAll[1]) * "_" * string(rank) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
+    for (idx, itm) in enumerate(globaldata)
+        primtowrite = globaldata[idx].q
+        for element in primtowrite
+            @printf(file,"%0.17f", element)
+            @printf(file, " ")
+        end
+        print(file, "\n")
+    end
+    close(file)
 
 end

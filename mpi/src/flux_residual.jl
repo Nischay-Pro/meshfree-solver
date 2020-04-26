@@ -1,4 +1,4 @@
-function cal_flux_residual(globaldata, numPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+function cal_flux_residual(globaldata, localPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
         result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
         
     power::Float64 = main_store[53]
@@ -6,7 +6,7 @@ function cal_flux_residual(globaldata, numPoints, configData, Gxp, Gxn, Gyp, Gyn
     vl_const = main_store[56]
     gamma = main_store[59]
 
-	for idx in 1:numPoints
+	for idx in 1:localPoints
         if globaldata.flag_1[idx] == 0
             wallindices_flux_residual(globaldata, gamma, idx, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k, result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, power, limiter_flag, vl_const)
         elseif globaldata.flag_1[idx] == 2
