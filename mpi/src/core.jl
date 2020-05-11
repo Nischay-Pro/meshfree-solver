@@ -182,9 +182,12 @@ function getPointDetails(globaldata, point_index)
     # println(IOContext(stdout, :compact => false), "Delta is", globaldata[point_index].delta)
 end
 
-function fpi_solver(iter, globaldata, configData, res_old, localPoints, ghostPoints, main_store, rank, size, comm, tempdq)
-    # println(IOContext(stdout, :compact => false), globaldata[3].prim)
-    # print(" 111\n")
+function fpi_solver(iter, globaldata, configData, res_old, localPoints, ghostPoints, main_store, foreignGhostPoints,
+    tempdq, requests_1, requests_2)
+
+    comm = MPI.COMM_WORLD
+    rank = MPI.Comm_rank(comm)
+    size = MPI.Comm_size(comm)
     if iter == 1 && rank == 0
         println("Starting FuncDelta for Rank:$rank")
     end
@@ -214,12 +217,12 @@ function fpi_solver(iter, globaldata, configData, res_old, localPoints, ghostPoi
         @printf("Iteration Number %d ", iter)
     end
 
-    for rk in 1:1
+    for rk in 1:4
         @timeit to "q_var" begin
-            q_variables(globaldata, localPoints, result)
+            q_variables(globaldata, tempdq, localPoints, ghostPoints, result)
         end
 
-        update_ghost_q(globaldata, localPoints, ghostPoints, rank, result)
+        # update_ghost_q(globaldata, foreignGhostPoints, localPoints, ghostPoints, rank, size, comm, tempdq, requests_1)
 
         # temporarray1 = zeros(Float64,4,4)
         # requests = Array{MPI.Request,1}(undef, 1)
@@ -236,30 +239,37 @@ function fpi_solver(iter, globaldata, configData, res_old, localPoints, ghostPoi
         #     print(temporarray1, "\n")
         # end
 
-
         @timeit to "q_derv" begin
             q_var_derivatives(globaldata, localPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
         end
+        
+        update_ghost_dq(globaldata, foreignGhostPoints, localPoints, ghostPoints, rank, size, comm, tempdq, requests_1, requests_2)
+        update_ghost_maxmin_q(globaldata, foreignGhostPoints, localPoints, ghostPoints, rank, size, comm, tempdq, requests_1, requests_2)
+
         @timeit to "q_derv_innerloop" begin
             for inner_iters in 1:3
                 q_var_derivatives_innerloop(globaldata, localPoints, power, tempdq, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
+                update_ghost_dq(globaldata, foreignGhostPoints, localPoints, ghostPoints, rank, size, comm, tempdq, requests_1, requests_2)
             end
         end
-        # @timeit to "flux_res" begin
-        #     cal_flux_residual(globaldata, localPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
-        #             result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
-        # end
 
-        # @timeit to "state_update" begin
-        #     state_update(globaldata, localPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
-        # end
+        @timeit to "flux_res" begin
+            cal_flux_residual(globaldata, localPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+                    result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+        end
+
+        @timeit to "state_update" begin
+            state_update(globaldata, localPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+        end
+
+        update_ghost_prim(globaldata, foreignGhostPoints, localPoints, ghostPoints, rank, size, comm, tempdq, requests_1)
 
     end
     return nothing
 end
 
-function q_variables(globaldata, localPoints, q_result)
-    for idx in 1:localPoints
+function q_variables(globaldata, tempdq, localPoints, ghostPoints, q_result)
+    for idx in 1:localPoints + ghostPoints
         rho = globaldata.prim[idx][1]
         u1 = globaldata.prim[idx][2]
         u2 = globaldata.prim[idx][3]
@@ -272,19 +282,6 @@ function q_variables(globaldata, localPoints, q_result)
         q_result[4] = -two_times_beta
         globaldata.q[idx] = SVector{4}(q_result)
     end
-    # tempor = globaldata.q[1]
-    # tempor = globaldata[1].q
-    # tempor = Array(globaldata[1].q)
-    # tempor = globaldata.q[1:10]
-    # tempor = [Dict('a'=>2, 'b'=>3), Dict('f'=>8, 'r'=>3)]
-    # tempor = globaldata[1:3]
-    # tempor = [Base.ImmutableDict("a"=>2), Base.ImmutableDict("f"=>8)]
-    # tempor = spzeros(3,3)
-    # tempor = globaldata.q[1]
-    # print(tempor, "\n")
-    # MPI.Sendrecv!(MPI.Buffer_send(globaldata.q[1]), 0, 1,  q_result, 0, 1, MPI.COMM_WORLD)
-    # print(q_result, "\n")
-    # MPI.Bcast!(MPI.Buffer_send(tempor), 0, MPI.COMM_WORLD)
     return nothing
 end
 
@@ -409,18 +406,181 @@ end
     return nothing
 end
 
-function update_ghost_q(globaldata, localPoints, ghostPoints, rank, q_store)
-    ghostPartition = rank
+function update_ghost_q(globaldata, foreignGhostPoints, localPoints, ghostPoints, rank, size, comm, tempdq, requests_1)
+    # Send q_vars of foregin ghost points
+    for numParts in 0:size-1
+        if numParts == rank
+            continue
+        end
+
+        partitionedForeignGhostPoints = @views foreignGhostPoints[:, numParts+1]
+        for iter in eachindex(partitionedForeignGhostPoints)
+            indexOfGhostPoint = partitionedForeignGhostPoints[iter]
+            if indexOfGhostPoint == 0
+                break
+            end
+            MPI.Isend(MPI.Buffer_send(globaldata.q[indexOfGhostPoint]), numParts, indexOfGhostPoint, comm)
+        end
+    end
+
     for idx in localPoints+1:localPoints+ghostPoints
         # if rank == 0 && idx == 12178
         #     println(globaldata.q[idx])
         # end
         originalPartition = globaldata.left[idx]
         originalPointID = globaldata.right[idx]
-        # MPI.Sendrecv!(MPI.Buffer_send(globaldata[originalPointID].q), ghostPartition, idx,  q_store, originalPartition, idx, MPI.COMM_WORLD)
-        globaldata.q[idx] = SVector{4}(q_store)
+        q_store = @views tempdq[idx, 1, :]
+        requests_1[idx-localPoints] = MPI.Irecv!(q_store, originalPartition, originalPointID, comm)
         # if rank == 0 && idx == 12178
+            # println(typeof(q_store))
         #     println(" PartionNo- " ,originalPartition, " PartitionID- ", originalPointID, " Rank- ", rank, " QStore- ", q_store, " Qvalue- ", globaldata.q[idx])
         # end
     end
+
+    status = MPI.Waitall!(requests_1)
+
+    for idx in localPoints+1:localPoints+ghostPoints
+        q_store = @views tempdq[idx, 1, :]
+        globaldata.q[idx] = q_store
+    end
+    return nothing
 end
+
+function update_ghost_dq(globaldata, foreignGhostPoints, localPoints, ghostPoints, rank, size, comm, tempdq, requests_1, requests_2)
+    # Send dq_vars of foregin ghost points
+    for numParts in 0:size-1
+        if numParts == rank
+            continue
+        end
+
+        partitionedForeignGhostPoints = @views foreignGhostPoints[:, numParts+1]
+        for iter in eachindex(partitionedForeignGhostPoints)
+            indexOfGhostPoint = partitionedForeignGhostPoints[iter]
+            if indexOfGhostPoint == 0
+                break
+            end
+            # if indexOfGhostPoint == 1 && rank  == 1
+            #     print(" The dqs are for Rank:$rank", globaldata.dq1[indexOfGhostPoint], " and ", globaldata.dq2[indexOfGhostPoint],"\n")
+            # end
+            MPI.Isend(MPI.Buffer_send(globaldata.dq1[indexOfGhostPoint]), numParts, 2*indexOfGhostPoint, comm)
+            MPI.Isend(MPI.Buffer_send(globaldata.dq2[indexOfGhostPoint]), numParts, 2*indexOfGhostPoint + 1, comm)
+        end
+    end
+
+    for idx in localPoints+1:localPoints+ghostPoints
+        originalPartition = globaldata.left[idx]
+        originalPointID = globaldata.right[idx]
+        dq_store = @views tempdq[idx, 1, :]
+        requests_1[idx-localPoints] = MPI.Irecv!(dq_store, originalPartition, 2*originalPointID, comm)
+        dq_store = @views tempdq[idx, 2, :]
+        requests_2[idx-localPoints] = MPI.Irecv!(dq_store, originalPartition, 2*originalPointID + 1, comm)
+    end
+
+    status = MPI.Waitall!(requests_1)
+    status = MPI.Waitall!(requests_2)
+
+    for idx in localPoints+1:localPoints+ghostPoints
+        # if globaldata.right[idx] == 1 && rank == 0
+        #     print(" The temps are for Rank:$rank", tempdq[idx, 1, :], " and ", tempdq[idx, 2, :],"\n")
+        # end
+        dq_store = @views tempdq[idx, 1, :]
+        globaldata.dq1[idx] = dq_store
+        dq_store = @views tempdq[idx, 2, :]
+        globaldata.dq2[idx] = dq_store
+        # if globaldata.right[idx] == 1 && rank == 0
+        #     print(" The updated dqs are for Rank:$rank", globaldata.dq1[idx], " and ", globaldata.dq2[idx],"\n")
+        # end
+    end
+    return nothing
+end
+
+function update_ghost_maxmin_q(globaldata, foreignGhostPoints, localPoints, ghostPoints, rank, size, comm, tempdq, requests_1, requests_2)
+    # Send dq_vars of foregin ghost points
+    for numParts in 0:size-1
+        if numParts == rank
+            continue
+        end
+
+        partitionedForeignGhostPoints = @views foreignGhostPoints[:, numParts+1]
+        for iter in eachindex(partitionedForeignGhostPoints)
+            indexOfGhostPoint = partitionedForeignGhostPoints[iter]
+            if indexOfGhostPoint == 0
+                break
+            end
+            MPI.Isend(MPI.Buffer_send(globaldata.max_q[indexOfGhostPoint]), numParts, 2*indexOfGhostPoint, comm)
+            MPI.Isend(MPI.Buffer_send(globaldata.min_q[indexOfGhostPoint]), numParts, 2*indexOfGhostPoint + 1, comm)
+        end
+    end
+
+    for idx in localPoints+1:localPoints+ghostPoints
+        # if rank == 0 && idx == 12178
+        #     println(globaldata.q[idx])
+        # end
+        originalPartition = globaldata.left[idx]
+        originalPointID = globaldata.right[idx]
+        dq_store = @views tempdq[idx, 1, :]
+        requests_1[idx-localPoints] = MPI.Irecv!(dq_store, originalPartition, 2*originalPointID, comm)
+        dq_store = @views tempdq[idx, 2, :]
+        requests_2[idx-localPoints] = MPI.Irecv!(dq_store, originalPartition, 2*originalPointID + 1, comm)
+    end
+
+    status = MPI.Waitall!(requests_1)
+    status = MPI.Waitall!(requests_2)
+
+    for idx in localPoints+1:localPoints+ghostPoints
+        dq_store = @views tempdq[idx, 1, :]
+        globaldata.max_q[idx] = dq_store
+        dq_store = @views tempdq[idx, 2, :]
+        globaldata.min_q[idx] = dq_store
+    end
+    return nothing
+end
+
+function update_ghost_prim(globaldata, foreignGhostPoints, localPoints, ghostPoints, rank, size, comm, tempdq, requests_1)
+    # Send q_vars of foregin ghost points
+    for numParts in 0:size-1
+        if numParts == rank
+            continue
+        end
+
+        partitionedForeignGhostPoints = @views foreignGhostPoints[:, numParts+1]
+        for iter in eachindex(partitionedForeignGhostPoints)
+            indexOfGhostPoint = partitionedForeignGhostPoints[iter]
+            if indexOfGhostPoint == 0
+                break
+            end
+            MPI.Isend(MPI.Buffer_send(globaldata.prim[indexOfGhostPoint]), numParts, indexOfGhostPoint, comm)
+        end
+    end
+
+    for idx in localPoints+1:localPoints+ghostPoints
+        originalPartition = globaldata.left[idx]
+        originalPointID = globaldata.right[idx]
+        prim_store = @views tempdq[idx, 1, :]
+        requests_1[idx-localPoints] = MPI.Irecv!(prim_store, originalPartition, originalPointID, comm)
+    end
+
+    status = MPI.Waitall!(requests_1)
+
+    for idx in localPoints+1:localPoints+ghostPoints
+        prim_store = @views tempdq[idx, 1, :]
+        globaldata.prim[idx] = prim_store
+    end
+    return nothing
+end
+
+    # tempor = globaldata.q[1]
+    # tempor = globaldata[1].q
+    # tempor = Array(globaldata[1].q)
+    # tempor = globaldata.q[1:10]
+    # tempor = [Dict('a'=>2, 'b'=>3), Dict('f'=>8, 'r'=>3)]
+    # tempor = globaldata[1:3]
+    # tempor = [Base.ImmutableDict("a"=>2), Base.ImmutableDict("f"=>8)]
+    # tempor = spzeros(3,3)
+    # tempor = globaldata.q[1]
+    # print(tempor, "\n")
+    # println(isbitstype(eltype(globaldata.q[1])))
+    # x= @SVector [1, 2, 3,4]
+    # MPI.Gather(x, 0, MPI.COMM_WORLD)
+    # print(q_result, "\n")
+    # MPI.Bcast!(MPI.Buffer_send(tempor), 0, MPI.COMM_WORLD)

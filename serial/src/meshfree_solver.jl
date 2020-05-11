@@ -98,11 +98,7 @@ function main()
     open("../results/timer" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) *".txt", "w") do io
         print_timer(io, to)
     end
-end
 
-
-    # compute_cl_cd_cm(globaldata, configData, shapeptsidx)
-    # println(globaldata[1])
     # file  = open("../results/primvals" * string(numPoints) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
     # for (idx, itm) in enumerate(globaldata)
     #     primtowrite = globaldata[idx].prim
@@ -113,3 +109,8 @@ end
     #     print(file, "\n")
     # end
     # close(file)
+end
+
+
+    # compute_cl_cd_cm(globaldata, configData, shapeptsidx)
+    # println(globaldata[1])

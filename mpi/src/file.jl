@@ -111,8 +111,8 @@ function readFileMPIQuadtree(file_name::String, globaldata, defprimal, localPoin
 
         if idx <= localPoints
             connectivity = zeros(Int32, 20)
-            for iter in 12:length(itmdata)
-                connectivity[iter-11] = parse(Int32, itmdata[iter])
+            for iter in 13:length(itmdata)
+                connectivity[iter-12] = parse(Int32, itmdata[iter])
             end
 
             globaldata[idx] = Point(idx,

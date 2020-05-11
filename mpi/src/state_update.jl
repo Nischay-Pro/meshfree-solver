@@ -45,6 +45,8 @@ function state_update(globaldata, localPoints, configData, iter, res_old, rk, U,
         end
     end
 
+    MPI.Reduce!(∑_res_sqr, +, 0, MPI.COMM_WORLD)
+    totalPoints = MPI.Reduce(localPoints, +, 0, MPI.COMM_WORLD)
     res_new = sqrt(∑_res_sqr[1])/ localPoints
     residue = zero(Float64)
 
@@ -55,7 +57,7 @@ function state_update(globaldata, localPoints, configData, iter, res_old, rk, U,
         residue = log10(res_new/res_old[1])
     end
     # println(residue)
-    if rk == 4
+    if rk == 4 && MPI.Comm_rank(MPI.COMM_WORLD) == 0
         @printf("%.17f \n", residue)
     end
     # open("residue_" * string(localPoints) * ".txt", "a+") do residue_io

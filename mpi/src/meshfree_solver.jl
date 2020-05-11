@@ -104,44 +104,28 @@ function main()
         println(localPoints)
         println(ghostPoints)
     end
-    function run_code(globaldata, configData, res_old, localPoints, ghostPoints, main_store, rank, size, comm, tempdq)
+    function run_code(globaldata, configData, res_old, localPoints, ghostPoints, main_store, foreignGhostPoints, tempdq, requests_1, requests_2)
         for i in 1:max_iters
-            fpi_solver(i, globaldata, configData, res_old, localPoints, ghostPoints, main_store, rank, size, comm, tempdq)
+            fpi_solver(i, globaldata, configData, res_old, localPoints, ghostPoints, main_store, foreignGhostPoints, tempdq, requests_1, requests_2)
         end
     end
 
-    function test_code(globaldata, configData, res_old, localPoints, ghostPoints, main_store, rank, size, comm)
-        if rank == 0
-            println("Starting warmup function")
-        end
-        # fpi_solver(1, globaldata, configData,  res_old, numPoints)
+    function test_code(globaldata, configData, res_old, localPoints, ghostPoints, main_store, foreignGhostPoints)
         res_old[1] = 0.0
-        # Profile.clear_malloc_data()
-        # Profile.clear()
-        # res_old[1] = 0.0
-        # fpi_solver(1, globaldata, configData,  res_old, numPoints)
-        # @profile fpi_solver(1, globaldata, configData,  res_old)
-        # Profile.print()
-        # res_old[1] = 0.0
-        if rank == 0
-            println("Starting main function")
-        end
-        tempdq = zeros(Float64, localPoints, 2, 4)
-        # @trace(fpi_solver(1, globaldata, configData,  res_old, main_store, tempdq), maxdepth = 3)
+        tempdq = zeros(Float64, numPoints, 2, 4)
+        requests_1 = Array{MPI.Request,1}(undef, ghostPoints)
+        requests_2 = Array{MPI.Request,1}(undef, ghostPoints)
         @timeit to "nest 1" begin
-            run_code(globaldata, configData, res_old, localPoints, ghostPoints, main_store, rank, size, comm, tempdq)
+            run_code(globaldata, configData, res_old, localPoints, ghostPoints, main_store, foreignGhostPoints, tempdq, requests_1, requests_2)
+            MPI.Barrier(MPI.COMM_WORLD)
         end
-        # open("prof.txt", "w") do s
-        #     Profile.print(IOContext(s, :displaysize => (24, 500)))
-        # end
     end
 
-    test_code(globaldata, configData, res_old, localPoints, ghostPoints, main_store, rank, size, comm)
+    test_code(globaldata, configData, res_old, localPoints, ghostPoints, main_store, foreignGhostPoints)
     localPointsArray = [localPoints]
     storePointsAll = zeros(Int, 1)
     MPI.Allreduce!(localPointsArray, storePointsAll, +, comm)
     # print(storePointsAll, "\n")
-
 
     #####
     ##### Output & Benchmark Files
@@ -154,7 +138,7 @@ function main()
     # println(globaldata[1])
     file  = open("../results_mpi/primvals_mpi" * string(storePointsAll[1]) * "_" * string(rank) * "_" * string(getConfig()["core"]["max_iters"]) * ".txt", "w")
     for (idx, itm) in enumerate(globaldata)
-        primtowrite = globaldata[idx].q
+        primtowrite = globaldata[idx].min_q
         for element in primtowrite
             @printf(file,"%0.17f", element)
             @printf(file, " ")

@@ -88,6 +88,7 @@ function calculate_qtile(qtilde_i, qtilde_k, globaldata, idx, conn, Δx, Δy, vl
         update_qtildes(qtilde_i, globaldata.q[idx], globaldata.dq1[idx], globaldata.dq2[idx], Δx, Δy, phi_i)
         update_qtildes(qtilde_k, globaldata.q[conn], globaldata.dq1[conn], globaldata.dq2[conn], Δx, Δy, phi_k)
     end
+    
     return nothing
 end
 
