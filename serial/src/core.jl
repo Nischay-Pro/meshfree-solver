@@ -1,3 +1,10 @@
+@doc raw"""
+    getInitialPrimitive(configData)
+
+	Procures the values of `rho_inf`, `mach` and `pr_inf` from configData.json,
+	Calculates `machcos` and `machsin`, and returns `primal` as column array,
+	of `rho_inf`, `machcos`, `machsin` and `pr_inf`
+"""
 function getInitialPrimitive(configData)
     rho_inf::Float64 = configData["core"]["rho_inf"]
     mach::Float64 = configData["core"]["mach"]
@@ -8,6 +15,11 @@ function getInitialPrimitive(configData)
     return primal
 end
 
+@doc raw"""
+    getInitialPrimitive2(configData)
+
+	TO_DO: Add doc
+"""
 function getInitialPrimitive2(configData)
     dataman = open("prim_soln_clean")
     data = read(dataman, String)
@@ -22,13 +34,19 @@ function getInitialPrimitive2(configData)
     return finaldata
 end
 
+@doc raw"""
+    placeNormals(globaldata, idx, configData, interior, wall, outer)
+
+	Computes the normals, by passing `leftpt`, `rightpt`, and `currpt`,
+	and sets the normals by calling setNormals(globaldata, idx, normals)
+"""
 function placeNormals(globaldata, idx, configData, interior, wall, outer)
     flag = globaldata[idx].flag_1
     if flag == wall || flag == outer
         currpt = getxy(globaldata[idx])
-        leftpt = globaldata[idx].left
+        #leftpt = globaldata[idx].left
         leftpt = getxy(globaldata[leftpt])
-        rightpt = globaldata[idx].right
+        #rightpt = globaldata[idx].right
         rightpt = getxy(globaldata[rightpt])
         normals = calculateNormals(leftpt, rightpt, currpt[1], currpt[2])
         setNormals(globaldata, idx, normals)
@@ -39,6 +57,11 @@ function placeNormals(globaldata, idx, configData, interior, wall, outer)
     end
 end
 
+@doc raw"""
+    calculateNormals(left, right, mx, my)
+
+	Computes the normals from `left`, `right`, `mx`, and  `my`
+"""
 function calculateNormals(left, right, mx, my)
     lx = left[1]
     ly = left[2]
@@ -63,6 +86,12 @@ function calculateNormals(left, right, mx, my)
     return (nx,ny)
 end
 
+@doc raw"""
+    calculateConnectivity(globaldata, idx)
+
+	Calculates the Quadtree connectivity for the point of interest,
+	And sets the properties by calling setproperties
+"""
 function calculateConnectivity(globaldata, idx)
     ptInterest = globaldata[idx]
     currx = ptInterest.x
@@ -120,18 +149,23 @@ function calculateConnectivity(globaldata, idx)
             ypos_conn = setindex(ypos_conn, itm, ypos_nbhs)
         end
     end
-    globaldata[idx] = setproperties(globaldata[idx], 
+    globaldata[idx] = setproperties(globaldata[idx],
                                     xpos_conn = xpos_conn,
                                     xneg_conn = xneg_conn,
                                     yneg_conn = yneg_conn,
-                                    ypos_conn = ypos_conn, 
-                                    xpos_nbhs = xpos_nbhs, 
-                                    xneg_nbhs = xneg_nbhs, 
-                                    ypos_nbhs = ypos_nbhs, 
+                                    ypos_conn = ypos_conn,
+                                    xpos_nbhs = xpos_nbhs,
+                                    xneg_nbhs = xneg_nbhs,
+                                    ypos_nbhs = ypos_nbhs,
                                     yneg_nbhs = yneg_nbhs)
     return nothing
 end
 
+@doc raw"""
+    getPointDetails(globaldata, point_index)
+
+	Procures point details - Q, Prim, Flux Res, and PrimOld
+"""
 function getPointDetails(globaldata, point_index)
     println("")
     println(IOContext(stdout, :compact => false), "Q is", globaldata[point_index].q)
@@ -144,6 +178,11 @@ function getPointDetails(globaldata, point_index)
     # println(IOContext(stdout, :compact => false), "Delta is", globaldata[point_index].delta)
 end
 
+@doc raw"""
+    fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store, tempdq)
+
+	Core fixed-point iterative solver. Details of the solver can be found here in [TO_DO: Add link]
+"""
 function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store, tempdq)
     # println(IOContext(stdout, :compact => false), globaldata[3].prim)
     # print(" 111\n")
@@ -202,6 +241,11 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
     return nothing
 end
 
+@doc raw"""
+    q_variables(globaldata, numPoints, q_result)
+
+	Computes `q_result` for all the points, and sets `globaldata.q[idx]`
+"""
 function q_variables(globaldata, numPoints, q_result)
     for idx in 1:numPoints
         rho = globaldata.prim[idx][1]
@@ -219,6 +263,11 @@ function q_variables(globaldata, numPoints, q_result)
     return nothing
 end
 
+@doc raw"""
+    q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δq, max_q, min_q)
+
+	TO_DO: Add doc
+"""
 function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δq, max_q, min_q)
     for idx in 1:numPoints
         x_i = globaldata.x[idx]
@@ -270,6 +319,11 @@ function q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δq, ∑_Δy_Δ
     return nothing
 end
 
+@doc raw"""
+    q_var_derivatives_update(∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq, dq1_store, dq2_store)
+
+	Inline function that updates `dq1_store` and `dq2_store`. Inlining optimizes function calls.
+"""
 @inline function q_var_derivatives_update(∑_Δx_sqr, ∑_Δy_sqr, ∑_Δx_Δy, ∑_Δx_Δq, ∑_Δy_Δq, dq1_store, dq2_store)
     det = (∑_Δx_sqr * ∑_Δy_sqr) - (∑_Δx_Δy * ∑_Δx_Δy)
     one_by_det = 1.0 / det
@@ -280,6 +334,12 @@ end
     return nothing
 end
 
+@doc raw"""
+    q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_Δx_Δq, ∑_Δy_Δq, qi_tilde, qk_tilde)
+
+	Inner-iterations for q_var_derivatives. Calls two inlined functions `q_var_derivatives_get_sum_delq_innerloop`,
+	and `q_var_derivatives_update_innerloop`
+"""
 function q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_Δx_Δq, ∑_Δy_Δq, qi_tilde, qk_tilde)
     for idx in 1:numPoints
         x_i = globaldata.x[idx]
@@ -310,7 +370,7 @@ function q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_�
         for iter in 1:4
             tempdq[idx, 1, iter] = one_by_det * (∑_Δx_Δq[iter] * ∑_Δy_sqr - ∑_Δy_Δq[iter] * ∑_Δx_Δy)
             tempdq[idx, 2, iter] = one_by_det * (∑_Δy_Δq[iter] * ∑_Δx_sqr - ∑_Δx_Δq[iter] * ∑_Δx_Δy)
-        end 
+        end
     end
     for idx in 1:numPoints
         q_var_derivatives_update_innerloop(qi_tilde, qk_tilde, idx, tempdq)
@@ -320,8 +380,13 @@ function q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_�
     return nothing
 end
 
+@doc raw"""
+    q_var_derivatives_get_sum_delq_innerloop(globaldata, idx, conn, weights, Δx, Δy, qi_tilde, qk_tilde, ∑_Δx_Δq, ∑_Δy_Δq)
+
+    Inline support funtion for `q_var_derivatives_innerloop`
+"""
 @inline function q_var_derivatives_get_sum_delq_innerloop(globaldata, idx, conn, weights, Δx, Δy, qi_tilde, qk_tilde, ∑_Δx_Δq, ∑_Δy_Δq)
-    for iter in 1:4    
+    for iter in 1:4
         qi_tilde[iter] = globaldata.q[idx][iter] - 0.5 * (Δx * globaldata.dq1[idx][iter] + Δy * globaldata.dq2[idx][iter])
         qk_tilde[iter] = globaldata.q[conn][iter] - 0.5 * (Δx * globaldata.dq1[conn][iter] + Δy * globaldata.dq2[conn][iter])
 
@@ -332,6 +397,11 @@ end
     return nothing
 end
 
+@doc raw"""
+    q_var_derivatives_update_innerloop(dq1, dq2, idx, tempdq)
+
+    Inline support funtion for `q_var_derivatives_innerloop`
+"""
 @inline function q_var_derivatives_update_innerloop(dq1, dq2, idx, tempdq)
     for iter in 1:4
         dq1[iter] = tempdq[idx, 1, iter]
