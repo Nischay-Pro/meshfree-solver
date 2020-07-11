@@ -44,9 +44,9 @@ function placeNormals(globaldata, idx, configData, interior, wall, outer)
     flag = globaldata[idx].flag_1
     if flag == wall || flag == outer
         currpt = getxy(globaldata[idx])
-        #leftpt = globaldata[idx].left
+        leftpt = globaldata[idx].left
         leftpt = getxy(globaldata[leftpt])
-        #rightpt = globaldata[idx].right
+        rightpt = globaldata[idx].right
         rightpt = getxy(globaldata[rightpt])
         normals = calculateNormals(leftpt, rightpt, currpt[1], currpt[2])
         setNormals(globaldata, idx, normals)
