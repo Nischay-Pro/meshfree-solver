@@ -238,8 +238,74 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
         end
 
     end
+    #print(globaldata.prim[70][1], "\n")
     return nothing
 end
+
+function modified_fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store, tempdq)
+    # println(IOContext(stdout, :compact => false), globaldata[3].prim)
+    # print(" 111\n")
+    if iter == 1
+        println("Starting FuncDelta")
+    end
+
+    power = main_store[53]
+    cfl = main_store[54]
+
+    @timeit to "func_delta" begin
+        func_delta(globaldata, numPoints, cfl)
+    end
+
+    phi_i = @view main_store[1:4]
+    phi_k = @view main_store[5:8]
+    G_i = @view main_store[9:12]
+    G_k = @view main_store[13:16]
+    result = @view main_store[17:20]
+    qtilde_i = @view main_store[21:24]
+    qtilde_k = @view main_store[25:28]
+    Gxp = @view main_store[29:32]
+    Gxn = @view main_store[33:36]
+    Gyp = @view main_store[37:40]
+    Gyn = @view main_store[41:44]
+    ∑_Δx_Δf = @view main_store[45:48]
+    ∑_Δy_Δf = @view main_store[49:52]
+
+    @printf("Iteration Number %d ", iter)
+
+    for rk in 1:4
+        @timeit to "q_var" begin
+            q_variables(globaldata, numPoints, result)
+        end
+
+        # temp = CuArray(globaldata.prim)
+        # globaldata.prim .= Array(temp)
+        @timeit to "q_derv" begin
+            q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
+        end
+        @timeit to "q_derv_innerloop" begin
+            for inner_iters in 1:3
+                q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
+            end
+        end
+        @timeit to "flux_res" begin
+            cal_flux_residual(globaldata, numPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+                    result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+        end
+
+        @timeit to "state_update" begin
+            state_update(globaldata, numPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+        end
+
+    end
+    return globaldata.prim[70][1]
+end
+
+function adjoint_fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store, tempdq)
+    grad = gradient(()->modified_fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store, tempdq), Params([iter, globaldata, configData, res_old, numPoints, main_store, tempdq]))
+    print(grad[1])
+    return grad[1]
+end
+
 
 @doc raw"""
     q_variables(globaldata, numPoints, q_result)
