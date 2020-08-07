@@ -103,17 +103,27 @@ end
 
 globaldata = StructArray(globaldata)
 
-function fpi_solver(globaldata, iter, idx)
-	#@.globaldata.x = globaldata.x+7
-	#return globaldata.x[3]
-	return 7
+function func1(num)
+	num = num + 2
+    return num
 end
 
-check = fpi_solver(globaldata, 10, 3)
-println(check)
+function fpi_solver(var, iter, idx)
+	#@.globaldata.x = globaldata.x+7
+	#return globaldata.x[3]
+	var = var^2
+	# @timeit to "func1" begin
+	# 	func1(var)
+	# end
+	return var
+end
+
+#check = fpi_solver(globaldata, 10, 3)
+#println(check)
 #print(globaldata)
 
 iter = 10
 idx = 3
-grad = gradient(()->fpi_solver(globaldata, iter, idx), Params([globaldata, iter, idx]))
-print(grad[1])
+var1 = 4
+grad = gradient(fpi_solver, var1, iter, idx)
+print(grad)

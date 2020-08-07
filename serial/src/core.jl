@@ -52,8 +52,9 @@ function placeNormals(globaldata, idx, configData, interior, wall, outer)
         setNormals(globaldata, idx, normals)
     elseif flag == interior
         setNormals(globaldata, idx, (0,1))
-    else
-        @warn "Illegal Point Type"
+    # else
+    #     #@warn "Illegal Point Type"
+    #     return nothing
     end
 end
 
@@ -193,9 +194,10 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
     power = main_store[53]
     cfl = main_store[54]
 
-    @timeit to "func_delta" begin
-        func_delta(globaldata, numPoints, cfl)
-    end
+    # @timeit to "func_delta" begin
+    #     func_delta(globaldata, numPoints, cfl)
+    # end
+    func_delta(globaldata, numPoints, cfl)
 
     phi_i = @view main_store[1:4]
 	phi_k = @view main_store[5:8]
@@ -214,28 +216,40 @@ function fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store
     @printf("Iteration Number %d ", iter)
 
     for rk in 1:4
-        @timeit to "q_var" begin
-            q_variables(globaldata, numPoints, result)
-        end
+
+        # @timeit to "q_var" begin
+        #     q_variables(globaldata, numPoints, result)
+        # end
+        q_variables(globaldata, numPoints, result)
 
         # temp = CuArray(globaldata.prim)
         # globaldata.prim .= Array(temp)
-        @timeit to "q_derv" begin
-            q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
-        end
-        @timeit to "q_derv_innerloop" begin
-            for inner_iters in 1:3
-                q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
-            end
-        end
-        @timeit to "flux_res" begin
-            cal_flux_residual(globaldata, numPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
-                    result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+
+        # @timeit to "q_derv" begin
+        #     q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
+        # end
+        q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
+
+        # @timeit to "q_derv_innerloop" begin
+        #     for inner_iters in 1:3
+        #         q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
+        #     end
+        # end
+        for inner_iters in 1:3
+            q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
         end
 
-        @timeit to "state_update" begin
-            state_update(globaldata, numPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
-        end
+        # @timeit to "flux_res" begin
+        #     cal_flux_residual(globaldata, numPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+        #             result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+        # end
+        cal_flux_residual(globaldata, numPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+                    result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+
+        # @timeit to "state_update" begin
+        #     state_update(globaldata, numPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+        # end
+        state_update(globaldata, numPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
 
     end
     #print(globaldata.prim[70][1], "\n")
@@ -252,9 +266,10 @@ function modified_fpi_solver(iter, globaldata, configData, res_old, numPoints, m
     power = main_store[53]
     cfl = main_store[54]
 
-    @timeit to "func_delta" begin
-        func_delta(globaldata, numPoints, cfl)
-    end
+    # @timeit to "func_delta" begin
+    #     func_delta(globaldata, numPoints, cfl)
+    # end
+    func_delta(globaldata, numPoints, cfl)
 
     phi_i = @view main_store[1:4]
     phi_k = @view main_store[5:8]
@@ -273,35 +288,48 @@ function modified_fpi_solver(iter, globaldata, configData, res_old, numPoints, m
     @printf("Iteration Number %d ", iter)
 
     for rk in 1:4
-        @timeit to "q_var" begin
-            q_variables(globaldata, numPoints, result)
-        end
+
+        # @timeit to "q_var" begin
+        #     q_variables(globaldata, numPoints, result)
+        # end
+        q_variables(globaldata, numPoints, result)
 
         # temp = CuArray(globaldata.prim)
         # globaldata.prim .= Array(temp)
-        @timeit to "q_derv" begin
-            q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
-        end
-        @timeit to "q_derv_innerloop" begin
-            for inner_iters in 1:3
-                q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
-            end
-        end
-        @timeit to "flux_res" begin
-            cal_flux_residual(globaldata, numPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
-                    result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+
+        # @timeit to "q_derv" begin
+        #     q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
+        # end
+        q_var_derivatives(globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
+
+        # @timeit to "q_derv_innerloop" begin
+        #     for inner_iters in 1:3
+        #         q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
+        #     end
+        # end
+        for inner_iters in 1:3
+            q_var_derivatives_innerloop(globaldata, numPoints, power, tempdq, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
         end
 
-        @timeit to "state_update" begin
-            state_update(globaldata, numPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
-        end
+        # @timeit to "flux_res" begin
+        #     cal_flux_residual(globaldata, numPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+        #             result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+        # end
+        cal_flux_residual(globaldata, numPoints, configData, Gxp, Gxn, Gyp, Gyn, phi_i, phi_k, G_i, G_k,
+                    result, qtilde_i, qtilde_k, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+
+        # @timeit to "state_update" begin
+        #     state_update(globaldata, numPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
+        # end
+        state_update(globaldata, numPoints, configData, iter, res_old, rk, ∑_Δx_Δf, ∑_Δy_Δf, main_store)
 
     end
     return globaldata.prim[70][1]
 end
 
 function adjoint_fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store, tempdq)
-    grad = gradient(()->modified_fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store, tempdq), Params([iter, globaldata, configData, res_old, numPoints, main_store, tempdq]))
+    println("hi")
+    grad = gradient(modified_fpi_solver, iter, globaldata, configData, res_old, numPoints, main_store, tempdq)
     print(grad[1])
     return grad[1]
 end

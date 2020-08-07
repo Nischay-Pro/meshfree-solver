@@ -23,12 +23,18 @@ function main()
     interior::Int64 = configData["point"]["interior"]
     wall::Int64 = configData["point"]["wall"]
     outer::Int64 = configData["point"]["outer"]
-    @showprogress 2 "Computing Normals" for idx in 1:numPoints
-        placeNormals(globaldata, idx, configData, interior, wall, outer)
+    # @showprogress 2 "Computing Normals" for idx in 1:numPoints
+    #     placeNormals(globaldata, idx, configData, interior, wall, outer)
+    # end
+    for idx in 1:numPoints
+         placeNormals(globaldata, idx, configData, interior, wall, outer)
     end
 
     println("Start Connectivity Generation")
-    @showprogress 3 "Computing Connectivity" for idx in 1:numPoints
+    # @showprogress 3 "Computing Connectivity" for idx in 1:numPoints
+    #     calculateConnectivity(globaldata, idx)
+    # end
+    for idx in 1:numPoints
         calculateConnectivity(globaldata, idx)
     end
 
@@ -90,9 +96,13 @@ function main()
         println("Starting main function")
         tempdq = zeros(Float64, numPoints, 2, 4)
         # @trace(fpi_solver(1, globaldata, configData,  res_old, main_store, tempdq), maxdepth = 3)
-        @timeit to "nest 1" begin
-            run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
-        end
+
+        # Zygote try-catch error
+        # @timeit to "nest 1" begin
+        #     run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
+        # end
+        run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
+
         # open("prof.txt", "w") do s
         #     Profile.print(IOContext(s, :displaysize => (24, 500)))
         # end
@@ -112,9 +122,12 @@ function main()
         println("Starting main function")
         tempdq = zeros(Float64, numPoints, 2, 4)
         # @trace(fpi_solver(1, globaldata, configData,  res_old, main_store, tempdq), maxdepth = 3)
-        @timeit to "nest 1" begin
-            run_adjoint_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
-        end
+
+        # Zygote try-catch error
+        # @timeit to "nest 1" begin
+        #     run_adjoint_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
+        # end
+        run_adjoint_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
         # open("prof.txt", "w") do s
         #     Profile.print(IOContext(s, :displaysize => (24, 500)))
         # end
