@@ -328,11 +328,15 @@ function modified_fpi_solver(iter, globaldata, configData, res_old, numPoints, m
 end
 
 function adjoint_fpi_solver(iter, globaldata, configData, res_old, numPoints, main_store, tempdq)
-    println("hi")
-    grad = gradient(modified_fpi_solver, iter, globaldata, configData, res_old, numPoints, main_store, tempdq)
+    println("Inside adjoint_fpi_solver")
+    result = @view main_store[17:20]
+    grad = gradient(modified_q_variables,globaldata, numPoints, result)
+    #grad = gradient(q_var_derivatives,globaldata, numPoints, power, ∑_Δx_Δf, ∑_Δy_Δf, qtilde_i, qtilde_k)
+    #grad = gradient(modified_fpi_solver, iter, globaldata, configData, res_old, numPoints, main_store, tempdq)
     print(grad[1])
     return grad[1]
 end
+
 
 
 @doc raw"""
@@ -355,6 +359,26 @@ function q_variables(globaldata, numPoints, q_result)
         globaldata.q[idx] = SVector{4}(q_result)
     end
     return nothing
+end
+
+function modified_q_variables(globaldata, numPoints, q_result)
+    # Using Buffers because Zygote doesn't support mutating arrays
+    q_result_buf = Zygote.Buffer(q_result, 4)
+    for idx in 1:numPoints
+        rho = globaldata.prim[idx][1]
+        u1 = globaldata.prim[idx][2]
+        u2 = globaldata.prim[idx][3]
+        pr = globaldata.prim[idx][4]
+        beta = 0.5 * (rho / pr)
+        two_times_beta = 2.0 * beta
+        q_result_buf[1] = log(rho) + log(beta) * 2.5 - (beta * ((u1 * u1) + (u2 * u2)))
+        q_result_buf[2] = (two_times_beta * u1)
+        q_result_buf[3] = (two_times_beta * u2)
+        q_result_buf[4] = -two_times_beta
+        ## How do I update globaldata.q though? Mutation isn't allowed; And this function has to return a scalar, can't return q_result_buf. So how can we update globaldata.q?
+        #q_result_buf = q_result
+    end
+    return copy(q_result_buf)[2]
 end
 
 @doc raw"""

@@ -77,8 +77,10 @@ function main()
     end
 
     function run_adjoint_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
-        for i in 1:max_iters
+        #for i in 1:max_iters
+        for i in 1:1 # just for debugging
             grad_check = adjoint_fpi_solver(i, globaldata, configData, res_old, numPoints, main_store, tempdq)
+            println("\nDone")
         end
     end    
 
