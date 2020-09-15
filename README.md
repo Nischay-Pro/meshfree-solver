@@ -12,12 +12,12 @@ Reviewers are requested to use the [mfpre](https://github.com/Nischay-Pro/mfpre)
 1. Julia 1.5.1
 
 ### Julia Libraries
-ClusterManagers  
-Distributed  
-DistributedArrays  
-StaticArrays  
-Printf  
-TimerOutputs  
+* ClusterManagers  
+* Distributed  
+* DistributedArrays  
+* StaticArrays  
+* Printf  
+* TimerOutputs  
   
 ### Configuration of the test case.
 1. Run the partitioner on the grid file provided in Google Drive.
