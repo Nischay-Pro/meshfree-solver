@@ -1,3 +1,5 @@
+import SpecialFunctions
+
 function flux_Gxp(Gxp, nx, ny, u1, u2, rho, pr)
     tx = ny
     ty = -nx
