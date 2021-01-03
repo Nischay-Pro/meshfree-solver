@@ -21,9 +21,9 @@ function func_delta_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalD
             x_k = gpuGlobalDataFauxFixed[conn]
             y_k = gpuGlobalDataFauxFixed[conn + numPoints]
 
-            dist = CUDAnative.hypot((x_k - x_i),(y_k - y_i))
-            mod_u = CUDAnative.hypot(u1,u2)
-            delta_t = dist/(mod_u + 3*CUDAnative.sqrt(pr/rho))
+            dist = CUDA.hypot((x_k - x_i),(y_k - y_i))
+            mod_u = CUDA.hypot(u1,u2)
+            delta_t = dist/(mod_u + 3*CUDA.sqrt(pr/rho))
             delta_t *= cfl
             if min_delt > delta_t
                 min_delt = delta_t
@@ -196,8 +196,8 @@ function state_update_outer_kernel(gpuGlobalDataFauxFixed, gpuGlobalDataRest, gp
     gamma::Float64 = gpuConfigData[15]
     theta = deg2rad(gpuConfigData[5])
 
-    u1_inf::Float64 = Mach*CUDAnative.cos(theta)
-    u2_inf::Float64 = Mach*CUDAnative.sin(theta)
+    u1_inf::Float64 = Mach*CUDA.cos(theta)
+    u2_inf::Float64 = Mach*CUDA.sin(theta)
 
     tx = ny
     ty = -nx
@@ -209,9 +209,9 @@ function state_update_outer_kernel(gpuGlobalDataFauxFixed, gpuGlobalDataRest, gp
     e_inf = (pr_inf/(rho_inf*(gamma-1))) + 0.5 * (temp1)
 
     beta = (0.5 * rho_inf)/pr_inf
-    S2 = u2_inf_rot * CUDAnative.sqrt(beta)
-    B2_inf = CUDAnative.exp(-S2*S2)/(2*CUDAnative.sqrt(pi*beta))
-    A2n_inf = 0.5 * (1 - CUDAnative.erf(S2))
+    S2 = u2_inf_rot * CUDA.sqrt(beta)
+    B2_inf = CUDA.exp(-S2*S2)/(2*CUDA.sqrt(pi*beta))
+    A2n_inf = 0.5 * (1 - CUDA.erf(S2))
 
     rho = gpuGlobalDataRest[idx, 1]
     u1 = gpuGlobalDataRest[idx, 2]
@@ -225,9 +225,9 @@ function state_update_outer_kernel(gpuGlobalDataFauxFixed, gpuGlobalDataRest, gp
     e = (pr/(rho*(gamma-1))) + 0.5*(temp1)
 
     beta = (rho)/(2*pr)
-    S2 = u2_rot*CUDAnative.sqrt(beta)
-    B2 = CUDAnative.exp(-S2*S2)/(2*CUDAnative.sqrt(pi*beta))
-    A2p = 0.5*(1 + CUDAnative.erf(S2))
+    S2 = u2_rot*CUDA.sqrt(beta)
+    B2 = CUDA.exp(-S2*S2)/(2*CUDA.sqrt(pi*beta))
+    A2p = 0.5*(1 + CUDA.erf(S2))
 
     U1 = (rho_inf*A2n_inf) + (rho*A2p)
 
@@ -253,9 +253,9 @@ function state_update_outer_kernel(gpuGlobalDataFauxFixed, gpuGlobalDataRest, gp
     e = (pr/(rho*(gamma-1))) + 0.5*(temp1)
 
     beta = (rho)/(2*pr)
-    S2 = u2_rot*CUDAnative.sqrt(beta)
-    B2 = CUDAnative.exp(-S2*S2)/(2*CUDAnative.sqrt(pi*beta))
-    A2p = 0.5*(1 + CUDAnative.erf(S2))
+    S2 = u2_rot*CUDA.sqrt(beta)
+    B2 = CUDA.exp(-S2*S2)/(2*CUDA.sqrt(pi*beta))
+    A2p = 0.5*(1 + CUDA.erf(S2))
 
     U1_old = (rho_inf*A2n_inf) + (rho*A2p)
     U2_old = (rho_inf*u1_inf_rot*A2n_inf) + (rho*u1_rot*A2p)

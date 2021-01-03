@@ -31,8 +31,8 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGl
         dely = gpuGlobalDataFauxFixed[conn + numPoints] - y_i
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
-        dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, power)
+        dist = CUDA.hypot(dels, deln)
+        weights = CUDA.pow(dist, power)
         # weights = 1.0
 
 
@@ -48,7 +48,7 @@ function outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGl
         flux_quad_GxIII_kernel(nx, ny, idx, shared, +)
         venkat_limiter_kernel_qtilde(gpuGlobalDataFauxFixed, gpuGlobalDataRest, conn, gpuConfigData, numPoints, delx, dely, shared, qtilde_shared)
         flux_quad_GxIII_kernel(nx, ny, idx, shared, -)
-        # CUDAnative.synchronize()
+        # CUDA.synchronize()
         temp_var = @SVector [shared[thread_idx], shared[thread_idx + block_dim], shared[thread_idx + block_dim * 2], shared[thread_idx + block_dim * 3] ]
         sum_delx_delf += temp_var * dels_weights
         sum_dely_delf += temp_var * deln_weights
@@ -98,8 +98,8 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGl
         dely = gpuGlobalDataFauxFixed[conn + numPoints] - y_i
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
-        dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, power)
+        dist = CUDA.hypot(dels, deln)
+        weights = CUDA.pow(dist, power)
         # weights = 1.0
 
 
@@ -115,7 +115,7 @@ function outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGl
         flux_quad_GxIV_kernel(nx, ny, idx, shared, +)
         venkat_limiter_kernel_qtilde(gpuGlobalDataFauxFixed, gpuGlobalDataRest, conn, gpuConfigData, numPoints, delx, dely, shared, qtilde_shared)
         flux_quad_GxIV_kernel(nx, ny, idx, shared, -)
-        # CUDAnative.synchronize()
+        # CUDA.synchronize()
         temp_var = @SVector [shared[thread_idx], shared[thread_idx + block_dim], shared[thread_idx + block_dim * 2], shared[thread_idx + block_dim * 3] ]
         sum_delx_delf += temp_var * dels_weights
         sum_dely_delf += temp_var * deln_weights
@@ -165,8 +165,8 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGl
         dely = gpuGlobalDataFauxFixed[conn + numPoints] - y_i
         dels = delx*ny - dely*nx
         deln = delx*nx + dely*ny
-        dist = CUDAnative.hypot(dels, deln)
-        weights = CUDAnative.pow(dist, power)
+        dist = CUDA.hypot(dels, deln)
+        weights = CUDA.pow(dist, power)
         # weights = 1.0
 
 
@@ -182,7 +182,7 @@ function outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGl
         flux_Gyp_kernel(nx, ny, idx, shared, +)
         venkat_limiter_kernel_qtilde(gpuGlobalDataFauxFixed, gpuGlobalDataRest, conn, gpuConfigData, numPoints, delx, dely, shared, qtilde_shared)
         flux_Gyp_kernel(nx, ny, idx, shared, -)
-        # CUDAnative.synchronize()
+        # CUDA.synchronize()
         temp_var = @SVector [shared[thread_idx], shared[thread_idx + block_dim], shared[thread_idx + block_dim * 2], shared[thread_idx + block_dim * 3] ]
         sum_delx_delf += temp_var * dels_weights
         sum_dely_delf += temp_var * deln_weights

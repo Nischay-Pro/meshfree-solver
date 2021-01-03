@@ -42,11 +42,11 @@ function venkat_limiter_kernel_qtilde(gpuGlobalDataFauxFixed, gpuGlobalDataRest,
     u1 = qtilde_shared[thread_idx + block_dim * 1]*temp
     u2 = qtilde_shared[thread_idx + block_dim * 2]*temp
 
-    temp2 = qtilde_shared[thread_idx] + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(gamma-1))
-    # rho = CUDAnative.exp(temp2)
+    temp2 = qtilde_shared[thread_idx] + beta*(u1*u1 + u2*u2) - (CUDA.log(beta)/(gamma-1))
+    # rho = CUDA.exp(temp2)
     shared[thread_idx + block_dim * 4] = u1
     shared[thread_idx + block_dim * 5] = u2
-    shared[thread_idx + block_dim * 6] = CUDAnative.exp(temp2)
+    shared[thread_idx + block_dim * 6] = CUDA.exp(temp2)
     shared[thread_idx + block_dim * 7] = shared[thread_idx + block_dim * 6]*temp
     return nothing
 end
@@ -103,11 +103,11 @@ end
 #     u1 = qtilde_shared[thread_idx + block_dim * 1]*temp
 #     u2 = qtilde_shared[thread_idx + block_dim * 2]*temp
 
-#     temp2 = qtilde_shared[thread_idx] + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(ldg(gpuConfigData, 15)-1))
-#     # rho = CUDAnative.exp(temp2)
+#     temp2 = qtilde_shared[thread_idx] + beta*(u1*u1 + u2*u2) - (CUDA.log(beta)/(ldg(gpuConfigData, 15)-1))
+#     # rho = CUDA.exp(temp2)
 #     shared[thread_idx + block_dim * 4] = u1
 #     shared[thread_idx + block_dim * 5] = u2
-#     shared[thread_idx + block_dim * 6] = CUDAnative.exp(temp2)
+#     shared[thread_idx + block_dim * 6] = CUDA.exp(temp2)
 #     shared[thread_idx + block_dim * 7] = shared[thread_idx + block_dim * 6]*temp
 
 #     # if idx == 3
@@ -158,11 +158,11 @@ end
 #     u1 = qtilde[2]*temp
 #     u2 = qtilde[3]*temp
 
-#     temp2 = qtilde[1] + beta*(u1*u1 + u2*u2) - (CUDAnative.log(beta)/(ldg(gpuConfigData, 15)-1))
-#     # rho = CUDAnative.exp(temp2)
+#     temp2 = qtilde[1] + beta*(u1*u1 + u2*u2) - (CUDA.log(beta)/(ldg(gpuConfigData, 15)-1))
+#     # rho = CUDA.exp(temp2)
 #     shared[thread_idx + block_dim * 4] = u1
 #     shared[thread_idx + block_dim * 5] = u2
-#     shared[thread_idx + block_dim * 6] = CUDAnative.exp(temp2)
+#     shared[thread_idx + block_dim * 6] = CUDA.exp(temp2)
 #     shared[thread_idx + block_dim * 7] = shared[thread_idx + block_dim * 6]*temp
 #     return nothing
 # end

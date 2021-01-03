@@ -63,7 +63,7 @@ function main()
     # replace_storage(Array, globaldata)
     # println(typeof(globaldata))
 
-    println(max_iters + 1)
+    println(max_iters)
     function run_code(globaldata, configData, res_old, numPoints, main_store, tempdq)
         for i in 1:max_iters
             fpi_solver(i, globaldata, configData, res_old, numPoints, main_store, tempdq)
@@ -71,7 +71,7 @@ function main()
     end
 
     function test_code(globaldata, configData, res_old, numPoints, main_store)
-        println("Starting warmup function")
+        # println("Starting warmup function")
         # fpi_solver(1, globaldata, configData,  res_old, numPoints)
         res_old[1] = 0.0
         # Profile.clear_malloc_data()

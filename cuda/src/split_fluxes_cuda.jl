@@ -11,9 +11,9 @@ function flux_Gxp_kernel(nx, ny, idx, shared, op::Function)
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
-    S1 = ut*CUDAnative.sqrt(beta)
-    B1 = 0.5*CUDAnative.exp(-S1*S1)/CUDAnative.sqrt(pi*beta)
-    A1pos = 0.5*(1 + CUDAnative.erf(S1))
+    S1 = ut*CUDA.sqrt(beta)
+    B1 = 0.5*CUDA.exp(-S1*S1)/CUDA.sqrt(pi*beta)
+    A1pos = 0.5*(1 + CUDA.erf(S1))
 
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
@@ -46,9 +46,9 @@ function flux_Gxn_kernel(nx, ny, idx, shared, op::Function)
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
-    S1 = ut*CUDAnative.sqrt(beta)
-    B1 = 0.5*CUDAnative.exp(-S1*S1)/CUDAnative.sqrt(pi*beta)
-    A1neg = 0.5*(1 - CUDAnative.erf(S1))
+    S1 = ut*CUDA.sqrt(beta)
+    B1 = 0.5*CUDA.exp(-S1*S1)/CUDA.sqrt(pi*beta)
+    A1neg = 0.5*(1 - CUDA.erf(S1))
 
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
@@ -79,9 +79,9 @@ function flux_Gyp_kernel(nx, ny, idx, shared, op::Function)
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
-    S2 = un*CUDAnative.sqrt(beta)
-    B2 = 0.5*CUDAnative.exp(-S2*S2)/CUDAnative.sqrt(pi*beta)
-    A2pos = 0.5*(1 + CUDAnative.erf(S2))
+    S2 = un*CUDA.sqrt(beta)
+    B2 = 0.5*CUDA.exp(-S2*S2)/CUDA.sqrt(pi*beta)
+    A2pos = 0.5*(1 + CUDA.erf(S2))
 
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
@@ -114,9 +114,9 @@ function flux_Gyn_kernel(nx, ny, idx, shared, op::Function)
     un = u1*nx + u2*ny
 
     beta = 0.5*rho/pr
-    S2 = un*CUDAnative.sqrt(beta)
-    B2 = 0.5*CUDAnative.exp(-S2*S2)/CUDAnative.sqrt(pi*beta)
-    A2neg = 0.5*(1 - CUDAnative.erf(S2))
+    S2 = un*CUDA.sqrt(beta)
+    B2 = 0.5*CUDA.exp(-S2*S2)/CUDA.sqrt(pi*beta)
+    A2neg = 0.5*(1 - CUDA.erf(S2))
 
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un

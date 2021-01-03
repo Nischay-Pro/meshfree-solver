@@ -1,4 +1,3 @@
-
 function main()
     configData = getConfig()
     file_name = string(ARGS[1])
@@ -21,13 +20,9 @@ function main()
     println(sizeof(globalDataConn))
     println(sizeof(globalDataConnSection))
 
-    # table = Array{Int,1}(undef, numPoints)
+
     defprimal = getInitialPrimitive(configData)
-    # wallpts, Interiorpts, outerpts, shapepts = 0,0,0,0
-    # wallptsidx = Array{Int,1}(undef, 0)
-    # Interiorptsidx = Array{Int,1}(undef, 0)
-    # outerptsidx = Array{Int,1}(undef, 0)
-    # shapeptsidx = Array{Int,1}(undef, 0)
+
     println("Start Read")
     if format == "structured"
         readFileExtra(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
@@ -38,20 +33,9 @@ function main()
     else
         @warn "Illegal Format Type"
     end
-    # file1 = open("partGridNew--160-60")
-    # data1 = read(file1, String)
-    # splitdata = split(data1, "\n")
-    # print(splitdata[1:3])
-    # splitdata = splitdata[1:end-1]
-    # print(splitdata[1:3])
 
     println("Passing to CPU Globaldata")
-    # count = 0
 
-
-    # print(wallptsidx)
-
-    # if format == 1
     interior = configData["point"]["interior"]
     wall = configData["point"]["wall"]
     outer = configData["point"]["outer"]
@@ -59,7 +43,6 @@ function main()
         placeNormals(globaldata, idx, configData, interior, wall, outer)
         convertToFauxArray(globalDataFauxFixed, globaldata[idx], idx, numPoints)
     end
-    # end
 
     println("Start table sorting")
     @showprogress 3 "Computing Table" for idx in 1:numPoints
@@ -72,21 +55,12 @@ function main()
 
 
     dev = CuDevice(0)
-    CuContext(dev) do ctx
+    # CuContext(dev) do ctx
 
     println("Running on ", dev)
-    # return
-    # typeof(globalDataConn[1])
-    # print(globaldata[1].dq)
-    # println(typeof(globaldata))
-    # println(globaldata[2762])
-    # println(globaldata[2763])
-    # globaldata_copy = deepcopy(globaldata)
-    # gpu_globaldata[1:2000] = CuArray(globaldata[1:2000])
-    # println(typeof(gpuGlobaldataDq))
-    # gpuGlobaldataLocalID = CuArray(globaldataLocalID)
-    gpuSumResSqr = CuArrays.zeros(Float64, numPoints)
-    gpuSumResSqrOutput = CuArrays.zeros(Float64, numPoints)
+
+    gpuSumResSqr = CUDA.zeros(Float64, numPoints)
+    gpuSumResSqrOutput = CUDA.zeros(Float64, numPoints)
     println("Passing to GPU Globaldata")
     # gpuGlobalDataCommon = CuArray(globalDataCommon)
     gpuConfigData = CuArray([
@@ -152,7 +126,7 @@ function main()
         res_old = 0
         println("Starting main function")
         @timeit to "nest 1" begin
-            CuArrays.@sync begin fpi_solver_cuda(Int(configData["core"]["max_iters"]), configData["core"]["innerloop"], gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput,
+            CUDA.@sync begin fpi_solver_cuda(Int(configData["core"]["max_iters"]), configData["core"]["innerloop"], gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput,
                 threadsperblock,blockspergrid, numPoints)
             end
         end
@@ -190,5 +164,5 @@ function main()
     #    print(file, "\n")
     # end
     # close(file)
-    end
+    # end
 end
