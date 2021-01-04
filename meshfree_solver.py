@@ -3,17 +3,19 @@ import core
 import config
 import argparse
 from progress import printProgressBar
-from tqdm import tqdm
+from tqdm import tqdm, trange
 import output
+import h5py
+import math
 
 def main():
 
-    globaldata = ["start"]
+    globaldata = {}
 
     configData = config.getConfig()
 
     wallpts, interiorpts, outerpts = 0,0,0
-    wallptsidx, interiorptsidx, outerptsidx, table = [],[],[],[]
+    wallptsidx, interiorptsidx, outerptsidx = [],[],[]
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", help="Grid File Location", type=str, default="partGridNew")
@@ -27,85 +29,71 @@ def main():
     if not args.inner == 0:
         configData["core"]["inner"] = args.inner
 
-    file1 = open(args.file)
     print("Loading file: %s" % args.file)
-    data1 = file1.read()
-    splitdata = data1.split("\n")
-    if len(splitdata[-1]) < 4:
-        splitdata = splitdata[:-1]
+    h5file = h5py.File(args.file, "r")
+    partitions = len(h5file.keys())
+    print("Detected {} partition(s)".format(partitions))
     print("Getting Primitive Values Default")
     defprimal = core.getInitialPrimitive(configData)
-
-    format = configData["core"]["format"]
-
-    # Format 0: 6th Grid Format
-    # Format 1: Old Format
-    # Format 2: QuadTree Format
-
-    splitdata.pop(0)
-
-    print("Converting RAW dataset to Globaldata")
-    for idx, itm in enumerate(tqdm(splitdata)):
-        itmdata = itm.split(" ")[:-1]
-        if format == 1:
-            temp = Point(int(itmdata[0]), float(itmdata[1]), float(itmdata[2]), 1, 1, int(itmdata[5]), int(itmdata[6]), int(itmdata[8]), list(map(int,itmdata[9:])), float(itmdata[3]), float(itmdata[4]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[7]), 0)
-        elif format == 2:
-            temp = Point(idx + 1, float(itmdata[0]), float(itmdata[1]), int(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[10]), list(map(int, itmdata[11:])), float(itmdata[6]), float(itmdata[7]), defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[9]), int(itmdata[8]))
-        else:
-            temp = Point(idx + 1, float(itmdata[0]), float(itmdata[1]), int(itmdata[2]), int(itmdata[3]), int(itmdata[4]), int(itmdata[5]), int(itmdata[7]), list(map(int,itmdata[8:])), 1, 0, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, float(itmdata[6]), 0)
-        globaldata.append(temp)
-        if format == 0 or format == 1:
-            if int(itmdata[4]) == configData["point"]["wall"]:
+    for i in trange(1, partitions + 1):
+        localData = h5file.get("{}/{}".format(str(i), "local"))
+        localpts = localData.shape[0]
+        for itm in localData:
+            idx = int(itm[0])
+            x = float(itm[1])
+            y = float(itm[2])
+            nx = 1
+            ny = 0
+            min_dist = float(itm[5])
+            left = int(itm[6])
+            right = int(itm[7])
+            qt_depth = int(itm[8])
+            flag_1 = int(itm[9])
+            flag_2 = int(itm[10])
+            nbhs = int(itm[11])
+            conn = tuple(map(int, itm[12:12+nbhs]))
+            temp = Point(idx, x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, defprimal, None, None, None, None, None, None, None, None, None, None, None, None, None, min_dist, qt_depth)
+            globaldata[idx] = temp
+            if flag_1 == configData["point"]["wall"]:
                 wallpts += 1
-                wallptsidx.append(idx + 1)
-            elif int(itmdata[4]) == configData["point"]["interior"]:
+                wallptsidx.append(idx)
+            elif flag_1 == configData["point"]["interior"]:
                 interiorpts += 1
-                interiorptsidx.append(idx + 1)
-            elif int(itmdata[4]) == configData["point"]["outer"]:
+                interiorptsidx.append(idx)
+            elif flag_1 == configData["point"]["outer"]:
                 outerpts += 1
-                outerptsidx.append(idx + 1)
-        else:
-            if int(itmdata[4]) == configData["point"]["wall"]:
-                wallpts += 1
-                wallptsidx.append(idx + 1)
-            elif int(itmdata[4]) == configData["point"]["interior"]:
-                interiorpts += 1
-                interiorptsidx.append(idx + 1)
-            elif int(itmdata[4]) == configData["point"]["outer"]:
-                outerpts += 1
-                outerptsidx.append(idx + 1)
-        table.append(idx + 1)
+                outerptsidx.append(idx)
 
-    for idx, itm in enumerate(globaldata):
-        if idx > 0:
-            if itm.checkConnectivity():
-                print(idx + 1)
+    for itm in globaldata.keys():
+        if globaldata[itm].checkConnectivity():
+            print(idx + 1)
 
-    if format == 0 or format == 2:
-        for idx in wallptsidx:
-            currpt = globaldata[idx].getxy()
-            leftpt = globaldata[idx].left
-            leftpt = globaldata[leftpt].getxy()
-            rightpt = globaldata[idx].right
-            rightpt = globaldata[rightpt].getxy()
-            normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
-            globaldata[idx].setNormals(normals)
+    for idx in wallptsidx:
+        currpt = globaldata[idx].getxy()
+        leftpt = globaldata[idx].left
+        leftpt = globaldata[leftpt].getxy()
+        rightpt = globaldata[idx].right
+        rightpt = globaldata[rightpt].getxy()
+        normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
+        globaldata[idx].setNormals(normals)
 
-        for idx in outerptsidx:
-            currpt = globaldata[idx].getxy()
-            leftpt = globaldata[idx].left
-            leftpt = globaldata[leftpt].getxy()
-            rightpt = globaldata[idx].right
-            rightpt = globaldata[rightpt].getxy()
-            normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
-            globaldata[idx].setNormals(normals)
+    for idx in outerptsidx:
+        currpt = globaldata[idx].getxy()
+        leftpt = globaldata[idx].left
+        leftpt = globaldata[leftpt].getxy()
+        rightpt = globaldata[idx].right
+        rightpt = globaldata[rightpt].getxy()
+        normals = core.calculateNormals(leftpt, rightpt, currpt[0], currpt[1])
+        globaldata[idx].setNormals(normals)
 
     print("Calculating Connectivity")
-    for idx in table:
+    for idx in range(1, len(globaldata) + 1):
         connectivity = core.calculateConnectivity(globaldata, idx, configData)
         globaldata[idx].setConnectivity(connectivity)
 
     res_old = 0
+
+    globaldata[0] = "Dummy"
 
     print("Starting FPI Solver")
     _, globaldata = core.fpi_solver(config.getConfig()["core"]["max_iters"] + 1, globaldata, configData, wallptsidx, outerptsidx, interiorptsidx, res_old)
