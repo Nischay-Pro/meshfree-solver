@@ -2,11 +2,9 @@ __precompile__()
 
 module main_module
 
-# using CuArrays
-# using CUDAdrv
-# using CUDAnative
 using CUDA
 using DelimitedFiles
+using HDF5
 using JSON
 using Printf
 using ProgressMeter

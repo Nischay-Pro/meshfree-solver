@@ -1,12 +1,10 @@
 function main()
     configData = getConfig()
     file_name = string(ARGS[1])
+    file_name = "/home/kumar/FORTRAN/mfcfd/examples/cuda/point/point.h5"
     format = configData["format"]["type"]
 
-    numPoints = returnFileLength(file_name)
-    if format == "old"
-        numPoints += 1
-    end
+    numPoints = returnHDF5FileLength(file_name)
     println("Number of points ", numPoints)
 
     globaldata = Array{Point,1}(undef, numPoints)
@@ -20,19 +18,9 @@ function main()
     println(sizeof(globalDataConn))
     println(sizeof(globalDataConnSection))
 
-
     defprimal = getInitialPrimitive(configData)
 
-    println("Start Read")
-    if format == "structured"
-        readFileExtra(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
-    elseif format == "quadtree"
-        readFileQuadtree(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
-    elseif format == "old"
-        readFile(file_name::String, globaldata, defprimal, globalDataRest, numPoints)
-    else
-        @warn "Illegal Format Type"
-    end
+    readHDF5File(file_name, globaldata, defprimal, globalDataRest, numPoints)
 
     println("Passing to CPU Globaldata")
 
@@ -89,32 +77,8 @@ function main()
     gpuGlobalDataConnSection = CuArray(globalDataConnSection)
     gpuGlobalDataFauxFixed = CuArray(globalDataFauxFixed)
     println("GPU ConfigGlobaldata Finished")
-    # gpuGlobaldataDq = CuArray(globaldataDq)
-    # println()
-    # println(isbitstype(globaldata) == true)
-    # d_globaldata_out = similar(d_globaldata)
-    # d_globaldata2 = CuArray(globaldata[2001:4000])
-    # d_globaldata = CuArray(globaldata_copy)
-    # testarray = Array(d_globaldata)
-    # globaldata[1:256] = Array(globaldata1)
-    # println(sizeof(d_globaldata))
-    # println(sizeof(globaldata[2762]))
-    # println(sizeof(globaldata[2763]))
-    res_old = 0
-    # print(Int(getConfig()["core"]["max_iters"]) + 1)
-    # for i in 1:(Int(getConfig()["core"]["max_iters"]))
-    # println(globaldata[3])
-    # fpi_solver(1, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
-    # end
-    # for i in 1:(Int(getConfig()["core"]["max_iters"]))
-    #     fpi_solver(i, globaldata, configData, wallptsidx, outerptsidx, Interiorptsidx, res_old)
-    # end
 
-    # len = 10^7
-    # input = ones(Int32, len)
-    # output = similar(input)
-    # gpu_input = CuArray(input)
-    # gpu_output = CuArray(output)
+    res_old = 0
 
     threadsperblock = Int(configData["core"]["threadsperblock"])
     threadsperblock = parse(Int , ARGS[2])
