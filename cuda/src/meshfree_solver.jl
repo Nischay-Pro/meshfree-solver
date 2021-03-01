@@ -1,7 +1,6 @@
 function main()
     configData = getConfig()
     file_name = string(ARGS[1])
-    file_name = "/home/kumar/FORTRAN/mfcfd/examples/cuda/point/point.h5"
     format = configData["format"]["type"]
 
     numPoints = returnHDF5FileLength(file_name)
