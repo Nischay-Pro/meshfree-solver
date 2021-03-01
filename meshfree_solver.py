@@ -5,8 +5,8 @@ import argparse
 from progress import printProgressBar
 from tqdm import tqdm, trange
 import output
-import h5py
 import math
+from pandas import HDFStore, read_hdf
 
 def main():
 
@@ -30,15 +30,16 @@ def main():
         configData["core"]["inner"] = args.inner
 
     print("Loading file: %s" % args.file)
-    h5file = h5py.File(args.file, "r", rdcc_nbytes=1024*1024*16000, rdcc_nslots=1e8, rdcc_w0=1)
-    partitions = len(h5file.keys())
+    h5file = HDFStore(args.file)
+    for itm in h5file.walk():
+        partitions = len(itm[1])
+        break
     print("Detected {} partition(s)".format(partitions))
     print("Getting Primitive Values Default")
     defprimal = core.getInitialPrimitive(configData)
     for i in trange(1, partitions + 1):
-        localData = h5file.get("{}/{}".format(str(i), "local"))
-        localpts = localData.shape[0]
-        for itm in localData:
+        localData = h5file.get_node("/{}/{}".format(str(i), "local"))
+        for itm in tqdm(localData):
             idx = int(itm[0])
             x = float(itm[1])
             y = float(itm[2])
@@ -64,6 +65,7 @@ def main():
                 outerpts += 1
                 outerptsidx.append(idx)
 
+    h5file.close()
     for itm in globaldata.keys():
         if globaldata[itm].checkConnectivity():
             print(idx + 1)
