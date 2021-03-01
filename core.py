@@ -223,6 +223,7 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
     with open('grid_{}.txt'.format(len(globaldata)), 'a+') as the_file:
         the_file.write("Block Dimensions: ({}, 1)\nRuntime: {}\n".format(int(configData['core']['blockGridX']), (b - a - (d - c))))
     if configData["core"]["profile"]:
+        print("Time taken: {} seconds.".format(b - a - (d - c)))
         exit()
     if configData["core"]["output"]:
         objective_function.compute_cl_cd_cm(x_gpu.copy_to_host(), y_gpu.copy_to_host(), nx_gpu.copy_to_host(), ny_gpu.copy_to_host(), left_gpu.copy_to_host(), right_gpu.copy_to_host(), prim_gpu.copy_to_host(), flag_2_gpu.copy_to_host(), configData, wallindices)
