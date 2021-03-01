@@ -136,6 +136,7 @@ def fpi_solver(iter, globaldata, configData, wallindices, outerindices, interior
 
 def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, interiorindices, res_old):
     stream = cuda.stream()
+    cuda.detect()
     print("Converting Globaldata to GPU")
     try:
         os.remove("residue")

@@ -30,7 +30,7 @@ def main():
         configData["core"]["inner"] = args.inner
 
     print("Loading file: %s" % args.file)
-    h5file = h5py.File(args.file, "r")
+    h5file = h5py.File(args.file, "r", rdcc_nbytes=1024*1024*16000, rdcc_nslots=1e8, rdcc_w0=1)
     partitions = len(h5file.keys())
     print("Detected {} partition(s)".format(partitions))
     print("Getting Primitive Values Default")
