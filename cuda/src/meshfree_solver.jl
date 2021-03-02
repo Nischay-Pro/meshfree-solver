@@ -101,7 +101,7 @@ function main()
             "_" * string(configData["core"]["innerloop"]) *".txt", "w") do io
         print_timer(io, to)
     end
-    globalDataPrim = Array(gpuGlobalDataRest)
+    # globalDataPrim = Array(gpuGlobalDataRest)
 
 
     # println()

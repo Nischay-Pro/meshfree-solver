@@ -131,7 +131,7 @@ function fpi_solver_cuda(iter, inner, gpuGlobalDataConn, gpuGlobalDataConnSectio
     res_old = 0
     println("Blocks per grid is ")
     println(blockspergrid)
-    residue_io = open("residue_cuda.txt", "a+")
+    # residue_io = open("residue_cuda.txt", "a+")
     # fluxthreadsperblock = Int(max(threadsperblock / 4, 32))
     # fluxblockspergrid = Int(ceil(numPoints/fluxthreadsperblock))
 
@@ -176,11 +176,11 @@ function fpi_solver_cuda(iter, inner, gpuGlobalDataConn, gpuGlobalDataConnSectio
             residue = log10(sqrt(sum(res_new))/sqrt(sum(res_old)))
         end
 
-        @printf(residue_io, "%d %.17f\n", i, residue)
+        # @printf(residue_io, "%d %.17f\n", i, residue)
         println(IOContext(stdout, :compact => false),"Iteration Number ", i, " Residue ", residue)
     end
     synchronize()
-    close(residue_io)
+    # close(residue_io)
     return nothing
 end
 
