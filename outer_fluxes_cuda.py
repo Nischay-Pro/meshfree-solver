@@ -7,8 +7,24 @@ from numba import cuda
 from cuda_func import add, zeros, multiply, qtilde_to_primitive_cuda, subtract, multiply_element_wise_shared
 from operator import add as addop, sub as subop
 
-@cuda.jit(device=True)
-def outer_dGx_pos(x, y, nx_gpu, ny_gpu, min_dist, nbhs, conn, xpos_nbhs, xpos_conn, xneg_nbhs, xneg_conn, ypos_nbhs, ypos_conn, yneg_nbhs, yneg_conn, prim, q, maxminq, dq, flux_res, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf, qtilde_shared):
+@cuda.jit(inline=True)
+def outer_dGx_pos(x, y, nx_gpu, ny_gpu, flag_1_gpu, min_dist, nbhs, conn, xpos_nbhs, xpos_conn, prim, q, maxminq, dq, flux_res, power, vl_const, gamma, outer):
+
+    tx = cuda.threadIdx.x
+    bx = cuda.blockIdx.x
+    bw = cuda.blockDim.x
+    idx =  bx * bw + tx
+
+    if flag_1_gpu[idx] != outer:
+        return
+    
+    if idx == 0 or idx >= len(x):
+        return
+
+    other_shared = cuda.shared.array(shape = (1024 * 2), dtype=numba.float64)
+    sum_delx_delf = cuda.shared.array(shape = (256 * 2), dtype=numba.float64)
+    sum_dely_delf = cuda.shared.array(shape = (256 * 2), dtype=numba.float64)
+    qtilde_shared = cuda.shared.array(shape = (256 * 2), dtype=numba.float64)
 
     sum_delx_sqr = 0
     sum_dely_sqr = 0
@@ -50,26 +66,42 @@ def outer_dGx_pos(x, y, nx_gpu, ny_gpu, min_dist, nbhs, conn, xpos_nbhs, xpos_co
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        shared[cuda.threadIdx.x], shared[cuda.threadIdx.x + cuda.blockDim.x], shared[cuda.threadIdx.x + cuda.blockDim.x * 2], shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
+        other_shared[cuda.threadIdx.x], other_shared[cuda.threadIdx.x + cuda.blockDim.x], other_shared[cuda.threadIdx.x + cuda.blockDim.x * 2], other_shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
 
-        limiters_cuda.venkat_limiter(qtilde_shared, q, maxminq, dq, nbhs, conn, x, y, min_dist, idx, vl_const, shared, delx, dely, gamma)
-        quadrant_fluxes_cuda.flux_quad_GxIII(nx, ny, shared, addop)
+        limiters_cuda.venkat_limiter(qtilde_shared, q, maxminq, dq, nbhs, conn, x, y, min_dist, idx, vl_const, other_shared, delx, dely, gamma)
+        quadrant_fluxes_cuda.flux_quad_GxIII(nx, ny, other_shared, addop)
 
-        limiters_cuda.venkat_limiter(qtilde_shared, q, maxminq, dq, nbhs, conn, x, y, min_dist, itm, vl_const, shared, delx, dely, gamma)
-        quadrant_fluxes_cuda.flux_quad_GxIII(nx, ny, shared, subop)
+        limiters_cuda.venkat_limiter(qtilde_shared, q, maxminq, dq, nbhs, conn, x, y, min_dist, itm, vl_const, other_shared, delx, dely, gamma)
+        quadrant_fluxes_cuda.flux_quad_GxIII(nx, ny, other_shared, subop)
 
         for i in range(4):
-            sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] += dels_weights * shared[cuda.threadIdx.x + cuda.blockDim.x * i]
-            sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] += deln_weights * shared[cuda.threadIdx.x + cuda.blockDim.x * i]
+            sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] += dels_weights * other_shared[cuda.threadIdx.x + cuda.blockDim.x * i]
+            sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] += deln_weights * other_shared[cuda.threadIdx.x + cuda.blockDim.x * i]
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
 
     for i in range(4):
-        store[cuda.threadIdx.x + cuda.blockDim.x * i] += one_by_det * (sum_dely_sqr * sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_delx_dely * sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
+        flux_res[idx][i] = one_by_det * (sum_dely_sqr * sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_delx_dely * sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
 
-@cuda.jit(device=True)
-def outer_dGx_neg(x, y, nx_gpu, ny_gpu, min_dist, nbhs, conn, xpos_nbhs, xpos_conn, xneg_nbhs, xneg_conn, ypos_nbhs, ypos_conn, yneg_nbhs, yneg_conn, prim, q, maxminq, dq, flux_res, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf, qtilde_shared):
+@cuda.jit(inline=True)
+def outer_dGx_neg(x, y, nx_gpu, ny_gpu, flag_1_gpu, min_dist, nbhs, conn, xneg_nbhs, xneg_conn, prim, q, maxminq, dq, flux_res, power, vl_const, gamma, outer):
+
+    tx = cuda.threadIdx.x
+    bx = cuda.blockIdx.x
+    bw = cuda.blockDim.x
+    idx =  bx * bw + tx
+
+    if flag_1_gpu[idx] != outer:
+        return
+    
+    if idx == 0 or idx >= len(x):
+        return
+
+    other_shared = cuda.shared.array(shape = (1024 * 2), dtype=numba.float64)
+    sum_delx_delf = cuda.shared.array(shape = (256 * 2), dtype=numba.float64)
+    sum_dely_delf = cuda.shared.array(shape = (256 * 2), dtype=numba.float64)
+    qtilde_shared = cuda.shared.array(shape = (256 * 2), dtype=numba.float64)
 
     sum_delx_sqr = 0
     sum_dely_sqr = 0
@@ -111,26 +143,42 @@ def outer_dGx_neg(x, y, nx_gpu, ny_gpu, min_dist, nbhs, conn, xpos_nbhs, xpos_co
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        shared[cuda.threadIdx.x], shared[cuda.threadIdx.x + cuda.blockDim.x], shared[cuda.threadIdx.x + cuda.blockDim.x * 2], shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
+        other_shared[cuda.threadIdx.x], other_shared[cuda.threadIdx.x + cuda.blockDim.x], other_shared[cuda.threadIdx.x + cuda.blockDim.x * 2], other_shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
 
-        limiters_cuda.venkat_limiter(qtilde_shared, q, maxminq, dq, nbhs, conn, x, y, min_dist, idx, vl_const, shared, delx, dely, gamma)
-        quadrant_fluxes_cuda.flux_quad_GxIV(nx, ny, shared, addop)
+        limiters_cuda.venkat_limiter(qtilde_shared, q, maxminq, dq, nbhs, conn, x, y, min_dist, idx, vl_const, other_shared, delx, dely, gamma)
+        quadrant_fluxes_cuda.flux_quad_GxIV(nx, ny, other_shared, addop)
 
-        limiters_cuda.venkat_limiter(qtilde_shared, q, maxminq, dq, nbhs, conn, x, y, min_dist, itm, vl_const, shared, delx, dely, gamma)
-        quadrant_fluxes_cuda.flux_quad_GxIV(nx, ny, shared, subop)
+        limiters_cuda.venkat_limiter(qtilde_shared, q, maxminq, dq, nbhs, conn, x, y, min_dist, itm, vl_const, other_shared, delx, dely, gamma)
+        quadrant_fluxes_cuda.flux_quad_GxIV(nx, ny, other_shared, subop)
 
         for i in range(4):
-            sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] += dels_weights * shared[cuda.threadIdx.x + cuda.blockDim.x * i]
-            sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] += deln_weights * shared[cuda.threadIdx.x + cuda.blockDim.x * i]
+            sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] += dels_weights * other_shared[cuda.threadIdx.x + cuda.blockDim.x * i]
+            sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] += deln_weights * other_shared[cuda.threadIdx.x + cuda.blockDim.x * i]
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
 
     for i in range(4):
-        store[cuda.threadIdx.x + cuda.blockDim.x * i] += one_by_det * (sum_dely_sqr * sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_delx_dely * sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
+        flux_res[idx][i] += one_by_det * (sum_dely_sqr * sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_delx_dely * sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
 
-@cuda.jit(device=True)
-def outer_dGy_pos(x, y, nx_gpu, ny_gpu, min_dist, nbhs, conn, xpos_nbhs, xpos_conn, xneg_nbhs, xneg_conn, ypos_nbhs, ypos_conn, yneg_nbhs, yneg_conn, prim, q, maxminq, dq, flux_res, idx, power, vl_const, gamma, store, shared, sum_delx_delf, sum_dely_delf, qtilde_shared):
+@cuda.jit(inline=True)
+def outer_dGy_pos(x, y, nx_gpu, ny_gpu, flag_1_gpu, min_dist, nbhs, conn, ypos_nbhs, ypos_conn, prim, q, maxminq, dq, flux_res, power, vl_const, gamma, outer):
+
+    tx = cuda.threadIdx.x
+    bx = cuda.blockIdx.x
+    bw = cuda.blockDim.x
+    idx =  bx * bw + tx
+
+    if flag_1_gpu[idx] != outer:
+        return
+    
+    if idx == 0 or idx >= len(x):
+        return
+
+    other_shared = cuda.shared.array(shape = (1024 * 2), dtype=numba.float64)
+    sum_delx_delf = cuda.shared.array(shape = (256 * 2), dtype=numba.float64)
+    sum_dely_delf = cuda.shared.array(shape = (256 * 2), dtype=numba.float64)
+    qtilde_shared = cuda.shared.array(shape = (256 * 2), dtype=numba.float64)
  
     sum_delx_sqr = 0
     sum_dely_sqr = 0
@@ -172,20 +220,20 @@ def outer_dGy_pos(x, y, nx_gpu, ny_gpu, min_dist, nbhs, conn, xpos_nbhs, xpos_co
 
         sum_delx_dely = sum_delx_dely + dels*deln_weights
 
-        shared[cuda.threadIdx.x], shared[cuda.threadIdx.x + cuda.blockDim.x], shared[cuda.threadIdx.x + cuda.blockDim.x * 2], shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
+        other_shared[cuda.threadIdx.x], other_shared[cuda.threadIdx.x + cuda.blockDim.x], other_shared[cuda.threadIdx.x + cuda.blockDim.x * 2], other_shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 0, 0, 0, 0
 
-        limiters_cuda.venkat_limiter(qtilde_shared, q, maxminq, dq, nbhs, conn, x, y, min_dist, idx, vl_const, shared, delx, dely, gamma)
-        split_fluxes_cuda.flux_Gyp(nx, ny, shared, addop)
+        limiters_cuda.venkat_limiter(qtilde_shared, q, maxminq, dq, nbhs, conn, x, y, min_dist, idx, vl_const, other_shared, delx, dely, gamma)
+        split_fluxes_cuda.flux_Gyp(nx, ny, other_shared, addop)
 
-        limiters_cuda.venkat_limiter(qtilde_shared, q, maxminq, dq, nbhs, conn, x, y, min_dist, itm, vl_const, shared, delx, dely, gamma)
-        split_fluxes_cuda.flux_Gyp(nx, ny, shared, subop)
+        limiters_cuda.venkat_limiter(qtilde_shared, q, maxminq, dq, nbhs, conn, x, y, min_dist, itm, vl_const, other_shared, delx, dely, gamma)
+        split_fluxes_cuda.flux_Gyp(nx, ny, other_shared, subop)
 
         for i in range(4):
-            sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] += dels_weights * shared[cuda.threadIdx.x + cuda.blockDim.x * i]
-            sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] += deln_weights * shared[cuda.threadIdx.x + cuda.blockDim.x * i]
+            sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i] += dels_weights * other_shared[cuda.threadIdx.x + cuda.blockDim.x * i]
+            sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] += deln_weights * other_shared[cuda.threadIdx.x + cuda.blockDim.x * i]
 
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1 / det
 
     for i in range(4):
-        store[cuda.threadIdx.x + cuda.blockDim.x * i] += one_by_det * (sum_delx_sqr * sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_delx_dely * sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i])
+        flux_res[idx][i] += one_by_det * (sum_delx_sqr * sum_dely_delf[cuda.threadIdx.x + cuda.blockDim.x * i] - sum_delx_dely * sum_delx_delf[cuda.threadIdx.x + cuda.blockDim.x * i])

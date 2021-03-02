@@ -17,6 +17,10 @@ import os
 import limiters_cuda
 import helper
 
+import wall_fluxes_cuda
+import interior_fluxes_cuda
+import outer_fluxes_cuda
+
 def getInitialPrimitive(configData):
     rho_inf = float(configData["core"]["rho_inf"])
     mach = float(configData["core"]["mach"])
@@ -202,7 +206,20 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
                     for _ in range(0, configData['core']['inner']):
                         q_var_derivatives_innerloops_kernel[blockspergrid, threadsperblock](x_gpu, y_gpu, q_gpu, dq_gpu, conn_gpu, nbhs_gpu, float(configData['core']['power']), inner_gpu)
                         update_innerloop[blockspergrid, threadsperblock](dq_gpu, inner_gpu)
-                flux_residual.cal_flux_residual_cuda_kernel[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, xpos_nbhs_gpu, xpos_conn_gpu, xneg_nbhs_gpu, xneg_conn_gpu, ypos_nbhs_gpu, ypos_conn_gpu, yneg_nbhs_gpu, yneg_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]))
+                
+                wall_fluxes_cuda.wall_dGx_pos[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, xpos_nbhs_gpu, xpos_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["wall"]))
+                wall_fluxes_cuda.wall_dGx_neg[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, xneg_nbhs_gpu, xneg_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["wall"]))
+                wall_fluxes_cuda.wall_dGy_neg[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, yneg_nbhs_gpu, yneg_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["wall"]))
+                
+                interior_fluxes_cuda.interior_dGx_pos[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, xpos_nbhs_gpu, xpos_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["interior"]))
+                interior_fluxes_cuda.interior_dGx_neg[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, xneg_nbhs_gpu, xneg_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["interior"]))
+                interior_fluxes_cuda.interior_dGy_pos[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, ypos_nbhs_gpu, ypos_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["interior"]))
+                interior_fluxes_cuda.interior_dGy_neg[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, yneg_nbhs_gpu, yneg_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["interior"]))
+                
+                outer_fluxes_cuda.outer_dGx_pos[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, xpos_nbhs_gpu, xpos_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["outer"]))
+                outer_fluxes_cuda.outer_dGx_neg[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, xneg_nbhs_gpu, xneg_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["outer"]))
+                outer_fluxes_cuda.outer_dGy_pos[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, yneg_nbhs_gpu, yneg_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["outer"]))
+
                 state_update_cuda.state_update_cuda[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, nbhs_gpu, conn_gpu, prim_gpu, prim_old_gpu, delta_gpu, flux_res_gpu, float(configData["core"]["mach"]), float(configData["core"]["gamma"]), float(configData["core"]["pr_inf"]), float(configData["core"]["rho_inf"]), float(configData["core"]["aoa"]), sum_res_sqr_gpu, int(configData["point"]["wall"]), int(configData["point"]["interior"]), int(configData["point"]["outer"]), rk, eu)
             if i == 1:
                 d = time.time()
