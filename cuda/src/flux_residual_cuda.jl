@@ -3,9 +3,9 @@ function cal_flux_residual_kernel1(gpuGlobalDataConn, gpuGlobalDataConnSection, 
 	thread_idx = threadIdx().x
 	block_dim = blockDim().x
 
-	shared = @cuStaticSharedMem(Float64, 512)
+	shared = @cuStaticSharedMem(Float64, 1024)
 	flux_shared = @cuStaticSharedMem(Float64, 0)
-	qtilde_shared = @cuStaticSharedMem(Float64, 256)
+	qtilde_shared = @cuStaticSharedMem(Float64, 512)
 	if idx > 0 && idx <= numPoints
 
 		# flux_shared[thread_idx], flux_shared[thread_idx + block_dim], flux_shared[thread_idx + block_dim * 2],
@@ -32,9 +32,9 @@ function cal_flux_residual_kernel2(gpuGlobalDataConn, gpuGlobalDataConnSection, 
 	thread_idx = threadIdx().x
 	block_dim = blockDim().x
 
-	shared = @cuStaticSharedMem(Float64, 512)
+	shared = @cuStaticSharedMem(Float64, 1024)
 	flux_shared = @cuStaticSharedMem(Float64, 0)
-	qtilde_shared = @cuStaticSharedMem(Float64, 256)
+	qtilde_shared = @cuStaticSharedMem(Float64, 512)
 	if idx > 0 && idx <= numPoints
 
 		# flux_shared[thread_idx], flux_shared[thread_idx + block_dim], flux_shared[thread_idx + block_dim * 2],
@@ -55,9 +55,9 @@ function cal_flux_residual_kernel3(gpuGlobalDataConn, gpuGlobalDataConnSection, 
 	thread_idx = threadIdx().x
 	block_dim = blockDim().x
 
-	shared = @cuStaticSharedMem(Float64, 512)
+	shared = @cuStaticSharedMem(Float64, 1024)
 	flux_shared = @cuStaticSharedMem(Float64, 0)
-	qtilde_shared = @cuStaticSharedMem(Float64, 256)
+	qtilde_shared = @cuStaticSharedMem(Float64, 512)
 	if idx > 0 && idx <= numPoints
 
 		# flux_shared[thread_idx], flux_shared[thread_idx + block_dim], flux_shared[thread_idx + block_dim * 2],
@@ -77,9 +77,9 @@ function cal_flux_residual_kernel4(gpuGlobalDataConn, gpuGlobalDataConnSection, 
 	thread_idx = threadIdx().x
 	block_dim = blockDim().x
 
-	shared = @cuStaticSharedMem(Float64, 512)
+	shared = @cuStaticSharedMem(Float64, 1024)
 	flux_shared = @cuStaticSharedMem(Float64, 0)
-	qtilde_shared = @cuStaticSharedMem(Float64, 256)
+	qtilde_shared = @cuStaticSharedMem(Float64, 512)
 	if idx > 0 && idx <= numPoints
 
 		# flux_shared[thread_idx], flux_shared[thread_idx + block_dim], flux_shared[thread_idx + block_dim * 2],
@@ -99,9 +99,9 @@ function cal_flux_residual_kernel5(gpuGlobalDataConn, gpuGlobalDataConnSection, 
 	thread_idx = threadIdx().x
 	block_dim = blockDim().x
 
-	shared = @cuStaticSharedMem(Float64, 512)
+	shared = @cuStaticSharedMem(Float64, 1024)
 	flux_shared = @cuStaticSharedMem(Float64, 0)
-	qtilde_shared = @cuStaticSharedMem(Float64, 256)
+	qtilde_shared = @cuStaticSharedMem(Float64, 512)
 	if idx > 0 && idx <= numPoints
 
 		# flux_shared[thread_idx], flux_shared[thread_idx + block_dim], flux_shared[thread_idx + block_dim * 2],
