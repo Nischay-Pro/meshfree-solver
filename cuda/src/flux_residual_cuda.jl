@@ -15,18 +15,10 @@ function cal_flux_residual_kernel1(gpuGlobalDataConn, gpuGlobalDataConnSection, 
             wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
             wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
             wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
-            gpuGlobalDataRest[idx, 5] = flux_shared[thread_idx]
-            gpuGlobalDataRest[idx, 6] = flux_shared[thread_idx + block_dim]
-            gpuGlobalDataRest[idx, 7] = flux_shared[thread_idx + block_dim * 2]
-            gpuGlobalDataRest[idx, 8] = flux_shared[thread_idx + block_dim * 3]
 		elseif gpuGlobalDataFauxFixed[idx + 4 * numPoints] == gpuConfigData[19]
             outer_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
             outer_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
             outer_dGy_pos_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints, shared, flux_shared, qtilde_shared)
-            gpuGlobalDataRest[idx, 5] = flux_shared[thread_idx]
-            gpuGlobalDataRest[idx, 6] = flux_shared[thread_idx + block_dim]
-            gpuGlobalDataRest[idx, 7] = flux_shared[thread_idx + block_dim * 2]
-            gpuGlobalDataRest[idx, 8] = flux_shared[thread_idx + block_dim * 3]
 		end
 	else
 		return nothing

@@ -33,10 +33,6 @@ function readHDF5File(file_name::String, globaldata, defprimal, globalDataRest, 
             itm[13:12 + Int(itm[12, idx]), idx],
             itm[4, idx],
             itm[6, idx],
-            copy(defprimal),
-            zeros(Float64, 4),
-            zeros(Float64, 4),
-            Array{Array{Float64,1},1}(undef, 0),
             0.0,
             0,
             0,
@@ -46,9 +42,7 @@ function readHDF5File(file_name::String, globaldata, defprimal, globalDataRest, 
             Array{Int,1}(undef, 0),
             Array{Int,1}(undef, 0),
             Array{Int,1}(undef, 0),
-            0.0,
-            zeros(Float64, 4),
-            zeros(Float64, 4))
+            0.0)
 
         globaldata[idx] = temp
         globalDataRest[idx, 1:4] = copy(defprimal)

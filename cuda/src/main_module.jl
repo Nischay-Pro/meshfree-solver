@@ -3,7 +3,6 @@ __precompile__()
 module main_module
 
 using CUDA
-using DelimitedFiles
 using HDF5
 using JSON
 using Printf
@@ -26,13 +25,6 @@ mutable struct Point
     conn::Array{Int32,1}
     nx::Float64
     ny::Float64
-    # Size 4 (Pressure, vx, vy, density) x numberpts
-    prim::Array{Float64,1}
-    flux_res::Array{Float64,1}
-    # Size 4 (Pressure, vx, vy, density) x numberpts
-    q::Array{Float64,1}
-    # Size 2(x,y) 4(Pressure, vx, vy, density) numberpts
-    dq::Array{Array{Float64,1},1}
     entropy::Float64
     xpos_nbhs::Int8
     xneg_nbhs::Int8
@@ -43,8 +35,6 @@ mutable struct Point
     ypos_conn::Array{Int32,1}
     yneg_conn::Array{Int32,1}
     delta::Float64
-    max_q::Array{Float64,1}
-    min_q::Array{Float64,1}
 end
 
 

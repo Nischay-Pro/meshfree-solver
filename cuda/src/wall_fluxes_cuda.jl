@@ -72,10 +72,10 @@ function wall_dGx_pos_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlo
     #     @cuprintf("\n %.17f %.17f %.17f %.17f", sum_delx_delf[1],sum_delx_delf[2],sum_delx_delf[3],sum_delx_delf[4])
     #     @cuprintf("\n %.17f %.17f %.17f %.17f", sum_dely_delf[1],sum_dely_delf[2],sum_dely_delf[3],sum_dely_delf[4])
     # end
-    flux_shared[thread_idx] += 2 * (sum_delx_delf[1]*sum_dely_sqr - sum_dely_delf[1]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + block_dim] += 2 * (sum_delx_delf[2]*sum_dely_sqr - sum_dely_delf[2]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + block_dim * 2] += 2 * (sum_delx_delf[3]*sum_dely_sqr - sum_dely_delf[3]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + block_dim * 3] += 2 * (sum_delx_delf[4]*sum_dely_sqr - sum_dely_delf[4]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[idx, 5] = 2 * (sum_delx_delf[1]*sum_dely_sqr - sum_dely_delf[1]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[idx, 6] = 2 * (sum_delx_delf[2]*sum_dely_sqr - sum_dely_delf[2]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[idx, 7] = 2 * (sum_delx_delf[3]*sum_dely_sqr - sum_dely_delf[3]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[idx, 8] = 2 * (sum_delx_delf[4]*sum_dely_sqr - sum_dely_delf[4]*sum_delx_dely)*one_by_det
     # if idx == 3
     #     @cuprintf("\n Q is %lf %lf %lf %lf", flux_shared[thread_idx], flux_shared[thread_idx + block_dim], flux_shared[thread_idx + block_dim * 2], flux_shared[thread_idx + block_dim * 3])
     # end
@@ -146,10 +146,10 @@ function wall_dGx_neg_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlo
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
 
-    flux_shared[thread_idx] += 2 * (sum_delx_delf[1]*sum_dely_sqr - sum_dely_delf[1]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + block_dim] += 2 * (sum_delx_delf[2]*sum_dely_sqr - sum_dely_delf[2]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + block_dim * 2] += 2 * (sum_delx_delf[3]*sum_dely_sqr - sum_dely_delf[3]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + block_dim * 3] += 2 * (sum_delx_delf[4]*sum_dely_sqr - sum_dely_delf[4]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[idx, 5] += 2 * (sum_delx_delf[1]*sum_dely_sqr - sum_dely_delf[1]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[idx, 6] += 2 * (sum_delx_delf[2]*sum_dely_sqr - sum_dely_delf[2]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[idx, 7] += 2 * (sum_delx_delf[3]*sum_dely_sqr - sum_dely_delf[3]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[idx, 8] += 2 * (sum_delx_delf[4]*sum_dely_sqr - sum_dely_delf[4]*sum_delx_dely)*one_by_det
 
     # flux_shared[thread_idx] += 2 * (shared[thread_idx + block_dim * 8]*sum_dely_sqr - shared[thread_idx + block_dim * 12]*sum_delx_dely)*one_by_det
     # flux_shared[thread_idx + block_dim] += 2 * (shared[thread_idx + block_dim * 9]*sum_dely_sqr - shared[thread_idx + block_dim * 13]*sum_delx_dely)*one_by_det
@@ -220,10 +220,10 @@ function wall_dGy_neg_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlo
     det = sum_delx_sqr*sum_dely_sqr - sum_delx_dely*sum_delx_dely
     one_by_det = 1.0 / det
 
-    flux_shared[thread_idx] += 2 * (sum_dely_delf[1]*sum_delx_sqr - sum_delx_delf[1]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + block_dim] += 2 * (sum_dely_delf[2]*sum_delx_sqr - sum_delx_delf[2]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + block_dim * 2] += 2 * (sum_dely_delf[3]*sum_delx_sqr - sum_delx_delf[3]*sum_delx_dely)*one_by_det
-    flux_shared[thread_idx + block_dim * 3] += 2 * (sum_dely_delf[4]*sum_delx_sqr - sum_delx_delf[4]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[idx, 5] += 2 * (sum_dely_delf[1]*sum_delx_sqr - sum_delx_delf[1]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[idx, 6] += 2 * (sum_dely_delf[2]*sum_delx_sqr - sum_delx_delf[2]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[idx, 7] += 2 * (sum_dely_delf[3]*sum_delx_sqr - sum_delx_delf[3]*sum_delx_dely)*one_by_det
+    gpuGlobalDataRest[idx, 8] += 2 * (sum_dely_delf[4]*sum_delx_sqr - sum_delx_delf[4]*sum_delx_dely)*one_by_det
     # if idx == 3
     #     @cuprintf("\n Q is %lf %lf %lf %lf", flux_shared[thread_idx], flux_shared[thread_idx + block_dim], flux_shared[thread_idx + block_dim * 2], flux_shared[thread_idx + block_dim * 3])
     # end
