@@ -149,14 +149,18 @@ function fpi_solver_cuda(iter, inner, gpuGlobalDataConn, gpuGlobalDataConnSectio
             @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_kernel(gpuGlobalDataConn,  gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
             innermost = 0
             while innermost < inner
-                @cuda blocks= blockspergrid threads= threadsperblock q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
-                @cuda blocks= blockspergrid threads= threadsperblock update_innerloop_kernel(gpuGlobalDataRest, numPoints)
+                @cuda blocks=blockspergrid threads=threadsperblock q_var_derivatives_innerloops_kernel(gpuGlobalDataConn, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
+                @cuda blocks=blockspergrid threads=threadsperblock update_innerloop_kernel(gpuGlobalDataRest, numPoints)
                 innermost += 1
             end
             # @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 2000)
             # synchronize(str)
             # @cuprintf("\n It is %lf ", gpuGlobalDataCommon[31, 3])
-            @cuda blocks= blockspergrid threads= threadsperblock cal_flux_residual_kernel(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
+            @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel1(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
+            @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel2(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
+            @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel3(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
+            @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel4(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
+            @cuda blocks=blockspergrid threads=threadsperblock cal_flux_residual_kernel5(gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, numPoints)
             # @cuda blocks=blockspergrid threads=threadsperblock getPointDetails(gpuGlobalDataRest, 3)
             # synchronize(str)
             # @cuprintf("\n It is %f ", gpuGlobalDataCommon[31, 3])

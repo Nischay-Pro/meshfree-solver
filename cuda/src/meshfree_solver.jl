@@ -37,7 +37,6 @@ function main()
         setConnectivity(globaldata[idx], connectivity)
         # smallest_dist(globaldata, idx)
         convertToNeighbourArray(globalDataConn, globalDataConnSection, globaldata[idx], idx)
-
     end
 
 
@@ -90,7 +89,7 @@ function main()
         println("Starting main function")
         @timeit to "nest 1" begin
             CUDA.@sync begin fpi_solver_cuda(Int(configData["core"]["max_iters"]), configData["core"]["innerloop"], gpuGlobalDataConn, gpuGlobalDataConnSection, gpuGlobalDataFauxFixed, gpuGlobalDataRest, gpuConfigData, gpuSumResSqr, gpuSumResSqrOutput,
-                threadsperblock,blockspergrid, numPoints)
+                threadsperblock, blockspergrid, numPoints)
             end
         end
     end
