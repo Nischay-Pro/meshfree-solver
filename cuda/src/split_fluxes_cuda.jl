@@ -52,8 +52,8 @@ function flux_Gxn_kernel(nx, ny, idx, shared, op::Function)
 
     pr_by_rho = pr/rho
     u_sqr = ut*ut + un*un
-    shared[thread_idx] = op((rho*(ut*A1neg - B1)), shared[thread_idx])
 
+    shared[thread_idx] = op((rho*(ut*A1neg - B1)), shared[thread_idx])
     temp1 = pr_by_rho + ut*ut
     temp2 = temp1*A1neg - ut*B1
     shared[thread_idx + block_dim] = op((rho*temp2), shared[thread_idx + block_dim])

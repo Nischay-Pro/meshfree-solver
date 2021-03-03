@@ -3,8 +3,8 @@ function venkat_limiter_kernel_qtilde(gpuGlobalDataFauxFixed, gpuGlobalDataRest,
     thread_idx = threadIdx().x
     block_dim = blockDim().x
     epsigh = gpuConfigData[8] * gpuGlobalDataFauxFixed[idx + 5 * numPoints]
-    epsi = epsigh*epsigh*epsigh
-    gamma = gpuConfigData[15]
+    epsigh = epsigh*epsigh*epsigh
+    epsigh = epsigh*epsigh
     # shared[thread_idx], shared[thread_idx + block_dim * 1], shared[thread_idx + block_dim * 2], shared[thread_idx + block_dim * 3] = 1,1,1,1
     del_pos = 0.0
     for i in 0:3
@@ -17,18 +17,17 @@ function venkat_limiter_kernel_qtilde(gpuGlobalDataFauxFixed, gpuGlobalDataRest,
             elseif del_neg < 0.0
                 del_pos = gpuGlobalDataRest[idx, 25+i] - q
             end
-            num = (del_pos*del_pos) + (epsi*epsi)
+            num = (del_pos*del_pos) + (epsigh)
             num = (num*del_neg) + 2 * (del_neg*del_neg*del_pos)
 
             den = (del_pos*del_pos) + (2 *del_neg*del_neg)
-            den = den + (del_neg*del_pos) + (epsi*epsi)
+            den = den + (del_neg*del_pos) + (epsigh)
             den *= del_neg
 
             temp = num/den
-            if temp >= 1.0
-                temp = 1.0
+            if temp < 1.0
+                qtilde_shared[thread_idx + block_dim * i] = temp
             end
-            qtilde_shared[thread_idx + block_dim * i] = temp
         end
     end
 
@@ -41,7 +40,7 @@ function venkat_limiter_kernel_qtilde(gpuGlobalDataFauxFixed, gpuGlobalDataRest,
     u1 = qtilde_shared[thread_idx + block_dim * 1]*temp
     u2 = qtilde_shared[thread_idx + block_dim * 2]*temp
 
-    temp2 = qtilde_shared[thread_idx] + beta*(u1*u1 + u2*u2) - (CUDA.log(beta)/(gamma-1))
+    temp2 = qtilde_shared[thread_idx] + beta*(u1*u1 + u2*u2) - (CUDA.log(beta)/(gpuConfigData[15]-1))
     # rho = CUDA.exp(temp2)
     shared[thread_idx + block_dim * 4] = u1
     shared[thread_idx + block_dim * 5] = u2
