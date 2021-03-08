@@ -146,7 +146,7 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         os.remove("residue")
     except:
         pass
-    x_gpu, y_gpu, left_gpu, right_gpu, flag_1_gpu, flag_2_gpu, nbhs_gpu, conn_gpu, nx_gpu, ny_gpu, prim_gpu, prim_old_gpu, flux_res_gpu, q_gpu, dq_gpu, xpos_nbhs_gpu, xneg_nbhs_gpu, ypos_nbhs_gpu, yneg_nbhs_gpu, xpos_conn_gpu, xneg_conn_gpu, ypos_conn_gpu, yneg_conn_gpu, delta_gpu, min_dist_gpu, maxminq, inner_gpu = convert.convert_globaldata_to_gpu_globaldata_new(globaldata)
+    x_gpu, y_gpu, left_gpu, right_gpu, flag_1_gpu, flag_2_gpu, nbhs_gpu, conn_gpu, nx_gpu, ny_gpu, prim_gpu, prim_old_gpu, flux_res_gpu, q_gpu, dq_gpu, xpos_nbhs_gpu, xneg_nbhs_gpu, ypos_nbhs_gpu, yneg_nbhs_gpu, xpos_conn_gpu, xneg_conn_gpu, ypos_conn_gpu, yneg_conn_gpu, delta_gpu, min_dist_gpu, maxminq, inner1_gpu, inner2_gpu = convert.convert_globaldata_to_gpu_globaldata_new(globaldata)
     sum_res_sqr = np.zeros(len(globaldata), dtype=np.float64)
     a = time.time()
     if configData['core']['ssprk']:
@@ -183,7 +183,8 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
         delta_gpu = cuda.to_device(delta_gpu, stream)
         min_dist_gpu = cuda.to_device(min_dist_gpu, stream)
         maxminq_gpu = cuda.to_device(maxminq, stream)
-        inner_gpu = cuda.to_device(inner_gpu, stream)
+        inner1_gpu = cuda.to_device(inner1_gpu, stream)
+        inner2_gpu = cuda.to_device(inner2_gpu, stream)
         sum_res_sqr_gpu = cuda.to_device(sum_res_sqr, stream)
         threadsperblock = (int(configData['core']['blockGridX']), 1)
         blockspergrid_x = math.ceil(len(globaldata) / threadsperblock[0])
@@ -204,8 +205,8 @@ def fpi_solver_cuda(iter, globaldata, configData, wallindices, outerindices, int
 
                 if int(configData['core']['inner']) != 0:
                     for _ in range(0, configData['core']['inner']):
-                        q_var_derivatives_innerloops_kernel[blockspergrid, threadsperblock](x_gpu, y_gpu, q_gpu, dq_gpu, conn_gpu, nbhs_gpu, float(configData['core']['power']), inner_gpu)
-                        update_innerloop[blockspergrid, threadsperblock](dq_gpu, inner_gpu)
+                        q_var_derivatives_innerloops_kernel[blockspergrid, threadsperblock](x_gpu, y_gpu, q_gpu, dq_gpu, conn_gpu, nbhs_gpu, float(configData['core']['power']), inner1_gpu, inner2_gpu)
+                        update_innerloop[blockspergrid, threadsperblock](dq_gpu, inner1_gpu, inner2_gpu)
                 
                 wall_fluxes_cuda.wall_dGx_pos[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, xpos_nbhs_gpu, xpos_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["wall"]))
                 wall_fluxes_cuda.wall_dGx_neg[blockspergrid, threadsperblock](x_gpu, y_gpu, nx_gpu, ny_gpu, flag_1_gpu, min_dist_gpu, nbhs_gpu, conn_gpu, xneg_nbhs_gpu, xneg_conn_gpu, prim_gpu, q_gpu, maxminq_gpu, dq_gpu, flux_res_gpu, float(configData['core']['power']), int(configData['core']['vl_const']), float(configData['core']['gamma']), int(configData["point"]["wall"]))
@@ -351,10 +352,10 @@ def q_var_cuda_kernel(prim, q):
         tempq[2] = (two_times_beta * u2)
         tempq[3] = -two_times_beta
 
-        q[idx][0] = tempq[0]
-        q[idx][1] = tempq[1]
-        q[idx][2] = tempq[2]
-        q[idx][3] = tempq[3]
+        equalize(q[idx], tempq)
+        # q[idx] = cuda.tempq
+        # for i in range(4):
+        #     q[idx, i] = tempq[i]
 
 @cuda.jit(inline=True)
 def q_var_derivatives_cuda_kernel(x, y, maxminq, conn_gpu, nbhs, q, dq, power):
@@ -504,7 +505,7 @@ def q_var_derivatives_cuda_kernel(x, y, maxminq, conn_gpu, nbhs, q, dq, power):
         dq[idx][1][3] = tempsumy[3]
 
 @cuda.jit(inline=True)
-def q_var_derivatives_innerloops_kernel(x, y, q, dq, conn_gpu, nbhs, power, inner):
+def q_var_derivatives_innerloops_kernel(x, y, q, dq, conn_gpu, nbhs, power, inner1, inner2):
     tx = cuda.threadIdx.x
     bx = cuda.blockIdx.x
     bw = cuda.blockDim.x
@@ -562,30 +563,30 @@ def q_var_derivatives_innerloops_kernel(x, y, q, dq, conn_gpu, nbhs, power, inne
         det = (sum_delx_sqr * sum_dely_sqr) - (sum_delx_dely * sum_delx_dely)
         one_by_det = 1.0 / det
 
-        inner[idx][0] = one_by_det * (sum_delx_delq1 * sum_dely_sqr - sum_dely_delq1 * sum_delx_dely)
-        inner[idx][1] = one_by_det * (sum_delx_delq2 * sum_dely_sqr - sum_dely_delq2 * sum_delx_dely)
-        inner[idx][2] = one_by_det * (sum_delx_delq3 * sum_dely_sqr - sum_dely_delq3 * sum_delx_dely)
-        inner[idx][3] = one_by_det * (sum_delx_delq4 * sum_dely_sqr - sum_dely_delq4 * sum_delx_dely)
-        inner[idx][4] = one_by_det * (sum_dely_delq1 * sum_delx_sqr - sum_delx_delq1 * sum_delx_dely)
-        inner[idx][5] = one_by_det * (sum_dely_delq2 * sum_delx_sqr - sum_delx_delq2 * sum_delx_dely)
-        inner[idx][6] = one_by_det * (sum_dely_delq3 * sum_delx_sqr - sum_delx_delq3 * sum_delx_dely)
-        inner[idx][7] = one_by_det * (sum_dely_delq4 * sum_delx_sqr - sum_delx_delq4 * sum_delx_dely)
+        inner1[idx][0] = one_by_det * (sum_delx_delq1 * sum_dely_sqr - sum_dely_delq1 * sum_delx_dely)
+        inner1[idx][1] = one_by_det * (sum_delx_delq2 * sum_dely_sqr - sum_dely_delq2 * sum_delx_dely)
+        inner1[idx][2] = one_by_det * (sum_delx_delq3 * sum_dely_sqr - sum_dely_delq3 * sum_delx_dely)
+        inner1[idx][3] = one_by_det * (sum_delx_delq4 * sum_dely_sqr - sum_dely_delq4 * sum_delx_dely)
+        inner2[idx][0] = one_by_det * (sum_dely_delq1 * sum_delx_sqr - sum_delx_delq1 * sum_delx_dely)
+        inner2[idx][1] = one_by_det * (sum_dely_delq2 * sum_delx_sqr - sum_delx_delq2 * sum_delx_dely)
+        inner2[idx][2] = one_by_det * (sum_dely_delq3 * sum_delx_sqr - sum_delx_delq3 * sum_delx_dely)
+        inner2[idx][3] = one_by_det * (sum_dely_delq4 * sum_delx_sqr - sum_delx_delq4 * sum_delx_dely)
 
 @cuda.jit(inline=True)
-def update_innerloop(dq, inner):
+def update_innerloop(dq, inner1, inner2):
     tx = cuda.threadIdx.x
     bx = cuda.blockIdx.x
     bw = cuda.blockDim.x
     idx =  bx * bw + tx
     if idx > 0 and idx < len(dq):
-        dq[idx][0][0] = inner[idx][0]
-        dq[idx][0][1] = inner[idx][1]
-        dq[idx][0][2] = inner[idx][2]
-        dq[idx][0][3] = inner[idx][3]
-        dq[idx][1][0] = inner[idx][4]
-        dq[idx][1][1] = inner[idx][5]
-        dq[idx][1][2] = inner[idx][6]
-        dq[idx][1][3] = inner[idx][7]
+        dq[idx][0][0] = inner1[idx][0]
+        dq[idx][0][1] = inner1[idx][1]
+        dq[idx][0][2] = inner1[idx][2]
+        dq[idx][0][3] = inner1[idx][3]
+        dq[idx][1][0] = inner2[idx][0]
+        dq[idx][1][1] = inner2[idx][1]
+        dq[idx][1][2] = inner2[idx][2]
+        dq[idx][1][3] = inner2[idx][3]
 
 
 def qtilde_to_primitive(qtilde, configData):

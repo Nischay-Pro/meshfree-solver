@@ -2,23 +2,23 @@ import math
 from numba import cuda
 import numba
 
-@cuda.jit(device=True)
+@cuda.jit(device=True, inline=True)
 def venkat_limiter(qtilde_shared, q_gpu, maxminq, dq, nbhs, conn, x, y, min_dist, idx, VL_CONST, shared, delx, dely, gamma):
     epsi = VL_CONST * min_dist[idx]
     epsi = math.pow(epsi,3)
-    for i in range(4):
-        qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = 1
-        q = q_gpu[idx][i]
-        del_neg = q_gpu[idx][i] - (0.5 * (delx * dq[idx][0][i] + dely * dq[idx][1][i])) - q
-        
-        if math.fabs(del_neg) <= 1e-5:
-            qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = 1
+    q = q_gpu[idx]
+    qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * 0] = 1
+    qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * 1] = 1
+    qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * 2] = 1
+    qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * 3] = 1
 
-        elif math.fabs(del_neg) > 1e-5:
+    for i in range(4):
+        del_neg = q_gpu[idx][i] - (0.5 * (delx * dq[idx][0][i] + dely * dq[idx][1][i])) - q[i]
+        if math.fabs(del_neg) > 1e-5:
             if del_neg > 0:
-                del_pos = maxminq[idx][0][i] - q
+                del_pos = maxminq[idx][0][i] - q[i]
             elif del_neg < 0:
-                del_pos = maxminq[idx][1][i] - q
+                del_pos = maxminq[idx][1][i] - q[i]
 
             num = (del_pos*del_pos) + (epsi*epsi)
             num = num*del_neg + 2.0*del_neg*del_neg*del_pos
@@ -31,9 +31,6 @@ def venkat_limiter(qtilde_shared, q_gpu, maxminq, dq, nbhs, conn, x, y, min_dist
 
             if temp < 1:
                 qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = temp
-
-            else:
-                qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = 1 
 
     for i in range(4):
         qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] = q_gpu[idx][i] - 0.5 * (qtilde_shared[cuda.threadIdx.x + cuda.blockDim.x * i] * (delx * dq[idx][0][i] + dely * dq[idx][1][i]))

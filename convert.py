@@ -116,7 +116,8 @@ def convert_globaldata_to_gpu_globaldata_new(globaldata):
     delta = np.zeros(len(globaldata), np.float64)
     min_dist = np.zeros(len(globaldata), np.float64)
     maxminq = np.zeros((len(globaldata), 2, 4), np.float64)
-    inner = np.zeros((len(globaldata), 8), np.float64)
+    inner1 = np.zeros((len(globaldata), 4), np.float64)
+    inner2 = np.zeros((len(globaldata), 4), np.float64)
     
     for idx in trange(1, len(globaldata)):
         x[idx] = globaldata[idx].x
@@ -157,7 +158,7 @@ def convert_globaldata_to_gpu_globaldata_new(globaldata):
         delta[idx] = globaldata[idx].delta
         min_dist[idx] = globaldata[idx].min_dist
     
-    return x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, prim_old, flux_res, q, dq, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta, min_dist, maxminq, inner
+    return x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, prim_old, flux_res, q, dq, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta, min_dist, maxminq, inner1, inner2
 
 def convert_globaldata_to_gpu_globaldata(globaldata):
     pres = np.float64
