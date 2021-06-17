@@ -42,3 +42,5 @@ ssprk43_results/
 results/
 run.sh
 residue_base
+*.ncu-rep
+*.h5
