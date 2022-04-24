@@ -87,7 +87,7 @@ def convert_globaldata_to_gpu_globaldata_new(globaldata):
         if globaldata[idx].yneg_nbhs > maxynegconn:
             maxynegconn = globaldata[idx].yneg_nbhs
     
-    print("Numpy Dynamic Array Creation: {} {} {} {} {}".format(maxconn, maxxpconn, maxxnegconn, maxypconn, maxynegconn))
+    print("Numpy Array Creation: {} {} {} {} {}".format(maxconn, maxxpconn, maxxnegconn, maxypconn, maxynegconn))
 
     x = np.zeros(len(globaldata), dtype=np.float64, order="F")
     y = np.zeros(len(globaldata), dtype=np.float64, order="F")

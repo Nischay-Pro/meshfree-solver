@@ -44,3 +44,4 @@ run.sh
 residue_base
 *.ncu-rep
 *.h5
+!requirements.txt
