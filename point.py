@@ -1,5 +1,5 @@
 class Point:
-    def __init__(self, localID, x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, flux_res, q, dq, entropy, xpos_nbhs, xneg_nbhs, ypos_nbhs, yneg_nbhs, xpos_conn, xneg_conn, ypos_conn, yneg_conn, delta, min_dist, qtdepth):
+    def __init__(self, localID, x, y, left, right, flag_1, flag_2, nbhs, conn, nx, ny, prim, min_dist):
         self.localID = localID
         self.x = x
         self.y = y
@@ -13,23 +13,23 @@ class Point:
         self.ny = ny
         # Size 4 (Pressure, vx, vy, density) x numberpts
         self.prim = prim
-        self.flux_res = flux_res
+        self.flux_res = None
         # Size 4 (Pressure, vx, vy, density) x numberpts
-        self.q = q
+        self.q = None
         # Size 2(x,y) 4(Pressure, vx, vy, density) numberpts
-        self.dq = dq
-        self.entropy = entropy
-        self.xpos_nbhs = xpos_nbhs
-        self.xneg_nbhs = xneg_nbhs
-        self.ypos_nbhs = ypos_nbhs
-        self.yneg_nbhs = yneg_nbhs
-        self.xpos_conn = xpos_conn
-        self.xneg_conn = xneg_conn
-        self.ypos_conn = ypos_conn
-        self.yneg_conn = yneg_conn
-        self.delta = delta
+        self.dq = None
+        self.entropy = None
+        self.xpos_nbhs = None
+        self.xneg_nbhs = None
+        self.ypos_nbhs = None
+        self.yneg_nbhs = None
+        self.xpos_conn = None
+        self.xneg_conn = None
+        self.ypos_conn = None
+        self.yneg_conn = None
+        self.delta = None
         self.min_dist = min_dist
-        self.qtdepth = qtdepth
+        self.qtdepth = None
 
     def setNormals(self, n):
         self.nx = n[0]

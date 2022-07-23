@@ -4,7 +4,6 @@ import split_fluxes_cuda
 import quadrant_fluxes_cuda
 import numba
 from numba import cuda
-from cuda_func import add, zeros, multiply, qtilde_to_primitive_cuda, subtract, multiply_element_wise_shared
 from operator import add as addop, sub as subop
 
 @cuda.jit(inline=True)
